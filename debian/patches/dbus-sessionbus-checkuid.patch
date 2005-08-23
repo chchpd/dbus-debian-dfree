@@ -1,0 +1,24 @@
+diff -Nur dbus-0.34/bus/policy.c dbus-0.34.new/bus/policy.c
+--- dbus-0.34/bus/policy.c	2004-08-26 00:11:49.000000000 +0200
++++ dbus-0.34.new/bus/policy.c	2005-06-27 09:07:01.000000000 +0200
+@@ -454,7 +454,7 @@
+       return FALSE;
+     }
+   
+-  allowed = FALSE;
++  allowed = uid == _dbus_getuid ();
+ 
+   allowed = list_allows_user (allowed,
+                               &policy->default_rules,
+diff -Nur dbus-0.34/bus/session.conf.in dbus-0.34.new/bus/session.conf.in
+--- dbus-0.34/bus/session.conf.in	2004-10-25 20:48:58.000000000 +0200
++++ dbus-0.34.new/bus/session.conf.in	2005-06-27 09:08:40.000000000 +0200
+@@ -19,8 +19,6 @@
+     <allow eavesdrop="true"/>
+     <!-- Allow anyone to own anything -->
+     <allow own="*"/>
+-    <!-- Allow any user to connect -->
+-    <allow user="*"/>
+   </policy>
+ 
+   <!-- This is included last so local configuration can override what's 

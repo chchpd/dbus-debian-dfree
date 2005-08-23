@@ -1,0 +1,13 @@
+--- dbus-0.23.4/dbus/dbus-sysdeps.c.orig	2005-06-02 20:00:58.000000000 +0200
++++ dbus-0.23.4/dbus/dbus-sysdeps.c	2005-06-02 20:01:37.000000000 +0200
+@@ -862,8 +862,8 @@
+ #ifdef HAVE_CMSGCRED
+   if (cmsg->cmsg_len < sizeof (cmsgmem) || cmsg->cmsg_type != SCM_CREDS)
+     {
+-      dbus_set_error (error, DBUS_ERROR_FAILED);
+-      _dbus_verbose ("Message from recvmsg() was not SCM_CREDS\n");
++      dbus_set_error (error, DBUS_ERROR_FAILED,
++                      "Message from recvmsg() was not SCM_CREDS");
+       return FALSE;
+     }
+ #endif
