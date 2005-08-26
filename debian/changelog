@@ -1,3 +1,23 @@
+dbus (0.36-1) experimental; urgency=low
+
+  * New upstream release (Closes: #319593, #324016)
+  * debian/patches/dbus_cmsgcred.patch
+    + Removed. Fixed upstream.
+  * debian/patches/dbus-gilstate.patch
+    + Removed. Fixed upstream.
+  * Sync with the ubuntu package
+    + Remove dbus_bindings.{a,la} from python2.4-dbus
+    + debian/patches/dbus-make-libtool-safe.patch
+      - Added. Replace explicit libtool calls with $(LIBTOOL) in
+        glib/Makefile.*
+    + Don't include the .la files in the dev packages.
+    + Don't restart dbus on upgrade. Too many applications don't handle it
+      correctly.
+    + Switched the init script to lsb-base
+    + Ship dbus-binding-tool and dbus-viewer with dbus-1-utils
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 26 Aug 2005 21:46:23 +0200
+
 dbus (0.34-4) experimental; urgency=low
 
   * libdbus-1-cil improvements based on comments from Mirco Bauer

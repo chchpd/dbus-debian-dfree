@@ -4,4 +4,3 @@ debian/tmp/usr/include/dbus*/dbus/server.h
 debian/tmp/usr/include/dbus*/dbus/message.h
 debian/tmp/usr/lib/libdbus-qt*.a
 debian/tmp/usr/lib/libdbus-qt*.so
-debian/tmp/usr/lib/libdbus-qt*.la
