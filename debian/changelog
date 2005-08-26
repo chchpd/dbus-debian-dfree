@@ -1,4 +1,4 @@
-dbus (0.36-1) experimental; urgency=low
+dbus (0.36.1-1) experimental; urgency=low
 
   * New upstream release (Closes: #319593, #324016)
   * debian/patches/dbus_cmsgcred.patch
@@ -16,7 +16,7 @@ dbus (0.36-1) experimental; urgency=low
     + Switched the init script to lsb-base
     + Ship dbus-binding-tool and dbus-viewer with dbus-1-utils
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri, 26 Aug 2005 21:46:23 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 26 Aug 2005 21:58:42 +0200
 
 dbus (0.34-4) experimental; urgency=low
 
