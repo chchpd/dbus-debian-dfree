@@ -50,12 +50,12 @@ Description: simple interprocess messaging system
  used.  It comes with several interfaces, including GLib.  See the
  description of dbus-glib-1 for more information about those.
  .
- The daemon can be found in the dbus-1 package.
+ The daemon can be found in the dbus package.
 
 Package: dbus-1-utils
 Architecture: any
 Section: utils
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, dbus
 Replaces: dbus-1 (<< 0.20-4)
 Description: simple interprocess messaging system (utilities)
  D-BUS is a message bus, used for sending messages between
@@ -65,7 +65,7 @@ Description: simple interprocess messaging system (utilities)
  This package contains several D-BUS related utilities like
  dbus-launch and dbus-send.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: dbus-1-doc
 Section: doc
@@ -81,7 +81,7 @@ Description: simple interprocess messaging system (documentation)
  This package contains the API documentation for D-BUS, as well as
  the protocol specification.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-1-dev
 Section: libdevel
@@ -94,7 +94,7 @@ Description: simple interprocess messaging system (development headers)
  Conceptually, it fits somewhere in between raw sockets and CORBA in
  terms of complexity.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-glib-1-dev
 Section: libdevel
@@ -109,7 +109,7 @@ Description: simple interprocess messaging system (GLib interface)
  .
  This package provides a GLib-style interface to D-BUS.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-glib-1-1
 Section: libs
@@ -123,7 +123,7 @@ Description: simple interprocess messaging system (GLib-based shared library)
  This package provides the GLib-based shared library for applications using the
  GLib interface to D-BUS.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-qt-1-dev
 Section: libdevel
@@ -138,7 +138,7 @@ Description: simple interprocess messaging system (Qt interface)
  .
  This package provides a Qt-style interface to D-BUS.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-qt-1-1c2
 Section: libs
@@ -154,7 +154,7 @@ Description: simple interprocess messaging system (Qt-based shared library)
  This package provides the Qt-based shared library for applications using the
  Qt interface to D-BUS.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: python2.4-dbus
 Section: python
@@ -167,7 +167,7 @@ Description: simple interprocess messaging system (Python interface)
  .
  This package provides a Python interface to D-BUS.
  .
- See the dbus-1 description for more information about D-BUS in general.
+ See the dbus description for more information about D-BUS in general.
 
 Package: libdbus-1-cil
 Section: libs

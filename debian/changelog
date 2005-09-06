@@ -1,3 +1,13 @@
+dbus (0.36.2-1) experimental; urgency=low
+
+  * New upstream release
+  * Fix descriptions to refer to dbus rather than dbus-1. 
+  * Make dbus-1-utils depend on dbus
+  * debian/patches/dbus-sessionbus-checkuid.patch
+    + Removed. Fixed upstream
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue,  6 Sep 2005 09:26:19 +0200
+
 dbus (0.36.1-1) experimental; urgency=low
 
   * New upstream release (Closes: #319593, #324016)
