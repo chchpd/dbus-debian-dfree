@@ -1,3 +1,9 @@
+dbus (0.50-1) experimental; urgency=low
+
+  * New upstream release 
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  8 Sep 2005 10:01:21 +0200
+
 dbus (0.36.2-1) experimental; urgency=low
 
   * New upstream release
