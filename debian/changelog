@@ -1,3 +1,9 @@
+dbus (0.23.4-7) unstable; urgency=low
+
+  * Add build depend on monodoc (Closes: #330558)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 10 Oct 2005 15:02:13 +0200
+
 dbus (0.23.4-6) unstable; urgency=low
 
   * debian/rules: Build mono on amd64 instead of s390
