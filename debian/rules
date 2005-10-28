@@ -29,7 +29,6 @@ DEB_CONFIGURE_SCRIPT_ENV += PYTHON=/usr/bin/python2.4
 DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-qt --enable-gtk \
                              --enable-python --with-xml=expat --enable-docs \
 														 --enable-xml-docs --enable-doxygen-docs \
-														 --enable-verbose-mode \
 														 $(MONO_FLAGS)
 
 DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-1 := debian/libdbus-1-1/usr/lib/

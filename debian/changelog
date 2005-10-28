@@ -1,8 +1,10 @@
 dbus (0.50-2) experimental; urgency=low
 
   * maintainance is actually spelled "maintenance" (Closes: #332238)
+  * Disable --enable-verbose because of the big performance hit
+  * Move dbus-launch and dbus-send into the dbus package
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri, 28 Oct 2005 12:03:46 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 28 Oct 2005 12:36:34 +0200
 
 dbus (0.50-1) experimental; urgency=low
 
