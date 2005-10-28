@@ -73,6 +73,8 @@ reload_it()
   log_begin_msg "Reloading $DESC config"
   dbus-send --system --type=method_call --dest=org.freedesktop.DBus \
      / org.freedesktop.DBus.ReloadConfig
+  # hopefully this is enough time for dbus to reload it's config file.
+  sleep 1
   log_end_msg $?
 }
 
