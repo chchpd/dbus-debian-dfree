@@ -3,8 +3,11 @@ dbus (0.50-2) experimental; urgency=low
   * maintainance is actually spelled "maintenance" (Closes: #332238)
   * Disable --enable-verbose because of the big performance hit
   * Move dbus-launch and dbus-send into the dbus package
+  * Add reload function to the init script 
+  * Use log_daemon_msg instead of log_begin_msg in the init script where
+    applicable
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri, 28 Oct 2005 12:36:34 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 28 Oct 2005 15:19:54 +0200
 
 dbus (0.50-1) experimental; urgency=low
 

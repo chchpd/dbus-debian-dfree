@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 # Debian init.d script for D-BUS
 # Copyright © 2003 Colin Walters <walters@debian.org>
+# Copyright © 2005 Sjoerd Simons <sjoerd@debian.org>
 
 set -e
 
@@ -42,7 +43,7 @@ start_it_up()
       rm -f $PIDFILE
     fi
   fi
-  log_begin_msg "Starting $DESC: "
+  log_daemon_msg "Starting $DESC" "$NAME"
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
     --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
   log_end_msg $?
@@ -56,7 +57,7 @@ shut_it_down()
   if [ -d $EVENTDIR ]; then
       run-parts --reverse --arg=stop $EVENTDIR
   fi
-  log_begin_msg "Stopping $DESC: "
+  log_daemon_msg "Stopping $DESC" "$NAME"
   start-stop-daemon --stop --retry 60 --quiet --oknodo --pidfile $PIDFILE \
     --user $DAEMONUSER
   # We no longer include these arguments so that start-stop-daemon
@@ -67,6 +68,14 @@ shut_it_down()
   rm -f $PIDFILE
 }
 
+reload_it()
+{
+  log_begin_msg "Reloading $DESC config"
+  dbus-send --system --type=method_call --dest=org.freedesktop.DBus \
+     / org.freedesktop.DBus.ReloadConfig
+  log_end_msg $?
+}
+
 case "$1" in
   start)
     start_it_up
@@ -74,13 +83,16 @@ case "$1" in
   stop)
     shut_it_down
   ;;
+  reload)
+    reload_it
+  ;;
   restart|force-reload)
     shut_it_down
     sleep 1
     start_it_up
   ;;
   *)
-    echo "Usage: /etc/init.d/$NAME {start|stop|restart|force-reload}" >&2
+    echo "Usage: /etc/init.d/$NAME {start|stop|reload|restart|force-reload}" >&2
     exit 1
   ;;
 esac
