@@ -3,14 +3,15 @@ dbus (0.50-2) experimental; urgency=low
   * maintainance is actually spelled "maintenance" (Closes: #332238)
   * Disable --enable-verbose because of the big performance hit
   * Move dbus-launch and dbus-send into the dbus package
+  * Move dbus-binding-tool from dbus-1-utils to libdbus-glib-1-dev
   * Add reload function to the init script
   * Use log_daemon_msg instead of log_begin_msg in the init script where
     applicable
-  * debian/patches/dbus-reloadconfig-reply.patch 
-    + Added. Send a reply message when org.freedesktop.DBus.ReloadConfig is 
+  * debian/patches/dbus-reloadconfig-reply.patch
+    + Added. Send a reply message when org.freedesktop.DBus.ReloadConfig is
       called
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed,  2 Nov 2005 21:05:37 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  2 Nov 2005 21:46:29 +0100
 
 dbus (0.50-1) experimental; urgency=low
 

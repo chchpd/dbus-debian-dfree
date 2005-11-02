@@ -9,7 +9,7 @@ Standards-Version: 3.6.1.0
 Package: dbus
 Architecture: any
 Depends: ${shlibs:Depends}, adduser, debianutils (>= 1.22.0), lsb-base
-Conflicts: libdbus0, dbus-1, dbus-1-utils (<< 0.50-1)
+Conflicts: libdbus0, dbus-1, dbus-1-utils (<< 0.50-2)
 Replaces: libdbus0, dbus-1
 Description: simple interprocess messaging system
  D-BUS is a message bus, used for sending messages between
@@ -100,7 +100,7 @@ Package: libdbus-glib-1-dev
 Section: libdevel
 Architecture: any
 Depends: libdbus-glib-1-1 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libglib2.0-dev
-Conflicts: libdbus-glib-dev, dbus-glib-1-dev
+Conflicts: libdbus-glib-dev, dbus-glib-1-dev, dbus-1-utils (<< 0.50-2)
 Replaces: libdbus-glib0-dev, dbus-glib-1-dev
 Description: simple interprocess messaging system (GLib interface)
  D-BUS is a message bus, used for sending messages between applications.
