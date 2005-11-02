@@ -55,12 +55,10 @@ binary-post-install/libdbus-1-dev::
 	rm -f debian/libdbus-1-dev/usr/include/dbus*/dbus/dbus-glib.h
 	rm -f debian/libdbus-1-dev/usr/include/dbus*/dbus/dbus-qt.h
 
-binary-post-install/dbus-1-utils::
-	mkdir -p debian/dbus-1-utils/etc/X11/Xsession.d
-	cp debian/dbus-Xsession debian/dbus-1-utils/etc/X11/Xsession.d/75dbus-1-utils_dbus-launch
-
 binary-post-install/dbus::
 	mkdir -p debian/dbus/etc/dbus-1/event.d
+	mkdir -p debian/dbus-1-utils/etc/X11/Xsession.d
+	cp debian/dbus-Xsession debian/dbus-1-utils/etc/X11/Xsession.d/75dbus_dbus-launch
 
 binary-post-install/libdbus-1-cil::
 	cd $(CURDIR)/debian/libdbus-1-cil && \
