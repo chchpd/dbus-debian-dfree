@@ -2,9 +2,9 @@ dbus (0.50-2) experimental; urgency=low
 
   * maintainance is actually spelled "maintenance" (Closes: #332238)
   * Disable --enable-verbose because of the big performance hit
-  * Move dbus-launch and dbus-send into the dbus package
-  * Move the /etc/X11/Xsession.d/ script from dbus-1-utils to dbus
   * Move dbus-binding-tool from dbus-1-utils to libdbus-glib-1-dev
+  * Move dbus-launch and dbus-send into the dbus package (Closes: #337212)
+  * Move the /etc/X11/Xsession.d/ script from dbus-1-utils to dbus
   * Add reload function to the init script
   * Use log_daemon_msg instead of log_begin_msg in the init script where
     applicable
@@ -12,9 +12,10 @@ dbus (0.50-2) experimental; urgency=low
     + Added. Send a reply message when org.freedesktop.DBus.ReloadConfig is
       called
   * Prefix the long description of monodoc-dubs-1-manual with one space
-    instead of two (Closes: #337032) 
+    instead of two (Closes: #337032)
+  * Add LSB formatted dependency info in the init script (Closes: #337644)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed,  9 Nov 2005 19:59:50 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  9 Nov 2005 20:02:09 +0100
 
 dbus (0.50-1) experimental; urgency=low
 
