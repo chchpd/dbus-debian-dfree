@@ -190,9 +190,9 @@ Section: doc
 Depends: monodoc-manual
 Architecture: i386 powerpc amd64
 Description: compiled XML documentation for the D-BUS CLI bindings
-  The MonoDoc Project is the documentation framework of the Mono project which
-  provides detailed API documentation for all Mono components and the Mono CLI
-  implementation.
-  .
-  This packages contains the compiled XML documentation for the D-BUS CLI 
-  bindings 
+ The MonoDoc Project is the documentation framework of the Mono project which
+ provides detailed API documentation for all Mono components and the Mono CLI
+ implementation.
+ .
+ This packages contains the compiled XML documentation for the D-BUS CLI 
+ bindings 

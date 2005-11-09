@@ -11,8 +11,10 @@ dbus (0.50-2) experimental; urgency=low
   * debian/patches/dbus-reloadconfig-reply.patch
     + Added. Send a reply message when org.freedesktop.DBus.ReloadConfig is
       called
+  * Prefix the long description of monodoc-dubs-1-manual with one space
+    instead of two (Closes: #337032) 
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed,  2 Nov 2005 21:52:11 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  9 Nov 2005 19:59:50 +0100
 
 dbus (0.50-1) experimental; urgency=low
 
