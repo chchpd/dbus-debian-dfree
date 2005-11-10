@@ -2,10 +2,11 @@ Index: bus/driver.c
 ===================================================================
 RCS file: /cvs/dbus/dbus/bus/driver.c,v
 retrieving revision 1.73
-diff -u -r1.73 driver.c
+retrieving revision 1.74
+diff -u -r1.73 -r1.74
 --- bus/driver.c	3 Oct 2005 19:55:56 -0000	1.73
-+++ bus/driver.c	30 Oct 2005 22:21:07 -0000
-@@ -1094,23 +1094,35 @@
++++ bus/driver.c	7 Nov 2005 21:57:13 -0000	1.74
+@@ -1094,23 +1094,34 @@
  				 DBusError      *error)
  {
    BusContext *context;
@@ -16,16 +17,20 @@ diff -u -r1.73 driver.c
  
 -  retval = FALSE;
 -
++  reply = NULL;
++  
    context = bus_connection_get_context (connection);
    if (!bus_context_reload_config (context, error))
-     {
+-    {
 -      _DBUS_ASSERT_ERROR_IS_SET (error);
 -      goto out;
-+      goto failed;
-     }
+-    }
++    goto failed;
  
 -  retval = TRUE;
 -  
+- out:
+-  return retval;
 +  reply = dbus_message_new_method_return (message);
 +  if (reply == NULL)
 +    goto oom;
@@ -43,8 +48,6 @@ diff -u -r1.73 driver.c
 +  _DBUS_ASSERT_ERROR_IS_SET (error);
 +  if (reply)
 +    dbus_message_unref (reply);
-  out:
--  return retval;
 +  return FALSE;
  }
  
