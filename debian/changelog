@@ -1,3 +1,9 @@
+dbus (0.50-3) experimental; urgency=low
+
+  * Also move dbus-launch and dbus-send manpages to the dbus package
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 15 Nov 2005 11:09:13 +0100
+
 dbus (0.50-2) experimental; urgency=low
 
   * maintainance is actually spelled "maintenance" (Closes: #332238)
