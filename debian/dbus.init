@@ -92,10 +92,10 @@ case "$1" in
   stop)
     shut_it_down
   ;;
-  reload)
+  reload|force-reload)
     reload_it
   ;;
-  restart|force-reload)
+  restart)
     shut_it_down
     sleep 1
     start_it_up

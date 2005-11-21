@@ -1,8 +1,10 @@
 dbus (0.50-3) experimental; urgency=low
 
   * Also move dbus-launch and dbus-send manpages to the dbus package
+  * debian/dbus.init 
+    + Make force-reload an alias of reload instead of restart
 
- -- Sjoerd Simons <sjoerd@debian.org>  Tue, 15 Nov 2005 11:09:13 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 21 Nov 2005 11:17:57 +0100
 
 dbus (0.50-2) experimental; urgency=low
 
