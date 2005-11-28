@@ -1,3 +1,10 @@
+dbus (0.23.4-8) unstable; urgency=low
+
+  * debian/patches/dbus-qtlinking.patch 
+    + Prevent linking against kdelibs (Closes: #332909)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 28 Nov 2005 20:35:20 +0100
+
 dbus (0.23.4-7) unstable; urgency=low
 
   * Add build depend on monodoc (Closes: #330558)
