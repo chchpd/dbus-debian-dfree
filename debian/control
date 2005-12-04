@@ -27,14 +27,12 @@ Description: simple interprocess messaging system
  description of dbus-glib-1 for more information about those.
  .
  This package contains the D-BUS daemon; the client-side library can
- be found in the libdbus-1-1 package, as it is no longer contained in
+ be found in the libdbus-1-2 package, as it is no longer contained in
  this package.
 
-Package: libdbus-1-1
+Package: libdbus-1-2
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: libdbus0, dbus-1
-Replaces: libdbus0, dbus-1
 Description: simple interprocess messaging system
  D-BUS is a message bus, used for sending messages between
  applications.  Conceptually, it fits somewhere in between raw sockets
@@ -48,7 +46,7 @@ Description: simple interprocess messaging system
  .
  D-BUS is still under heavy development, but is expected to be widely
  used.  It comes with several interfaces, including GLib.  See the
- description of dbus-glib-1 for more information about those.
+ description of libdbus-glib-1-2 for more information about those.
  .
  The daemon can be found in the dbus package.
 
@@ -56,7 +54,6 @@ Package: dbus-1-utils
 Architecture: any
 Section: utils
 Depends: ${shlibs:Depends}, dbus
-Replaces: dbus-1 (<< 0.20-4)
 Description: simple interprocess messaging system (utilities)
  D-BUS is a message bus, used for sending messages between
  applications.  Conceptually, it fits somewhere in between raw sockets
@@ -86,7 +83,7 @@ Description: simple interprocess messaging system (documentation)
 Package: libdbus-1-dev
 Section: libdevel
 Architecture: any
-Depends: libdbus-1-1 (= ${Source-Version}), pkg-config
+Depends: libdbus-1-2 (= ${Source-Version}), pkg-config
 Conflicts: dbus-1-dev
 Replaces: libdbus0-dev, dbus-1-dev 
 Description: simple interprocess messaging system (development headers)
@@ -99,7 +96,7 @@ Description: simple interprocess messaging system (development headers)
 Package: libdbus-glib-1-dev
 Section: libdevel
 Architecture: any
-Depends: libdbus-glib-1-1 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libglib2.0-dev
+Depends: libdbus-glib-1-2 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libglib2.0-dev
 Conflicts: libdbus-glib-dev, dbus-glib-1-dev, dbus-1-utils (<< 0.50-2)
 Replaces: libdbus-glib0-dev, dbus-glib-1-dev
 Description: simple interprocess messaging system (GLib interface)
@@ -111,7 +108,7 @@ Description: simple interprocess messaging system (GLib interface)
  .
  See the dbus description for more information about D-BUS in general.
 
-Package: libdbus-glib-1-1
+Package: libdbus-glib-1-2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
@@ -128,7 +125,7 @@ Description: simple interprocess messaging system (GLib-based shared library)
 Package: libdbus-qt-1-dev
 Section: libdevel
 Architecture: any
-Depends: libdbus-qt-1-1c2 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libqt3-mt-dev 
+Depends: libdbus-qt-1-2 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libqt3-mt-dev 
 Conflicts: dbus-qt-1-dev
 Replaces: dbus-qt-1-dev
 Description: simple interprocess messaging system (Qt interface)
@@ -140,12 +137,10 @@ Description: simple interprocess messaging system (Qt interface)
  .
  See the dbus description for more information about D-BUS in general.
 
-Package: libdbus-qt-1-1c2
+Package: libdbus-qt-1-2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}
-Conflicts: dbus-qt-1, dbus-qt-1c2, libdbus-qt-1-1
-Replaces: dbus-qt-1, dbus-qt-1c2, libdbus-qt-1-1
 Description: simple interprocess messaging system (Qt-based shared library)
  D-BUS is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -174,7 +169,7 @@ Section: libs
 Conflicts: libdbus-cil
 Replaces: libdbus-cil
 Architecture: i386 powerpc amd64
-Depends: ${cli:Depends}, libdbus-glib-1-1
+Depends: ${cli:Depends}, libdbus-glib-1-2
 Description: CLI binding for D-BUS interprocess messaging system
  D-BUS is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
