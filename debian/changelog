@@ -4,10 +4,12 @@ dbus (0.60-1) experimental; urgency=low
   * Sonames of libdbus-1, libdbus-glib-1 and libdbus-qt-1 was bumped to 2
   * debian/patches/dbus-reloadconfig-reply.patch
     + Removed. Merged upstream
+  * debian/patches/dbus-monitor.patch 
+    + Removed. Merged upstream
   * debian/patches/dbus-make-libtool-safe.patch
     + Removed. Fixed upstream
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sun,  4 Dec 2005 14:59:01 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun,  4 Dec 2005 15:20:51 +0100
 
 dbus (0.50-3) experimental; urgency=low
 
