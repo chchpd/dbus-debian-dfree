@@ -26,10 +26,11 @@ endif
 
 
 DEB_CONFIGURE_SCRIPT_ENV += PYTHON=/usr/bin/python2.4
-DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-qt --enable-gtk \
+DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
+                             --enable-qt3 --enable-qt \
                              --enable-python --with-xml=expat --enable-docs \
-														 --enable-xml-docs --enable-doxygen-docs \
-														 $(MONO_FLAGS)
+                             --enable-xml-docs --enable-doxygen-docs \
+                             $(MONO_FLAGS)
 
 DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-1 := debian/libdbus-1-1/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-1/usr/lib/ debian/dbus-glib-1-1/usr/lib/
