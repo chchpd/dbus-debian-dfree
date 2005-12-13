@@ -10,8 +10,9 @@ dbus (0.60-1) experimental; urgency=low
     + Removed. Fixed upstream
   * debian/patches/dbus-moc-selection.patch
     + Added. Enable the Qt moc paths to be specified to configure
+  * Depend on lsb-base >= 3.0 
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon,  5 Dec 2005 09:46:25 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 13 Dec 2005 19:23:15 +0100
 
 dbus (0.50-3) experimental; urgency=low
 
