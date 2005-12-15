@@ -33,6 +33,12 @@ DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
                              --enable-xml-docs --enable-doxygen-docs \
                              $(MONO_FLAGS)
 
+DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/dbus-gl
+DEB_SHLIBDEPS_INCLUDE_libdbus-qt-1-1c2 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_libdbus-qt4-1-1 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_python2.4-dbus := debian/libdbus-1-2/usr/lib/
+
 # Strict library versioning
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
