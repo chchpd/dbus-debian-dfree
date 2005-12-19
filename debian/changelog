@@ -1,6 +1,6 @@
 dbus (0.60-2) experimental; urgency=low
 
-  * Let python2.4-dbus depend on python2.4-libxml2
+  * Let python2.4-dbus depend on python2.4-libxml2 (Closes: #343715)
   * Changed maintainer address to
     pkg-utopia-maintainers@lists.alioth.debian.org
 
