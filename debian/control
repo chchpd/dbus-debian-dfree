@@ -184,7 +184,7 @@ Description: simple interprocess messaging system (Qt4-based shared library)
 Package: python2.4-dbus
 Section: python
 Architecture: any
-Depends: ${shlibs:Depends}, ${python:Depends}
+Depends: ${shlibs:Depends}, ${python:Depends}, python2.4-libxml2
 Description: simple interprocess messaging system (Python interface)
  D-BUS is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
