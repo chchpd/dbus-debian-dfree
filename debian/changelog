@@ -1,3 +1,9 @@
+dbus (0.60-3) experimental; urgency=low
+
+  * Ignore the exit code of run-parts in the init script.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 22 Dec 2005 13:12:23 +0100
+
 dbus (0.60-2) experimental; urgency=low
 
   * Let python2.4-dbus depend on python2.4-libxml2 (Closes: #343715)

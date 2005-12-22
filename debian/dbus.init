@@ -55,14 +55,14 @@ start_it_up()
     --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
   log_end_msg $?
   if [ -d $EVENTDIR ]; then
-      run-parts --arg=start $EVENTDIR
+      run-parts --arg=start $EVENTDIR || true
   fi
 }
 
 shut_it_down()
 {
   if [ -d $EVENTDIR ]; then
-      run-parts --reverse --arg=stop $EVENTDIR
+      run-parts --reverse --arg=stop $EVENTDIR || true
   fi
   log_daemon_msg "Stopping $DESC" "$NAME"
   start-stop-daemon --stop --retry 60 --quiet --oknodo --pidfile $PIDFILE \
