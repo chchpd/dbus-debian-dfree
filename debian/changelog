@@ -1,8 +1,10 @@
 dbus (0.60-3) experimental; urgency=low
 
+  * debian/patches/dbus-qdbusmarshall-amd64.patch
+    + Fix build failure on amd64 (Closes: #343746)
   * Ignore the exit code of run-parts in the init script.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Thu, 22 Dec 2005 13:12:23 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  5 Jan 2006 12:30:26 +0100
 
 dbus (0.60-2) experimental; urgency=low
 
