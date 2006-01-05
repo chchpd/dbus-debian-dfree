@@ -2,11 +2,12 @@
 # Copyright © 2002,2003 Colin Walters <walters@verbum.org>
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
 
-binary/dbus-glib-1:: binary/dbus-1 
-binary/dbus-qt-1:: binary/dbus-1
-binary/dbus-1-utils:: binary/dbus-glib-1 
-binary/python2.3-dbus::
-	dh_python -ppython2.3-dbus
+binary/libdbus-glib-1-2:: binary/libdbus-1-2
+binary/libdbus-qt-1-1c2:: binary/libdbus-1-2
+binary/dbus-1-utils:: binary/libdbus-glib-1-2
+binary/python2.4-dbus::
+	rm debian/python2.4-dbus/usr/lib/python2.4/site-packages/dbus/dbus_bindings.*a
+	dh_python -ppython2.4-dbus
 
 include /usr/share/cdbs/1/rules/simple-patchsys.mk
 include /usr/share/cdbs/1/rules/utils.mk
@@ -24,25 +25,26 @@ ifeq ($(DEB_BUILD_ARCH),i386)
 endif
 
 
-DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-qt --enable-gtk \
+DEB_CONFIGURE_SCRIPT_ENV += PYTHON=/usr/bin/python2.4
+DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
+                             --enable-qt3 --with-qt3-moc=/usr/bin/moc-qt3 \
+                             --enable-qt --with-qt-moc=/usr/bin/moc-qt4 \
                              --enable-python --with-xml=expat --enable-docs \
-														 --enable-xml-docs --enable-doxygen-docs \
-														 --enable-verbose-mode \
-														 $(MONO_FLAGS)
+                             --enable-xml-docs --enable-doxygen-docs \
+                             $(MONO_FLAGS)
 
-DEB_SHLIBDEPS_INCLUDE_dbus-glib-1 := debian/dbus-1/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/dbus-1/usr/lib/ debian/dbus-glib-1/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_dbus-qt-1 := debian/dbus-1/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_python2.3-dbus := debian/dbus-1/usr/lib/
-
-DEB_DH_INSTALLINIT_ARGS := -r
+DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/dbus-gl
+DEB_SHLIBDEPS_INCLUDE_libdbus-qt-1-1c2 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_libdbus-qt4-1-1 := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_python2.4-dbus := debian/libdbus-1-2/usr/lib/
 
 # Strict library versioning
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
-binary-predeb/libdbus-cil::
+binary-predeb/libdbus-1-cil::
 	dh_makeclilibs -V
 	dh_clideps
 
@@ -52,19 +54,17 @@ common-configure-indep::
 common-configure-impl::
 	chmod +x py-compile
 
-binary-post-install/dbus-1-dev::
-	rm -f debian/dbus-1-dev/usr/include/dbus*/dbus/dbus-glib.h
-	rm -f debian/dbus-1-dev/usr/include/dbus*/dbus/dbus-qt.h
+binary-post-install/libdbus-1-dev::
+	rm -f debian/libdbus-1-dev/usr/include/dbus*/dbus/dbus-glib.h
+	rm -f debian/libdbus-1-dev/usr/include/dbus*/dbus/dbus-qt.h
 
-binary-post-install/dbus-1-utils::
-	mkdir -p debian/dbus-1-utils/etc/X11/Xsession.d
-	cp debian/dbus-Xsession debian/dbus-1-utils/etc/X11/Xsession.d/75dbus-1-utils_dbus-launch
+binary-post-install/dbus::
+	mkdir -p debian/dbus/etc/dbus-1/event.d
+	mkdir -p debian/dbus/etc/X11/Xsession.d
+	cp debian/dbus-Xsession debian/dbus/etc/X11/Xsession.d/75dbus_dbus-launch
 
-binary-post-install/dbus-1::
-	mkdir -p debian/dbus-1/etc/dbus-1/event.d
-
-binary-post-install/libdbus-cil::
-	cd $(CURDIR)/debian/libdbus-cil && \
+binary-post-install/libdbus-1-cil::
+	cd $(CURDIR)/debian/libdbus-1-cil && \
 		find -type f -name "*.dll" -exec chmod -x {} \;
 
 build/dbus-1-doc::

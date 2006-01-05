@@ -10,12 +10,11 @@ chgrp "$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || addgroup --system "$MESSAGEUS
 chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
 	adduser --system --home "$MESSAGEHOME" --no-create-home --disabled-password --ingroup "$MESSAGEUSER" "$MESSAGEUSER"
 
-if [ -x "/etc/init.d/dbus-1" ] && [ "$1" = configure ] && [ "x$2" != "x" ]; then
-  if [ -x /usr/sbin/invoke-rc.d ]; then
-    /usr/sbin/invoke-rc.d dbus-1 stop
-  else
-    /etc/init.d/dbus-1 stop
- fi
+# Do not restart dbus on upgrades, only on fresh installations
+if [ "$1" = "configure" ]; then
+    if [ -e /var/run/dbus/pid ] && ps --no-heading -p $(< /var/run/dbus/pid) > /dev/null; then
+        exit 0
+    fi
 fi
 
 #DEBHELPER#

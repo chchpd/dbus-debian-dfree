@@ -1,45 +1,165 @@
-dbus (0.23.4-8) unstable; urgency=low
+dbus (0.60-3) experimental; urgency=low
 
-  * debian/patches/dbus-qtlinking.patch 
-    + Prevent linking against kdelibs (Closes: #332909)
+  * debian/patches/dbus-qdbusmarshall-amd64.patch
+    + Fix build failure on amd64 (Closes: #343746)
+  * Ignore the exit code of run-parts in the init script.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon, 28 Nov 2005 20:35:20 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  5 Jan 2006 12:30:26 +0100
 
-dbus (0.23.4-7) unstable; urgency=low
+dbus (0.60-2) experimental; urgency=low
 
-  * Add build depend on monodoc (Closes: #330558)
+  * Let python2.4-dbus depend on python2.4-libxml2 (Closes: #343715)
+  * Changed maintainer address to
+    pkg-utopia-maintainers@lists.alioth.debian.org
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon, 10 Oct 2005 15:02:13 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 15 Dec 2005 20:01:11 +0100
 
-dbus (0.23.4-6) unstable; urgency=low
+dbus (0.60-1) experimental; urgency=low
 
-  * debian/rules: Build mono on amd64 instead of s390
+  * New upstream release
+  * Soname of libdbus-1 and libdbus-glib-1 were bumped to 2
+  * debian/patches/dbus-reloadconfig-reply.patch
+    + Removed. Merged upstream
+  * debian/patches/dbus-monitor.patch
+    + Removed. Merged upstream
+  * debian/patches/dbus-make-libtool-safe.patch
+    + Removed. Fixed upstream
+  * debian/patches/dbus-moc-selection.patch
+    + Added. Enable the Qt moc paths to be specified to configure
+  * Depend on lsb-base >= 3.0
+  * Let dbus conflicht with libdbus-1-1 and libdbus-1-2 with dbus << 0.60.
+    Some bus changes could result in strange bugs when mixing the old libs
+    with the new bus.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Tue, 23 Aug 2005 11:12:14 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 14 Dec 2005 19:53:07 +0100
 
-dbus (0.23.4-5) unstable; urgency=low
+dbus (0.50-3) experimental; urgency=low
 
-  * C++ transition (Closes: #323998)
-  * Build-Depend on python-pyrex instead of python2.3-pyrex (Closes: #316683)
-  * monodoc-dbus-1-manual: Dbus CLI manual package
+  * Also move dbus-launch and dbus-send manpages to the dbus package
+  * debian/dbus.init 
+    + Make force-reload an alias of reload instead of restart
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon, 22 Aug 2005 18:49:36 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 21 Nov 2005 11:17:57 +0100
 
-dbus (0.23.4-4) unstable; urgency=low
+dbus (0.50-2) experimental; urgency=low
 
-  * libdbus-cil improvements based on comments from Mirco Bauer
-    + call dh_clideps before dh_makeclilibs
-    + use CLI instead of .NET in the package description
-  * Build CLI bindings on amd64 (Closes: #31427)
+  * maintainance is actually spelled "maintenance" (Closes: #332238)
+  * Disable --enable-verbose because of the big performance hit
+  * Move dbus-binding-tool from dbus-1-utils to libdbus-glib-1-dev
+  * Move dbus-launch and dbus-send into the dbus package (Closes: #337212)
+  * Move the /etc/X11/Xsession.d/ script from dbus-1-utils to dbus
+  * Add reload function to the init script
+  * Use log_daemon_msg instead of log_begin_msg in the init script where
+    applicable
+  * debian/patches/dbus-reloadconfig-reply.patch
+    + Added. Send a reply message when org.freedesktop.DBus.ReloadConfig is
+      called
+  * Prefix the long description of monodoc-dubs-1-manual with one space
+    instead of two (Closes: #337032)
+  * Add LSB formatted dependency info in the init script (Closes: #337644)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Thu, 30 Jun 2005 22:43:12 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  9 Nov 2005 20:02:09 +0100
 
-dbus (0.23.4-3) unstable; urgency=low
+dbus (0.50-1) experimental; urgency=low
 
-  * Also depend on cli-common and use dh_clideps/dh_makeclilibs instead of
-    dh_netdeps/dh_makenetlibs
+  * New upstream release 
 
- -- Sjoerd Simons <sjoerd@debian.org>  Thu,  9 Jun 2005 00:37:10 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  8 Sep 2005 10:01:21 +0200
+
+dbus (0.36.2-1) experimental; urgency=low
+
+  * New upstream release
+  * Fix descriptions to refer to dbus rather than dbus-1. 
+  * Make dbus-1-utils depend on dbus
+  * debian/patches/dbus-sessionbus-checkuid.patch
+    + Removed. Fixed upstream
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue,  6 Sep 2005 09:26:19 +0200
+
+dbus (0.36.1-1) experimental; urgency=low
+
+  * New upstream release (Closes: #319593, #324016)
+  * debian/patches/dbus_cmsgcred.patch
+    + Removed. Fixed upstream.
+  * debian/patches/dbus-gilstate.patch
+    + Removed. Fixed upstream.
+  * Sync with the ubuntu package
+    + Remove dbus_bindings.{a,la} from python2.4-dbus
+    + debian/patches/dbus-make-libtool-safe.patch
+      - Added. Replace explicit libtool calls with $(LIBTOOL) in
+        glib/Makefile.*
+    + Don't include the .la files in the dev packages.
+    + Don't restart dbus on upgrade. Too many applications don't handle it
+      correctly.
+    + Switched the init script to lsb-base
+    + Ship dbus-binding-tool and dbus-viewer with dbus-1-utils
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 26 Aug 2005 21:58:42 +0200
+
+dbus (0.34-4) experimental; urgency=low
+
+  * libdbus-1-cil improvements based on comments from Mirco Bauer
+    + Call dh_clideps before dh_makeclilibs
+    + libdbus-1-cil can be arch all
+    + Use CLI instead of .NET in the package description
+  * Add debian/patches/dbus-sessionbus-checkuid.patch:
+    - bus/session.conf.in: Do not allow any user to connect to any session bus
+      by default.
+    - bus/policy.c: "allowed" now defaults to true if the connecting user id
+      matches the session bus user id.
+    - This stops other users from listening and sending to other user's
+      session dbus instances.
+    - References:
+      CAN-2005-0201
+      https://bugs.freedesktop.org/show_bug.cgi?id=2436
+  * debian/patches/dbus-gilstate: Fix segfaults in python bindings.
+    Patch by Anthony Baxter.
+  * Add D-BUS monodoc documentation package
+  * C++ transition
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 11 Jul 2005 10:22:44 +0200
+
+dbus (0.34-3) experimental; urgency=low
+
+  * Build-depend on python-pyrex instead of python2.3-pyrex
+  * debian/dbus.postinst
+   + Forgot to rename dbus-1 to dbus in the previous package.
+  * Rename libdbus-cil to libdbus-1-cil
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 22 Jun 2005 18:53:22 +0200
+
+dbus (0.34-2) experimental; urgency=low
+
+  * debian/dbus.init 
+    + The even.d dir is in /etc/dbus-1 not in /etc/dbus
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 21 Jun 2005 16:16:43 +0200
+
+dbus (0.34-1) experimental; urgency=low
+
+  * New upstream release
+  * Build libdbus-cil on amd64 too (Closes: #314247)
+  * Python bindings need python2.4, so build them against python2.4.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 20 Jun 2005 13:07:04 +0200
+
+dbus (0.33-1) experimental; urgency=low
+
+  * New upstream release (Closes: #299049)
+  * Redone the package names to be much more sane.
+    - Based on ubuntu's dbus 0.33 package by Daniel Stone.
+    - dbus deamon goes into the dbus package instead of dbus-1
+    - glib bindings in libdbus-glib-1-1 instead of dbus-glib-1
+    - qt bindings in libdbus-qt-1-1 instead of dbus-qt-1
+    - Library component from dbus-1 goed into libdbus-1-1
+  * debian/patches/dbus-fixverbose.patch
+    - Removed. Fixed upstream
+  * debian/patches/dbus-getpwname.patch
+    - Removed. Fixed upstream
+  * debian/patches/fix-policy-group.patch
+    - Removed. Not relevant anymore
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon, 20 Jun 2005 11:12:12 +0200
 
 dbus (0.23.4-2) unstable; urgency=low
 
