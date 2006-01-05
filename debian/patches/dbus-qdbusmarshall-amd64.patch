@@ -1,10 +1,6 @@
-Index: qdbusmarshall.cpp
-===================================================================
-RCS file: /cvs/dbus/dbus/qt/qdbusmarshall.cpp,v
-retrieving revision 1.1
-diff -u -3 -p -r1.1 qdbusmarshall.cpp
---- qdbusmarshall.cpp	23 Sep 2005 13:08:26 -0000	1.1
-+++ qdbusmarshall.cpp	19 Dec 2005 21:40:02 -0000
+diff -u -3 -p -r1.1 qt/qdbusmarshall.cpp
+--- qt/qdbusmarshall.cpp	23 Sep 2005 13:08:26 -0000	1.1
++++ qt/qdbusmarshall.cpp	19 Dec 2005 21:40:02 -0000
 @@ -69,9 +69,9 @@ static QVariant qFetchParameter(DBusMess
      case DBUS_TYPE_BOOLEAN:
          return qIterGet<dbus_bool_t>(it);
