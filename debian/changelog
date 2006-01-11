@@ -1,3 +1,9 @@
+dbus (0.60-5) unstable; urgency=low
+
+  * Fix a bashim in the postinst script (Closes: #347453)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 11 Jan 2006 20:15:02 +0100
+
 dbus (0.60-4) unstable; urgency=low
 
   * Upload to unstable 
