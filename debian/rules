@@ -31,7 +31,9 @@ DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
                              --enable-qt --with-qt-moc=/usr/bin/moc-qt4 \
                              --enable-python --with-xml=expat --enable-docs \
                              --enable-xml-docs --enable-doxygen-docs \
-                             $(MONO_FLAGS)
+                             --enable-mono=auto --enable-mono-docs=auto
+
+#                             $(MONO_FLAGS)
 
 DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/dbus-gl
