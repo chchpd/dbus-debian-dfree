@@ -1,3 +1,14 @@
+dbus (0.60-6) unstable; urgency=low
+
+  * Sync relavant changes from ubuntu 
+    + dbus-0.60-mono-arguments-fix.diff
+      - Added. 64bit fixes ((fd.o bugzilla #4410)
+    + dbus-0.60-mono-return-null-fix.diff
+      - Added. Don't return null for the session bus (fd.o bugzilla #5716)
+    + Send the update-notifier reboot required notification if it's installed
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 16 Feb 2006 11:46:43 +0100
+
 dbus (0.60-5) unstable; urgency=low
 
   * Fix a bashim in the postinst script (Closes: #347453)
