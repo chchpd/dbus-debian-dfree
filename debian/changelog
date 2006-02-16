@@ -236,7 +236,7 @@ dbus (0.23.2-1bindings0) experimental; urgency=low
   * debian/patches/dbus-monofixes.patch
     + Removed. Fixed in this release
 
- - Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
 
 dbus (0.23.2-1) unstable; urgency=low
   * New upstream release 
