@@ -1,11 +1,10 @@
-? .dbus-sysdeps.c.swp
-Index: dbus-sysdeps-util.c
+Index: dbus/dbus-sysdeps-util.c
 ===================================================================
 RCS file: /cvs/dbus/dbus/dbus/dbus-sysdeps-util.c,v
 retrieving revision 1.5
 diff -u -r1.5 dbus-sysdeps-util.c
---- dbus-sysdeps-util.c	8 Jul 2005 14:36:22 -0000	1.5
-+++ dbus-sysdeps-util.c	23 Feb 2006 11:16:38 -0000
+--- dbus/dbus-sysdeps-util.c	8 Jul 2005 14:36:22 -0000	1.5
++++ dbus/dbus-sysdeps-util.c	23 Feb 2006 11:29:06 -0000
 @@ -680,17 +680,6 @@
    return fill_group_info (info, gid, NULL, error);
  }
@@ -24,13 +23,13 @@ diff -u -r1.5 dbus-sysdeps-util.c
  /** @} */ /* End of DBusInternalsUtils functions */
  
  /**
-Index: dbus-sysdeps.c
+Index: dbus/dbus-sysdeps.c
 ===================================================================
 RCS file: /cvs/dbus/dbus/dbus/dbus-sysdeps.c,v
 retrieving revision 1.100
 diff -u -r1.100 dbus-sysdeps.c
---- dbus-sysdeps.c	22 Nov 2005 20:37:00 -0000	1.100
-+++ dbus-sysdeps.c	23 Feb 2006 11:16:38 -0000
+--- dbus/dbus-sysdeps.c	22 Nov 2005 20:37:00 -0000	1.100
++++ dbus/dbus-sysdeps.c	23 Feb 2006 11:29:06 -0000
 @@ -1754,6 +1754,17 @@
  }
  
@@ -49,13 +48,13 @@ diff -u -r1.100 dbus-sysdeps.c
   * Sets fields in DBusCredentials to DBUS_PID_UNSET,
   * DBUS_UID_UNSET, DBUS_GID_UNSET.
   *
-Index: dbus-userdb.c
+Index: dbus/dbus-userdb.c
 ===================================================================
 RCS file: /cvs/dbus/dbus/dbus/dbus-userdb.c,v
 retrieving revision 1.17
 diff -u -r1.17 dbus-userdb.c
---- dbus-userdb.c	22 Mar 2005 17:57:27 -0000	1.17
-+++ dbus-userdb.c	23 Feb 2006 11:16:38 -0000
+--- dbus/dbus-userdb.c	22 Mar 2005 17:57:27 -0000	1.17
++++ dbus/dbus-userdb.c	23 Feb 2006 11:29:06 -0000
 @@ -61,7 +61,7 @@
    if (info == NULL) /* hash table will pass NULL */
      return;
