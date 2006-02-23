@@ -1,0 +1,9 @@
+Index: dbus/dbus-userdb.c
+===================================================================
+RCS file: /cvs/dbus/dbus/dbus/dbus-userdb.c,v
+retrieving revision 1.17
+diff -r1.17 dbus-userdb.c
+64c64
+<   _dbus_group_info_free_allocated (info);
+---
+>   _dbus_group_info_free (info);

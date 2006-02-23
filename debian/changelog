@@ -1,8 +1,10 @@
-dbus (0.60-7) unstable; urgency=low
+dbus (0.60-7) unstable; urgency=medium
 
+  * debian/patch/dbus-group_info_free.patch
+    + Added. Don't run into in infinite loop when freeing group info
   * Update cli-common depend to >= 0.2.0. Older versions have known bugs 
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon, 20 Feb 2006 00:32:08 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 23 Feb 2006 11:24:44 +0100
 
 dbus (0.60-6) unstable; urgency=low
 
