@@ -1,12 +1,19 @@
-dbus (0.60-7) unstable; urgency=medium
+dbus (0.61-1) unstable; urgency=medium
 
-  * debian/patch/dbus-group_info_free.patch
-    + Added. Don't run into in infinite loop when freeing group info
+  * New upstream release 
+  * debian/patches/dbus-0.60-mono-arguments-fix.diff
+    - Removed. Fixed upstream
+  * debian/patches/dbus-0.60-mono-return-null-fix.diff
+    - Removed. Fixed upstream
+  * debian/patches/dbus-moc-selection.patch
+    - Removed. Fixed upstream
+  * debian/patches/dbus-qdbusmarshall-amd64.patch
+    - Removed. Fixed upstream
   * Update cli-common depend to >= 0.2.0. Older versions have known bugs
   * Let binary-predeb/libdbus-1-cil:: depend on
-    common-binary-post-install-arch, so dh_clideps can do it's work correctly. 
+    common-binary-post-install-arch, so dh_clideps can do it's work correctly.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 16:10:34 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 20:40:46 +0100
 
 dbus (0.60-6) unstable; urgency=low
 
