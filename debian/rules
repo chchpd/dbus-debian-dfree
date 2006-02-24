@@ -46,7 +46,7 @@ DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
-binary-predeb/libdbus-1-cil::
+binary-predeb/libdbus-1-cil:: common-binary-post-install-arch
 	dh_makeclilibs -V
 	dh_clideps
 
