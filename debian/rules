@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 # Copyright © 2002,2003 Colin Walters <walters@verbum.org>
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
+DEB_AUTO_UPDATE_AUTOCONF="yes"
 
 binary/libdbus-glib-1-2:: binary/libdbus-1-2
 binary/libdbus-qt-1-1c2:: binary/libdbus-1-2
@@ -13,6 +14,7 @@ include /usr/share/cdbs/1/rules/simple-patchsys.mk
 include /usr/share/cdbs/1/rules/utils.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
+
 
 ifeq ($(DEB_BUILD_ARCH),powerpc)
  MONO_FLAGS=--enable-mono --enable-mono-docs
@@ -46,7 +48,7 @@ DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
-binary-predeb/libdbus-1-cil:: common-binary-post-install-arch
+binary-predeb/libdbus-1-cil:: binary-arch
 	dh_makeclilibs -V
 	dh_clideps
 

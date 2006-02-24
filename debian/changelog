@@ -14,6 +14,8 @@ dbus (0.61-1) unstable; urgency=medium
     common-binary-post-install-arch, so dh_clideps can do it's work correctly.
   * debian/patches/dbus-qt-buildfix.patch 
     + Added. Fix compilation of the Qt bindings.
+  * debian/patches/dbus-update-automake.patch
+    + Added. Fix compilation of the Qt bindings.
 
  -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 22:09:17 +0100
 
