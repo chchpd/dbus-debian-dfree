@@ -1,10 +1,30 @@
+Index: qt/Makefile.am
+===================================================================
+RCS file: /cvs/dbus/dbus/qt/Makefile.am,v
+retrieving revision 1.14
+diff -u -r1.14 Makefile.am
+--- qt/Makefile.am	17 Feb 2006 00:04:38 -0000	1.14
++++ qt/Makefile.am	24 Feb 2006 21:22:31 -0000
+@@ -58,9 +58,9 @@
+ 	$(top_srcdir)/qt/qdbusxmlparser_p.h     
+ 
+ 
+-$(top_srcdir)/qt/qdbusabstractadaptor.lo: qdbusabstractadaptor.moc
+-$(top_srcdir)/qt/qdbusserver.lo: qdbusserver.moc
+-$(top_srcdir)/qt/qdbusconnection.lo: qdbusconnection_p.moc
++qdbusabstractadaptor.lo: qdbusabstractadaptor.moc
++qdbusserver.lo: qdbusserver.moc
++qdbusconnection.lo: qdbusconnection_p.moc
+ 
+ CLEANFILES=qdbusabstractadaptor.moc qdbusserver.moc qdbusconnection.moc
+ 
 Index: qt/qdbustype.h
 ===================================================================
 RCS file: /cvs/dbus/dbus/qt/qdbustype.h,v
 retrieving revision 1.1
 diff -u -r1.1 qdbustype.h
 --- qt/qdbustype.h	15 Feb 2006 16:25:12 -0000	1.1
-+++ qt/qdbustype.h	24 Feb 2006 21:09:10 -0000
++++ qt/qdbustype.h	24 Feb 2006 21:22:31 -0000
 @@ -31,6 +31,7 @@
  #include <QtCore/qlist.h>
  #include "qdbusmacros.h"
@@ -19,7 +39,7 @@ RCS file: /cvs/dbus/dbus/qt/qdbusutil.cpp,v
 retrieving revision 1.1
 diff -u -r1.1 qdbusutil.cpp
 --- qt/qdbusutil.cpp	15 Feb 2006 16:25:12 -0000	1.1
-+++ qt/qdbusutil.cpp	24 Feb 2006 21:09:10 -0000
++++ qt/qdbusutil.cpp	24 Feb 2006 21:22:31 -0000
 @@ -24,6 +24,7 @@
  #include "qdbusutil.h"
  
