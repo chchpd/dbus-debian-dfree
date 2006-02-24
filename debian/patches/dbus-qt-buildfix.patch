@@ -1,0 +1,30 @@
+Index: qt/qdbustype.h
+===================================================================
+RCS file: /cvs/dbus/dbus/qt/qdbustype.h,v
+retrieving revision 1.1
+diff -u -r1.1 qdbustype.h
+--- qt/qdbustype.h	15 Feb 2006 16:25:12 -0000	1.1
++++ qt/qdbustype.h	24 Feb 2006 21:09:10 -0000
+@@ -31,6 +31,7 @@
+ #include <QtCore/qlist.h>
+ #include "qdbusmacros.h"
+ #include <dbus/dbus.h>
++#include <dbus/dbus-signature.h>
+ 
+ // forward declaration
+ class QDBusTypeList;
+Index: qt/qdbusutil.cpp
+===================================================================
+RCS file: /cvs/dbus/dbus/qt/qdbusutil.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 qdbusutil.cpp
+--- qt/qdbusutil.cpp	15 Feb 2006 16:25:12 -0000	1.1
++++ qt/qdbusutil.cpp	24 Feb 2006 21:09:10 -0000
+@@ -24,6 +24,7 @@
+ #include "qdbusutil.h"
+ 
+ #include <dbus/dbus.h>
++#include <dbus/dbus-signature.h>
+ 
+ #include <QtCore/qstringlist.h>
+ #include <QtCore/qregexp.h>

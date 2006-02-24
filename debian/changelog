@@ -1,6 +1,6 @@
 dbus (0.61-1) unstable; urgency=medium
 
-  * New upstream release 
+  * New upstream release
   * debian/patches/dbus-0.60-mono-arguments-fix.diff
     - Removed. Fixed upstream
   * debian/patches/dbus-0.60-mono-return-null-fix.diff
@@ -12,8 +12,10 @@ dbus (0.61-1) unstable; urgency=medium
   * Update cli-common depend to >= 0.2.0. Older versions have known bugs
   * Let binary-predeb/libdbus-1-cil:: depend on
     common-binary-post-install-arch, so dh_clideps can do it's work correctly.
+  * debian/patches/dbus-qt-buildfix.patch 
+    + Added. Fix compilation of the Qt bindings.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 20:40:46 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 22:09:17 +0100
 
 dbus (0.60-6) unstable; urgency=low
 
