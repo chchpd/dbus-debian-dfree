@@ -1,6 +1,6 @@
 diff -Naur dbus-0.61.orig/aclocal.m4 dbus-0.61/aclocal.m4
---- dbus-0.61.orig/aclocal.m4	2006-02-24 23:14:14.000000000 +0100
-+++ dbus-0.61/aclocal.m4	2006-02-24 23:16:31.000000000 +0100
+--- dbus-0.61.orig/aclocal.m4	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/aclocal.m4	2006-02-27 21:44:42.000000000 +0100
 @@ -412,7 +412,7 @@
  
  # libtool.m4 - Configure libtool for the host system. -*-Autoconf-*-
@@ -154,8 +154,8 @@ diff -Naur dbus-0.61.orig/aclocal.m4 dbus-0.61/aclocal.m4
  if test "x${GCJFLAGS-unset}" = xunset; then
     GCJFLAGS="-g -O2"
 diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
---- dbus-0.61.orig/config.guess	2006-02-24 23:14:15.000000000 +0100
-+++ dbus-0.61/config.guess	2005-08-14 05:51:20.000000000 +0200
+--- dbus-0.61.orig/config.guess	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/config.guess	2006-02-25 16:29:12.000000000 +0100
 @@ -1,9 +1,9 @@
  #! /bin/sh
  # Attempt to guess a canonical system name.
@@ -164,7 +164,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 +#   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
  
 -timestamp='2003-06-17'
-+timestamp='2005-08-03'
++timestamp='2006-02-23'
  
  # This file is free software; you can redistribute it and/or modify it
  # under the terms of the GNU General Public License as published by
@@ -209,6 +209,15 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      -- )     # Stop option processing
         shift; break ;;
      - )	# Use stdin as input.
+@@ -104,7 +106,7 @@
+ trap "exitcode=\$?; (rm -f \$tmpfiles 2>/dev/null; rmdir \$tmp 2>/dev/null) && exit \$exitcode" 0 ;
+ trap "rm -f \$tmpfiles 2>/dev/null; rmdir \$tmp 2>/dev/null; exit 1" 1 2 13 15 ;
+ : ${TMPDIR=/tmp} ;
+- { tmp=`(umask 077 && mktemp -d -q "$TMPDIR/cgXXXXXX") 2>/dev/null` && test -n "$tmp" && test -d "$tmp" ; } ||
++ { tmp=`(umask 077 && mktemp -d "$TMPDIR/cgXXXXXX") 2>/dev/null` && test -n "$tmp" && test -d "$tmp" ; } ||
+  { test -n "$RANDOM" && tmp=$TMPDIR/cg$$-$RANDOM && (umask 077 && mkdir $tmp) ; } ||
+  { tmp=$TMPDIR/cg-$$ && (umask 077 && mkdir $tmp) && echo "Warning: creating insecure temp directory" >&2 ; } ||
+  { echo "$me: cannot create a temporary directory in $TMPDIR" >&2 ; exit 1 ; } ;
 @@ -123,7 +125,7 @@
  	;;
   ,,*)   CC_FOR_BUILD=$CC ;;
@@ -232,7 +241,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  # Note: order is significant - the case branches are not exclusive.
  
  case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
-@@ -203,50 +198,29 @@
+@@ -203,50 +198,32 @@
  	# contains redundant information, the shorter form:
  	# CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM is used.
  	echo "${machine}-${os}${release}"
@@ -283,6 +292,9 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 +    *:ekkoBSD:*:*)
 +	echo ${UNAME_MACHINE}-unknown-ekkobsd${UNAME_RELEASE}
 +	exit ;;
++    *:SolidBSD:*:*)
++	echo ${UNAME_MACHINE}-unknown-solidbsd${UNAME_RELEASE}
++	exit ;;
 +    macppc:MirBSD:*:*)
 +	echo powerppc-unknown-mirbsd${UNAME_RELEASE}
 +	exit ;;
@@ -303,7 +315,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  	# According to Compaq, /usr/sbin/psrinfo has been available on
  	# OSF/1 and Tru64 systems produced since 1995.  I hope that
  	# covers most systems running today.  This code pipes the CPU
-@@ -284,42 +258,49 @@
+@@ -284,42 +261,49 @@
  	    "EV7.9 (21364A)")
  		UNAME_MACHINE="alphaev79" ;;
  	esac
@@ -366,7 +378,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      Pyramid*:OSx*:*:* | MIS*:OSx*:*:* | MIS*:SMP_DC-OSx*:*:*)
  	# akee@wpdis03.wpafb.af.mil (Earle F. Ake) contributed MIS and NILE.
  	if test "`(/bin/universe) 2>/dev/null`" = att ; then
-@@ -327,32 +308,32 @@
+@@ -327,32 +311,32 @@
  	else
  		echo pyramid-pyramid-bsd
  	fi
@@ -408,7 +420,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      sun4*:SunOS:*:*)
  	case "`/usr/bin/arch -k`" in
  	    Series*|S4*)
-@@ -361,10 +342,10 @@
+@@ -361,10 +345,10 @@
  	esac
  	# Japanese Language versions have a version number like `4.1.3-JL'.
  	echo sparc-sun-sunos`echo ${UNAME_RELEASE}|sed -e 's/-/_/'`
@@ -421,7 +433,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      sun*:*:4.2BSD:*)
  	UNAME_RELEASE=`(sed 1q /etc/motd | awk '{print substr($5,1,3)}') 2>/dev/null`
  	test "x${UNAME_RELEASE}" = "x" && UNAME_RELEASE=3
-@@ -376,10 +357,10 @@
+@@ -376,10 +360,10 @@
  		echo sparc-sun-sunos${UNAME_RELEASE}
  		;;
  	esac
@@ -434,7 +446,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      # The situation for MiNT is a little confusing.  The machine name
      # can be virtually everything (everything which is not
      # "atarist" or "atariste" at least should have a processor
-@@ -390,37 +371,40 @@
+@@ -390,37 +374,40 @@
      # be no problem.
      atarist[e]:*MiNT:*:* | atarist[e]:*mint:*:* | atarist[e]:*TOS:*:*)
          echo m68k-atari-mint${UNAME_RELEASE}
@@ -486,7 +498,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      mips:*:*:UMIPS | mips:*:*:RISCos)
  	eval $set_cc_for_build
  	sed 's/^	//' << EOF >$dummy.c
-@@ -444,32 +428,33 @@
+@@ -444,32 +431,33 @@
  	  exit (-1);
  	}
  EOF
@@ -531,7 +543,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      AViiON:dgux:*:*)
          # DG/UX returns AViiON for all architectures
          UNAME_PROCESSOR=`/usr/bin/uname -p`
-@@ -485,29 +470,29 @@
+@@ -485,29 +473,29 @@
  	else
  	    echo i586-dg-dgux${UNAME_RELEASE}
  	fi
@@ -570,7 +582,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      ia64:AIX:*:*)
  	if [ -x /usr/bin/oslevel ] ; then
  		IBM_REV=`/usr/bin/oslevel`
-@@ -515,7 +500,7 @@
+@@ -515,7 +503,7 @@
  		IBM_REV=${UNAME_VERSION}.${UNAME_RELEASE}
  	fi
  	echo ${UNAME_MACHINE}-ibm-aix${IBM_REV}
@@ -579,7 +591,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      *:AIX:2:3)
  	if grep bos325 /usr/include/stdio.h >/dev/null 2>&1; then
  		eval $set_cc_for_build
-@@ -530,14 +515,18 @@
+@@ -530,14 +518,18 @@
  			exit(0);
  			}
  EOF
@@ -601,7 +613,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      *:AIX:*:[45])
  	IBM_CPU_ID=`/usr/sbin/lsdev -C -c processor -S available | sed 1q | awk '{ print $1 }'`
  	if /usr/sbin/lsattr -El ${IBM_CPU_ID} | grep ' POWER' >/dev/null 2>&1; then
-@@ -551,28 +540,28 @@
+@@ -551,28 +543,28 @@
  		IBM_REV=${UNAME_VERSION}.${UNAME_RELEASE}
  	fi
  	echo ${IBM_ARCH}-ibm-aix${IBM_REV}
@@ -638,7 +650,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      9000/[34678]??:HP-UX:*:*)
  	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
  	case "${UNAME_MACHINE}" in
-@@ -634,9 +623,19 @@
+@@ -634,9 +626,19 @@
  	esac
  	if [ ${HP_ARCH} = "hppa2.0w" ]
  	then
@@ -661,7 +673,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  	    then
  		HP_ARCH="hppa2.0w"
  	    else
-@@ -644,11 +643,11 @@
+@@ -644,11 +646,11 @@
  	    fi
  	fi
  	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
@@ -675,7 +687,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      3050*:HI-UX:*:*)
  	eval $set_cc_for_build
  	sed 's/^	//' << EOF >$dummy.c
-@@ -676,150 +675,166 @@
+@@ -676,150 +678,177 @@
  	  exit (0);
  	}
  EOF
@@ -807,7 +819,12 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 -	exit 0 ;;
 +	exit ;;
 +    *:FreeBSD:*:*)
-+	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
++	case ${UNAME_MACHINE} in
++	    pc98)
++		echo i386-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
++	    *)
++		echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
++	esac
 +	exit ;;
      i*:CYGWIN*:*)
  	echo ${UNAME_MACHINE}-pc-cygwin
@@ -817,6 +834,9 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  	echo ${UNAME_MACHINE}-pc-mingw32
 -	exit 0 ;;
 +	exit ;;
++    i*:MSYS_NT-*:*:*)
++	echo ${UNAME_MACHINE}-pc-mingw32
++	exit ;;
 +    i*:windows32*:*)
 +    	# uname -m includes "-pc" on this system.
 +    	echo ${UNAME_MACHINE}-mingw32
@@ -824,10 +844,15 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      i*:PW*:*)
  	echo ${UNAME_MACHINE}-pc-pw32
 -	exit 0 ;;
-+	exit ;;
-     x86:Interix*:[34]*)
- 	echo i586-pc-interix${UNAME_RELEASE}|sed -e 's/\..*//'
+-    x86:Interix*:[34]*)
+-	echo i586-pc-interix${UNAME_RELEASE}|sed -e 's/\..*//'
 -	exit 0 ;;
++	exit ;;
++    x86:Interix*:[345]*)
++	echo i586-pc-interix${UNAME_RELEASE}
++	exit ;;
++    EM64T:Interix*:[345]*)
++	echo x86_64-unknown-interix${UNAME_RELEASE}
 +	exit ;;
      [345]86:Windows_95:* | [345]86:Windows_98:* | [345]86:Windows_NT:*)
  	echo i${UNAME_MACHINE}-pc-mks
@@ -897,20 +922,32 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      mips:Linux:*:*)
  	eval $set_cc_for_build
  	sed 's/^	//' << EOF >$dummy.c
-@@ -837,7 +852,7 @@
+@@ -836,8 +865,12 @@
+ 	#endif
  	#endif
  EOF
- 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
+-	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
 -	test x"${CPU}" != x && echo "${CPU}-unknown-linux-gnu" && exit 0
++	eval "`$CC_FOR_BUILD -E $dummy.c 2>/dev/null | sed -n '
++	    /^CPU/{
++		s: ::g
++		p
++	    }'`"
 +	test x"${CPU}" != x && { echo "${CPU}-unknown-linux-gnu"; exit; }
  	;;
      mips64:Linux:*:*)
  	eval $set_cc_for_build
-@@ -856,14 +871,17 @@
+@@ -855,15 +888,22 @@
+ 	#endif
  	#endif
  EOF
- 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
+-	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
 -	test x"${CPU}" != x && echo "${CPU}-unknown-linux-gnu" && exit 0
++	eval "`$CC_FOR_BUILD -E $dummy.c 2>/dev/null | sed -n '
++	    /^CPU/{
++		s: ::g
++		p
++	    }'`"
 +	test x"${CPU}" != x && { echo "${CPU}-unknown-linux-gnu"; exit; }
  	;;
 +    or32:Linux:*:*)
@@ -929,7 +966,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      alpha:Linux:*:*)
  	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
  	  EV5)   UNAME_MACHINE=alphaev5 ;;
-@@ -877,7 +895,7 @@
+@@ -877,7 +917,7 @@
  	objdump --private-headers /bin/sh | grep ld.so.1 >/dev/null
  	if test "$?" = 0 ; then LIBC="libc1" ; else LIBC="" ; fi
  	echo ${UNAME_MACHINE}-unknown-linux-gnu${LIBC}
@@ -938,7 +975,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      parisc:Linux:*:* | hppa:Linux:*:*)
  	# Look for CPU level
  	case `grep '^cpu[^a-z]*:' /proc/cpuinfo 2>/dev/null | cut -d' ' -f2` in
-@@ -885,25 +903,25 @@
+@@ -885,25 +925,28 @@
  	  PA8*) echo hppa2.0-unknown-linux-gnu ;;
  	  *)    echo hppa-unknown-linux-gnu ;;
  	esac
@@ -965,6 +1002,9 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  	echo ${UNAME_MACHINE}-unknown-linux-gnu
 -	exit 0 ;;
 +	exit ;;
++    vax:Linux:*:*)
++	echo ${UNAME_MACHINE}-dec-linux-gnu
++	exit ;;
      x86_64:Linux:*:*)
 -	echo x86_64-${VENDOR:-unknown}-linux-gnu
 -	exit 0 ;;
@@ -973,7 +1013,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      i*86:Linux:*:*)
  	# The BFD linker knows what the default object file format is, so
  	# first see if it will tell us. cd to the root directory to prevent
-@@ -921,15 +939,15 @@
+@@ -921,15 +964,15 @@
  		;;
  	  a.out-i386-linux)
  		echo "${UNAME_MACHINE}-pc-linux-gnuaout"
@@ -992,7 +1032,14 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  	esac
  	# Determine whether the default compiler is a.out or elf
  	eval $set_cc_for_build
-@@ -952,17 +970,23 @@
+@@ -946,23 +989,33 @@
+ 	LIBC=gnulibc1
+ 	# endif
+ 	#else
+-	#ifdef __INTEL_COMPILER
++	#if defined(__INTEL_COMPILER) || defined(__PGI) || defined(__sun)
+ 	LIBC=gnu
+ 	#else
  	LIBC=gnuaout
  	#endif
  	#endif
@@ -1000,9 +1047,14 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 +	LIBC=dietlibc
 +	#endif
  EOF
- 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^LIBC=`
+-	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^LIBC=`
 -	test x"${LIBC}" != x && echo "${UNAME_MACHINE}-${VENDOR:-pc}-linux-${LIBC}" && exit 0
 -	test x"${TENTATIVE}" != x && echo "${TENTATIVE}" && exit 0
++	eval "`$CC_FOR_BUILD -E $dummy.c 2>/dev/null | sed -n '
++	    /^LIBC/{
++		s: ::g
++		p
++	    }'`"
 +	test x"${LIBC}" != x && {
 +		echo "${UNAME_MACHINE}-pc-linux-${LIBC}"
 +		exit
@@ -1019,7 +1071,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      i*86:UNIX_SV:4.2MP:2.*)
          # Unixware is an offshoot of SVR4, but it has its own version
          # number series starting with 2...
-@@ -970,24 +994,27 @@
+@@ -970,24 +1023,27 @@
  	# I just have to hope.  -- rms.
          # Use sysv4.2uw... so that sysv4* matches it.
  	echo ${UNAME_MACHINE}-pc-sysv4.2uw${UNAME_VERSION}
@@ -1053,7 +1105,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      i*86:*:4.*:* | i*86:SYSTEM_V:4.*:*)
  	UNAME_REL=`echo ${UNAME_RELEASE} | sed 's/\/MP$//'`
  	if grep Novell /usr/include/link.h >/dev/null 2>/dev/null; then
-@@ -995,15 +1022,16 @@
+@@ -995,15 +1051,16 @@
  	else
  		echo ${UNAME_MACHINE}-pc-sysv${UNAME_REL}
  	fi
@@ -1073,7 +1125,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      i*86:*:3.2:*)
  	if test -f /usr/options/cb.name; then
  		UNAME_REL=`sed -n 's/.*Version //p' </usr/options/cb.name`
-@@ -1021,73 +1049,73 @@
+@@ -1021,73 +1078,73 @@
  	else
  		echo ${UNAME_MACHINE}-pc-sysv32
  	fi
@@ -1169,7 +1221,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      *:SINIX-*:*:*)
  	if uname -p 2>/dev/null >/dev/null ; then
  		UNAME_MACHINE=`(uname -p) 2>/dev/null`
-@@ -1095,68 +1123,73 @@
+@@ -1095,68 +1152,72 @@
  	else
  		echo ns32k-sni-sysv
  	fi
@@ -1250,10 +1302,10 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 +	exit ;;
      *:Darwin:*:*)
 -	case `uname -p` in
+-	    *86) UNAME_PROCESSOR=i686 ;;
+-	    powerpc) UNAME_PROCESSOR=powerpc ;;
 +	UNAME_PROCESSOR=`uname -p` || UNAME_PROCESSOR=unknown
 +	case $UNAME_PROCESSOR in
- 	    *86) UNAME_PROCESSOR=i686 ;;
--	    powerpc) UNAME_PROCESSOR=powerpc ;;
 +	    unknown) UNAME_PROCESSOR=powerpc ;;
  	esac
  	echo ${UNAME_PROCESSOR}-apple-darwin${UNAME_RELEASE}
@@ -1262,7 +1314,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      *:procnto*:*:* | *:QNX:[0123456789]*:*)
  	UNAME_PROCESSOR=`uname -p`
  	if test "$UNAME_PROCESSOR" = "x86"; then
-@@ -1164,22 +1197,25 @@
+@@ -1164,22 +1225,25 @@
  		UNAME_MACHINE=pc
  	fi
  	echo ${UNAME_PROCESSOR}-${UNAME_MACHINE}-nto-qnx${UNAME_RELEASE}
@@ -1295,7 +1347,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      *:Plan9:*:*)
  	# "uname -m" is not consistent, so use $cputype instead. 386
  	# is converted to i386 for consistency with other x86
-@@ -1190,28 +1226,44 @@
+@@ -1190,28 +1254,47 @@
  	    UNAME_MACHINE="$cputype"
  	fi
  	echo ${UNAME_MACHINE}-unknown-plan9
@@ -1345,10 +1397,13 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
 +    i*86:skyos:*:*)
 +	echo ${UNAME_MACHINE}-pc-skyos`echo ${UNAME_RELEASE}` | sed -e 's/ .*$//'
 +	exit ;;
++    i*86:rdos:*:*)
++	echo ${UNAME_MACHINE}-pc-rdos
++	exit ;;
  esac
  
  #echo '(No uname command or uname output not recognized.)' 1>&2
-@@ -1243,7 +1295,7 @@
+@@ -1243,7 +1326,7 @@
  #endif
  
  #if defined (__arm) && defined (__acorn) && defined (__unix)
@@ -1357,7 +1412,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  #endif
  
  #if defined (hp300) && !defined (hpux)
-@@ -1332,11 +1384,12 @@
+@@ -1332,11 +1415,12 @@
  }
  EOF
  
@@ -1372,7 +1427,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  
  # Convex versions that predate uname can use getsysinfo(1)
  
-@@ -1345,22 +1398,22 @@
+@@ -1345,22 +1429,22 @@
      case `getsysinfo -f cpu_type` in
      c1*)
  	echo c1-convex-bsd
@@ -1400,7 +1455,7 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
      esac
  fi
  
-@@ -1371,7 +1424,9 @@
+@@ -1371,7 +1455,9 @@
  the operating system you are using. It is advised that you
  download the most up to date version of the config scripts from
  
@@ -1412,8 +1467,8 @@ diff -Naur dbus-0.61.orig/config.guess dbus-0.61/config.guess
  If the version you run ($0) is already up to date, please
  send the following data and any information you think might be
 diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
---- dbus-0.61.orig/config.sub	2006-02-24 23:14:15.000000000 +0100
-+++ dbus-0.61/config.sub	2005-08-14 05:51:20.000000000 +0200
+--- dbus-0.61.orig/config.sub	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/config.sub	2006-02-25 16:29:12.000000000 +0100
 @@ -1,9 +1,9 @@
  #! /bin/sh
  # Configuration validation subroutine script.
@@ -1422,7 +1477,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
 +#   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
  
 -timestamp='2003-06-18'
-+timestamp='2005-07-08'
++timestamp='2006-02-23'
  
  # This file is (in principle) common to ALL GNU software.
  # The presence of a machine in this file suggests that SOME GNU software
@@ -1478,17 +1533,18 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  
      * )
         break ;;
-@@ -118,7 +119,8 @@
+@@ -118,7 +119,9 @@
  # Here we must recognize all the valid KERNEL-OS combinations.
  maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
  case $maybe_os in
 -  nto-qnx* | linux-gnu* | freebsd*-gnu* | netbsd*-gnu* | storm-chaos* | os2-emx* | rtmk-nova*)
-+  nto-qnx* | linux-gnu* | linux-dietlibc | linux-uclibc* | uclinux-uclibc* | uclinux-gnu* | \
-+  kfreebsd*-gnu* | knetbsd*-gnu* | netbsd*-gnu* | storm-chaos* | os2-emx* | rtmk-nova*)
++  nto-qnx* | linux-gnu* | linux-dietlibc | linux-newlib* | linux-uclibc* | \
++  uclinux-uclibc* | uclinux-gnu* | kfreebsd*-gnu* | knetbsd*-gnu* | netbsd*-gnu* | \
++  storm-chaos* | os2-emx* | rtmk-nova*)
      os=-$maybe_os
      basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
      ;;
-@@ -144,7 +146,7 @@
+@@ -144,7 +147,7 @@
  	-convergent* | -ncr* | -news | -32* | -3600* | -3100* | -hitachi* |\
  	-c[123]* | -convex* | -sun | -crds | -omron* | -dg | -ultra | -tti* | \
  	-harris | -dolphin | -highlevel | -gould | -cbm | -ns | -masscomp | \
@@ -1497,7 +1553,29 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  		os=
  		basic_machine=$1
  		;;
-@@ -228,14 +230,16 @@
+@@ -169,6 +172,10 @@
+ 	-hiux*)
+ 		os=-hiuxwe2
+ 		;;
++	-sco6)
++		os=-sco5v6
++		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
++		;;
+ 	-sco5)
+ 		os=-sco3.2v5
+ 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
+@@ -185,6 +192,10 @@
+ 		# Don't forget version if it is 3.2v4 or newer.
+ 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
+ 		;;
++	-sco5v6*)
++		# Don't forget version if it is 3.2v4 or newer.
++		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
++		;;
+ 	-sco*)
+ 		os=-sco3.2v2
+ 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
+@@ -228,14 +239,16 @@
  	| a29k \
  	| alpha | alphaev[4-8] | alphaev56 | alphaev6[78] | alphapca5[67] \
  	| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] | alpha64pca5[67] \
@@ -1512,11 +1590,11 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
 -	| ip2k \
 -	| m32r | m68000 | m68k | m88k | mcore \
 +	| ip2k | iq2000 \
-+	| m32r | m32rle | m68000 | m68k | m88k | maxq | mcore \
++	| m32r | m32rle | m68000 | m68k | m88k | maxq | mb | microblaze | mcore \
  	| mips | mipsbe | mipseb | mipsel | mipsle \
  	| mips16 \
  	| mips64 | mips64el \
-@@ -244,31 +248,37 @@
+@@ -244,31 +257,38 @@
  	| mips64vr4100 | mips64vr4100el \
  	| mips64vr4300 | mips64vr4300el \
  	| mips64vr5000 | mips64vr5000el \
@@ -1529,8 +1607,9 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	| mipsisa64sr71k | mipsisa64sr71kel \
  	| mipstx39 | mipstx39el \
  	| mn10200 | mn10300 \
-+	| ms1 \
++	| mt \
  	| msp430 \
++	| nios | nios2 \
  	| ns16k | ns32k \
 -	| openrisc | or32 \
 +	| or32 \
@@ -1559,7 +1638,17 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	m6811 | m68hc11 | m6812 | m68hc12)
  		# Motorola 68HC11/12.
  		basic_machine=$basic_machine-unknown
-@@ -296,19 +306,19 @@
+@@ -276,6 +296,9 @@
+ 		;;
+ 	m88110 | m680[12346]0 | m683?2 | m68360 | m5200 | v70 | w65 | z8k)
+ 		;;
++	ms1)
++		basic_machine=mt-unknown
++		;;
+ 
+ 	# We use `pc' rather than `unknown'
+ 	# because (1) that's what they normally are, and
+@@ -296,19 +319,19 @@
  	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* \
  	| arm-*  | armbe-* | armle-* | armeb-* | armv*-* \
  	| avr-* \
@@ -1584,7 +1673,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	| mips-* | mipsbe-* | mipseb-* | mipsel-* | mipsle-* \
  	| mips16-* \
  	| mips64-* | mips64el-* \
-@@ -317,34 +327,40 @@
+@@ -317,34 +340,41 @@
  	| mips64vr4100-* | mips64vr4100el-* \
  	| mips64vr4300-* | mips64vr4300el-* \
  	| mips64vr5000-* | mips64vr5000el-* \
@@ -1597,9 +1686,10 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	| mipsisa64sr71k-* | mipsisa64sr71kel-* \
  	| mipstx39-* | mipstx39el-* \
 +	| mmix-* \
-+	| ms1-* \
++	| mt-* \
  	| msp430-* \
 -	| none-* | np1-* | nv1-* | ns16k-* | ns32k-* \
++	| nios-* | nios2-* \
 +	| none-* | np1-* | ns16k-* | ns32k-* \
  	| orion-* \
  	| pdp10-* | pdp11-* | pj-* | pjl-* | pn-* | power-* \
@@ -1631,7 +1721,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	# Recognize the various machine names and aliases which stand
  	# for a CPU type and a company and sometimes even an OS.
  	386bsd)
-@@ -361,6 +377,9 @@
+@@ -361,6 +391,9 @@
  		basic_machine=a29k-amd
  		os=-udi
  		;;
@@ -1641,7 +1731,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	adobe68k)
  		basic_machine=m68010-adobe
  		os=-scout
-@@ -378,6 +397,9 @@
+@@ -378,6 +411,9 @@
  	amd64)
  		basic_machine=x86_64-pc
  		;;
@@ -1651,7 +1741,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	amdahl)
  		basic_machine=580-amdahl
  		os=-sysv
-@@ -437,12 +459,27 @@
+@@ -437,12 +473,27 @@
  		basic_machine=j90-cray
  		os=-unicos
  		;;
@@ -1679,7 +1769,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	da30 | da30-*)
  		basic_machine=m68k-da30
  		;;
-@@ -465,6 +502,10 @@
+@@ -465,6 +516,10 @@
  		basic_machine=m88k-motorola
  		os=-sysv3
  		;;
@@ -1690,7 +1780,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	dpx20 | dpx20-*)
  		basic_machine=rs6000-bull
  		os=-bosx
-@@ -643,10 +684,6 @@
+@@ -643,10 +698,6 @@
  	mips3*)
  		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`-unknown
  		;;
@@ -1701,7 +1791,17 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	monitor)
  		basic_machine=m68k-rom68k
  		os=-coff
-@@ -727,10 +764,6 @@
+@@ -659,6 +710,9 @@
+ 		basic_machine=i386-pc
+ 		os=-msdos
+ 		;;
++	ms1-*)
++		basic_machine=`echo $basic_machine | sed -e 's/ms1-/mt-/'`
++		;;
+ 	mvs)
+ 		basic_machine=i370-ibm
+ 		os=-mvs
+@@ -727,10 +781,6 @@
  	np1)
  		basic_machine=np1-gould
  		;;
@@ -1712,7 +1812,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	nsr-tandem)
  		basic_machine=nsr-tandem
  		;;
-@@ -738,9 +771,12 @@
+@@ -738,9 +788,12 @@
  		basic_machine=hppa1.1-oki
  		os=-proelf
  		;;
@@ -1727,7 +1827,31 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  		;;
  	OSE68000 | ose68000)
  		basic_machine=m68000-ericsson
-@@ -833,6 +869,12 @@
+@@ -767,6 +820,12 @@
+ 	pc532 | pc532-*)
+ 		basic_machine=ns32k-pc532
+ 		;;
++	pc98)
++		basic_machine=i386-pc
++		;;
++	pc98-*)
++		basic_machine=i386-`echo $basic_machine | sed 's/^[^-]*-//'`
++		;;
+ 	pentium | p5 | k5 | k6 | nexgen | viac3)
+ 		basic_machine=i586-pc
+ 		;;
+@@ -823,6 +882,10 @@
+ 		basic_machine=i586-unknown
+ 		os=-pw32
+ 		;;
++	rdos)
++		basic_machine=i386-pc
++		os=-rdos
++		;;
+ 	rom68k)
+ 		basic_machine=m68k-rom68k
+ 		os=-coff
+@@ -833,6 +896,12 @@
  	rtpc | rtpc-*)
  		basic_machine=romp-ibm
  		;;
@@ -1740,7 +1864,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	sa29200)
  		basic_machine=a29k-amd
  		os=-udi
-@@ -956,6 +998,10 @@
+@@ -956,6 +1025,10 @@
  	tower | tower-32)
  		basic_machine=m68k-ncr
  		;;
@@ -1751,7 +1875,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	udi29k)
  		basic_machine=a29k-amd
  		os=-udi
-@@ -999,6 +1045,10 @@
+@@ -999,6 +1072,10 @@
  		basic_machine=hppa1.1-winbond
  		os=-proelf
  		;;
@@ -1762,7 +1886,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	xps | xps100)
  		basic_machine=xps100-honeywell
  		;;
-@@ -1029,6 +1079,9 @@
+@@ -1029,6 +1106,9 @@
  	romp)
  		basic_machine=romp-ibm
  		;;
@@ -1772,7 +1896,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	rs6000)
  		basic_machine=rs6000-ibm
  		;;
-@@ -1045,12 +1098,9 @@
+@@ -1045,12 +1125,9 @@
  	we32k)
  		basic_machine=we32k-att
  		;;
@@ -1786,13 +1910,14 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	sparc | sparcv8 | sparcv9 | sparcv9b)
  		basic_machine=sparc-sun
  		;;
-@@ -1124,19 +1174,21 @@
+@@ -1124,19 +1201,23 @@
  	      | -aos* \
  	      | -nindy* | -vxsim* | -vxworks* | -ebmon* | -hms* | -mvs* \
  	      | -clix* | -riscos* | -uniplus* | -iris* | -rtu* | -xenix* \
 -	      | -hiux* | -386bsd* | -netbsd* | -openbsd* | -freebsd* | -riscix* \
 -	      | -lynxos* | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \
-+	      | -hiux* | -386bsd* | -knetbsd* | -mirbsd* | -netbsd* | -openbsd* \
++	      | -hiux* | -386bsd* | -knetbsd* | -mirbsd* | -netbsd* \
++	      | -openbsd* | -solidbsd* \
 +	      | -ekkobsd* | -kfreebsd* | -freebsd* | -riscix* | -lynxos* \
 +	      | -bosx* | -nextstep* | -cxux* | -aout* | -elf* | -oabi* \
  	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
@@ -1800,7 +1925,8 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	      | -chorusos* | -chorusrdb* \
  	      | -cygwin* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
 -	      | -mingw32* | -linux-gnu* | -uxpv* | -beos* | -mpeix* | -udk* \
-+	      | -mingw32* | -linux-gnu* | -linux-uclibc* | -uxpv* | -beos* | -mpeix* | -udk* \
++	      | -mingw32* | -linux-gnu* | -linux-newlib* | -linux-uclibc* \
++	      | -uxpv* | -beos* | -mpeix* | -udk* \
  	      | -interix* | -uwin* | -mks* | -rhapsody* | -darwin* | -opened* \
  	      | -openstep* | -oskit* | -conix* | -pw32* | -nonstopux* \
  	      | -storm-chaos* | -tops10* | -tenex* | -tops20* | -its* \
@@ -1808,11 +1934,11 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
 -	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei*)
 +	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
-+	      | -skyos* | -haiku*)
++	      | -skyos* | -haiku* | -rdos*)
  	# Remember, each alternative MUST END IN *, to match a version number.
  		;;
  	-qnx*)
-@@ -1154,12 +1206,15 @@
+@@ -1154,12 +1235,15 @@
  		os=`echo $os | sed -e 's|nto|nto-qnx|'`
  		;;
  	-sim | -es1800* | -hms* | -xray | -os68k* | -none* | -v88r* \
@@ -1829,7 +1955,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	-linux*)
  		os=`echo $os | sed -e 's|linux|linux-gnu|'`
  		;;
-@@ -1172,6 +1227,9 @@
+@@ -1172,6 +1256,9 @@
  	-opened*)
  		os=-openedition
  		;;
@@ -1839,7 +1965,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	-wince*)
  		os=-wince
  		;;
-@@ -1193,6 +1251,9 @@
+@@ -1193,6 +1280,9 @@
  	-atheos*)
  		os=-atheos
  		;;
@@ -1849,7 +1975,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	-386bsd)
  		os=-bsd
  		;;
-@@ -1215,6 +1276,9 @@
+@@ -1215,6 +1305,9 @@
  	-sinix*)
  		os=-sysv4
  		;;
@@ -1859,7 +1985,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	-triton*)
  		os=-sysv3
  		;;
-@@ -1251,6 +1315,9 @@
+@@ -1251,6 +1344,9 @@
  	-kaos*)
  		os=-kaos
  		;;
@@ -1869,7 +1995,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	-none)
  		;;
  	*)
-@@ -1282,9 +1349,9 @@
+@@ -1282,9 +1378,9 @@
  	arm*-semi)
  		os=-aout
  		;;
@@ -1882,7 +2008,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	# This must come before the *-dec entry.
  	pdp10-*)
  		os=-tops20
-@@ -1328,9 +1395,15 @@
+@@ -1328,9 +1424,15 @@
  	*-be)
  		os=-beos
  		;;
@@ -1898,7 +2024,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  	*-wec)
  		os=-proelf
  		;;
-@@ -1463,9 +1536,15 @@
+@@ -1463,9 +1565,15 @@
  			-mvs* | -opened*)
  				vendor=ibm
  				;;
@@ -1914,7 +2040,7 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  			-vxsim* | -vxworks* | -windiss*)
  				vendor=wrs
  				;;
-@@ -1490,7 +1569,7 @@
+@@ -1490,7 +1598,7 @@
  esac
  
  echo $basic_machine$os
@@ -1924,8 +2050,8 @@ diff -Naur dbus-0.61.orig/config.sub dbus-0.61/config.sub
  # Local variables:
  # eval: (add-hook 'write-file-hooks 'time-stamp)
 diff -Naur dbus-0.61.orig/configure dbus-0.61/configure
---- dbus-0.61.orig/configure	2006-02-24 23:14:14.000000000 +0100
-+++ dbus-0.61/configure	2006-02-24 23:17:20.000000000 +0100
+--- dbus-0.61.orig/configure	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/configure	2006-02-27 21:45:19.000000000 +0100
 @@ -1197,7 +1197,7 @@
      else
        echo "$as_me: WARNING: no configuration information is in $ac_dir" >&2
@@ -3963,8 +4089,40 @@ diff -Naur dbus-0.61.orig/configure dbus-0.61/configure
  _ACEOF
  cat >>$CONFIG_STATUS <<_ACEOF
    sed "$ac_vpsub
+diff -Naur dbus-0.61.orig/dbus/Makefile.in dbus-0.61/dbus/Makefile.in
+--- dbus-0.61.orig/dbus/Makefile.in	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/dbus/Makefile.in	2006-02-27 21:45:02.000000000 +0100
+@@ -113,9 +113,9 @@
+ am__dbusinclude_HEADERS_DIST = dbus.h dbus-address.h dbus-bus.h \
+ 	dbus-connection.h dbus-errors.h dbus-macros.h dbus-memory.h \
+ 	dbus-message.h dbus-pending-call.h dbus-protocol.h \
+-	dbus-server.h dbus-shared.h dbus-threads.h dbus-types.h \
+-	dbus-glib.h dbus-glib-lowlevel.h dbus-glib-error-enum.h \
+-	qdbus.h
++	dbus-server.h dbus-shared.h dbus-signature.h dbus-threads.h \
++	dbus-types.h dbus-glib.h dbus-glib-lowlevel.h \
++	dbus-glib-error-enum.h qdbus.h
+ dbusincludeHEADERS_INSTALL = $(INSTALL_HEADER)
+ HEADERS = $(dbusarchinclude_HEADERS) $(dbusinclude_HEADERS)
+ ETAGS = etags
+@@ -400,6 +400,7 @@
+ 	dbus-protocol.h				\
+ 	dbus-server.h				\
+ 	dbus-shared.h				\
++	dbus-signature.h			\
+ 	dbus-threads.h				\
+ 	dbus-types.h				\
+ 	$(GLIB_INCLUDES)			\
+@@ -448,7 +449,6 @@
+ 	dbus-sha.c				\
+ 	dbus-sha.h				\
+ 	dbus-signature.c			\
+-	dbus-signature.h			\
+ 	dbus-timeout.c				\
+ 	dbus-timeout.h				\
+ 	dbus-threads-internal.h			\
 diff -Naur dbus-0.61.orig/ltmain.sh dbus-0.61/ltmain.sh
---- dbus-0.61.orig/ltmain.sh	2006-02-24 23:14:14.000000000 +0100
+--- dbus-0.61.orig/ltmain.sh	2006-02-27 21:44:03.000000000 +0100
 +++ dbus-0.61/ltmain.sh	2006-01-09 16:21:15.000000000 +0100
 @@ -43,7 +43,7 @@
  
@@ -4000,8 +4158,8 @@ diff -Naur dbus-0.61.orig/ltmain.sh dbus-0.61/ltmain.sh
  	  ;;
  	no)
 diff -Naur dbus-0.61.orig/qt/Makefile.in dbus-0.61/qt/Makefile.in
---- dbus-0.61.orig/qt/Makefile.in	2006-02-24 23:14:15.000000000 +0100
-+++ dbus-0.61/qt/Makefile.in	2006-02-24 23:17:10.000000000 +0100
+--- dbus-0.61.orig/qt/Makefile.in	2006-02-27 21:44:03.000000000 +0100
++++ dbus-0.61/qt/Makefile.in	2006-02-27 21:45:11.000000000 +0100
 @@ -551,7 +551,7 @@
  @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
  @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<

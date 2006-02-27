@@ -15,7 +15,8 @@ dbus (0.61-1) unstable; urgency=medium
   * debian/patches/dbus-qt-buildfix.patch 
     + Added. Fix compilation of the Qt bindings (from CVS)
   * debian/patches/dbus-update-automake.patch
-    + Added. Fix compilation of the Qt bindings.
+    + Added. Do a new autogen run, because the qt patch patches autotools
+      files
 
  -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 22:09:17 +0100
 
