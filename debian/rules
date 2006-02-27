@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 # Copyright © 2002,2003 Colin Walters <walters@verbum.org>
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
-DEB_AUTO_UPDATE_AUTOCONF="yes"
+# Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 
 binary/libdbus-glib-1-2:: binary/libdbus-1-2
 binary/libdbus-qt-1-1c2:: binary/libdbus-1-2
