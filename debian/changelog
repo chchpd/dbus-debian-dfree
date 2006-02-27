@@ -13,7 +13,7 @@ dbus (0.61-1) unstable; urgency=medium
   * Let binary-predeb/libdbus-1-cil:: depend on
     common-binary-post-install-arch, so dh_clideps can do it's work correctly.
   * debian/patches/dbus-qt-buildfix.patch 
-    + Added. Fix compilation of the Qt bindings.
+    + Added. Fix compilation of the Qt bindings (from CVS)
   * debian/patches/dbus-update-automake.patch
     + Added. Fix compilation of the Qt bindings.
 
