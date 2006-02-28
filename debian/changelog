@@ -1,8 +1,7 @@
 dbus (0.61-2) unstable; urgency=low
 
   * debian/patches/dbus-qt-endianness.patch
-    + Added. include <sys/param.h> for __BYTE_ORDER. Fixes compile errors on
-      big-endian
+    + Added. Fix FTBS on big-endian architectures 
 
  -- Sjoerd Simons <sjoerd@debian.org>  Tue, 28 Feb 2006 00:58:05 +0100
 
