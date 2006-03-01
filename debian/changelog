@@ -1,3 +1,13 @@
+dbus (0.61-3) unstable; urgency=low
+
+  * debian/patches/dbus-monoversion.patch 
+    + Added. Dbus mono assembly version is synced with release version, but
+    nothing actually changed. This patch changes the assembly version back to
+    0.60 to minimize breakage. New version will encode the assembly version
+    in the package name (e.g libdbus-1-cil-0.61).
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  1 Mar 2006 19:59:47 +0100
+
 dbus (0.61-2) unstable; urgency=low
 
   * debian/patches/dbus-qt-endianness.patch
