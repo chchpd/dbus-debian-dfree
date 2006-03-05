@@ -1,3 +1,10 @@
+dbus (0.61-4) unstable; urgency=low
+
+  * debian/patches/dbus-reload-usercache.patch
+    + Added. Reload the user info cache when reloading the config.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun,  5 Mar 2006 18:09:15 +0100
+
 dbus (0.61-3) unstable; urgency=low
 
   * debian/patches/dbus-monoversion.patch 
