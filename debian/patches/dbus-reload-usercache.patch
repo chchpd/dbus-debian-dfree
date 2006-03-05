@@ -27,7 +27,7 @@ diff -u -r1.19 dbus-hash.c
  }
  
 +/**
-+ * Removed all entries from a hash table.
++ * Removes all entries from a hash table.
 + *
 + * @param table the hash table to remove all entries from.
 + */
