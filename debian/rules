@@ -48,7 +48,7 @@ DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
-binary-predeb/libdbus-1-cil:: binary-arch
+binary-predeb/libdbus-1-0.60-cil:: binary-arch
 	dh_makeclilibs -V
 	dh_clideps
 
@@ -67,8 +67,8 @@ binary-post-install/dbus::
 	mkdir -p debian/dbus/etc/X11/Xsession.d
 	cp debian/dbus-Xsession debian/dbus/etc/X11/Xsession.d/75dbus_dbus-launch
 
-binary-post-install/libdbus-1-cil::
-	cd $(CURDIR)/debian/libdbus-1-cil && \
+binary-post-install/libdbus-1-0.60-cil::
+	cd $(CURDIR)/debian/libdbus-1-0.60-cil && \
 		find -type f -name "*.dll" -exec chmod -x {} \;
 
 build/dbus-1-doc::

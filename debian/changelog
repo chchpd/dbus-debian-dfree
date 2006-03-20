@@ -1,3 +1,11 @@
+dbus (0.61-6) unstable; urgency=low
+
+  * Renamed libdbus-1-cil to libdbus-1-0.60-cil to conform with the latest
+    version of the Debian CLI policy. Added Conflicts/Replaces/Provides for
+    libdbus-1-cil and Depends on libdbus-1-2.
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Mon, 20 Mar 2006 03:19:37 +0100
+
 dbus (0.61-5) unstable; urgency=low
 
   * debian/patches/dbus-0.60-mono-return-null-fix.diff:
