@@ -195,13 +195,12 @@ Description: simple interprocess messaging system (Python interface)
  .
  See the dbus description for more information about D-BUS in general.
 
-Package: libdbus-1-0.60-cil
+Package: libdbus-1-cil
 Section: libs
-Conflicts: libdbus-cil, libdbus-1-cil
-Replaces: libdbus-cil, libdbus-1-cil
-Provides: libdbus-1-cil
+Conflicts: libdbus-cil
+Replaces: libdbus-cil
 Architecture: all
-Depends: ${cli:Depends}, libdbus-1-2, libdbus-glib-1-2
+Depends: ${cli:Depends}, libdbus-glib-1-2
 Description: CLI binding for D-BUS interprocess messaging system
  D-BUS is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
