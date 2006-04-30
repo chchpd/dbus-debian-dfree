@@ -1,3 +1,17 @@
+dbus (0.61-6) unstable; urgency=low
+
+  * debian/patches/dbus-new-monodoc.patch:
+    + Call the new monodoc executables for doc generation to really get
+      docs (Closes: #361541)
+  * debian/patches/dbus-update-automake.patch:
+    + updated for the above change
+  * Add the correct libdbus-glib-1-2 path to the dh_shlibdeps search path to
+    generate correct dependencies on dbus-1-utils.
+  * Update libdbus-1-cil to the new CLI policy and use dh_installcligac for
+    late GAC installation
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Sun, 30 Apr 2006 12:01:27 +0200
+
 dbus (0.61-5) unstable; urgency=low
 
   * debian/patches/dbus-0.60-mono-return-null-fix.diff:

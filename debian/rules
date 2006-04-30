@@ -3,9 +3,6 @@
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
 # Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 
-binary/libdbus-glib-1-2:: binary/libdbus-1-2
-binary/libdbus-qt-1-1c2:: binary/libdbus-1-2
-binary/dbus-1-utils:: binary/libdbus-glib-1-2
 binary/python2.4-dbus::
 	rm debian/python2.4-dbus/usr/lib/python2.4/site-packages/dbus/dbus_bindings.*a
 	dh_python -ppython2.4-dbus
@@ -38,7 +35,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
 #                             $(MONO_FLAGS)
 
 DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/dbus-gl
+DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/libdbus-glib-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt-1-1c2 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt4-1-1 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_python2.4-dbus := debian/libdbus-1-2/usr/lib/
@@ -48,7 +45,17 @@ DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
-binary-predeb/libdbus-1-cil:: binary-arch
+install/libdbus-1-cil::
+	# put the dlls into the correct place required by the CLI policy
+	mkdir -p debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll.config debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll.mdb debian/tmp/usr/lib/cli/dbus-sharp-0.60
+
+binary-install/libdbus-1-cil::
+	dh_installcligac
+
+binary-predeb/libdbus-1-cil::
 	dh_makeclilibs -V
 	dh_clideps
 
