@@ -56,8 +56,8 @@ binary-install/libdbus-1-cil::
 	dh_installcligac
 
 binary-predeb/libdbus-1-cil::
-	dh_makeclilibs -V
-	dh_clideps
+	dh_makeclilibs -m0.60
+	dh_clideps -d
 
 common-configure-indep::
 	mkdir -p $(MONO_SHARED_DIR)/.wapi
