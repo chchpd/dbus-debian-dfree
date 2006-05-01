@@ -9,6 +9,9 @@ dbus (0.61-6) unstable; urgency=low
     generate correct dependencies on dbus-1-utils.
   * Update libdbus-1-cil to the new CLI policy and use dh_installcligac for
     late GAC installation
+  * debian/patches/dbus-mono-pkgconfig-location.patch:
+    + Adjust the location of the .dll in the pkg-config file for the new CLI
+      policy.
 
  -- Sebastian Dröge <slomo@ubuntu.com>  Sun, 30 Apr 2006 12:01:27 +0200
 
