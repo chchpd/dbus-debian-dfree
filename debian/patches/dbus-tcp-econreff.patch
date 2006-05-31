@@ -1,0 +1,19 @@
+Index: dbus/dbus-sysdeps.c
+===================================================================
+RCS file: /cvs/dbus/dbus/dbus/dbus-sysdeps.c,v
+retrieving revision 1.101
+retrieving revision 1.102
+diff -u -r1.101 -r1.102
+--- dbus/dbus-sysdeps.c	24 Feb 2006 16:13:08 -0000	1.101
++++ dbus/dbus-sysdeps.c	30 May 2006 15:34:10 -0000	1.102
+@@ -678,8 +678,8 @@
+     {      
+       dbus_set_error (error,
+                        _dbus_error_from_errno (errno),
+-                      "Failed to connect to socket %s: %s:%d",
+-                      host, _dbus_strerror (errno), port);
++                      "Failed to connect to socket %s:%d %s",
++                      host, port, _dbus_strerror (errno));
+ 
+       close (fd);
+       fd = -1;
