@@ -1,3 +1,10 @@
+dbus (0.61-7) UNRELEASED; urgency=low
+
+  * debian/dbus.init: Remove the sleep 1 when restarting. It's not needed as
+  the start-stop-daemon --retry option is used to shut dbus down  
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri,  9 Jun 2006 00:27:14 +0200
+
 dbus (0.61-6) unstable; urgency=low
 
   [ Sebastian Dröge ]
