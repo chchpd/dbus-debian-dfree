@@ -12,8 +12,10 @@ dbus (0.62-1) unstable; urgency=low
     + debian/patches/dbus-tcp-econreff.patch
     + debian/patches/dbus-transport-tcp.patch
     + debian/patches/dbus-pendingcall-deadlock.patch
+  * debian/patches/dbus-update-automake.patch
+    + Updated
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sun, 18 Jun 2006 19:40:40 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 18 Jun 2006 20:30:13 +0200
 
 dbus (0.61-6) unstable; urgency=low
 
