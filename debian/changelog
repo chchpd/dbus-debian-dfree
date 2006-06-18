@@ -1,9 +1,19 @@
-dbus (0.61-7) UNRELEASED; urgency=low
+dbus (0.62-1) unstable; urgency=low
 
+  * New upstream release
+  * Remove Daniel Stone from uploaders at his request.
   * debian/dbus.init: Remove the sleep 1 when restarting. It's not needed as
-  the start-stop-daemon --retry option is used to shut dbus down  
+    the start-stop-daemon --retry option is used to shut dbus down
+  * Removed patched that aren't needed anymore:
+    + debian/patches/dbus-reload-usercache.patch
+    + debian/patches/dbus-qt-buildfix.patch
+    + debian/patches/dbus-qt-endianness.patch
+    + debian/patches/dbus-0.60-mono-return-null-fix.diff
+    + debian/patches/dbus-tcp-econreff.patch
+    + debian/patches/dbus-transport-tcp.patch
+    + debian/patches/dbus-pendingcall-deadlock.patch
 
- -- Sjoerd Simons <sjoerd@debian.org>  Fri,  9 Jun 2006 00:27:14 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 18 Jun 2006 19:40:40 +0200
 
 dbus (0.61-6) unstable; urgency=low
 
