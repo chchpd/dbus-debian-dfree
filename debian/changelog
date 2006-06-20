@@ -1,7 +1,7 @@
 dbus (0.62-1) unstable; urgency=low
 
   * New upstream release
-  * Remove Daniel Stone from uploaders at his request.
+  * Remove Daniel Stone from uploaders on his request.
   * debian/dbus.init: Remove the sleep 1 when restarting. It's not needed as
     the start-stop-daemon --retry option is used to shut dbus down
   * Removed patched that aren't needed anymore:
@@ -14,8 +14,10 @@ dbus (0.62-1) unstable; urgency=low
     + debian/patches/dbus-pendingcall-deadlock.patch
   * debian/patches/dbus-update-automake.patch
     + Updated
+  * debian/patches/dbus-no-qt4-examples.patch
+    + Added. Quick hack to disable the building of the qt4 example binaries.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sun, 18 Jun 2006 20:30:13 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 20 Jun 2006 19:35:46 +0200
 
 dbus (0.61-6) unstable; urgency=low
 
