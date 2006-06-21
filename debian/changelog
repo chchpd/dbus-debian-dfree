@@ -7,9 +7,9 @@ dbus (0.62-2) unstable; urgency=low
   * debian/session.conf
     + Install a custom dbus session.conf. In the generated one some variables
     aren't expanded, causing the session bus to fail (Closes: #374747)
+  * Move libdbus-1-2 to sections libs
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 09:38:06 +0200
-
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 10:23:23 +0200
 
 dbus (0.62-1) unstable; urgency=low
 
