@@ -4,8 +4,11 @@ dbus (0.62-2) unstable; urgency=low
     doesn't accidentally pickup qt4 files
   * debian/libdbus-qt4-1-dev.install: Also install the dbuscpp2xml and
     dbusidl2cpp utilities
+  * debian/session.conf
+    + Install a custom dbus session.conf. In the generated one some variables
+    aren't expanded, causing the session bus to fail (Closes: #374747)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 01:11:56 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 09:38:06 +0200
 
 
 dbus (0.62-1) unstable; urgency=low
