@@ -11,8 +11,11 @@ dbus (0.62-2) unstable; urgency=low
   * Let libdbus-1-2 recommend dbus. Almost all libdbus-1 using applications
     really need the dbus to be present so the recommends is justified.
     (Closes: #374726)
+  * debian/libdbus-qt-1-dev.install: Install all the needed header files. 
+    Thanks to Michael Biebl for testing a KDE4 build against these bindings.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 10:30:28 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 10:47:00 +0200
+
 
 
 dbus (0.62-1) unstable; urgency=low
