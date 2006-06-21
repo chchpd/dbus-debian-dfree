@@ -34,6 +34,7 @@ Description: simple interprocess messaging system
 Package: libdbus-1-2
 Architecture: any
 Depends: ${shlibs:Depends}
+Recommends: dbus
 Section: libs
 Conflicts: dbus (<< 0.60)
 Description: simple interprocess messaging system
