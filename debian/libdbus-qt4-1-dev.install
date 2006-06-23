@@ -1,4 +1,4 @@
-qt/dbus/qdbus.h usr/include/dbus-1.0/dbus/
+qt/src/qdbus.h usr/include/dbus-1.0/dbus/
 debian/tmp/usr/include/dbus-1.0/dbus/qdbusabstractadaptor.h
 debian/tmp/usr/include/dbus-1.0/dbus/qdbusabstractinterface.h
 debian/tmp/usr/include/dbus-1.0/dbus/qdbusbus.h
