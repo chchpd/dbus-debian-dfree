@@ -1,3 +1,11 @@
+dbus (0.62-4) unstable; urgency=low
+
+  * add ${shlibs:Depends} to Depends of libdbus-glib-1-dev, as it ships
+    dbus-binding-tool to /usr/bin/. This fixes a missing libexpat.so.1.0.0.
+    Thanks to Daniel Holbach for noticing this.
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Tue, 27 Jun 2006 19:01:59 +0200
+
 dbus (0.62-3) unstable; urgency=low
 
   * Make the Qt4 bindings buid-depend on libqt4-dev (>= 4.1.3) 
