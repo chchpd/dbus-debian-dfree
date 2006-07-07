@@ -3,10 +3,6 @@
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
 # Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 
-binary/python2.4-dbus::
-	rm debian/python2.4-dbus/usr/lib/python2.4/site-packages/dbus/dbus_bindings.*a
-	dh_python -ppython2.4-dbus
-
 include /usr/share/cdbs/1/rules/simple-patchsys.mk
 include /usr/share/cdbs/1/rules/utils.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
@@ -38,7 +34,7 @@ DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/libdbus-glib-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt-1-1c2 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt4-1-1 := debian/libdbus-1-2/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_python2.4-dbus := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_python-dbus := debian/libdbus-1-2/usr/lib/
 
 # Strict library versioning
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
@@ -58,6 +54,12 @@ binary-install/libdbus-1-cil::
 binary-predeb/libdbus-1-cil::
 	dh_makeclilibs -m0.60
 	dh_clideps -d
+
+binary-install/python-dbus::
+	rm -f debian/python-dbus/usr/lib/python*/site-packages/dbus/dbus_bindings.*a
+	rm -f debian/python-dbus/usr/lib/python*/site-packages/dbus/*.py[co]
+	dh_pycentral -p$(cdbs_curpkg)
+	dh_python -p$(cdbs_curpkg)
 
 common-configure-indep::
 	mkdir -p $(MONO_SHARED_DIR)/.wapi
