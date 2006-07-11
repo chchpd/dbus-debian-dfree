@@ -189,8 +189,8 @@ Package: python-dbus
 Section: python
 Architecture: any
 Depends: ${shlibs:Depends}, ${python:Depends}, python-libxml2
-Replaces: python2.4-dbus
-Conflicts: python2.4-dbus
+Replaces: python2.4-dbus (<< 0.62-5)
+Conflicts: python2.4-dbus (<< 0.62-5)
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description: simple interprocess messaging system (Python interface)
