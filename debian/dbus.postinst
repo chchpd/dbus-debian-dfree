@@ -2,9 +2,13 @@
 # -*- coding: utf-8 -*-
 # Post-installation script for D-BUS
 # Copyright © 2003 Colin Walters <walters@debian.org>
+# Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
+
+set -e
 
 MESSAGEUSER=messagebus
 MESSAGEHOME=/var/run/dbus
+
 
 chgrp "$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || addgroup --system "$MESSAGEUSER"
 chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
@@ -12,7 +16,11 @@ chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
 
 # Do not restart dbus on upgrades, only on fresh installations
 if [ "$1" = "configure" ]; then
-    if [ -e /var/run/dbus/pid ] && ps --no-heading -p $(< /var/run/dbus/pid) > /dev/null; then
+    if [ -e /var/run/dbus/pid ] && 
+      ps --no-heading -p $(cat /var/run/dbus/pid) > /dev/null; then
+        # trigger an update notification which recommends to reboot
+        [ -x /usr/share/update-notifier/notify-reboot-required ] && \
+            /usr/share/update-notifier/notify-reboot-required || true
         exit 0
     fi
 fi

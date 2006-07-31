@@ -97,7 +97,6 @@ case "$1" in
   ;;
   restart)
     shut_it_down
-    sleep 1
     start_it_up
   ;;
   *)

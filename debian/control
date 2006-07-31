@@ -2,9 +2,11 @@ Source: dbus
 Section: devel
 Priority: optional
 Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
-Uploaders: Daniel Stone <daniels@debian.org>, Sjoerd Simons <sjoerd@debian.org>
-Build-Depends: cdbs (>= 0.4.5.1), debhelper (>= 4.1.46), libglib2.0-dev, libexpat-dev, doxygen, docbook-utils, python2.4, libgtk2.0-dev, python-pyrex (>= 0.9.2.1-3), xmlto, python2.4-dev, libqt3-mt-dev, libqt4-dev, libmono-dev [i386 powerpc amd64], mono-mcs [i386 powerpc amd64], mono-gac [i386 powerpc amd64], monodoc [i386 powerpc amd64], libgtk-cil [i386 powerpc amd64], cli-common (>= 0.1.3) [i386 powerpc amd64]
-Standards-Version: 3.6.1.0
+Uploaders: Sjoerd Simons <sjoerd@debian.org>, Sebastian Dröge <slomo@ubuntu.com>
+Build-Depends: cdbs (>= 0.4.43), debhelper (>= 5.0.37.2), libglib2.0-dev, libexpat-dev, doxygen, docbook-utils, python2.4, libgtk2.0-dev, python-pyrex (>= 0.9.2.1-3), xmlto, python2.4-dev, libqt3-mt-dev, libqt4-dev (>= 4.1.3), python-central (>= 0.4.17)
+Build-Depends-Indep: libgtk-cil, cli-common-dev (>= 0.4.0), libmono-dev, mono-mcs, mono-gac, monodoc-base
+Standards-Version: 3.7.2
+XS-Python-Version: current, >= 2.4, << 2.5
 
 Package: dbus
 Architecture: any
@@ -33,6 +35,8 @@ Description: simple interprocess messaging system
 Package: libdbus-1-2
 Architecture: any
 Depends: ${shlibs:Depends}
+Recommends: dbus
+Section: libs
 Conflicts: dbus (<< 0.60)
 Description: simple interprocess messaging system
  D-BUS is a message bus, used for sending messages between
@@ -97,7 +101,7 @@ Description: simple interprocess messaging system (development headers)
 Package: libdbus-glib-1-dev
 Section: libdevel
 Architecture: any
-Depends: libdbus-glib-1-2 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libglib2.0-dev
+Depends: libdbus-glib-1-2 (= ${Source-Version}), libdbus-1-dev (= ${Source-Version}), libglib2.0-dev, ${shlibs:Depends}
 Conflicts: libdbus-glib-dev, dbus-glib-1-dev, dbus-1-utils (<< 0.50-2)
 Replaces: libdbus-glib0-dev, dbus-glib-1-dev
 Description: simple interprocess messaging system (GLib interface)
@@ -181,10 +185,14 @@ Description: simple interprocess messaging system (Qt4-based shared library)
  .
  See the dbus description for more information about D-BUS in general.
 
-Package: python2.4-dbus
+Package: python-dbus
 Section: python
 Architecture: any
-Depends: ${shlibs:Depends}, ${python:Depends}, python2.4-libxml2
+Depends: ${shlibs:Depends}, ${python:Depends}, python-libxml2
+Replaces: python2.4-dbus
+Conflicts: python2.4-dbus
+Provides: ${python:Provides}
+XB-Python-Version: ${python:Versions}
 Description: simple interprocess messaging system (Python interface)
  D-BUS is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -198,7 +206,7 @@ Package: libdbus-1-cil
 Section: libs
 Conflicts: libdbus-cil
 Replaces: libdbus-cil
-Architecture: i386 powerpc amd64
+Architecture: all
 Depends: ${cli:Depends}, libdbus-glib-1-2
 Description: CLI binding for D-BUS interprocess messaging system
  D-BUS is a message bus, used for sending messages between applications.
@@ -213,7 +221,7 @@ Description: CLI binding for D-BUS interprocess messaging system
 Package: monodoc-dbus-1-manual
 Section: doc
 Depends: monodoc-manual
-Architecture: i386 powerpc amd64
+Architecture: all
 Description: compiled XML documentation for the D-BUS CLI bindings
  The MonoDoc Project is the documentation framework of the Mono project which
  provides detailed API documentation for all Mono components and the Mono CLI

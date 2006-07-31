@@ -1,18 +1,13 @@
 #!/usr/bin/make -f
 # Copyright © 2002,2003 Colin Walters <walters@verbum.org>
 # Copyright © 2003 Daniel Stone <daniels@debian.org>
-
-binary/libdbus-glib-1-2:: binary/libdbus-1-2
-binary/libdbus-qt-1-1c2:: binary/libdbus-1-2
-binary/dbus-1-utils:: binary/libdbus-glib-1-2
-binary/python2.4-dbus::
-	rm debian/python2.4-dbus/usr/lib/python2.4/site-packages/dbus/dbus_bindings.*a
-	dh_python -ppython2.4-dbus
+# Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 
 include /usr/share/cdbs/1/rules/simple-patchsys.mk
 include /usr/share/cdbs/1/rules/utils.mk
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
+
 
 ifeq ($(DEB_BUILD_ARCH),powerpc)
  MONO_FLAGS=--enable-mono --enable-mono-docs
@@ -31,22 +26,40 @@ DEB_CONFIGURE_EXTRA_FLAGS := --enable-glib --enable-gtk \
                              --enable-qt --with-qt-moc=/usr/bin/moc-qt4 \
                              --enable-python --with-xml=expat --enable-docs \
                              --enable-xml-docs --enable-doxygen-docs \
-                             $(MONO_FLAGS)
+                             --enable-mono=auto --enable-mono-docs=auto
+
+#                             $(MONO_FLAGS)
 
 DEB_SHLIBDEPS_INCLUDE_libdbus-glib-1-2 := debian/libdbus-1-2/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/dbus-gl
+DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-2/usr/lib/ debian/libdbus-glib-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt-1-1c2 := debian/libdbus-1-2/usr/lib/
 DEB_SHLIBDEPS_INCLUDE_libdbus-qt4-1-1 := debian/libdbus-1-2/usr/lib/
-DEB_SHLIBDEPS_INCLUDE_python2.4-dbus := debian/libdbus-1-2/usr/lib/
+DEB_SHLIBDEPS_INCLUDE_python-dbus := debian/libdbus-1-2/usr/lib/
 
 # Strict library versioning
 DEB_DH_MAKESHLIBS_ARGS_ALL := -V
 
 export MONO_SHARED_DIR=$(CURDIR)
 
+install/libdbus-1-cil::
+	# put the dlls into the correct place required by the CLI policy
+	mkdir -p debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll.config debian/tmp/usr/lib/cli/dbus-sharp-0.60
+	cp mono/dbus-sharp.dll.mdb debian/tmp/usr/lib/cli/dbus-sharp-0.60
+
+binary-install/libdbus-1-cil::
+	dh_installcligac
+
 binary-predeb/libdbus-1-cil::
-	dh_makeclilibs -V
-	dh_clideps
+	dh_makeclilibs -m0.60
+	dh_clideps -d
+
+binary-install/python-dbus::
+	rm -f debian/python-dbus/usr/lib/python*/site-packages/dbus/dbus_bindings.*a
+	rm -f debian/python-dbus/usr/lib/python*/site-packages/dbus/*.py[co]
+	dh_pycentral -p$(cdbs_curpkg)
+	dh_python -p$(cdbs_curpkg)
 
 common-configure-indep::
 	mkdir -p $(MONO_SHARED_DIR)/.wapi

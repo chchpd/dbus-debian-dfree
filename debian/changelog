@@ -1,3 +1,181 @@
+dbus (0.62-5) unstable; urgency=low
+
+  * Update python-dbus to the new Python Policy
+  * Bump Standards-Version to 3.7.2
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Sat,  8 Jul 2006 01:25:40 +0200
+
+dbus (0.62-4) unstable; urgency=low
+
+  [ Sebastian Dröge ]
+  * add ${shlibs:Depends} to Depends of libdbus-glib-1-dev, as it ships
+    dbus-binding-tool to /usr/bin/. This fixes a missing libexpat.so.1.0.0.
+    Thanks to Daniel Holbach for noticing this.
+
+  [  Michael Biebl ]
+  * debian/libdbus-qt4-1-dev.install: qt/dbus/qdbus.h is only a dummy header
+    file. Install the real one instead. (Closes: #375298)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 28 Jun 2006 19:03:23 +0200
+
+dbus (0.62-3) unstable; urgency=low
+
+  * Make the Qt4 bindings buid-depend on libqt4-dev (>= 4.1.3) 
+    (Closes: #374802)
+  * Ensure /etc/dbus-1/system.d is included in the dbus package 
+    (Closes: #374930)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 22 Jun 2006 18:36:35 +0200
+
+dbus (0.62-2) unstable; urgency=low
+
+  * debian/libdbus-qt-1-dev.install: Make the wildcard more strict so that it
+    doesn't accidentally pickup qt4 files
+  * debian/libdbus-qt4-1-dev.install: Also install the dbuscpp2xml and
+    dbusidl2cpp utilities
+  * debian/session.conf
+    + Install a custom dbus session.conf. In the generated one some variables
+    aren't expanded, causing the session bus to fail (Closes: #374747)
+  * Move libdbus-1-2 to sections libs
+  * Let libdbus-1-2 recommend dbus. Almost all libdbus-1 using applications
+    really need the dbus to be present so the recommends is justified.
+    (Closes: #374726)
+  * debian/libdbus-qt-1-dev.install: Install all the needed header files. 
+    Thanks to Michael Biebl for testing a KDE4 build against these bindings.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 10:47:00 +0200
+
+
+
+dbus (0.62-1) unstable; urgency=low
+
+  * New upstream release
+  * Remove Daniel Stone from uploaders on his request.
+  * debian/dbus.init: Remove the sleep 1 when restarting. It's not needed as
+    the start-stop-daemon --retry option is used to shut dbus down
+  * Removed patched that aren't needed anymore:
+    + debian/patches/dbus-reload-usercache.patch
+    + debian/patches/dbus-qt-buildfix.patch
+    + debian/patches/dbus-qt-endianness.patch
+    + debian/patches/dbus-0.60-mono-return-null-fix.diff
+    + debian/patches/dbus-tcp-econreff.patch
+    + debian/patches/dbus-transport-tcp.patch
+    + debian/patches/dbus-pendingcall-deadlock.patch
+  * debian/patches/dbus-update-automake.patch
+    + Updated
+  * debian/patches/dbus-no-qt4-examples.patch
+    + Added. Quick hack to disable the building of the qt4 example binaries.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 20 Jun 2006 19:35:46 +0200
+
+dbus (0.61-6) unstable; urgency=low
+
+  [ Sebastian Dröge ]
+  * debian/patches/dbus-new-monodoc.patch:
+    + Call the new monodoc executables for doc generation to really get
+      docs (Closes: #361541)
+  * debian/patches/dbus-update-automake.patch:
+    + updated for the above change
+  * Add the correct libdbus-glib-1-2 path to the dh_shlibdeps search path to
+    generate correct dependencies on dbus-1-utils.
+  * Update libdbus-1-cil to the new CLI policy and use dh_installcligac for
+    late GAC installation
+  * debian/patches/dbus-mono-pkgconfig-location.patch:
+    + Adjust the location of the .dll in the pkg-config file for the new CLI
+      policy.
+
+  [ Sjoerd Simons ]
+  * debian/patches/dbus-transport-tcp.patch
+    + Added. Fixes crash when using the tcp transport without an host option
+    (from dbus CVS) (Closes: #368894)
+  * debian/patches/dbus-tcp-econreff.patch
+    + Added. Make the error which is given when the tcp transport gets a
+    connection refused more understandable (from dbus CVS)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 31 May 2006 15:00:49 +0200
+
+dbus (0.61-5) unstable; urgency=low
+
+  * debian/patches/dbus-0.60-mono-return-null-fix.diff:
+    + Added again as this wasn't applied upstream. This makes dbus-sharp
+      useable again as you don't get null anymore when asking for the session
+      bus (see fd.o #5716)
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Sat, 18 Mar 2006 14:40:48 +0100
+
+dbus (0.61-4) unstable; urgency=low
+
+  * debian/patches/dbus-reload-usercache.patch
+    + Added. Reload the user info cache when reloading the config.
+  * debian/patches/dbus-pendingcall-deadlock.patch
+    + Added. Don't block in a poll if the data we're looking for was already
+    read by another connection. (From dbus CVS)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun,  5 Mar 2006 21:27:16 +0100
+
+dbus (0.61-3) unstable; urgency=low
+
+  * debian/patches/dbus-monoversion.patch 
+    + Added. Dbus mono assembly version is synced with release version, but
+    nothing actually changed. This patch changes the assembly version back to
+    0.60 to minimize breakage. New version will encode the assembly version
+    in the package name (e.g libdbus-1-cil-0.61).
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed,  1 Mar 2006 19:59:47 +0100
+
+dbus (0.61-2) unstable; urgency=low
+
+  * debian/patches/dbus-qt-endianness.patch
+    + Added. Fix FTBS on big-endian architectures 
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 28 Feb 2006 00:58:05 +0100
+
+dbus (0.61-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/patches/dbus-0.60-mono-arguments-fix.diff
+    - Removed. Fixed upstream
+  * debian/patches/dbus-0.60-mono-return-null-fix.diff
+    - Removed. Fixed upstream
+  * debian/patches/dbus-moc-selection.patch
+    - Removed. Fixed upstream
+  * debian/patches/dbus-qdbusmarshall-amd64.patch
+    - Removed. Fixed upstream
+  * Update cli-common depend to >= 0.2.0. Older versions have known bugs
+  * Let binary-predeb/libdbus-1-cil:: depend on
+    common-binary-post-install-arch, so dh_clideps can do it's work correctly.
+  * debian/patches/dbus-qt-buildfix.patch 
+    + Added. Fix compilation of the Qt bindings (from CVS)
+  * debian/patches/dbus-update-automake.patch
+    + Added. Do a new autogen run, because the qt patch patches autotools
+      files
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 24 Feb 2006 22:09:17 +0100
+
+dbus (0.60-6) unstable; urgency=low
+
+  * Sync relavant changes from ubuntu
+    + dbus-0.60-mono-arguments-fix.diff
+      - Added. 64bit fixes ((fd.o bugzilla #4410)
+    + dbus-0.60-mono-return-null-fix.diff
+      - Added. Don't return null for the session bus (fd.o bugzilla #5716)
+    + Send the update-notifier reboot required notification if it's installed
+    + Build mono bindings as arch indep.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 16 Feb 2006 12:32:31 +0100
+
+dbus (0.60-5) unstable; urgency=low
+
+  * Fix a bashim in the postinst script (Closes: #347453)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 11 Jan 2006 20:15:02 +0100
+
+dbus (0.60-4) unstable; urgency=low
+
+  * Upload to unstable 
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  5 Jan 2006 21:55:49 +0100
+
 dbus (0.60-3) experimental; urgency=low
 
   * debian/patches/dbus-qdbusmarshall-amd64.patch
@@ -212,7 +390,7 @@ dbus (0.23.2-1bindings0) experimental; urgency=low
   * debian/patches/dbus-monofixes.patch
     + Removed. Fixed in this release
 
- - Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
 
 dbus (0.23.2-1) unstable; urgency=low
   * New upstream release 

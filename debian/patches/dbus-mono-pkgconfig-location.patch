@@ -1,0 +1,8 @@
+--- dbus-sharp.pc.in.old	2006-05-01 11:50:28.631976144 +0200
++++ dbus-sharp.pc.in	2006-05-01 11:51:11.396474952 +0200
+@@ -5,4 +5,4 @@
+ Name: DBus#
+ Description: DBus# - D-BUS .NET Bindings
+ Version: @VERSION@
+-Libs: -r:${libdir}/mono/dbus-sharp/dbus-sharp.dll
++Libs: -r:${libdir}/cli/dbus-sharp-0.60/dbus-sharp.dll

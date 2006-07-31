@@ -1,0 +1,27 @@
+diff -Nur dbus-0.62/qt/Makefile.am dbus-0.62.new/qt/Makefile.am
+--- dbus-0.62/qt/Makefile.am	2006-06-08 12:31:04.000000000 +0200
++++ dbus-0.62.new/qt/Makefile.am	2006-06-20 18:56:54.000000000 +0200
+@@ -1,7 +1,7 @@
+-DIST_SUBDIRS = dbus src tools examples
++DIST_SUBDIRS = dbus src tools 
+ 
+ if HAVE_QT
+-QT_SUBDIRS = src tools examples
++QT_SUBDIRS = src tools 
+ endif
+ 
+ SUBDIRS = $(QT_SUBDIRS)
+diff -Nur dbus-0.62/qt/Makefile.in dbus-0.62.new/qt/Makefile.in
+--- dbus-0.62/qt/Makefile.in	2006-06-12 14:26:07.000000000 +0200
++++ dbus-0.62.new/qt/Makefile.in	2006-06-20 18:56:39.000000000 +0200
+@@ -320,8 +320,8 @@
+ target_cpu = @target_cpu@
+ target_os = @target_os@
+ target_vendor = @target_vendor@
+-DIST_SUBDIRS = dbus src tools examples
+-@HAVE_QT_TRUE@QT_SUBDIRS = src tools examples
++DIST_SUBDIRS = dbus src tools 
++@HAVE_QT_TRUE@QT_SUBDIRS = src tools 
+ SUBDIRS = $(QT_SUBDIRS)
+ EXTRA_DIST = qt-dbus.qdocconf
+ all: all-recursive
