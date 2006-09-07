@@ -1,0 +1,22 @@
+--- dbus-0.92.orig/configure
++++ dbus-0.92/configure
+@@ -26468,7 +28962,7 @@
+ 
+ #### Directory to install dbus-daemon
+ if test -z "$with_dbus_daemondir" ; then
+-    DBUS_DAEMONDIR="${bindir}"
++    DBUS_DAEMONDIR=$EXPANDED_BINDIR
+ else
+     DBUS_DAEMONDIR=$with_dbus_daemondir
+ fi
+--- dbus-0.92.orig/configure.in
++++ dbus-0.92/configure.in
+@@ -995,7 +995,7 @@
+ 
+ #### Directory to install dbus-daemon
+ if test -z "$with_dbus_daemondir" ; then
+-    DBUS_DAEMONDIR="${bindir}"
++    DBUS_DAEMONDIR=$EXPANDED_BINDIR
+ else
+     DBUS_DAEMONDIR=$with_dbus_daemondir
+ fi
