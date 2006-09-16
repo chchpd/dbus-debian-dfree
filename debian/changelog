@@ -3,8 +3,10 @@ dbus (0.93-1) unstable; urgency=low
   * New upstream release
   * debian/patches/00_expand_bindir.patch
     - Removed. Fixed upstream
+  * debian/control: Build-depend on libx11-dev, so dbus-launch can monitor X
+    sessions.
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sat, 16 Sep 2006 11:09:47 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 16 Sep 2006 23:13:30 +0200
 
 dbus (0.92-2) unstable; urgency=low
 
