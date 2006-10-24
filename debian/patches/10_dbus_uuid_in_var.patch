@@ -1,0 +1,83 @@
+Index: dbus/Makefile.am
+===================================================================
+RCS file: /cvs/dbus/dbus/dbus/Makefile.am,v
+retrieving revision 1.85
+diff -u -r1.85 Makefile.am
+--- dbus/Makefile.am	1 Oct 2006 15:36:18 -0000	1.85
++++ dbus/Makefile.am	24 Oct 2006 07:42:23 -0000
+@@ -1,7 +1,7 @@
+ 
+ configdir=$(sysconfdir)/dbus-1
+ 
+-INCLUDES=-I$(top_builddir) -I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) -DDBUS_COMPILATION -DDBUS_MACHINE_UUID_FILE=\""$(configdir)/machine-id"\"
++INCLUDES=-I$(top_builddir) -I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) -DDBUS_COMPILATION -DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\"
+ 
+ dbusincludedir=$(includedir)/dbus-1.0/dbus
+ dbusarchincludedir=$(libdir)/dbus-1.0/include/dbus
+Index: tools/Makefile.am
+===================================================================
+RCS file: /cvs/dbus/dbus/tools/Makefile.am,v
+retrieving revision 1.26
+diff -u -r1.26 Makefile.am
+--- tools/Makefile.am	2 Oct 2006 18:45:27 -0000	1.26
++++ tools/Makefile.am	24 Oct 2006 07:42:23 -0000
+@@ -1,6 +1,6 @@
+ configdir=$(sysconfdir)/dbus-1
+ 
+-INCLUDES=-I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) $(DBUS_X_CFLAGS) -DDBUS_LOCALEDIR=\"@EXPANDED_DATADIR@/locale\" -DDBUS_COMPILATION -DDBUS_DAEMONDIR=\"@DBUS_DAEMONDIR@\" -DDBUS_MACHINE_UUID_FILE=\""$(configdir)/machine-id"\"
++INCLUDES=-I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) $(DBUS_X_CFLAGS) -DDBUS_LOCALEDIR=\"@EXPANDED_DATADIR@/locale\" -DDBUS_COMPILATION -DDBUS_DAEMONDIR=\"@DBUS_DAEMONDIR@\" -DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\"
+ 
+ bin_PROGRAMS=dbus-send dbus-monitor dbus-launch dbus-cleanup-sockets dbus-uuidgen
+ 
+Index: tools/dbus-uuidgen.1
+===================================================================
+RCS file: /cvs/dbus/dbus/tools/dbus-uuidgen.1,v
+retrieving revision 1.1
+diff -u -r1.1 dbus-uuidgen.1
+--- tools/dbus-uuidgen.1	1 Oct 2006 03:18:47 -0000	1.1
++++ tools/dbus-uuidgen.1	24 Oct 2006 08:08:19 -0000
+@@ -25,7 +25,7 @@
+ .fi
+ 
+ .PP
+-This will ensure that /etc/dbus-1/machine-id exists and has the uuid in it.
++This will ensure that /var/lib/dbus/machine-id exists and has the uuid in it.
+ It won't overwrite an existing uuid, since this id should remain fixed
+ for a single machine until the next reboot at least.
+ 
+@@ -50,31 +50,25 @@
+ UUIDs compatible with that spec.
+ 
+ .PP
+-If you try to change an existing /etc/dbus-1/machine-id on a running
++If you try to change an existing machine-id on a running
+ system, it will probably result in bad things happening. Don't try 
+ to change this file. Also, don't make it the same on two different 
+ systems; it needs to be different anytime there are two different 
+ kernels running.
+ 
+-.PP
+-If you need to share /etc between two different kernels, a possible solution
+-is to symlink the machine ID to /var, and run "dbus-uuidgen
+---ensure=/var/whatever" from an early boot script or the system
+-message bus boot script.
+-
+ .SH OPTIONS
+ The following options are supported:
+ .TP
+ .I "--get[=FILENAME]"
+-If a filename is not given, defaults to sysconfdir/dbus-1/machine-id
++If a filename is not given, defaults to localstatedir/lib/dbus/machine-id
+ (sysconfdir is usually /etc). If this file exists and is valid, the
+ uuid in the file is printed on stdout. Otherwise, the command exits 
+ with a nonzero status.
+ 
+ .TP
+ .I "--ensure[=FILENAME]"
+-If a filename is not given, defaults to sysconfdir/dbus-1/machine-id
+-(sysconfdir is usually /etc). If this file exists then it will be
++If a filename is not given, defaults to localstatedir/lib/dbus/machine-id
++(localstatedir is usually /var). If this file exists then it will be
+ validated, and a failure code returned if it contains the wrong thing.
+ If the file does not exist, it will be created with a new uuid in it.
+ On success, prints no output.

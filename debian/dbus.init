@@ -14,6 +14,8 @@
 set -e
 
 DAEMON=/usr/bin/dbus-daemon
+UUIDGEN=/usr/bin/dbus-uuidgen
+UUIDGEN_OPTS=--ensure
 NAME=dbus
 DAEMONUSER=messagebus
 PIDDIR=/var/run/dbus
@@ -50,6 +52,11 @@ start_it_up()
       rm -f $PIDFILE
     fi
   fi
+  # Create machine-id file
+  if [ -x $UUIDGEN ]; then
+    $UUIDGEN $UUIDGEN_OPTS
+  fi
+
   log_daemon_msg "Starting $DESC" "$NAME"
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
     --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
