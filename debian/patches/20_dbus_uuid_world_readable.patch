@@ -57,32 +57,6 @@ diff -u -r1.13 -r1.14
  /** Creates the given file, failing if the file already exists.
   *
   * @param filename the filename
-@@ -2361,11 +2388,11 @@
-     }
-   
-   i = 0;
--  argv[i] = DBUS_BINDIR "/dbus-launch";
-+  argv[i] = "dbus-launch";
-   ++i;
-   argv[i] = "--autolaunch";
-   ++i;
--  argv[i] = /* const cast */ (char*) _dbus_string_get_const_data (&uuid);
-+  argv[i] = _dbus_string_get_data (&uuid);
-   ++i;
-   argv[i] = "--binary-syntax";
-   ++i;
-@@ -2423,10 +2450,9 @@
-       close (fd);
-       close (address_pipe[WRITE_END]);
- 
--      execv (argv[0], argv);
-+      execv (DBUS_BINDIR "/dbus-launch", argv);
- 
-       /* failed, try searching PATH */
--      argv[0] = "dbus-launch";
-       execvp ("dbus-launch", argv);
- 
-       /* still nothing, we failed */
 Index: dbus/dbus-sysdeps.h
 ===================================================================
 RCS file: /cvs/dbus/dbus/dbus/dbus-sysdeps.h,v
