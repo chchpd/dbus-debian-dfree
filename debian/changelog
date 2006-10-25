@@ -18,8 +18,11 @@ dbus (0.94-1) unstable; urgency=low
   * debian/dbus.install: Include dbus-uuidgen and it's manpage
   * debian/libdbus-1-3.shlibs, debian/shlibs.local: Added. New symbols were
     added in this release.
+  * debian/patches/20_dbus_uuid_world_readable.patch
+    + Added. Make the generated machine-id file world readable (from upstream
+    CVS)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Tue, 24 Oct 2006 11:27:18 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 25 Oct 2006 11:26:32 +0200
 
 dbus (0.93-1) unstable; urgency=low
 
