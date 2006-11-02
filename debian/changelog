@@ -1,3 +1,11 @@
+dbus (0.94-2) unstable; urgency=low
+
+  * debian/patches/30_dbus_send_close_shared_connection.patch:
+    + Don't close shared connection in dbus-send. (Closes: 395358)
+      Patch from upstream CVS
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Thu,  2 Nov 2006 23:55:31 +0100
+
 dbus (0.94-1) unstable; urgency=low
 
   [ Riccardo Setti ]
