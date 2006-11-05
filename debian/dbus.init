@@ -14,6 +14,8 @@
 set -e
 
 DAEMON=/usr/bin/dbus-daemon
+UUIDGEN=/usr/bin/dbus-uuidgen
+UUIDGEN_OPTS=--ensure
 NAME=dbus
 DAEMONUSER=messagebus
 PIDDIR=/var/run/dbus
@@ -50,6 +52,11 @@ start_it_up()
       rm -f $PIDFILE
     fi
   fi
+  # Create machine-id file
+  if [ -x $UUIDGEN ]; then
+    $UUIDGEN $UUIDGEN_OPTS
+  fi
+
   log_daemon_msg "Starting $DESC" "$NAME"
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
     --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
@@ -77,12 +84,12 @@ shut_it_down()
 
 reload_it()
 {
-  log_begin_msg "Reloading $DESC config"
+  log_action_begin_msg "Reloading $DESC config"
   dbus-send --print-reply --system --type=method_call \
             --dest=org.freedesktop.DBus \
             / org.freedesktop.DBus.ReloadConfig > /dev/null
   # hopefully this is enough time for dbus to reload it's config file.
-  log_end_msg $?
+  log_action_end_msg $?
 }
 
 case "$1" in
@@ -101,7 +108,7 @@ case "$1" in
   ;;
   *)
     echo "Usage: /etc/init.d/$NAME {start|stop|reload|restart|force-reload}" >&2
-    exit 1
+    exit 2
   ;;
 esac
 

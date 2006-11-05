@@ -1,3 +1,69 @@
+dbus (0.95-1) experimental; urgency=low
+
+  * New upstream release (aka 1.0 RC3)
+  * debian/patches/10_dbus_uuid_in_var.patch,
+    debian/patches/20_dbus_uuid_world_readable.patch,
+    debian/patches/30_dbus_send_close_shared_connection.patch:
+    + Dropped, merged upstream
+  * debian/patches/99_rerun_automake.patch:
+    + Not needed anymore because of the above
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Sun,  5 Nov 2006 23:22:01 +0100
+
+dbus (0.94-2) unstable; urgency=low
+
+  * debian/patches/30_dbus_send_close_shared_connection.patch:
+    + Don't close shared connection in dbus-send. (Closes: 395358)
+      Patch from upstream CVS
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Thu,  2 Nov 2006 23:55:31 +0100
+
+dbus (0.94-1) unstable; urgency=low
+
+  [ Riccardo Setti ]
+  * Fixed dbus description. (closes: #388186)
+  * Improved dbus.init script. (closes: #384859)
+    - Patch from David Härdeman <david@2gen.com
+
+  [ Sjoerd Simons ]
+  * New upstream release (aka 1.0 RC2)
+  * debian/dbus.init: Create the machine-id on start
+  * debian/patches/10_dbus_uuid_in_var.patch
+    + Added. Put the generated machine-id file in /var. Next upstream version
+    will also have it there
+  * debian/patches/99_rerun_automake.patch
+    + Added. Re-automake because of the changes in the previous patch
+  * debian/rules: Use list-missing to list files missing from the package
+  * debin/dbus.dirs: Add /var/lib/dbus
+  * debian/dbus.install: Include dbus-uuidgen and it's manpage
+  * debian/libdbus-1-3.shlibs, debian/shlibs.local: Added. New symbols were
+    added in this release.
+  * debian/patches/20_dbus_uuid_world_readable.patch
+    + Added. Make the generated machine-id file world readable (from upstream
+    CVS)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Wed, 25 Oct 2006 11:26:32 +0200
+
+dbus (0.93-1) unstable; urgency=low
+
+  * New upstream release
+  * debian/patches/00_expand_bindir.patch
+    - Removed. Fixed upstream
+  * debian/control: Build-depend on libx11-dev, so dbus-launch can monitor X
+    sessions.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 16 Sep 2006 23:13:30 +0200
+
+dbus (0.92-2) unstable; urgency=low
+
+  * Upload to unstable
+  * debian/patches/00_expand_bindir.patch
+    - Added. Ensure the expanded version of $bindir is used for the
+    DBUS_DAEMONDIR define. Fixes useless warning from dbus-launch (From
+    upstream CVS)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu,  7 Sep 2006 20:30:05 +0200
+
 dbus (0.92-1) experimental; urgency=low
 
   * New upstream release 
@@ -33,8 +99,6 @@ dbus (0.91-1) experimental; urgency=low
     + debian/patches/dbus-new-monodoc.patch
 
  -- Sjoerd Simons <sjoerd@debian.org>  Mon, 31 Jul 2006 14:50:05 +0200
-
-
 
 dbus (0.62-5) unstable; urgency=low
 
