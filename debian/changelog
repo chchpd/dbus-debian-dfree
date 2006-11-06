@@ -2,7 +2,7 @@ dbus (0.94-2) unstable; urgency=medium
 
   [ Sebastian Dröge ]
   * debian/patches/30_dbus_send_close_shared_connection.patch:
-    + Don't close shared connection in dbus-send. (Closes: 395358)
+    + Don't close shared connection in dbus-send. (Closes: 395358, 397303)
       Patch from upstream CVS
 
   [ Sjoerd Simons ]
@@ -10,7 +10,7 @@ dbus (0.94-2) unstable; urgency=medium
     + Added. Check if get_machine_uuid() returns NULL before proceeding any
      further: we can't init the X atoms or create a session file name if there 
      is no machine ID. Solves a dbus-launch crash if there is no machine id. 
-     (Closes: #3395938)
+     (Closes: 3395938) Patch from upstream CVS
   * 2 important bugfixes, setting urgency to medium. 
 
  -- Sjoerd Simons <sjoerd@debian.org>  Mon,  6 Nov 2006 22:02:19 +0100
