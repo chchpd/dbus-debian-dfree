@@ -1,3 +1,14 @@
+dbus (1.0.0-1) experimental; urgency=low
+
+  * New upstream release, 1.0.0 aka "Blue Bird"
+  * debian/patches/01_no-fatal-warnings.patch:
+    + Don't abort on fatal warnings now by default. This behaviour can be
+      controlled by the DBUS_FATAL_WARNINGS enviroment variable.
+      This will be set to upstream default again at some point so if you have
+      an application that prints a DBus warning get it fixed.
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Fri, 10 Nov 2006 09:32:20 +0100
+
 dbus (0.95-1) experimental; urgency=low
 
   * New upstream release (aka 1.0 RC3)
