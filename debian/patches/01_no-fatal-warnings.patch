@@ -1,0 +1,11 @@
+--- dbus/dbus-internals.c.old	2006-11-10 01:02:50.997690889 +0100
++++ dbus/dbus-internals.c	2006-11-10 01:03:05.662526590 +0100
+@@ -192,7 +192,7 @@
+ 
+ static dbus_bool_t warn_initted = FALSE;
+ static dbus_bool_t fatal_warnings = FALSE;
+-static dbus_bool_t fatal_warnings_on_check_failed = TRUE;
++static dbus_bool_t fatal_warnings_on_check_failed = FALSE;
+ 
+ static void
+ init_warnings(void)
