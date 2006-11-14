@@ -36,6 +36,13 @@ fi
 
 test "$ENABLED" != "0" || exit 0
 
+create_machineid() {
+  # Create machine-id file
+  if [ -x $UUIDGEN ]; then
+    $UUIDGEN $UUIDGEN_OPTS
+  fi
+}
+
 start_it_up()
 {
   if [ ! -d $PIDDIR ]; then
@@ -52,10 +59,7 @@ start_it_up()
       rm -f $PIDFILE
     fi
   fi
-  # Create machine-id file
-  if [ -x $UUIDGEN ]; then
-    $UUIDGEN $UUIDGEN_OPTS
-  fi
+  create_machineid
 
   log_daemon_msg "Starting $DESC" "$NAME"
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
@@ -84,6 +88,7 @@ shut_it_down()
 
 reload_it()
 {
+  create_machineid
   log_action_begin_msg "Reloading $DESC config"
   dbus-send --print-reply --system --type=method_call \
             --dest=org.freedesktop.DBus \
