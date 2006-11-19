@@ -1,3 +1,13 @@
+dbus (1.0.1-1) unstable; urgency=medium
+
+  * New bugfix release
+  * Fixes bug where calling dbus_threads_init_default would assert
+  * debian/patches/02_fix_thread_initialisation.patch
+    + Fixes an assertion failure when using pthreads (From upstream CVS)
+  * Urgency medium, fixes two assertion failures.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 19 Nov 2006 22:02:16 +0100
+
 dbus (1.0.0-1) unstable; urgency=low
 
   [ Sebastian Dröge ]
