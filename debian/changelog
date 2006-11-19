@@ -1,3 +1,11 @@
+dbus (1.0.1-2) unstable; urgency=medium
+
+  * There is no need anymore to install a custom session.conf. Also The custom
+    one doesn't include the new directive to look at various standard service
+    dirs.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 19 Nov 2006 22:59:17 +0100
+
 dbus (1.0.1-1) unstable; urgency=medium
 
   * New bugfix release
