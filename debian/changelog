@@ -1,3 +1,15 @@
+dbus (1.0.2-1) unstable; urgency=high
+
+  * New upstream release:
+    + Urgency set to high because it fixes a local denial of service
+      exploit involving removal of match rules from other apps.
+      This effects all versions of D-Bus. CVE-2006-6107
+      https://bugs.freedesktop.org/show_bug.cgi?id=9142
+  * debian/patches/02_fix_thread_initialisation.patch:
+    + Dropped, merged upstream
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Tue, 12 Dec 2006 23:36:37 +0100
+
 dbus (1.0.1-2) unstable; urgency=medium
 
   * There is no need anymore to install a custom session.conf. Also The custom
