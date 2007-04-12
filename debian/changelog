@@ -5,7 +5,10 @@ dbus (1.0.2-2) unstable; urgency=low
     + Updated to use my debian.org mail address
 
   [ Michael Biebl ]
-  * Add XS-Vcs-* fields to debian/control. 
+  * debian/control 
+    + Add XS-Vcs-* fields. 
+  * debian/watch 
+    + Added. Allows to track upstream releases.
 
  -- Michael Biebl <biebl@debian.org>  Mon,  5 Mar 2007 21:16:07 +0100
 
