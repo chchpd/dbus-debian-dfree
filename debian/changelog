@@ -10,8 +10,14 @@ dbus (1.0.2-2) unstable; urgency=low
     + Add myself to Uploaders.
   * debian/watch
     + Added. Allows to track upstream releases.
+  * debian/dbus.init
+    + Add functionality to start/stop dbus dependent services based on their 
+      LSB header.
+      Instead of installing an init script into /etc/dbus-1/event.d, services
+      depending on dbus should from now on install a regular sysv init script
+      and add an LSB header with "Required-Start: dbus".
 
- -- Michael Biebl <biebl@debian.org>  Fri, 13 Apr 2007 00:51:41 +0200
+ -- Michael Biebl <biebl@debian.org>  Fri, 13 Apr 2007 00:56:54 +0200
 
 dbus (1.0.2-1) unstable; urgency=high
 

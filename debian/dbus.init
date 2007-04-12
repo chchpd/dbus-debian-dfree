@@ -43,6 +43,35 @@ create_machineid() {
   fi
 }
 
+dependent_services()
+{
+  # Do nothing if we are called by init
+  [ ! -z $runlevel ] && return 
+
+  # Determine current runlevel
+  r=$(/sbin/runlevel)
+  r=${r#*\ }
+  
+  if [ "$1" = "stop" ] ; then
+    param="--reverse"
+    action="stop"
+  else
+    action="start"
+  fi
+
+  # Get the list of services active in this runlevel
+  services=$(grep -l "^# Required-Start:.*dbus" /etc/rc${r}.d/S??* | sort $param)
+
+  # Start the services in the correct order
+  for i in $services ; do
+    service=$(basename $i)
+    service=${service#S??}
+    invoke-rc.d $service $action
+  done
+
+}
+
+
 start_it_up()
 {
   if [ ! -d $PIDDIR ]; then
@@ -68,10 +97,12 @@ start_it_up()
   if [ -d $EVENTDIR ]; then
       run-parts --arg=start $EVENTDIR || true
   fi
+  dependent_services start
 }
 
 shut_it_down()
 {
+  dependent_services stop
   if [ -d $EVENTDIR ]; then
       run-parts --reverse --arg=stop $EVENTDIR || true
   fi
