@@ -8,6 +8,7 @@ dbus (1.0.2-2) unstable; urgency=low
   * debian/control
     + Add XS-Vcs-* fields.
     + Add myself to Uploaders.
+    + Update description.
   * debian/watch
     + Added. Allows to track upstream releases.
   * debian/dbus.init
