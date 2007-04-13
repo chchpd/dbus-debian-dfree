@@ -59,6 +59,7 @@ dependent_services()
     param="--reverse"
     action="stop"
   else
+    param=""
     action="start"
   fi
 
