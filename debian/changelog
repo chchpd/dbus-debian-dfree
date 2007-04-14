@@ -1,3 +1,11 @@
+dbus (1.0.2-3) UNRELEASED; urgency=low
+
+  * debian/dbus.post{inst,rm}
+    + Restart dbus on upgrades again. Might break some applications, but they
+      should be fixed.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 14 Apr 2007 15:24:57 +0200
+
 dbus (1.0.2-2) unstable; urgency=low
 
   [ Sebastian Dröge ]
