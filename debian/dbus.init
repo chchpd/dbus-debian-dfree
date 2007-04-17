@@ -52,9 +52,12 @@ dependent_services()
   [ ! -z $runlevel ] && return 
 
   # Determine current runlevel
-  r=$(/sbin/runlevel)
+  r=$(/sbin/runlevel) || true
+
+  [ $r = "unknown" ] && return
+
   r=${r#*\ }
-  
+
   if [ "$1" = "stop" ] ; then
     param="--reverse"
     action="stop"
@@ -87,6 +90,7 @@ start_it_up()
     PIDDIR=/proc/$(cat $PIDFILE)
     if [ -d ${PIDDIR} -a  "$(readlink -f ${PIDDIR}/exe)" = "${DAEMON}" ]; then 
       log_success_msg "$DESC already started; not starting."
+      return
     else
       log_success_msg "Removing stale PID file $PIDFILE."
       rm -f $PIDFILE

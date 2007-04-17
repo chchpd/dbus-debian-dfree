@@ -3,8 +3,14 @@ dbus (1.0.2-3) UNRELEASED; urgency=low
   * debian/dbus.post{inst,rm}
     + Restart dbus on upgrades again. Might break some applications, but they
       should be fixed.
+  * debian/dbus.init
+    + Don't return an error, if start is called when there is already a bus
+      running.
+  * debian/dbus.init
+    + Handle errors from /sbin/runlevel. Fixes dbus installation in chroots.
+      (Closes: #419655)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sat, 14 Apr 2007 15:24:57 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 17 Apr 2007 17:24:46 +0200
 
 dbus (1.0.2-2) unstable; urgency=low
 
