@@ -54,7 +54,7 @@ dependent_services()
   # Determine current runlevel
   r=$(/sbin/runlevel) || true
 
-  [ $r = "unknown" ] && return
+  [ "$r" = "unknown" ] && return
 
   r=${r#*\ }
 

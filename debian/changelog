@@ -1,3 +1,10 @@
+dbus (1.0.2-4) unstable; urgency=low
+
+  * debian/dbus.init
+    + Properly quote the runlevel variable. (Closes: #419818)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 18 Apr 2007 06:30:42 +0200
+
 dbus (1.0.2-3) unstable; urgency=low
 
   * debian/dbus.post{inst,rm}
