@@ -1,9 +1,11 @@
 dbus (1.0.2-4) unstable; urgency=low
 
   * debian/dbus.init
-    + Properly quote the runlevel variable. (Closes: #419818)
+    + Properly quote the runlevel variable $r. (Closes: #419818)
+  * debian/dbus.prerm
+    + Removed empty maintainer script.
 
- -- Michael Biebl <biebl@debian.org>  Wed, 18 Apr 2007 06:30:42 +0200
+ -- Michael Biebl <biebl@debian.org>  Wed, 18 Apr 2007 19:16:13 +0200
 
 dbus (1.0.2-3) unstable; urgency=low
 
