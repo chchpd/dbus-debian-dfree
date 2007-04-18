@@ -53,10 +53,10 @@ dependent_services()
 
   # Determine current runlevel
   r=$(/sbin/runlevel) || true
-
-  [ "$r" = "unknown" ] && return
-
   r=${r#*\ }
+
+  # Do nothing if we can't determine the runlevel (e.g. inside chroots)
+  [ "$r" = "unknown" ] && return
 
   if [ "$1" = "stop" ] ; then
     param="--reverse"
