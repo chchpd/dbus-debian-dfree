@@ -1,3 +1,10 @@
+dbus (1.0.2-5) unstable; urgency=low
+
+  * debian/dbus.init
+    + Add some safety checks and support for file-rc. (Closes: #419984)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 18 Apr 2007 19:50:29 +0200
+
 dbus (1.0.2-4) unstable; urgency=low
 
   * debian/dbus.init
