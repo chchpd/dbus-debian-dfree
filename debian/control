@@ -60,8 +60,7 @@ Description: simple interprocess messaging system (utilities)
  applications.  Conceptually, it fits somewhere in between raw sockets
  and CORBA in terms of complexity.
  .
- This package contains several D-Bus related utilities like
- dbus-launch and dbus-send.
+ This package contains D-Bus related utilities like dbus-monitor.
  .
  See the dbus description for more information about D-Bus in general.
 
