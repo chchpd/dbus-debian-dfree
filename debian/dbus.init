@@ -72,7 +72,7 @@ dependent_services()
   elif [ -f /etc/runlevel.conf ] ; then # file-rc
     list=$(grep -l "^# Required-Start:.*dbus" /etc/init.d/*)
     services=$( for i in $list ; do
-      grep -E "^[[:digit:]]{2}[[:space:]]+[0-9,-S]+[[:space:]]+.*$r.*[[:space:]]+$i$" /etc/runlevel.conf
+      grep -E "^[[:digit:]]{2}[[:space:]]+([0-9,S]+|[-])[[:space:]]+.*$r.*[[:space:]]+$i$" /etc/runlevel.conf
     done  | sort $param | awk '{print $4}' )
   else
     services=""
