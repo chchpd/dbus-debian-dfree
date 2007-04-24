@@ -2,10 +2,16 @@ dbus (1.0.2-5) unstable; urgency=low
 
   * debian/dbus.init
     + Add some safety checks and support for file-rc. (Closes: #419984)
-  * debian/control
-    + Revise package description of dbus-1-utils. (Closes: #404981)
+  * Drop dbus-1-utils package and move dbus-monitor into the dbus package.
+    (Closes: #404981)
+  * Create dbus-x11 package and move dbus-launch and the Xsession start script
+    from dbus into this package. This removes the X11 dependency from the dbus
+    package.
+    Add a dependency on dbus-x11 to the dbus package, to not break packages
+    which still depend on dbus but should be updated to depend on dbus-x11
+    instead if they require a D-Bus session bus.
 
- -- Michael Biebl <biebl@debian.org>  Mon, 23 Apr 2007 00:15:42 +0200
+ -- Michael Biebl <biebl@debian.org>  Tue, 24 Apr 2007 08:42:40 +0200
 
 dbus (1.0.2-4) unstable; urgency=low
 
