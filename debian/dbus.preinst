@@ -10,7 +10,7 @@ rm_conffile() {
    if [ "$md5sum" != "$OLD_MD5SUM" ]; then
      echo "Obsolete conffile $CONFFILE has been modified by you."
      echo "Saving as $CONFFILE.dpkg-bak ..."
-     mv -f "$CONFFILE" "$CONFFILE".bak
+     mv -f "$CONFFILE" "$CONFFILE".dpkg-bak
    else
      echo "Removing obsolete conffile $CONFFILE ..."
      rm -f "$CONFFILE"
