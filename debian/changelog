@@ -1,5 +1,6 @@
 dbus (1.0.2-5) unstable; urgency=low
 
+  [ Michael Biebl ]
   * debian/dbus.init
     + Add some safety checks and support for file-rc. (Closes: #419984)
   * Drop dbus-1-utils package and move dbus-monitor into the dbus package.
@@ -11,7 +12,10 @@ dbus (1.0.2-5) unstable; urgency=low
     which still depend on dbus but should be updated to depend on dbus-x11
     instead if they require a D-Bus session bus.
 
- -- Michael Biebl <biebl@debian.org>  Tue, 24 Apr 2007 08:42:40 +0200
+  [ Sjoerd Simons ]
+  * debian/control: Add libselinux1-dev to build depends
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 03 May 2007 13:23:09 +0200
 
 dbus (1.0.2-4) unstable; urgency=low
 
