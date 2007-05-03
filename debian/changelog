@@ -14,8 +14,10 @@ dbus (1.0.2-5) unstable; urgency=low
 
   [ Sjoerd Simons ]
   * debian/control: Add libselinux1-dev to build depends
+  * debian/rules: Clean up some more generated files (From the ubuntu
+    packaging)
 
- -- Sjoerd Simons <sjoerd@debian.org>  Thu, 03 May 2007 13:23:09 +0200
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 03 May 2007 13:28:19 +0200
 
 dbus (1.0.2-4) unstable; urgency=low
 

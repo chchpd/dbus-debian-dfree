@@ -24,3 +24,6 @@ build/dbus-1-doc::
 
 clean::
 	rm -rf doc/api
+	rm -f test/data/valid-config-files/session.conf
+	rm -f test/data/valid-config-files/system.conf
+	rm -f doc/*.html
