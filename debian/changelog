@@ -1,8 +1,12 @@
 dbus (1.1.0-1) UNRELEASED; urgency=low
 
+  [ Sjoerd Simons ]
   * New upstream release
 
- -- Sjoerd Simons <sjoerd@debian.org>  Mon, 28 May 2007 21:44:16 +0200
+  [ Tim Dijkstra ]
+  * Disable userdb cache. If you need a cache, use nscd. (closes: #370569)
+
+ -- Tim Dijkstra <tim@famdijkstra.org>  Fri,  1 Jun 2007 21:00:17 +0200
 
 dbus (1.0.2-5) unstable; urgency=low
 
