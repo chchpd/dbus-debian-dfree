@@ -13,8 +13,6 @@ common-binary-post-install-arch:: list-missing
 
 DEB_CONFIGURE_EXTRA_FLAGS := --enable-xml-docs --enable-doxygen-docs --disable-userdb-cache
 
-DEB_SHLIBDEPS_INCLUDE_dbus-1-utils := debian/libdbus-1-3/usr/lib/ 
-
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d
 	cp debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
