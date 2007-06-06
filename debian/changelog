@@ -9,6 +9,7 @@ dbus (1.1.0-1) UNRELEASED; urgency=low
   [ Michael Biebl ]
   * debian/control
     + Fix small typo in the dbus-x11 package description. (Closes: #425132)
+    + Replace Source-Version with binary:Version for libdbus-1-dev.
   * debian/dbus.init
     + Suppress error messages about nonexistent or unreadable files. 
       (Closes: #426296)
