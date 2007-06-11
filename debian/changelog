@@ -14,6 +14,9 @@ dbus (1.1.0-1) UNRELEASED; urgency=low
     + Suppress error messages about nonexistent or unreadable files. 
       (Closes: #426296)
     + Do not fail on grep errors. (Closes: #423380)
+  * debian/control
+    + Add build dependency on autotools-dev for up-to-date config.{guess,sub}
+      files.
 
  -- Michael Biebl <biebl@debian.org>  Wed, 06 Jun 2007 15:39:23 +0200
 
