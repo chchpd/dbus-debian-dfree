@@ -1,4 +1,4 @@
-dbus (1.1.0-1) UNRELEASED; urgency=low
+dbus (1.1.0-1) unstable; urgency=low
 
   [ Sjoerd Simons ]
   * New upstream release
@@ -13,7 +13,8 @@ dbus (1.1.0-1) UNRELEASED; urgency=low
   * debian/dbus.init
     + Suppress error messages about nonexistent or unreadable files. 
       (Closes: #426296)
-    + Do not fail on grep errors. (Closes: #423380)
+    + Do not abort on grep errors. (Closes: #423380)
+    + Do not abort if starting a dependent service fails.
   * debian/control
     + Add build dependency on autotools-dev for up-to-date config.{guess,sub}
       files.

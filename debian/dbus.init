@@ -83,7 +83,7 @@ dependent_services()
   for i in $services ; do
     service=$(basename $i)
     service=${service#S??}
-    invoke-rc.d $service $action
+    invoke-rc.d $service $action || true
   done
 
 }
