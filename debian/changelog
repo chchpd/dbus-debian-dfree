@@ -1,10 +1,15 @@
-dbus (1.1.0-2) UNRELEASED; urgency=low
+dbus (1.1.1-1) unstable; urgency=low
 
-  * debian/patches/02_dbus_monitor_no_sigint_handler.patch 
+  [ Michael Biebl ]
+  * debian/patches/02_dbus_monitor_no_sigint_handler.patch
     + Remove the sigint_handler in dbus-monitor so the application properly
       terminates on STRG+C. (Closes: #414139)
 
- -- Michael Biebl <biebl@debian.org>  Wed, 13 Jun 2007 00:24:07 +0200
+  [ Sjoerd Simons ]
+  * New upstream release
+  * debian/libdbus-1-3.shlibs: Bumped shlibs
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 19 Jun 2007 13:18:12 +0100
 
 dbus (1.1.0-1) unstable; urgency=low
 
