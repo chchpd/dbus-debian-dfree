@@ -43,7 +43,7 @@ Description: simple interprocess messaging system (X11 deps)
  applications.  Conceptually, it fits somewhere in between raw sockets
  and CORBA in terms of complexity.
  .
- This package contains the dbus-launch utitility which is necessary for
+ This package contains the dbus-launch utility which is necessary for
  packages using a D-Bus session bus.
  .
  See the dbus description for more information about D-Bus in general.
