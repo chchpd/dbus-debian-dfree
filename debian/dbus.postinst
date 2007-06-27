@@ -12,6 +12,11 @@ MESSAGEHOME=/var/run/dbus
 
 chgrp "$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || addgroup --system "$MESSAGEUSER"
 chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
-	adduser --system --home "$MESSAGEHOME" --no-create-home --disabled-password --ingroup "$MESSAGEUSER" "$MESSAGEUSER"
+    adduser --system \
+            --home "$MESSAGEHOME" \
+            --no-create-home \
+            --disabled-password \
+            --ingroup "$MESSAGEUSER" \
+            "$MESSAGEUSER"
 
 #DEBHELPER#

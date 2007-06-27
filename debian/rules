@@ -11,7 +11,10 @@ include /usr/share/cdbs/1/class/autotools.mk
 # List any files which are not installed
 common-binary-post-install-arch:: list-missing
 
-DEB_CONFIGURE_EXTRA_FLAGS := --enable-xml-docs --enable-doxygen-docs --disable-userdb-cache
+DEB_CONFIGURE_EXTRA_FLAGS += \
+	--enable-xml-docs \
+	--enable-doxygen-docs \
+	--disable-userdb-cache
 
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d
