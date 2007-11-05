@@ -19,7 +19,4 @@ chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
             --ingroup "$MESSAGEUSER" \
             "$MESSAGEUSER"
 
-chown root:messagebus /usr/lib/dbus-1.0/dbus-daemon-launch-helper
-chmod 4750 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
-
 #DEBHELPER#

@@ -11,6 +11,7 @@ include /usr/share/cdbs/1/class/autotools.mk
 # List any files which are not installed
 common-binary-post-install-arch:: list-missing
 
+DEB_FIXPERMS_EXCLUDE = usr/lib/dbus-1.0/dbus-daemon-launch-helper
 DEB_CONFIGURE_LIBEXECDIR ="\$${prefix}/lib/dbus-1.0"
 
 DEB_CONFIGURE_EXTRA_FLAGS += \
