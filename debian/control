@@ -16,8 +16,9 @@ Build-Depends: cdbs (>= 0.4.43),
                libx11-dev,
                libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64]
 Standards-Version: 3.7.2
-XS-Vcs-Svn: svn://svn.debian.org/svn/pkg-utopia/packages/unstable/dbus
-XS-Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus
+Vcs-Svn: svn://svn.debian.org/svn/pkg-utopia/packages/unstable/dbus
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus
+Homepage: http://dbus.freedesktop.org/
 
 Package: dbus
 Architecture: any
@@ -25,8 +26,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          adduser,
          debianutils (>= 1.22.0),
-         lsb-base (>= 3.1),
-         dbus-x11
+         lsb-base (>= 3.1)
 Conflicts: libdbus0,
            dbus-1,
            dbus-1-utils (<< 1.0.2-5),
@@ -35,6 +35,7 @@ Replaces: libdbus0,
           dbus-1,
           dbus-1-utils (<< 1.0.2-5)
 Provides: dbus-1-utils
+Recommends: dbus-x11
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between
  applications.  Conceptually, it fits somewhere in between raw sockets
