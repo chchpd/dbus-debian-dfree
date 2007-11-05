@@ -1,12 +1,18 @@
 dbus (1.1.2-1) UNRELEASED; urgency=low
 
   * New upstream release.
-  * debian/control 
+  * debian/control
     - Use the new "Homepage:" field to specify the upstream URL.
     - The Vcs-* fields are now officially supported, so remove the XS- prefix.
     - Demote dbus-x11 dependency to a Recommends. (Closes: #427932)
+  * debian/dbus.install
+    - Install the dbus-daemon-launch-helper binary.
+    - Install the directory /usr/share/dbus-1/system-services.
+  * debian/dbus.postinst
+    - Install the dbus-daemon-launch-helper binary SUID root and make it
+      executable for the messagebus group.
 
- -- Michael Biebl <biebl@debian.org>  Mon, 05 Nov 2007 11:46:10 +0100
+ -- Michael Biebl <biebl@debian.org>  Mon, 05 Nov 2007 11:59:46 +0100
 
 dbus (1.1.1-3) unstable; urgency=low
 
