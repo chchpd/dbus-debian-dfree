@@ -8,22 +8,33 @@ set -e
 
 MESSAGEUSER=messagebus
 MESSAGEHOME=/var/run/dbus
+LAUNCHER=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
 
+case "$1" in
+    configure)
+	adduser --system \
+	        --home "$MESSAGEHOME" \
+                --no-create-home \
+                --disabled-password \
+        	--group "$MESSAGEUSER"
 
-chgrp "$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || addgroup --system "$MESSAGEUSER"
-chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
-    adduser --system \
-            --home "$MESSAGEHOME" \
-            --no-create-home \
-            --disabled-password \
-            --ingroup "$MESSAGEUSER" \
-            "$MESSAGEUSER"
+	chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 
 
-launcher=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+	if ! dpkg-statoverride --list "$LAUNCHER" > /dev/null 2>&1; then
+		chown root:"$MESSAGEUSER" "$LAUNCHER"
+		chmod 4750 "$LAUNCHER"
+	fi
+    ;;
 
-if ! dpkg-statoverride --list $launcher > /dev/null 2>&1; then
-	chown root:messagebus $launcher
-	chmod 4750 $launcher
-fi
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
 
 #DEBHELPER#
+
+exit 0
