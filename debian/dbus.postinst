@@ -22,7 +22,7 @@ case "$1" in
 
 	if ! dpkg-statoverride --list "$LAUNCHER" > /dev/null 2>&1; then
 		chown root:"$MESSAGEUSER" "$LAUNCHER"
-		chmod 4750 "$LAUNCHER"
+		chmod 4754 "$LAUNCHER"
 	fi
     ;;
 
