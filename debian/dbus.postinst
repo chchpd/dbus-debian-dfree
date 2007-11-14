@@ -19,4 +19,11 @@ chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 2>/dev/null || \
             --ingroup "$MESSAGEUSER" \
             "$MESSAGEUSER"
 
+launcher=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+
+if ! dpkg-statoverride --list $launcher > /dev/null 2>&1; then
+	chown root:messagebus $launcher
+	chmod 4750 $launcher
+fi
+
 #DEBHELPER#
