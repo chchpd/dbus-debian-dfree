@@ -18,7 +18,7 @@ case "$1" in
                 --disabled-password \
         	--group "$MESSAGEUSER"
 
-	chown "$MESSAGEUSER"."$MESSAGEUSER" "$MESSAGEHOME" 
+	chown "$MESSAGEUSER":"$MESSAGEUSER" "$MESSAGEHOME" 
 
 	if ! dpkg-statoverride --list "$LAUNCHER" > /dev/null 2>&1; then
 		chown root:"$MESSAGEUSER" "$LAUNCHER"
