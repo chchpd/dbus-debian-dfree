@@ -96,6 +96,12 @@ start_it_up()
     chown $DAEMONUSER $PIDDIR
     chgrp $DAEMONUSER $PIDDIR
   fi
+
+  if [ ! -e /proc/filesystems ] ; then
+    log_failure_msg "Can't start $DESC - /proc is not mounted"
+    return
+  fi
+
   if [ -e $PIDFILE ]; then
     PIDDIR=/proc/$(cat $PIDFILE)
     if [ -d ${PIDDIR} -a  "$(readlink -f ${PIDDIR}/exe)" = "${DAEMON}" ]; then 

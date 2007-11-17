@@ -1,5 +1,6 @@
-dbus (1.1.2-1) unstable; urgency=low
+dbus (1.1.2-1) UNRELEASED; urgency=low
 
+  [ Michael Biebl ]
   * New upstream release.
   * debian/control
     - Use the new "Homepage:" field to specify the upstream URL.
@@ -12,6 +13,10 @@ dbus (1.1.2-1) unstable; urgency=low
     - Install the dbus-daemon-launch-helper binary SUID root and make it
       executable for the messagebus group.
     - General cleanup. Remove superfluous addgroup and chgrp call.
+
+  [ Sjoerd Simons ]
+  * debian/dbus.init
+    - Warn if /proc isn't mounted and refuse to start (Closes: #431101, #447363)
 
  -- Michael Biebl <biebl@debian.org>  Wed, 14 Nov 2007 18:08:42 +0100
 
