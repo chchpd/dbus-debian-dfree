@@ -20,6 +20,12 @@ dbus (1.1.2-1) UNRELEASED; urgency=low
   * debian/patches/03_uuid_nul.patch
     - Added. Don't accidentally overwrite the last byte of the uuid with nul
       while autostarting. (From upstream GIT)
+  * debian/patches/04_dbus_launch.patch
+    - Added. Also save the session bus info in X11 on a normally launched bus.
+      This ensures apps that don't have a session bus address in their
+      environment can still properly connect to a DISPLAY's normal session bus.
+      Making hacks to determine which dbus address belongs to a DISPLAY as
+      used by some obsolete.
 
  -- Michael Biebl <biebl@debian.org>  Wed, 14 Nov 2007 18:08:42 +0100
 
