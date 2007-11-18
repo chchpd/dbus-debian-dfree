@@ -1,0 +1,93 @@
+diff -aur dbus-1.1.2/bus/selinux.c dbus-1.1.2.patched/bus/selinux.c
+--- dbus-1.1.2/bus/selinux.c	2007-07-24 17:39:08.000000000 +0200
++++ dbus-1.1.2.patched/bus/selinux.c	2007-11-18 18:44:00.000000000 +0100
+@@ -178,7 +178,20 @@
+ log_audit_callback (void *data, security_class_t class, char *buf, size_t bufleft)
+ {
+   DBusString *audmsg = data;
+-  _dbus_string_copy_to_buffer (audmsg, buf, bufleft);
++
++  if (bufleft > (size_t) _dbus_string_get_length(audmsg))
++    {
++      _dbus_string_copy_to_buffer_with_nul (audmsg, buf, bufleft);
++    }
++  else
++    {
++      DBusString s;
++
++      _dbus_string_init_const(&s, "Buffer too small for audit message");
++
++      if (bufleft > (size_t) _dbus_string_get_length(&s))
++        _dbus_string_copy_to_buffer_with_nul (&s, buf, bufleft);
++    }
+ }
+ 
+ /**
+diff -aur dbus-1.1.2/dbus/dbus-string.c dbus-1.1.2.patched/dbus/dbus-string.c
+--- dbus-1.1.2/dbus/dbus-string.c	2007-07-24 17:39:09.000000000 +0200
++++ dbus-1.1.2.patched/dbus/dbus-string.c	2007-11-18 18:44:00.000000000 +0100
+@@ -710,8 +710,9 @@
+ }
+ 
+ /**
+- * Copies the contents of a DBusString into a different
+- * buffer. The resulting buffer will be nul-terminated.
++ * Copies the contents of a DBusString into a different buffer. It is
++ * a bug if avail_len is too short to hold the string contents. nul
++ * termination is not copied, just the supplied bytes.
+  * 
+  * @param str a string
+  * @param buffer a C buffer to copy data to
+@@ -722,15 +723,34 @@
+ 			     char              *buffer,
+ 			     int                avail_len)
+ {
+-  int copy_len;
+   DBUS_CONST_STRING_PREAMBLE (str);
+ 
+   _dbus_assert (avail_len >= 0);
++  _dbus_assert (avail_len >= real->len);
++  
++  memcpy (buffer, real->str, real->len);
++}
++
++/**
++ * Copies the contents of a DBusString into a different buffer. It is
++ * a bug if avail_len is too short to hold the string contents plus a
++ * nul byte. 
++ * 
++ * @param str a string
++ * @param buffer a C buffer to copy data to
++ * @param avail_len maximum length of C buffer
++ */
++void
++_dbus_string_copy_to_buffer_with_nul (const DBusString  *str,
++                                      char              *buffer,
++                                      int                avail_len)
++{
++  DBUS_CONST_STRING_PREAMBLE (str);
+ 
+-  copy_len = MIN (avail_len, real->len+1);
+-  memcpy (buffer, real->str, copy_len);
+-  if (avail_len > 0 && avail_len == copy_len)
+-    buffer[avail_len-1] = '\0';
++  _dbus_assert (avail_len >= 0);
++  _dbus_assert (avail_len > real->len);
++  
++  memcpy (buffer, real->str, real->len+1);
+ }
+ 
+ #ifdef DBUS_BUILD_TESTS
+diff -aur dbus-1.1.2/dbus/dbus-string.h dbus-1.1.2.patched/dbus/dbus-string.h
+--- dbus-1.1.2/dbus/dbus-string.h	2007-07-24 17:39:09.000000000 +0200
++++ dbus-1.1.2.patched/dbus/dbus-string.h	2007-11-18 18:44:00.000000000 +0100
+@@ -118,6 +118,9 @@
+ void          _dbus_string_copy_to_buffer        (const DBusString  *str,
+                                                   char              *buffer,
+ 						  int                len);
++void          _dbus_string_copy_to_buffer_with_nul (const DBusString  *str,
++                                                    char              *buffer,
++                                                    int                avail_len);
+ #ifndef _dbus_string_get_length
+ int           _dbus_string_get_length            (const DBusString  *str);
+ #endif /* !_dbus_string_get_length */

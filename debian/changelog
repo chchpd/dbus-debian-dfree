@@ -17,6 +17,9 @@ dbus (1.1.2-1) UNRELEASED; urgency=low
   [ Sjoerd Simons ]
   * debian/dbus.init
     - Warn if /proc isn't mounted and refuse to start (Closes: #431101, #447363)
+  * debian/patches/03_uuid_nul.patch
+    - Added. Don't accidentally overwrite the last byte of the uuid with nul
+      while autostarting. (From upstream GIT)
 
  -- Michael Biebl <biebl@debian.org>  Wed, 14 Nov 2007 18:08:42 +0100
 
