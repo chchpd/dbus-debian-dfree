@@ -1,4 +1,4 @@
-dbus (1.1.2-1) UNRELEASED; urgency=low
+dbus (1.1.2-1) unstable; urgency=low
 
   [ Michael Biebl ]
   * New upstream release.
@@ -27,7 +27,7 @@ dbus (1.1.2-1) UNRELEASED; urgency=low
       Making hacks to determine which dbus address belongs to a DISPLAY as
       used by some obsolete.
 
- -- Michael Biebl <biebl@debian.org>  Wed, 14 Nov 2007 18:08:42 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 23 Nov 2007 11:33:00 +0100
 
 dbus (1.1.1-3) unstable; urgency=low
 
