@@ -10,8 +10,9 @@ dbus (1.1.2-2) UNRELEASED; urgency=low
       xsltproc in build/dbus-1-doc::.
     - Install the devhelp index in dbus-1-doc and move the HTML documentation
       around; add a symlink from the gtk-doc dir.
+  * Misc smallish whitespace cleanups.
 
- -- Loic Minier <lool@dooz.org>  Mon, 03 Dec 2007 15:42:01 +0100
+ -- Loic Minier <lool@dooz.org>  Mon, 03 Dec 2007 15:46:05 +0100
 
 dbus (1.1.2-1) unstable; urgency=low
 
