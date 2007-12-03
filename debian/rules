@@ -24,9 +24,11 @@ binary-post-install/dbus-x11::
 
 build/dbus-1-doc::
 	doxygen Doxyfile
+	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
 
 clean::
 	rm -rf doc/api
 	rm -f test/data/valid-config-files/session.conf
 	rm -f test/data/valid-config-files/system.conf
 	rm -f doc/*.html
+	rm -f dbus.devhelp

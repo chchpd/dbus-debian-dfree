@@ -13,6 +13,7 @@ Build-Depends: cdbs (>= 0.4.43),
                doxygen,
                docbook-utils,
                xmlto,
+               xsltproc,
                libx11-dev,
                libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64]
 Standards-Version: 3.7.2

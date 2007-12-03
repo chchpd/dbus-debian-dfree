@@ -1,3 +1,18 @@
+dbus (1.1.2-2) UNRELEASED; urgency=low
+
+  * Merge patch from Ubuntu to build a devhelp file; thanks Martin Pitt;
+    closes: #454142.
+    - Build-dep on xsltproc.
+    - New patch, dbus-1.0.1-generate-xml-docs, enables generation of XML docs
+      which serve as source for the devhelp generation.
+    - Add a XSLT file from the Fedora package, debian/doxygen_to_devhelp.xsl.
+    - Generate the devhelp file from the XML files thanks to the XSL file via
+      xsltproc in build/dbus-1-doc::.
+    - Install the devhelp index in dbus-1-doc and move the HTML documentation
+      around; add a symlink from the gtk-doc dir.
+
+ -- Loic Minier <lool@dooz.org>  Mon, 03 Dec 2007 15:42:01 +0100
+
 dbus (1.1.2-1) unstable; urgency=low
 
   [ Michael Biebl ]
