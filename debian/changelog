@@ -1,5 +1,6 @@
 dbus (1.1.2-2) UNRELEASED; urgency=low
 
+  [ Loic Minier ]
   * Merge patch from Ubuntu to build a devhelp file; thanks Martin Pitt;
     closes: #454142.
     - Build-dep on xsltproc.
@@ -12,7 +13,11 @@ dbus (1.1.2-2) UNRELEASED; urgency=low
       around; add a symlink from the gtk-doc dir.
   * Misc smallish whitespace cleanups.
 
- -- Loic Minier <lool@dooz.org>  Mon, 03 Dec 2007 15:46:05 +0100
+  [ Michael Biebl ]
+  * Deprecate the ENABLED option and remove it from /etc/default/dbus. Print a
+    warning message in the init script if this option is still used.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
 dbus (1.1.2-1) unstable; urgency=low
 
