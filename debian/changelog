@@ -23,6 +23,12 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
     - Removed, merged upstream.
   * debian/control
     - Bump Standards-Version to 3.7.3. No further changes required.
+  * debian/dbus.init
+    - Fix LSB init header. Use $remote_fs instead of $local_fs as the
+      daemon requires /usr to be mounted. 
+      Remove S from Should-Stop. (Closes: #459473)
+    - Use mountpoint to check if /proc is mounted. (Closes: #458392)
+    - Decrease retry-time to 5 secs on stop. (Closes: #462182)
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
