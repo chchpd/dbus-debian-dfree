@@ -1,4 +1,4 @@
-dbus (1.1.2-2) UNRELEASED; urgency=low
+dbus (1.1.4-1) UNRELEASED; urgency=low
 
   [ Loic Minier ]
   * Merge patch from Ubuntu to build a devhelp file; thanks Martin Pitt;
@@ -14,8 +14,13 @@ dbus (1.1.2-2) UNRELEASED; urgency=low
   * Misc smallish whitespace cleanups.
 
   [ Michael Biebl ]
+  * New upstream release.
   * Deprecate the ENABLED option and remove it from /etc/default/dbus. Print a
     warning message in the init script if this option is still used.
+  * debian/patches/03_uuid_nul.patch
+    - Removed, merged upstream.
+  * debian/patches/04_dbus_launch.patch
+    - Removed, merged upstream.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
