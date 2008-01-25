@@ -16,7 +16,7 @@ Build-Depends: cdbs (>= 0.4.43),
                xsltproc,
                libx11-dev,
                libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64]
-Standards-Version: 3.7.2
+Standards-Version: 3.7.3
 Vcs-Svn: svn://svn.debian.org/svn/pkg-utopia/packages/unstable/dbus
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus
 Homepage: http://dbus.freedesktop.org/
@@ -38,14 +38,14 @@ Replaces: libdbus0,
 Provides: dbus-1-utils
 Recommends: dbus-x11
 Description: simple interprocess messaging system
- D-Bus is a message bus, used for sending messages between
- applications.  Conceptually, it fits somewhere in between raw sockets
- and CORBA in terms of complexity.
+ D-Bus is a message bus, used for sending messages between applications.
+ Conceptually, it fits somewhere in between raw sockets and CORBA in
+ terms of complexity.
  .
  D-Bus supports broadcast messages, asynchronous messages (thus
- decreasing latency), authentication, and more.  It is designed to be
+ decreasing latency), authentication, and more. It is designed to be
  low-overhead; messages are sent using a binary protocol, not using
- XML.  D-Bus also supports a method call mapping for its messages, but
+ XML. D-Bus also supports a method call mapping for its messages, but
  it is not required; this makes using the system quite simple.
  .
  It comes with several bindings, including GLib, Python, Qt and Java.
@@ -64,9 +64,9 @@ Depends: ${shlibs:Depends},
 Conflicts: dbus (<< 1.0.2-5)
 Replaces: dbus (<< 1.0.2-5)
 Description: simple interprocess messaging system (X11 deps)
- D-Bus is a message bus, used for sending messages between
- applications.  Conceptually, it fits somewhere in between raw sockets
- and CORBA in terms of complexity.
+ D-Bus is a message bus, used for sending messages between applications.
+ Conceptually, it fits somewhere in between raw sockets and CORBA in
+ terms of complexity.
  .
  This package contains the dbus-launch utility which is necessary for
  packages using a D-Bus session bus.
@@ -81,14 +81,14 @@ Recommends: dbus
 Section: libs
 Conflicts: dbus (<< 0.60)
 Description: simple interprocess messaging system
- D-Bus is a message bus, used for sending messages between
- applications.  Conceptually, it fits somewhere in between raw sockets
- and CORBA in terms of complexity.
+ D-Bus is a message bus, used for sending messages between applications.
+ Conceptually, it fits somewhere in between raw sockets and CORBA in
+ terms of complexity.
  .
  D-Bus supports broadcast messages, asynchronous messages (thus
- decreasing latency), authentication, and more.  It is designed to be
+ decreasing latency), authentication, and more. It is designed to be
  low-overhead; messages are sent using a binary protocol, not using
- XML.  D-Bus also supports a method call mapping for its messages, but
+ XML. D-Bus also supports a method call mapping for its messages, but
  it is not required; this makes using the system quite simple.
  .
  It comes with several bindings, including GLib, Python, Qt and Java.

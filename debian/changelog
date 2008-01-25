@@ -21,6 +21,8 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
     - Removed, merged upstream.
   * debian/patches/04_dbus_launch.patch
     - Removed, merged upstream.
+  * debian/control
+    - Bump Standards-Version to 3.7.3. No further changes required.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
