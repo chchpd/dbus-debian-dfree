@@ -42,6 +42,7 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
   * Bump up dbus-x11 conflicts/replaces to << 1.1.2 to match the transition
     version in Ubuntu and reduce the delta.
   * Cleanup trailing whitespace.
+  * Drop superfluous exit 0 at the end of dbus' init script which is set -e.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
