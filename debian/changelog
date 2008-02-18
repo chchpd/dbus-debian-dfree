@@ -45,6 +45,8 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
   * Drop superfluous exit 0 at the end of dbus' init script which is set -e.
   * Add ${shlibs:Depends} to libdbus-1-dev.
   * Simplify dbus.postinst.
+  * Rename patch dbus-1.0.1-generate-xml-docs to
+    10_dbus-1.0.1-generate-xml-docs to reflect current patch stack order.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
