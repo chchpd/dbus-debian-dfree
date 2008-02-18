@@ -35,9 +35,10 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
     eliminates the race condition of starting the X session before hal is
     running.  Migrate rc?.d symlinks from 20 to 12/88 on upgrades.  This need
     to be kept until after lenny is released.
-  * Set LSB Default-Stop section to 1 to only stop dbus when going down to
-    single user mode; dbus can simply be killed like everything else on
-    shutdown or reboot by sendsigs.
+  * Set LSB Default-Stop section to 1 and only install a shutdown script for
+    runlevel 1 to only stop dbus when going down to single user mode; dbus can
+    simply be killed like everything else on shutdown or reboot by sendsigs;
+    drop rc0 and rc6.d symlinks on upgrades.
   * Bump up dbus-x11 conflicts/replaces to << 1.1.2 to match the transition
     version in Ubuntu and reduce the delta.
 

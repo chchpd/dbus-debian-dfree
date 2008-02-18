@@ -35,21 +35,25 @@ esac
 
 # fix rc symlink priorities for upgrades from older versions
 if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.1.4-1; then
-    echo "Fixing up dbus startup script priorities..." >&2
+    echo "Fixing up dbus startup script runlevels and priorities..." >&2
+    # update start scripts to use the proper priority
     for l in 2 3 4 5; do
         old=/etc/rc$l.d/S20dbus
         new=/etc/rc$l.d/S12dbus
         if [ -e $old ] && ! [ -e $new ]; then
-            mv $old $new
+            mv -vf $old $new >&2
         fi
     done
-    for l in 0 1 6; do
-        old=/etc/rc$l.d/K20dbus
-        new=/etc/rc$l.d/K88dbus
-        if [ -e $old ] && ! [ -e $new ]; then
-            mv $old $new
+    # drop stop scripts in runlevels we don't install anymore
+    for l in 0 6; do
+        if [ -L /etc/rc$l.d/K20dbus ] && [ "../init.d/dbus"  = "$(readlink /etc/rc$l.d/K20dbus)" ]; then
+            rm -vf /etc/rc$l.d/K20dbus >&2
         fi
     done
+    # update stop script to use the proper priority
+    if [ -e /etc/rc1.d/K20dbus ] && ! [ -e /etc/rc1.d/K88dbus ]; then
+        mv -vf /etc/rc1.d/K20dbus /etc/rc1.d/K88dbus >&2
+    fi
 fi
 
 #DEBHELPER#
