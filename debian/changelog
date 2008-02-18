@@ -1,4 +1,4 @@
-dbus (1.1.4-1) UNRELEASED; urgency=low
+dbus (1.1.4-1) unstable; urgency=low
 
   [ Loic Minier ]
   * Merge patch from Ubuntu to build a devhelp file; thanks Martin Pitt;
@@ -47,6 +47,9 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
   * Simplify dbus.postinst.
   * Rename patch dbus-1.0.1-generate-xml-docs to
     10_dbus-1.0.1-generate-xml-docs to reflect current patch stack order.
+  * Set shlibs via DEB_DH_MAKESHLIBS_ARGS_ALL instead of libdbus-1-3.shlibs
+    and extract libdbus-1-3 package name from control to avoid hardcoding the
+    SONAME and package name.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
