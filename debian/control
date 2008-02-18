@@ -61,8 +61,8 @@ Section: x11
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          dbus
-Conflicts: dbus (<< 1.0.2-5)
-Replaces: dbus (<< 1.0.2-5)
+Conflicts: dbus (<< 1.1.2)
+Replaces: dbus (<< 1.1.2)
 Description: simple interprocess messaging system (X11 deps)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in

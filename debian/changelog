@@ -37,6 +37,8 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
   * Set LSB Default-Stop section to 1 to only stop dbus when going down to
     single user mode; dbus can simply be killed like everything else on
     shutdown or reboot by sendsigs.
+  * Bump up dbus-x11 conflicts/replaces to << 1.1.2 to match the transition
+    version in Ubuntu and reduce the delta.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
