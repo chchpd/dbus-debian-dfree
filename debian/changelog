@@ -12,25 +12,6 @@ dbus (1.1.4-1) unstable; urgency=low
     - Install the devhelp index in dbus-1-doc and move the HTML documentation
       around; add a symlink from the gtk-doc dir.
   * Misc smallish whitespace cleanups.
-
-  [ Michael Biebl ]
-  * New upstream release.
-  * Deprecate the ENABLED option and remove it from /etc/default/dbus. Print a
-    warning message in the init script if this option is still used.
-  * debian/patches/03_uuid_nul.patch
-    - Removed, merged upstream.
-  * debian/patches/04_dbus_launch.patch
-    - Removed, merged upstream.
-  * debian/control
-    - Bump Standards-Version to 3.7.3. No further changes required.
-  * debian/dbus.init
-    - Fix LSB init header. Use $remote_fs instead of $local_fs as the
-      daemon requires /usr to be mounted.
-      Remove S from Should-Stop. (Closes: #459473)
-    - Use mountpoint to check if /proc is mounted. (Closes: #458392)
-    - Decrease retry-time to 5 secs on stop. (Closes: #462182)
-
-  [ Loic Minier ]
   * Start dbus at runlevel priority 12 and stop at priority 88.  This
     eliminates the race condition of starting the X session before hal is
     running.  Migrate rc?.d symlinks from 20 to 12/88 on upgrades.  This need
@@ -50,6 +31,23 @@ dbus (1.1.4-1) unstable; urgency=low
   * Set shlibs via DEB_DH_MAKESHLIBS_ARGS_ALL instead of libdbus-1-3.shlibs
     and extract libdbus-1-3 package name from control to avoid hardcoding the
     SONAME and package name.
+
+  [ Michael Biebl ]
+  * New upstream release.
+  * Deprecate the ENABLED option and remove it from /etc/default/dbus. Print a
+    warning message in the init script if this option is still used.
+  * debian/patches/03_uuid_nul.patch
+    - Removed, merged upstream.
+  * debian/patches/04_dbus_launch.patch
+    - Removed, merged upstream.
+  * debian/control
+    - Bump Standards-Version to 3.7.3. No further changes required.
+  * debian/dbus.init
+    - Fix LSB init header. Use $remote_fs instead of $local_fs as the
+      daemon requires /usr to be mounted.
+      Remove S from Should-Stop. (Closes: #459473)
+    - Use mountpoint to check if /proc is mounted. (Closes: #458392)
+    - Decrease retry-time to 5 secs on stop. (Closes: #462182)
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
