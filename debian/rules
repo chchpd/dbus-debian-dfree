@@ -18,7 +18,7 @@ DEB_CONFIGURE_EXTRA_FLAGS += \
 	--enable-doxygen-docs \
 	--disable-userdb-cache
 
-DEB_UPDATE_RCD_PARAMS += defaults 12 20
+DEB_UPDATE_RCD_PARAMS += defaults 12 88
 
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d

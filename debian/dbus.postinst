@@ -43,6 +43,13 @@ if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.1.4-1; then
             mv $old $new
         fi
     done
+    for l in 0 1 6; do
+        old=/etc/rc$l.d/K20dbus
+        new=/etc/rc$l.d/K88dbus
+        if [ -e $old ] && ! [ -e $new ]; then
+            mv $old $new
+        fi
+    done
 fi
 
 #DEBHELPER#

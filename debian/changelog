@@ -31,9 +31,10 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
     - Decrease retry-time to 5 secs on stop. (Closes: #462182)
 
   [ Loic Minier ]
-  * Start dbus at runlevel priority 12.  This eliminates the race condition of
-    starting the X session before hal is running.  Migrate rc?.d symlinks from
-    20 to 12 on upgrades.  This need to be kept until after lenny is released.
+  * Start dbus at runlevel priority 12 and stop at priority 88.  This
+    eliminates the race condition of starting the X session before hal is
+    running.  Migrate rc?.d symlinks from 20 to 12/88 on upgrades.  This need
+    to be kept until after lenny is released.
   * Set LSB Default-Stop section to 1 to only stop dbus when going down to
     single user mode; dbus can simply be killed like everything else on
     shutdown or reboot by sendsigs.
