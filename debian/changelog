@@ -44,6 +44,7 @@ dbus (1.1.4-1) UNRELEASED; urgency=low
   * Cleanup trailing whitespace.
   * Drop superfluous exit 0 at the end of dbus' init script which is set -e.
   * Add ${shlibs:Depends} to libdbus-1-dev.
+  * Simplify dbus.postinst.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
 
