@@ -33,5 +33,17 @@ case "$1" in
     ;;
 esac
 
+# fix rc symlink priorities for upgrades from older versions
+if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.1.4-1; then
+    echo "Fixing up dbus startup script priorities..." >&2
+    for l in 2 3 4 5; do
+        old=/etc/rc$l.d/S20dbus
+        new=/etc/rc$l.d/S12dbus
+        if [ -e $old ] && ! [ -e $new ]; then
+            mv $old $new
+        fi
+    done
+fi
+
 #DEBHELPER#
 
