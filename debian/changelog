@@ -1,10 +1,14 @@
-dbus (1.1.4-2) unstable; urgency=medium
+dbus (1.1.20-1) unstable; urgency=medium
 
+  [ Loic Minier ]
   * Forcefully remove old init script symlinks on upgrades to this version to
     properly reinstall the init script when using insserv or file-rc; thanks
     Petter Reinholdtsen; closes: #466503.
 
- -- Loic Minier <lool@dooz.org>  Thu, 21 Feb 2008 12:04:04 +0100
+  [ Michael Biebl ]
+  * New upstream release. 
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 28 Feb 2008 09:01:00 +0100
 
 dbus (1.1.4-1) unstable; urgency=low
 
