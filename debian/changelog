@@ -6,7 +6,13 @@ dbus (1.1.20-1) unstable; urgency=medium
     Petter Reinholdtsen; closes: #466503.
 
   [ Michael Biebl ]
-  * New upstream release. 
+  * New upstream release:
+    + SECURITY - CVE-2008-0595:
+      security policy of the type <allow send_interface="some.interface.With
+      Methods"/> work as an implicit allow for messages sent without an
+      interface bypassing the default deny rules and potentially allowing
+      restricted methods exported on the bus to be executed by unauthorized
+      users. 
 
  -- Michael Biebl <biebl@debian.org>  Thu, 28 Feb 2008 09:01:00 +0100
 
