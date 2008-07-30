@@ -16,7 +16,7 @@ diff --git a/dbus/dbus-sysdeps-unix.c b/dbus/dbus-sysdeps-unix.c
 index 64d925d..c96499a 100644
 --- a/dbus/dbus-sysdeps-unix.c
 +++ b/dbus/dbus-sysdeps-unix.c
-@@ -1487,28 +1487,60 @@ fill_user_info (DBusUserInfo       *info,
+@@ -1452,28 +1452,60 @@ fill_user_info (DBusUserInfo       *info,
    {
      struct passwd *p;
      int result;
@@ -91,7 +91,7 @@ index 64d925d..c96499a 100644
        }
      else
        {
-@@ -1516,6 +1548,7 @@ fill_user_info (DBusUserInfo       *info,
+@@ -1481,6 +1513,7 @@ fill_user_info (DBusUserInfo       *info,
                          "User \"%s\" unknown or no memory to allocate password entry\n",
                          username_c ? username_c : "???");
          _dbus_verbose ("User %s unknown\n", username_c ? username_c : "???");
@@ -99,7 +99,7 @@ index 64d925d..c96499a 100644
          return FALSE;
        }
    }
-@@ -1532,7 +1565,9 @@ fill_user_info (DBusUserInfo       *info,
+@@ -1497,7 +1530,9 @@ fill_user_info (DBusUserInfo       *info,
      if (p != NULL)
        {
          if (!fill_user_info_from_passwd (p, info, error))
