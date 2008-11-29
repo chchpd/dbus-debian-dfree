@@ -1,3 +1,9 @@
+dbus (1.2.4-1) UNRELEASED; urgency=low
+
+  * New upstream release
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 29 Nov 2008 18:59:29 +0100
+
 dbus (1.2.1-4) unstable; urgency=high
 
   * debian/patches/CVE-2008-3834.patch
