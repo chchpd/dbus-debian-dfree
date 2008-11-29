@@ -1,5 +1,310 @@
-dbus (1.0.0-1) experimental; urgency=low
+dbus (1.2.1-4) unstable; urgency=high
 
+  * debian/patches/CVE-2008-3834.patch
+    - The dbus_signature_validate function in the D-bus library allows
+      attackers to cause a denial of service (application abort) via a message
+      containing a malformed signature, which triggers a failed assertion
+      error. (Closes: #501443)
+      Fixes: CVE-2008-3834
+    - Urgency high for the security fix.
+  * debian/patches/20-dbus-alpha-unaligned.patch
+    - Fix misaligned memory access which causes "unaligned traps" on Alpha.
+      (Closes: #502408)
+  * debian/dbus.init
+    - Add "status" action to init script. (Closes: #470121)
+  * debian/control
+    - Bump Depends on lsb-base to >= 3.2-14, which provides status_of_proc().
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 25 Oct 2008 15:28:05 +0200
+
+dbus (1.2.1-3) unstable; urgency=low
+
+  * debian/patches/15_dbus_group_parsing.patch
+    - Added. Fixes failure to parse /etc/group when it contains lines with
+    more then 512 chars (Closes: #489738) (From upstream git)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 31 Jul 2008 00:04:21 +0100
+
+dbus (1.2.1-2) unstable; urgency=low
+
+  [ Sjoerd Simons ]
+  * debian/rules: Disable the disabling of the userdb cache. No other
+    distribution disables it and it is somewhat buggy (Thanks to Scott James
+    Remnant for pointing out this issue)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 26 Apr 2008 12:41:47 +0200
+
+dbus (1.2.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/rules, debian/dbus.postinst
+    - Minimize downtime of the system message bus (and dependent D-Bus
+      services) by restarting dbus in postinst instead of stop in prerm and
+      start in postinst. (Closes: #428669)
+  * debian/libdbus-1-3.symbols
+    - Add symbols file for improved shared library dependencies.
+  * debian/shlibs.local
+    - This file has been neglected for quite some time and has been
+      obsoleted by the symbols file so better remove it.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 11 Apr 2008 16:33:42 +0200
+
+dbus (1.1.20-1) unstable; urgency=medium
+
+  [ Loic Minier ]
+  * Forcefully remove old init script symlinks on upgrades to this version to
+    properly reinstall the init script when using insserv or file-rc; thanks
+    Petter Reinholdtsen; closes: #466503.
+
+  [ Michael Biebl ]
+  * New upstream release:
+    + SECURITY - CVE-2008-0595:
+      security policy of the type <allow send_interface="some.interface.With
+      Methods"/> work as an implicit allow for messages sent without an
+      interface bypassing the default deny rules and potentially allowing
+      restricted methods exported on the bus to be executed by unauthorized
+      users. 
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 28 Feb 2008 09:01:00 +0100
+
+dbus (1.1.4-1) unstable; urgency=low
+
+  [ Loic Minier ]
+  * Merge patch from Ubuntu to build a devhelp file; thanks Martin Pitt;
+    closes: #454142.
+    - Build-dep on xsltproc.
+    - New patch, dbus-1.0.1-generate-xml-docs, enables generation of XML docs
+      which serve as source for the devhelp generation.
+    - Add a XSLT file from the Fedora package, debian/doxygen_to_devhelp.xsl.
+    - Generate the devhelp file from the XML files thanks to the XSL file via
+      xsltproc in build/dbus-1-doc::.
+    - Install the devhelp index in dbus-1-doc and move the HTML documentation
+      around; add a symlink from the gtk-doc dir.
+  * Misc smallish whitespace cleanups.
+  * Start dbus at runlevel priority 12 and stop at priority 88.  This
+    eliminates the race condition of starting the X session before hal is
+    running.  Migrate rc?.d symlinks from 20 to 12/88 on upgrades.  This need
+    to be kept until after lenny is released.
+  * Set LSB Default-Stop section to 1 and only install a shutdown script for
+    runlevel 1 to only stop dbus when going down to single user mode; dbus can
+    simply be killed like everything else on shutdown or reboot by sendsigs;
+    drop rc0 and rc6.d symlinks on upgrades.
+  * Bump up dbus-x11 conflicts/replaces to << 1.1.2 to match the transition
+    version in Ubuntu and reduce the delta.
+  * Cleanup trailing whitespace.
+  * Drop superfluous exit 0 at the end of dbus' init script which is set -e.
+  * Add ${shlibs:Depends} to libdbus-1-dev.
+  * Simplify dbus.postinst.
+  * Rename patch dbus-1.0.1-generate-xml-docs to
+    10_dbus-1.0.1-generate-xml-docs to reflect current patch stack order.
+  * Set shlibs via DEB_DH_MAKESHLIBS_ARGS_ALL instead of libdbus-1-3.shlibs
+    and extract libdbus-1-3 package name from control to avoid hardcoding the
+    SONAME and package name.
+
+  [ Michael Biebl ]
+  * New upstream release.
+  * Deprecate the ENABLED option and remove it from /etc/default/dbus. Print a
+    warning message in the init script if this option is still used.
+  * debian/patches/03_uuid_nul.patch
+    - Removed, merged upstream.
+  * debian/patches/04_dbus_launch.patch
+    - Removed, merged upstream.
+  * debian/control
+    - Bump Standards-Version to 3.7.3. No further changes required.
+  * debian/dbus.init
+    - Fix LSB init header. Use $remote_fs instead of $local_fs as the
+      daemon requires /usr to be mounted.
+      Remove S from Should-Stop. (Closes: #459473)
+    - Use mountpoint to check if /proc is mounted. (Closes: #458392)
+    - Decrease retry-time to 5 secs on stop. (Closes: #462182)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 04 Dec 2007 21:31:12 +0100
+
+dbus (1.1.2-1) unstable; urgency=low
+
+  [ Michael Biebl ]
+  * New upstream release.
+  * debian/control
+    - Use the new "Homepage:" field to specify the upstream URL.
+    - The Vcs-* fields are now officially supported, so remove the XS- prefix.
+    - Demote dbus-x11 dependency to a Recommends. (Closes: #427932)
+  * debian/dbus.install
+    - Install the dbus-daemon-launch-helper binary.
+    - Install the directory /usr/share/dbus-1/system-services.
+  * debian/dbus.postinst
+    - Install the dbus-daemon-launch-helper binary SUID root and make it
+      executable for the messagebus group.
+    - General cleanup. Remove superfluous addgroup and chgrp call.
+
+  [ Sjoerd Simons ]
+  * debian/dbus.init
+    - Warn if /proc isn't mounted and refuse to start (Closes: #431101, #447363)
+  * debian/patches/03_uuid_nul.patch
+    - Added. Don't accidentally overwrite the last byte of the uuid with nul
+      while autostarting. (From upstream GIT)
+  * debian/patches/04_dbus_launch.patch
+    - Added. Also save the session bus info in X11 on a normally launched bus.
+      This ensures apps that don't have a session bus address in their
+      environment can still properly connect to a DISPLAY's normal session bus.
+      Making hacks to determine which dbus address belongs to a DISPLAY as
+      used by some obsolete.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Fri, 23 Nov 2007 11:33:00 +0100
+
+dbus (1.1.1-3) unstable; urgency=low
+
+  * List arches where the build-dep on libselinux1-dev doesn't apply; thanks
+    Michael Banck; closes: #430821.
+  * Wrap build-deps and deps.
+  * Misc cleanups, including quoting in maintainer scripts.
+  * Add myself as uploader.
+  * Add ${misc:Depends}.
+
+ -- Loic Minier <lool@dooz.org>  Wed, 27 Jun 2007 16:42:08 +0200
+
+dbus (1.1.1-2) UNRELEASED; urgency=low
+
+  * debian/control
+    - Fix small typo in the dbus-x11 package description. (Closes: #430736)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 27 Jun 2007 01:42:38 +0200
+
+
+dbus (1.1.1-1) unstable; urgency=low
+
+  [ Michael Biebl ]
+  * debian/patches/02_dbus_monitor_no_sigint_handler.patch
+    + Remove the sigint_handler in dbus-monitor so the application properly
+      terminates on STRG+C. (Closes: #414139)
+
+  [ Sjoerd Simons ]
+  * New upstream release
+  * debian/libdbus-1-3.shlibs: Bumped shlibs
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 19 Jun 2007 13:18:12 +0100
+
+dbus (1.1.0-1) unstable; urgency=low
+
+  [ Sjoerd Simons ]
+  * New upstream release
+
+  [ Tim Dijkstra ]
+  * Disable userdb cache. If you need a cache, use nscd. (closes: #370569)
+
+  [ Michael Biebl ]
+  * debian/control
+    + Fix small typo in the dbus-x11 package description. (Closes: #425132)
+    + Replace Source-Version with binary:Version for libdbus-1-dev.
+  * debian/dbus.init
+    + Suppress error messages about nonexistent or unreadable files.
+      (Closes: #426296)
+    + Do not abort on grep errors. (Closes: #423380)
+    + Do not abort if starting a dependent service fails.
+  * debian/control
+    + Add build dependency on autotools-dev for up-to-date config.{guess,sub}
+      files.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 06 Jun 2007 15:39:23 +0200
+
+dbus (1.0.2-5) unstable; urgency=low
+
+  [ Michael Biebl ]
+  * debian/dbus.init
+    + Add some safety checks and support for file-rc. (Closes: #419984)
+  * Drop dbus-1-utils package and move dbus-monitor into the dbus package.
+    (Closes: #404981)
+  * Create dbus-x11 package and move dbus-launch and the Xsession start script
+    from dbus into this package. This removes the X11 dependency from the dbus
+    package.
+    Add a dependency on dbus-x11 to the dbus package, to not break packages
+    which still depend on dbus but should be updated to depend on dbus-x11
+    instead if they require a D-Bus session bus.
+
+  [ Sjoerd Simons ]
+  * debian/control: Add libselinux1-dev to build depends
+  * debian/rules: Clean up some more generated files (From the ubuntu
+    packaging)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Thu, 03 May 2007 13:28:19 +0200
+
+dbus (1.0.2-4) unstable; urgency=low
+
+  * debian/dbus.init
+    + Properly quote the runlevel variable $r. (Closes: #419818)
+  * debian/dbus.prerm
+    + Removed empty maintainer script.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 18 Apr 2007 19:16:13 +0200
+
+dbus (1.0.2-3) unstable; urgency=low
+
+  * debian/dbus.post{inst,rm}
+    + Restart dbus on upgrades again. Might break some applications, but they
+      should be fixed.
+  * debian/dbus.init
+    + Don't return an error, if start is called when there is already a bus
+      running.
+  * debian/dbus.init
+    + Handle errors from /sbin/runlevel. Fixes dbus installation in chroots.
+      (Closes: #419655)
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 17 Apr 2007 17:55:14 +0200
+
+dbus (1.0.2-2) unstable; urgency=low
+
+  [ Sebastian Dröge ]
+  * debian/control:
+    + Updated to use my debian.org mail address
+
+  [ Michael Biebl ]
+  * debian/control
+    + Add XS-Vcs-* fields.
+    + Add myself to Uploaders.
+    + Update description.
+  * debian/watch
+    + Added. Allows to track upstream releases.
+  * debian/dbus.init
+    + Add functionality to start/stop dbus dependent services based on their
+      LSB header.
+      Instead of installing an init script into /etc/dbus-1/event.d, services
+      depending on dbus should from now on install a regular sysv init script
+      and add an LSB header with "Required-Start: dbus".
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 13 Apr 2007 00:56:54 +0200
+
+dbus (1.0.2-1) unstable; urgency=high
+
+  * New upstream release:
+    + Urgency set to high because it fixes a local denial of service
+      exploit involving removal of match rules from other apps.
+      This effects all versions of D-Bus. CVE-2006-6107
+      https://bugs.freedesktop.org/show_bug.cgi?id=9142
+  * debian/patches/02_fix_thread_initialisation.patch:
+    + Dropped, merged upstream
+
+ -- Sebastian Dröge <slomo@ubuntu.com>  Tue, 12 Dec 2006 23:36:37 +0100
+
+dbus (1.0.1-2) unstable; urgency=medium
+
+  * There is no need anymore to install a custom session.conf. Also The custom
+    one doesn't include the new directive to look at various standard service
+    dirs.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 19 Nov 2006 22:59:17 +0100
+
+dbus (1.0.1-1) unstable; urgency=medium
+
+  * New bugfix release
+  * Fixes bug where calling dbus_threads_init_default would assert
+  * debian/patches/02_fix_thread_initialisation.patch
+    + Fixes an assertion failure when using pthreads (From upstream CVS)
+  * Urgency medium, fixes two assertion failures.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 19 Nov 2006 22:02:16 +0100
+
+dbus (1.0.0-1) unstable; urgency=low
+
+  [ Sebastian Dröge ]
   * New upstream release, 1.0.0 aka "Blue Bird"
   * debian/patches/01_no-fatal-warnings.patch:
     + Don't abort on fatal warnings now by default. This behaviour can be
@@ -7,7 +312,14 @@ dbus (1.0.0-1) experimental; urgency=low
       This will be set to upstream default again at some point so if you have
       an application that prints a DBus warning get it fixed.
 
- -- Sebastian Dröge <slomo@ubuntu.com>  Fri, 10 Nov 2006 09:32:20 +0100
+  [ Sjoerd Simons ]
+  * Target unstable. Since 0.94 only bugfixes and cleanups went in.
+  * Also generate the machine-id on reload if it doesn't exist and reload the
+    bus on upgrades. (Closes: #357247)
+  * patches/40_dbus_launch_get_uuid.patch
+    + Dropped, fixed upstream
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Tue, 14 Nov 2006 15:35:00 +0100
 
 dbus (0.95-1) experimental; urgency=low
 
@@ -21,13 +333,22 @@ dbus (0.95-1) experimental; urgency=low
 
  -- Sebastian Dröge <slomo@ubuntu.com>  Sun,  5 Nov 2006 23:22:01 +0100
 
-dbus (0.94-2) unstable; urgency=low
+dbus (0.94-2) unstable; urgency=medium
 
+  [ Sebastian Dröge ]
   * debian/patches/30_dbus_send_close_shared_connection.patch:
-    + Don't close shared connection in dbus-send. (Closes: 395358)
+    + Don't close shared connection in dbus-send. (Closes: 395358, 397303)
       Patch from upstream CVS
 
- -- Sebastian Dröge <slomo@ubuntu.com>  Thu,  2 Nov 2006 23:55:31 +0100
+  [ Sjoerd Simons ]
+  * patches/40_dbus_launch_get_uuid.patch
+    + Added. Check if get_machine_uuid() returns NULL before proceeding any
+     further: we can't init the X atoms or create a session file name if there
+     is no machine ID. Solves a dbus-launch crash if there is no machine id.
+     (Closes: 3395938) Patch from upstream CVS
+  * 2 important bugfixes, setting urgency to medium.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Mon,  6 Nov 2006 22:02:19 +0100
 
 dbus (0.94-1) unstable; urgency=low
 
@@ -77,7 +398,7 @@ dbus (0.92-2) unstable; urgency=low
 
 dbus (0.92-1) experimental; urgency=low
 
-  * New upstream release 
+  * New upstream release
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sat, 19 Aug 2006 22:13:25 +0200
 
@@ -88,7 +409,7 @@ dbus (0.91-1) experimental; urgency=low
       packages now.
   * Bumped libdbus-1 soname
   * debian/control: Remove all build-depends and definitions for the bindings.
-  * debian/control: Update to use the official D-Bus spelling 
+  * debian/control: Update to use the official D-Bus spelling
   * debian/rules: Remove everything that was needed to build the bindings.
   * Remove files not applicable to the D-Bus bus and core libraries:
     + debian/python-dbus.install
@@ -133,9 +454,9 @@ dbus (0.62-4) unstable; urgency=low
 
 dbus (0.62-3) unstable; urgency=low
 
-  * Make the Qt4 bindings buid-depend on libqt4-dev (>= 4.1.3) 
+  * Make the Qt4 bindings buid-depend on libqt4-dev (>= 4.1.3)
     (Closes: #374802)
-  * Ensure /etc/dbus-1/system.d is included in the dbus package 
+  * Ensure /etc/dbus-1/system.d is included in the dbus package
     (Closes: #374930)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Thu, 22 Jun 2006 18:36:35 +0200
@@ -153,7 +474,7 @@ dbus (0.62-2) unstable; urgency=low
   * Let libdbus-1-2 recommend dbus. Almost all libdbus-1 using applications
     really need the dbus to be present so the recommends is justified.
     (Closes: #374726)
-  * debian/libdbus-qt-1-dev.install: Install all the needed header files. 
+  * debian/libdbus-qt-1-dev.install: Install all the needed header files.
     Thanks to Michael Biebl for testing a KDE4 build against these bindings.
 
  -- Sjoerd Simons <sjoerd@debian.org>  Wed, 21 Jun 2006 10:47:00 +0200
@@ -228,7 +549,7 @@ dbus (0.61-4) unstable; urgency=low
 
 dbus (0.61-3) unstable; urgency=low
 
-  * debian/patches/dbus-monoversion.patch 
+  * debian/patches/dbus-monoversion.patch
     + Added. Dbus mono assembly version is synced with release version, but
     nothing actually changed. This patch changes the assembly version back to
     0.60 to minimize breakage. New version will encode the assembly version
@@ -239,7 +560,7 @@ dbus (0.61-3) unstable; urgency=low
 dbus (0.61-2) unstable; urgency=low
 
   * debian/patches/dbus-qt-endianness.patch
-    + Added. Fix FTBS on big-endian architectures 
+    + Added. Fix FTBS on big-endian architectures
 
  -- Sjoerd Simons <sjoerd@debian.org>  Tue, 28 Feb 2006 00:58:05 +0100
 
@@ -257,7 +578,7 @@ dbus (0.61-1) unstable; urgency=medium
   * Update cli-common depend to >= 0.2.0. Older versions have known bugs
   * Let binary-predeb/libdbus-1-cil:: depend on
     common-binary-post-install-arch, so dh_clideps can do it's work correctly.
-  * debian/patches/dbus-qt-buildfix.patch 
+  * debian/patches/dbus-qt-buildfix.patch
     + Added. Fix compilation of the Qt bindings (from CVS)
   * debian/patches/dbus-update-automake.patch
     + Added. Do a new autogen run, because the qt patch patches autotools
@@ -285,7 +606,7 @@ dbus (0.60-5) unstable; urgency=low
 
 dbus (0.60-4) unstable; urgency=low
 
-  * Upload to unstable 
+  * Upload to unstable
 
  -- Sjoerd Simons <sjoerd@debian.org>  Thu,  5 Jan 2006 21:55:49 +0100
 
@@ -327,7 +648,7 @@ dbus (0.60-1) experimental; urgency=low
 dbus (0.50-3) experimental; urgency=low
 
   * Also move dbus-launch and dbus-send manpages to the dbus package
-  * debian/dbus.init 
+  * debian/dbus.init
     + Make force-reload an alias of reload instead of restart
 
  -- Sjoerd Simons <sjoerd@debian.org>  Mon, 21 Nov 2005 11:17:57 +0100
@@ -353,14 +674,14 @@ dbus (0.50-2) experimental; urgency=low
 
 dbus (0.50-1) experimental; urgency=low
 
-  * New upstream release 
+  * New upstream release
 
  -- Sjoerd Simons <sjoerd@debian.org>  Thu,  8 Sep 2005 10:01:21 +0200
 
 dbus (0.36.2-1) experimental; urgency=low
 
   * New upstream release
-  * Fix descriptions to refer to dbus rather than dbus-1. 
+  * Fix descriptions to refer to dbus rather than dbus-1.
   * Make dbus-1-utils depend on dbus
   * debian/patches/dbus-sessionbus-checkuid.patch
     + Removed. Fixed upstream
@@ -421,7 +742,7 @@ dbus (0.34-3) experimental; urgency=low
 
 dbus (0.34-2) experimental; urgency=low
 
-  * debian/dbus.init 
+  * debian/dbus.init
     + The even.d dir is in /etc/dbus-1 not in /etc/dbus
 
  -- Sjoerd Simons <sjoerd@debian.org>  Tue, 21 Jun 2005 16:16:43 +0200
@@ -488,13 +809,13 @@ dbus (0.23.4-1) unstable; urgency=low
 dbus (0.23.2-3) unstable; urgency=low
 
   * debian/patches/dbus-abi-api.patch
-    - Fix dbus api and abi breakage between 0.23.1 and 0.23.2 (Closes: #297020) 
+    - Fix dbus api and abi breakage between 0.23.1 and 0.23.2 (Closes: #297020)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Mon, 28 Feb 2005 15:05:19 +0100
 
 dbus (0.23.2-2) unstable; urgency=low
 
-  * debian/patches/dbus-python-fix.patch 
+  * debian/patches/dbus-python-fix.patch
     - Fix python bindings (Based on dbus CVS fix)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Thu, 24 Feb 2005 11:19:03 +0100
@@ -506,35 +827,35 @@ dbus (0.23.2-1bindings0) experimental; urgency=low
  -- Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
 
 dbus (0.23.2-1) unstable; urgency=low
-  * New upstream release 
+  * New upstream release
 
  -- Sjoerd Simons <sjoerd@debian.org>  Wed, 23 Feb 2005 13:04:21 +0100
 
 dbus (0.23.1-1bindings0) experimental; urgency=low
 
   * New upstream release
-  * debian/patches/dbus-monofixes.patch 
+  * debian/patches/dbus-monofixes.patch
     + Added. Some mono fixes from dbus cvs
 
  -- Sjoerd Simons <sjoerd@debian.org>  Thu, 17 Feb 2005 13:24:22 +0100
 
 dbus (0.23-1mono1) experimental; urgency=low
 
-  * Enable the qt bindings. Thanks to Kevin Ottens 
+  * Enable the qt bindings. Thanks to Kevin Ottens
     (Closes: #271895) (Closes: #271896) (Closes: #290622)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sat, 22 Jan 2005 13:53:27 +0100
 
 dbus (0.23-1mono0) experimental; urgency=low
 
-  * Enable the mono bindings 
+  * Enable the mono bindings
 
  -- Sjoerd Simons <sjoerd@debian.org>  Fri, 14 Jan 2005 17:54:26 +0100
 
 dbus (0.23-1) unstable; urgency=low
 
-  * New upstream release 
-  * Disable the mono bindings for the unstable packages untill mono goes into 
+  * New upstream release
+  * Disable the mono bindings for the unstable packages untill mono goes into
     testing.
 
  -- Sjoerd Simons <sjoerd@debian.org>  Fri, 14 Jan 2005 15:22:20 +0100
@@ -542,7 +863,7 @@ dbus (0.23-1) unstable; urgency=low
 dbus (0.22+cvs.20050104-1) experimental; urgency=low
 
   * CVS snapshot
-  * Package the dbus mono bindings for i386, powerpc and s390. Mostly based on 
+  * Package the dbus mono bindings for i386, powerpc and s390. Mostly based on
     patches from Edd Dumbill. (Closes: #260044)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Wed,  5 Jan 2005 18:20:47 +0100
@@ -558,7 +879,7 @@ dbus (0.22-3) unstable; urgency=medium
 
   * Actually ship the init script improvements mentioned in the previous
     upload. (please pass the brown paper bag)
-  * Call run-parts --reverse on the event.d dir when stopping dbus 
+  * Call run-parts --reverse on the event.d dir when stopping dbus
     (Closes: #269283)
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sat,  6 Nov 2004 16:17:40 +0100
@@ -589,7 +910,7 @@ dbus (0.22-1.1) unstable; urgency=high
 
 dbus (0.22-1) unstable; urgency=high
 
-  * New upstream release. 
+  * New upstream release.
     + Urgency high so it slips into sarge before the freeze.
 
  -- Daniel Stone <daniels@debian.org>  Tue, 17 Aug 2004 00:42:56 +0100
@@ -618,7 +939,7 @@ dbus (0.21-5) unstable; urgency=low
     the fixed patch for coping with unsigned long int vs. long unsigned int
   * Removed the seddery introduced in 0.21-2 because the above build-depend
     change should ensure we're safe.
-  
+
  -- Daniel Silverstone <dsilvers@debian.org>  Mon,  5 Jul 2004 17:44:06 +0100
 
 dbus (0.21-4) unstable; urgency=low
@@ -668,7 +989,7 @@ dbus (0.20-6) unstable; urgency=low
     NOTE: this is likely to be removed in a future version of dbus after the
     configuration file syntax stabilises. Please report bugs against packages
     which have configs which fail to parse with the latest dbus package.
-  
+
  -- Daniel Silverstone <dsilvers@debian.org>  Tue, 10 Feb 2004 00:46:52 +0000
 
 dbus (0.20-5) unstable; urgency=low
@@ -827,7 +1148,7 @@ dbus (0.11-1) unstable; urgency=low
 
 dbus (0.10+cvs20030503-2) unstable; urgency=low
 
-  * The "I've Got To Stop Taking Lives So Seriously" release. 
+  * The "I've Got To Stop Taking Lives So Seriously" release.
   * debian/control:
     - Add Build-Depends on docbook-utils.
 
@@ -934,5 +1255,5 @@ dbus (0.5-2) unstable; urgency=low
 dbus (0.5-1) unstable; urgency=low
 
   * Initial version (Closes: #183739)
-  
+
  -- Colin Walters <walters@debian.org>  Thu,  6 Mar 2003 17:58:06 -0500

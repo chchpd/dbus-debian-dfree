@@ -5,6 +5,3 @@
 
 # Parameters to pass to dbus.
 PARAMS=""
-
-# Whether or not to run the dbus system daemon; set to 0 to disable.
-ENABLED=1
