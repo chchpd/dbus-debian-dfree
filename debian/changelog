@@ -1,6 +1,6 @@
 dbus (1.2.1-5) UNRELEASED; urgency=low
 
-  * debian/patches/CV-2008-4311:
+  * debian/patches/CV-2008-4311.patch:
     + Added, Fixes CVE-2008-4311. A mistake in the default configuration for
       the system bus (system.conf) which made the default policy for both sent
       and received messages effectively *allow*, and not deny as intended. This
