@@ -1,12 +1,16 @@
 dbus (1.2.6-1) UNRELEASED; urgency=low
 
-  * New upstream release.
+  [ Sjoerd Simons ]
+  * New upstream release
+  * Fixes CVE-2008-4311 (Closes: #503532, #508032)
+
+  [ Michael Biebl ]
   * debian/libdbus-1-3.symbols
     - Updated, new symbol was has been added.
   * debian/rules
     - Bump shlibs to 1.2.4.
 
- -- Michael Biebl <biebl@debian.org>  Sun, 30 Nov 2008 02:53:38 +0100
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 07 Dec 2008 13:30:19 +0000
 
 dbus (1.2.4-1) experimental; urgency=low
 
