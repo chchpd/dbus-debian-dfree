@@ -6,9 +6,11 @@ dbus (1.2.8-1) UNRELEASED; urgency=low
 
   [ Michael Biebl ]
   * debian/libdbus-1-3.symbols
-    - Updated, new symbol was has been added.
+    - Updated, new symbol has been added.
   * debian/rules
     - Bump shlibs to 1.2.4.
+  * debian/control
+    - Bump Standards-Version to 3.8.0. No further changes.
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sun, 07 Dec 2008 13:30:19 +0000
 

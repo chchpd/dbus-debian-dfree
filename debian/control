@@ -16,7 +16,7 @@ Build-Depends: cdbs (>= 0.4.43),
                xsltproc,
                libx11-dev,
                libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64]
-Standards-Version: 3.7.3
+Standards-Version: 3.8.0
 Vcs-Svn: svn://svn.debian.org/svn/pkg-utopia/packages/unstable/dbus
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus
 Homepage: http://dbus.freedesktop.org/
