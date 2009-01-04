@@ -1,11 +1,23 @@
 dbus (1.2.1-5) UNRELEASED; urgency=low
 
+  [ Sjoerd Simons ]
   * debian/patches/CV-2008-4311.patch:
     + Added, Fixes CVE-2008-4311. A mistake in the default configuration for
       the system bus (system.conf) which made the default policy for both sent
       and received messages effectively *allow*, and not deny as intended. This
       patch fixes the send side permissions (Closes: #503532, #508032)
   * Urgency high for the security fix
+
+  [ Simon McVittie ]
+  * Rename CVE-*.patch to prefix them with a sequence number so it's clear
+    what order they should apply in
+  * Add 51-CVE-2008-4311-but-allow-signals.patch, cherry-picked from upstream
+    git commit d899734475: after fixing CVE-2008-4311, re-allow emitting
+    signals
+  * debian/patches/3[0-4]*.patch, cherry-picked from upstream git (see patches
+    for commit IDs): add logging when permission to send a message is denied
+  * debian/patches/35-syslog-h.patch: #include <syslog.h> to fix compilation
+    with the logging patches applied
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sun, 07 Dec 2008 12:30:09 +0000
 
