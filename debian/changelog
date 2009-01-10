@@ -1,7 +1,7 @@
-dbus (1.2.1-5) UNRELEASED; urgency=low
+dbus (1.2.1-5) unstable; urgency=high
 
   [ Sjoerd Simons ]
-  * debian/patches/CV-2008-4311.patch:
+  * debian/patches/CVE-2008-4311.patch:
     + Added, Fixes CVE-2008-4311. A mistake in the default configuration for
       the system bus (system.conf) which made the default policy for both sent
       and received messages effectively *allow*, and not deny as intended. This
@@ -19,7 +19,7 @@ dbus (1.2.1-5) UNRELEASED; urgency=low
   * debian/patches/35-syslog-h.patch: #include <syslog.h> to fix compilation
     with the logging patches applied
 
- -- Sjoerd Simons <sjoerd@debian.org>  Sun, 07 Dec 2008 12:30:09 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 10 Jan 2009 21:43:16 +0000
 
 dbus (1.2.1-4) unstable; urgency=high
 
