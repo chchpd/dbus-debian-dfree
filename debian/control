@@ -5,7 +5,8 @@ Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.
 Uploaders: Sjoerd Simons <sjoerd@debian.org>,
            Sebastian Dröge <slomo@debian.org>,
            Michael Biebl <biebl@debian.org>,
-           Loic Minier <lool@dooz.org>
+           Loic Minier <lool@dooz.org>,
+           Simon McVittie <smcv@debian.org>
 Build-Depends: cdbs (>= 0.4.43),
                debhelper (>= 5.0.37.2),
                autotools-dev,

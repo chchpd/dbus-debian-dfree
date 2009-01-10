@@ -18,6 +18,7 @@ dbus (1.2.1-5) unstable; urgency=high
     for commit IDs): add logging when permission to send a message is denied
   * debian/patches/35-syslog-h.patch: #include <syslog.h> to fix compilation
     with the logging patches applied
+  * Add myself to Uploaders
 
  -- Simon McVittie <smcv@debian.org>  Sat, 10 Jan 2009 21:43:16 +0000
 
