@@ -100,7 +100,7 @@ Package: dbus-1-doc
 Section: doc
 Architecture: all
 Depends: ${misc:Depends}
-Suggests: dbus-1-dev
+Suggests: libdbus-1-dev
 Conflicts: libdbus0-doc
 Replaces: libdbus0-doc
 Description: simple interprocess messaging system (documentation)
