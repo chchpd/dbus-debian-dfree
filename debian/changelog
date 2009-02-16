@@ -1,11 +1,18 @@
 dbus (1.2.12-1) UNRELEASED; urgency=low
 
+  [ Simon McVittie ]
   * New upstream release
   * Merge experimental into unstable
     - Changes in packaging relative to experimental: add myself to
       Uploaders, and suggest libdbus-1-dev instead of nonexistent dbus-1-dev
 
- -- Simon McVittie <smcv@debian.org>  Mon, 16 Feb 2009 12:16:22 +0000
+  [ Michael Biebl ]
+  * Drop support for /etc/dbus-1/event.d. This interface has long been
+    deprecated and all affected Debian packages have been fixed for lenny.
+    If your (custom) service needs to be restarted on a dbus restart, add a
+    regular sysv init script and a "Required-Start: dbus" to the LSB header.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 16 Feb 2009 14:06:47 +0100
 
 dbus (1.2.8-1) experimental; urgency=low
 
