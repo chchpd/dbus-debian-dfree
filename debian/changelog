@@ -11,8 +11,10 @@ dbus (1.2.12-1) UNRELEASED; urgency=low
     deprecated and all affected Debian packages have been fixed for lenny.
     If your (custom) service needs to be restarted on a dbus restart, add a
     regular sysv init script and a "Required-Start: dbus" to the LSB header.
+  * debian/control
+    - Drop ancient Conflicts/Replaces which are from pre-oldstable (sarge).
 
- -- Michael Biebl <biebl@debian.org>  Mon, 16 Feb 2009 14:06:47 +0100
+ -- Michael Biebl <biebl@debian.org>  Mon, 16 Feb 2009 14:25:50 +0100
 
 dbus (1.2.8-1) experimental; urgency=low
 
