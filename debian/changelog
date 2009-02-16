@@ -1,7 +1,8 @@
-dbus (1.2.8-2) unstable; urgency=low
+dbus (1.2.12-1) UNRELEASED; urgency=low
 
+  * New upstream release
   * Merge experimental into unstable
-    - Changes in this package relative to experimental: add myself to
+    - Changes in packaging relative to experimental: add myself to
       Uploaders, and suggest libdbus-1-dev instead of nonexistent dbus-1-dev
 
  -- Simon McVittie <smcv@debian.org>  Mon, 16 Feb 2009 12:16:22 +0000
