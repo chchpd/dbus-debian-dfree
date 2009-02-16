@@ -8,7 +8,7 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
            Loic Minier <lool@dooz.org>,
            Simon McVittie <smcv@debian.org>
 Build-Depends: cdbs (>= 0.4.43),
-               debhelper (>= 5.0.37.2),
+               debhelper (>= 7),
                autotools-dev,
                libexpat-dev,
                doxygen,

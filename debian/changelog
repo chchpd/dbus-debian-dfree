@@ -13,6 +13,9 @@ dbus (1.2.12-1) UNRELEASED; urgency=low
     regular sysv init script and a "Required-Start: dbus" to the LSB header.
   * debian/control
     - Drop ancient Conflicts/Replaces which are from pre-oldstable (sarge).
+    - Bump debhelper Build-Depends to (>= 7).
+  * debian/compat
+    - Bump to debhelper v7 compat mode.
   * debian/copyright
     - Update AFL license to version 2.1.
     - Make it clear that dbus is released under version 2 of the GPL and refer
