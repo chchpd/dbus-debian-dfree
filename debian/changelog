@@ -1,3 +1,36 @@
+dbus (1.2.8-2) UNRELEASED; urgency=low
+
+  * Merge experimental into unstable
+    - Changes in this package relative to experimental: add myself to
+      Uploaders, and suggest libdbus-1-dev instead of nonexistent dbus-1-dev
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 16 Feb 2009 11:52:13 +0000
+
+dbus (1.2.8-1) experimental; urgency=low
+
+  [ Sjoerd Simons ]
+  * New upstream release
+  * Fixes CVE-2008-4311 (Closes: #503532, #508032)
+
+  [ Michael Biebl ]
+  * debian/libdbus-1-3.symbols
+    - Updated, new symbol has been added.
+  * debian/rules
+    - Bump shlibs to 1.2.4.
+  * debian/control
+    - Bump Standards-Version to 3.8.0. No further changes.
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sun, 07 Dec 2008 13:30:19 +0000
+
+dbus (1.2.4-1) experimental; urgency=low
+
+  * New upstream release
+  * Remove patches that were merged upstream
+    - debian/patches/15_dbus_group_parsing.patch
+    - debian/patches/CVE-2008-3834.patch
+
+ -- Sjoerd Simons <sjoerd@debian.org>  Sat, 29 Nov 2008 19:16:05 +0100
+
 dbus (1.2.1-5) unstable; urgency=high
 
   [ Sjoerd Simons ]
