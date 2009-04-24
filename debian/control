@@ -27,7 +27,6 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          adduser,
-         debianutils (>= 1.22.0),
          lsb-base (>= 3.2-14)
 Conflicts: dbus-1-utils (<< 1.0.2-5)
 Replaces: dbus-1-utils (<< 1.0.2-5)
