@@ -2,6 +2,8 @@ dbus (1.2.14-1) UNRELEASED; urgency=low
 
   * New upstream release.
   * Switch patch management system to quilt.
+  * Refresh and update patches.
+  * Remove debian/patches/20-dbus-alpha-unaligned.patch, fixed upstream.
   * debian/control
     - Drop dependency on debianutils as we no longer require run-parts.
 
