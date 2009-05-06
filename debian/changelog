@@ -1,6 +1,7 @@
 dbus (1.2.14-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * Switch patch management system to quilt.
   * debian/control
     - Drop dependency on debianutils as we no longer require run-parts.
 

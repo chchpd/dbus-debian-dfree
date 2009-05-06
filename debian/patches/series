@@ -1,0 +1,5 @@
+00_dbus-quiesce-startup-errors.patch
+01_no-fatal-warnings.patch -p0
+02_dbus_monitor_no_sigint_handler.patch
+10_dbus-1.0.1-generate-xml-docs.patch
+20-dbus-alpha-unaligned.patch
