@@ -35,12 +35,6 @@ if [ -e /etc/default/dbus ]; then
   . /etc/default/dbus
 fi
 
-if [ -n "$ENABLED" ]; then
-    log_warning_msg "The ENABLED option in /etc/default/$NAME has been deprecated."
-    log_warning_msg "Please remove this setting from the configuration file."
-    log_warning_msg "To disable the service use a runlevel editor like sysv-rc-conf or bum instead."
-fi
-
 create_machineid() {
   # Create machine-id file
   if [ -x $UUIDGEN ]; then
