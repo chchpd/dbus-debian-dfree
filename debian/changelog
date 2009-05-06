@@ -6,6 +6,10 @@ dbus (1.2.14-1) UNRELEASED; urgency=low
   * Remove debian/patches/20-dbus-alpha-unaligned.patch, fixed upstream.
   * debian/control
     - Drop dependency on debianutils as we no longer require run-parts.
+  * debian/libdbus-1-3.symbols
+    - Update for API additions.
+  * debian/rules
+    - Bump shlibs to 1.2.14.
 
  -- Michael Biebl <biebl@debian.org>  Thu, 07 May 2009 00:00:25 +0200
 
