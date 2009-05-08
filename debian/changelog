@@ -14,6 +14,12 @@ dbus (1.2.14-1) UNRELEASED; urgency=low
     - Remove chown call for /var/run/dbus as the init script will take care of
       setting the right permissions anyway. This also ensures that we don't
       fail if /var/run is on tmpfs. (Closes: #508931)
+  * Bump Standards-Version to 3.8.1. No longer ship /var/run/dbus in the
+    package but let the init script create it.
+  * debian/dbus.install
+    - Remove /var/run/dbus directory.
+  * debian/dbus.postrm
+    - Remove /var/run/dbus on purge.
 
  -- Michael Biebl <biebl@debian.org>  Fri, 08 May 2009 13:02:05 +0200
 
