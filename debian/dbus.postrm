@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$1" = "purge"] ; then
+if [ "$1" = "purge" ] ; then
 	rmdir /var/run/dbus || true
 fi
 
