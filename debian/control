@@ -32,7 +32,7 @@ Depends: ${shlibs:Depends},
 Conflicts: dbus-1-utils (<< 1.0.2-5)
 Replaces: dbus-1-utils (<< 1.0.2-5)
 Provides: dbus-1-utils
-Recommends: dbus-x11
+Suggests: dbus-x11
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
