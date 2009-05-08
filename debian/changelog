@@ -11,6 +11,8 @@ dbus (1.2.14-1) UNRELEASED; urgency=low
     - Update for API additions.
   * debian/rules
     - Bump shlibs to 1.2.14.
+    - Add "-Wl,--as-needed" to LDFLAGS. This way we don't pick up any spurious
+      X11 dependencies. (Closes: #499650)
   * debian/dbus.postinst
     - Remove chown call for /var/run/dbus as the init script will take care of
       setting the right permissions anyway. This also ensures that we don't

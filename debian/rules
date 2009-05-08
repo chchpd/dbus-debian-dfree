@@ -12,6 +12,8 @@ libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*
 
 DEB_DH_MAKESHLIBS_ARGS_ALL = -V '$(libdbusN) (>= 1.2.14)'
 
+LDFLAGS += -Wl,--as-needed
+
 # List any files which are not installed
 common-binary-post-install-arch:: list-missing
 
