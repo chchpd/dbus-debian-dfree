@@ -1,3 +1,69 @@
+dbus (1.2.14-3~exp1) UNRELEASED; urgency=low
+
+  * Sync unstable into experimental
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 May 2009 10:30:25 +0100
+
+dbus (1.2.14-2) unstable; urgency=low
+
+  * debian/dbus.postrm
+    - Add missing whitespace before ']'.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 08 May 2009 23:30:35 +0200
+
+dbus (1.2.14-1) unstable; urgency=low
+
+  * New upstream release.
+  * Switch patch management system to quilt.
+  * Refresh and update patches.
+  * Remove debian/patches/20-dbus-alpha-unaligned.patch, fixed upstream.
+  * debian/control
+    - Drop dependency on debianutils as we no longer require run-parts.
+    - Demote dbus-x11 from Recommends to Suggests. (Closes: #479341)
+  * debian/libdbus-1-3.symbols
+    - Update for API additions.
+  * debian/rules
+    - Bump shlibs to 1.2.14.
+    - Add "-Wl,--as-needed" to LDFLAGS. This way we don't pick up any spurious
+      X11 dependencies. (Closes: #499650)
+  * debian/dbus.postinst
+    - Remove chown call for /var/run/dbus as the init script will take care of
+      setting the right permissions anyway. This also ensures that we don't
+      fail if /var/run is on tmpfs. (Closes: #508931)
+  * Bump Standards-Version to 3.8.1. No longer ship /var/run/dbus in the
+    package but let the init script create it.
+  * debian/dbus.install
+    - Remove /var/run/dbus directory.
+  * debian/dbus.postrm
+    - Remove /var/run/dbus on purge.
+
+ -- Michael Biebl <biebl@debian.org>  Fri, 08 May 2009 14:31:33 +0200
+
+dbus (1.2.12-1) unstable; urgency=low
+
+  [ Simon McVittie ]
+  * New upstream release
+  * Merge experimental into unstable
+    - Changes in packaging relative to experimental: add myself to
+      Uploaders, and suggest libdbus-1-dev instead of nonexistent dbus-1-dev
+
+  [ Michael Biebl ]
+  * Drop support for /etc/dbus-1/event.d. This interface has long been
+    deprecated and all affected Debian packages have been fixed for lenny.
+    If your (custom) service needs to be restarted on a dbus restart, add a
+    regular sysv init script and "Required-Start: dbus" to the LSB header.
+  * debian/control
+    - Drop ancient Conflicts/Replaces which are from pre-oldstable (sarge).
+    - Bump debhelper Build-Depends to (>= 7).
+  * debian/compat
+    - Bump to debhelper v7 compat mode.
+  * debian/copyright
+    - Update AFL license to version 2.1.
+    - Make it clear that dbus is released under version 2 of the GPL and refer
+      to the versioned GPL-2 file in /usr/share/common-licenses.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 16 Feb 2009 15:07:46 +0100
+
 dbus (1.2.8-1) experimental; urgency=low
 
   [ Sjoerd Simons ]
@@ -22,6 +88,30 @@ dbus (1.2.4-1) experimental; urgency=low
     - debian/patches/CVE-2008-3834.patch
 
  -- Sjoerd Simons <sjoerd@debian.org>  Sat, 29 Nov 2008 19:16:05 +0100
+
+dbus (1.2.1-5) unstable; urgency=high
+
+  [ Sjoerd Simons ]
+  * debian/patches/CVE-2008-4311.patch:
+    + Added, Fixes CVE-2008-4311. A mistake in the default configuration for
+      the system bus (system.conf) which made the default policy for both sent
+      and received messages effectively *allow*, and not deny as intended. This
+      patch fixes the send side permissions (Closes: #503532, #508032)
+  * Urgency high for the security fix
+
+  [ Simon McVittie ]
+  * Rename CVE-*.patch to prefix them with a sequence number so it's clear
+    what order they should apply in
+  * Add 51-CVE-2008-4311-but-allow-signals.patch, cherry-picked from upstream
+    git commit d899734475: after fixing CVE-2008-4311, re-allow emitting
+    signals
+  * debian/patches/3[0-4]*.patch, cherry-picked from upstream git (see patches
+    for commit IDs): add logging when permission to send a message is denied
+  * debian/patches/35-syslog-h.patch: #include <syslog.h> to fix compilation
+    with the logging patches applied
+  * Add myself to Uploaders
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 10 Jan 2009 21:43:16 +0000
 
 dbus (1.2.1-4) unstable; urgency=high
 

@@ -15,8 +15,6 @@ if [ "$1" = configure ]; then
             --disabled-password \
             --group "$MESSAGEUSER"
 
-    chown "$MESSAGEUSER":"$MESSAGEUSER" "$MESSAGEHOME"
-
     if ! dpkg-statoverride --list "$LAUNCHER" >/dev/null 2>&1; then
             chown root:"$MESSAGEUSER" "$LAUNCHER"
             chmod 4754 "$LAUNCHER"

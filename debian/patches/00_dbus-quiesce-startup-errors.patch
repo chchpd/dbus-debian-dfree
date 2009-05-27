@@ -1,6 +1,8 @@
---- dbus-0.20-virgin-patches/bus/config-parser.c	2003-10-14 21:30:21.000000000 +0100
-+++ dbus-0.20/bus/config-parser.c	2004-02-10 00:40:05.000000000 +0000
-@@ -1710,8 +1710,18 @@
+Index: dbus-1.2.14/bus/config-parser.c
+===================================================================
+--- dbus-1.2.14.orig/bus/config-parser.c	2009-05-05 22:51:37.000000000 +0200
++++ dbus-1.2.14/bus/config-parser.c	2009-05-07 00:16:25.000000000 +0200
+@@ -2193,8 +2193,18 @@
          {
            if (!include_file (parser, &full_path, TRUE, error))
              {

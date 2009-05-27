@@ -24,7 +24,6 @@ DAEMONUSER=messagebus
 PIDDIR=/var/run/dbus
 PIDFILE=$PIDDIR/pid
 DESC="system message bus"
-EVENTDIR=/etc/dbus-1/event.d
 
 test -x $DAEMON || exit 0
 
@@ -34,12 +33,6 @@ test -x $DAEMON || exit 0
 PARAMS=""
 if [ -e /etc/default/dbus ]; then
   . /etc/default/dbus
-fi
-
-if [ -n "$ENABLED" ]; then
-    log_warning_msg "The ENABLED option in /etc/default/$NAME has been deprecated."
-    log_warning_msg "Please remove this setting from the configuration file."
-    log_warning_msg "To disable the service use a runlevel editor like sysv-rc-conf or bum instead."
 fi
 
 create_machineid() {
@@ -122,18 +115,12 @@ start_it_up()
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
     --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
   log_end_msg $?
-  if [ -d $EVENTDIR ]; then
-      run-parts --arg=start $EVENTDIR || true
-  fi
   dependent_services start
 }
 
 shut_it_down()
 {
   dependent_services stop
-  if [ -d $EVENTDIR ]; then
-      run-parts --reverse --arg=stop $EVENTDIR || true
-  fi
   log_daemon_msg "Stopping $DESC" "$NAME"
   start-stop-daemon --stop --retry 5 --quiet --oknodo --pidfile $PIDFILE \
     --user $DAEMONUSER
