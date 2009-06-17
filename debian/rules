@@ -25,9 +25,10 @@ DEB_CONFIGURE_EXTRA_FLAGS += \
 
 DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 . stop  88 1 .
 
-ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel i386))
+ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
 common-configure-impl::
-	# workaround for a bug in binutils on mipsen (see #532821 and #528145)
+	# Workaround for a bug in binutils on mipsen (see #528145).
+	# Remove again when #532821 has been fixed.
 	sed -i -e 's/\-fPIE//' -e 's/\-pie\ \-Wl\,\-z\,relro//' bus/Makefile
 endif
 
