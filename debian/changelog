@@ -1,4 +1,4 @@
-dbus (1.2.14-3) UNRELEASED; urgency=low
+dbus (1.2.14-3) unstable; urgency=low
 
   * debian/dbus.postinst
     - Suppress output from adduser.
@@ -9,7 +9,7 @@ dbus (1.2.14-3) UNRELEASED; urgency=low
       toolchain bug on mipsen (#532821) which causes dbus-daemon to segfault.
       (Closes: #528145)
 
- -- Michael Biebl <biebl@debian.org>  Wed, 17 Jun 2009 04:55:57 +0200
+ -- Michael Biebl <biebl@debian.org>  Wed, 17 Jun 2009 21:03:57 +0200
 
 dbus (1.2.14-2) unstable; urgency=low
 
