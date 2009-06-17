@@ -10,6 +10,7 @@ LAUNCHER=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
 
 if [ "$1" = configure ]; then
     adduser --system \
+            --quiet \
             --home "$MESSAGEHOME" \
             --no-create-home \
             --disabled-password \
