@@ -4,6 +4,10 @@ dbus (1.2.14-3) UNRELEASED; urgency=low
     - Suppress output from adduser.
   * debian/dbus.postrm
     - Cleanup /var/lib/dbus on purge.
+  * debian/rules
+    - Compile dbus-daemon without -pie on mipsen. This is a workaround for a
+      toolchain bug on mipsen (#532821) which causes dbus-daemon to segfault.
+      (Closes: #528145)
 
  -- Michael Biebl <biebl@debian.org>  Wed, 17 Jun 2009 04:55:57 +0200
 
