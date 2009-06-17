@@ -2,6 +2,8 @@ dbus (1.2.14-3) UNRELEASED; urgency=low
 
   * debian/dbus.postinst
     - Suppress output from adduser.
+  * debian/dbus.postrm
+    - Cleanup /var/lib/dbus on purge.
 
  -- Michael Biebl <biebl@debian.org>  Wed, 17 Jun 2009 04:55:57 +0200
 
