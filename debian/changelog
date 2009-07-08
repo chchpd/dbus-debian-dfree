@@ -1,6 +1,5 @@
 dbus (1.2.14-4~exp1) UNRELEASED; urgency=low
 
-  * Sync unstable into experimental
   * Add dbus-1-dbg package containing separated debug symbols
 
  -- Simon McVittie <smcv@debian.org>  Wed, 27 May 2009 10:30:25 +0100
