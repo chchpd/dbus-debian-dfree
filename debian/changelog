@@ -1,9 +1,22 @@
-dbus (1.2.14-3~exp1) UNRELEASED; urgency=low
+dbus (1.2.14-4~exp1) UNRELEASED; urgency=low
 
   * Sync unstable into experimental
   * Add dbus-1-dbg package containing separated debug symbols
 
  -- Simon McVittie <smcv@debian.org>  Wed, 27 May 2009 10:30:25 +0100
+
+dbus (1.2.14-3) unstable; urgency=low
+
+  * debian/dbus.postinst
+    - Suppress output from adduser.
+  * debian/dbus.postrm
+    - Cleanup /var/lib/dbus on purge.
+  * debian/rules
+    - Compile dbus-daemon without -pie on mipsen. This is a workaround for a
+      toolchain bug on mipsen (#532821) which causes dbus-daemon to segfault.
+      (Closes: #528145)
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 17 Jun 2009 21:03:57 +0200
 
 dbus (1.2.14-2) unstable; urgency=low
 
