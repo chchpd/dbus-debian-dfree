@@ -18,7 +18,7 @@ Build-Depends: cdbs (>= 0.4.43),
                libx11-dev,
                libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64],
                quilt
-Standards-Version: 3.8.1
+Standards-Version: 3.8.2
 Vcs-Svn: svn://svn.debian.org/svn/pkg-utopia/packages/unstable/dbus
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus
 Homepage: http://dbus.freedesktop.org/
