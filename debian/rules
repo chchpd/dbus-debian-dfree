@@ -40,6 +40,9 @@ build/dbus-1-doc::
 	doxygen Doxyfile
 	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
 
+install/libdbus-1-dev::
+	dh_link -p$(cdbs_curpkg) lib/`basename debian/tmp/usr/lib/libdbus-1.so.*.*.*` usr/lib/libdbus-1.so
+
 clean::
 	rm -rf doc/api
 	rm -f test/data/valid-config-files/session.conf

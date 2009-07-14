@@ -5,6 +5,8 @@ dbus (1.2.16-1) UNRELEASED; urgency=low
     - Update for API additions.
   * debian/rules
     - Bump shlibs to 1.2.16.
+  * Install libdbus to /lib. Upstart requires libdbus before /usr is
+    mounted. Keep the development files libdbus-1*.{a,so} in /usr/lib.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 14 Jul 2009 23:39:04 +0200
 
