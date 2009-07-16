@@ -1,4 +1,4 @@
-dbus (1.2.16-2) UNRELEASED; urgency=low
+dbus (1.2.16-2) unstable; urgency=low
 
   * Rebuild against debhelper (>= 7.2.23) that fixes a regression in
     dh_install which did not correctly strip debian/tmp. (Closes: #537125)
@@ -9,7 +9,7 @@ dbus (1.2.16-2) UNRELEASED; urgency=low
     - Fix spurious build failures on alpha and ia64 when using -Wl,--as-needed
       by changing the link order of libdbus-convenience.la and -lrt.
 
- -- Michael Biebl <biebl@debian.org>  Thu, 16 Jul 2009 01:43:46 +0200
+ -- Michael Biebl <biebl@debian.org>  Thu, 16 Jul 2009 02:03:18 +0200
 
 dbus (1.2.16-1) unstable; urgency=low
 
