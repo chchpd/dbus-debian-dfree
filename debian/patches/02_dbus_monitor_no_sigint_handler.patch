@@ -1,7 +1,7 @@
-Index: dbus-1.2.14/tools/dbus-monitor.c
+Index: dbus-1.2.16/tools/dbus-monitor.c
 ===================================================================
---- dbus-1.2.14.orig/tools/dbus-monitor.c	2009-05-06 18:51:18.000000000 +0200
-+++ dbus-1.2.14/tools/dbus-monitor.c	2009-05-07 00:19:51.000000000 +0200
+--- dbus-1.2.16.orig/tools/dbus-monitor.c	2009-07-14 21:42:25.000000000 +0200
++++ dbus-1.2.16/tools/dbus-monitor.c	2009-07-16 02:08:59.000000000 +0200
 @@ -33,8 +33,6 @@
  
  #include <time.h>
@@ -26,7 +26,7 @@ Index: dbus-1.2.14/tools/dbus-monitor.c
  int
  main (int argc, char *argv[])
  {
-@@ -294,11 +284,7 @@
+@@ -338,11 +328,7 @@
      fprintf (stderr, "Couldn't add filter!\n");
      exit (1);
    }

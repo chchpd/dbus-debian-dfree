@@ -1,8 +1,8 @@
-diff --git a/dbus/dbus-sysdeps-unix.c b/dbus/dbus-sysdeps-unix.c
-index 2ae7909..4730c8e 100644
---- a/dbus/dbus-sysdeps-unix.c
-+++ b/dbus/dbus-sysdeps-unix.c
-@@ -1247,7 +1247,7 @@ _dbus_read_credentials_socket  (int              client_fd,
+Index: dbus-1.2.16/dbus/dbus-sysdeps-unix.c
+===================================================================
+--- dbus-1.2.16.orig/dbus/dbus-sysdeps-unix.c	2009-07-14 21:42:38.000000000 +0200
++++ dbus-1.2.16/dbus/dbus-sysdeps-unix.c	2009-07-16 02:09:20.000000000 +0200
+@@ -1241,7 +1241,7 @@
  #elif defined(HAVE_CMSGCRED)
      struct cmsgcred *cred;
  
