@@ -26,13 +26,6 @@ DEB_CONFIGURE_EXTRA_FLAGS += \
 
 DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 . stop  88 1 .
 
-ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
-common-configure-impl::
-	# Workaround for a bug in binutils on mipsen (see #528145).
-	# Remove again when #532821 has been fixed.
-	sed -i -e 's/\-fPIE//' -e 's/\-pie\ \-Wl\,\-z\,relro//' bus/Makefile
-endif
-
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d
 	cp debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
