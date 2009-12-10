@@ -5,7 +5,7 @@ dbus (1.2.16-3) UNRELEASED; urgency=low
   * debian/rules
     - Explicitly disable audit support so we don't accidentally pick up a
       libaudit shlib dependency.
-    - Drop our workaround for the broken binutils and reenable -pie on mips.
+    - Drop our workaround for the broken binutils and re-enable -pie on mips.
       (Closes: #533460)
     - Improve the way we create the symlink from /usr/lib/ → /lib by using
       readlink.
