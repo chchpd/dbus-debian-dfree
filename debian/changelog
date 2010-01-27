@@ -1,11 +1,6 @@
 dbus (1.2.16-3~exp1) UNRELEASED-experimental; urgency=low
 
-  * Add separate debugging symbols (Closes: 550517)
-
- -- Simon McVittie <smcv@debian.org>  Wed, 27 Jan 2010 21:58:06 +0000
-
-dbus (1.2.16-3) UNRELEASED; urgency=low
-
+  [ Michael Biebl ]
   * debian/control
     - Drop Build-Depends on docbook-utils, apparently no longer necessary.
   * debian/rules
@@ -16,7 +11,14 @@ dbus (1.2.16-3) UNRELEASED; urgency=low
     - Improve the way we create the symlink from /usr/lib/ → /lib by using
       readlink.
 
- -- Michael Biebl <biebl@debian.org>  Thu, 12 Nov 2009 09:04:48 +0100
+  [ Simon McVittie ]
+  * Add separate debugging symbols (Closes: 550517)
+  * Install libdbus shared library to a multiarch directory
+    (/lib/i486-linux-gnu or whatever) as now allowed by Policy, and set
+    Multi-Arch: same as befits a shared library
+  * Standards-Version: 3.8.4 (no changes needed)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Jan 2010 21:58:06 +0000
 
 dbus (1.2.16-2) unstable; urgency=low
 
