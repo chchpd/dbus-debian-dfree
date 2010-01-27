@@ -2,3 +2,5 @@
 01_no-fatal-warnings.patch
 02_dbus_monitor_no_sigint_handler.patch
 10_dbus-1.0.1-generate-xml-docs.patch
+20_kbsd_cmsgcred.patch
+30_rt-as-needed.patch

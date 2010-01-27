@@ -10,7 +10,7 @@ include /usr/share/cdbs/1/class/autotools.mk
 
 libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
 
-DEB_DH_MAKESHLIBS_ARGS_ALL = -V '$(libdbusN) (>= 1.2.14)'
+DEB_DH_MAKESHLIBS_ARGS_ALL = -V '$(libdbusN) (>= 1.2.16)'
 
 LDFLAGS += -Wl,--as-needed
 
@@ -21,16 +21,10 @@ DEB_CONFIGURE_LIBEXECDIR := "\$${prefix}/lib/dbus-1.0"
 
 DEB_CONFIGURE_EXTRA_FLAGS += \
 	--enable-xml-docs \
-	--enable-doxygen-docs
+	--enable-doxygen-docs \
+	--disable-libaudit
 
 DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 . stop  88 1 .
-
-ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
-common-configure-impl::
-	# Workaround for a bug in binutils on mipsen (see #528145).
-	# Remove again when #532821 has been fixed.
-	sed -i -e 's/\-fPIE//' -e 's/\-pie\ \-Wl\,\-z\,relro//' bus/Makefile
-endif
 
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d
@@ -39,6 +33,9 @@ binary-post-install/dbus-x11::
 build/dbus-1-doc::
 	doxygen Doxyfile
 	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
+
+install/libdbus-1-dev::
+	dh_link -p$(cdbs_curpkg) lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
 
 clean::
 	rm -rf doc/api

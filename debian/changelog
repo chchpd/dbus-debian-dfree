@@ -1,8 +1,48 @@
-dbus (1.2.14-4~exp1) UNRELEASED; urgency=low
+dbus (1.2.16-3~exp1) UNRELEASED-experimental; urgency=low
 
-  * Add dbus-1-dbg package containing separated debug symbols
+  * Add separate debugging symbols (Closes: 550517)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 27 May 2009 10:30:25 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Jan 2010 21:58:06 +0000
+
+dbus (1.2.16-3) UNRELEASED; urgency=low
+
+  * debian/control
+    - Drop Build-Depends on docbook-utils, apparently no longer necessary.
+  * debian/rules
+    - Explicitly disable audit support so we don't accidentally pick up a
+      libaudit shlib dependency.
+    - Drop our workaround for the broken binutils and re-enable -pie on mips.
+      (Closes: #533460)
+    - Improve the way we create the symlink from /usr/lib/ → /lib by using
+      readlink.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 12 Nov 2009 09:04:48 +0100
+
+dbus (1.2.16-2) unstable; urgency=low
+
+  * Rebuild against debhelper (>= 7.2.23) that fixes a regression in
+    dh_install which did not correctly strip debian/tmp. (Closes: #537125)
+  * debian/patches/20_kbsd_cmsgcred.patch
+    - Fix incorrect usage of cmsgcred on kFreeBSD. Thanks to Aurelien Jarno
+      for the patch.
+  * debian/patches/30_rt-as-needed.patch
+    - Fix spurious build failures on alpha and ia64 when using -Wl,--as-needed
+      by changing the link order of libdbus-convenience.la and -lrt.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 16 Jul 2009 02:03:18 +0200
+
+dbus (1.2.16-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/libdbus-1-3.symbols
+    - Update for API additions.
+  * debian/rules
+    - Bump shlibs to 1.2.16.
+  * Install libdbus to /lib. Upstart requires libdbus before /usr is
+    mounted. Keep the development files libdbus-1*.{a,so} in /usr/lib.
+  * Bump Standards-Version to 3.8.2. No further changes.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 15 Jul 2009 00:39:18 +0200
 
 dbus (1.2.14-3) unstable; urgency=low
 
