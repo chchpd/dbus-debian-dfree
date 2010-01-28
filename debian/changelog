@@ -1,4 +1,4 @@
-dbus (1.2.16-3~exp1) UNRELEASED-experimental; urgency=low
+dbus (1.2.16-3~exp1) experimental; urgency=low
 
   [ Michael Biebl ]
   * debian/control
@@ -18,7 +18,7 @@ dbus (1.2.16-3~exp1) UNRELEASED-experimental; urgency=low
     Multi-Arch: same as befits a shared library
   * Standards-Version: 3.8.4 (no changes needed)
 
- -- Simon McVittie <smcv@debian.org>  Wed, 27 Jan 2010 21:58:06 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 28 Jan 2010 23:48:25 +0000
 
 dbus (1.2.16-2) unstable; urgency=low
 
