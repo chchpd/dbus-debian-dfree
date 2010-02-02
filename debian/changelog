@@ -10,6 +10,10 @@ dbus (1.2.18-1) UNRELEASED; urgency=low
       (Closes: #533460)
     - Improve the way we create the symlink from /usr/lib/ → /lib by using
       readlink.
+  * Remove patches:
+    - debian/patches/02_dbus_monitor_no_sigint_handler.patch (fixed upstream)
+    - debian/patches/20_kbsd_cmsgcred.patch (merged upstream)
+    - debian/patches/30_rt-as-needed.patch (merged upstream)
 
  -- Michael Biebl <biebl@debian.org>  Thu, 12 Nov 2009 09:04:48 +0100
 
