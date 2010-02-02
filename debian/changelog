@@ -3,6 +3,7 @@ dbus (1.2.18-1) UNRELEASED; urgency=low
   * New upstream release.
   * debian/control
     - Drop Build-Depends on docbook-utils, apparently no longer necessary.
+    - Bump Standards-Version to 3.8.4.
   * debian/rules
     - Explicitly disable audit support so we don't accidentally pick up a
       libaudit shlib dependency.
