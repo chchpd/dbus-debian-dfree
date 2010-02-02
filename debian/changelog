@@ -14,6 +14,8 @@ dbus (1.2.18-1) UNRELEASED; urgency=low
     - debian/patches/02_dbus_monitor_no_sigint_handler.patch (fixed upstream)
     - debian/patches/20_kbsd_cmsgcred.patch (merged upstream)
     - debian/patches/30_rt-as-needed.patch (merged upstream)
+  * debian/README.source
+    - Add reference to the quilt patch management system documentation.
 
  -- Michael Biebl <biebl@debian.org>  Thu, 12 Nov 2009 09:04:48 +0100
 
