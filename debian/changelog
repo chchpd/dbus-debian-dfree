@@ -1,5 +1,6 @@
-dbus (1.2.16-3) UNRELEASED; urgency=low
+dbus (1.2.18-1) UNRELEASED; urgency=low
 
+  * New upstream release.
   * debian/control
     - Drop Build-Depends on docbook-utils, apparently no longer necessary.
   * debian/rules
