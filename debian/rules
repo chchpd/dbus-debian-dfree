@@ -19,7 +19,7 @@ common-binary-post-install-arch:: list-missing
 
 DEB_CONFIGURE_LIBEXECDIR := "\$${prefix}/lib/dbus-1.0"
 
-DEB_CONFIGURE_EXTRA_FLAGS += \
+DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-xml-docs \
 	--enable-doxygen-docs \
 	--disable-libaudit
