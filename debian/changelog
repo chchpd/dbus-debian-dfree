@@ -1,4 +1,4 @@
-dbus (1.2.20-1) UNRELEASED; urgency=low
+dbus (1.2.20-1) unstable; urgency=low
 
   * New upstream release.
   * debian/control
@@ -18,7 +18,7 @@ dbus (1.2.20-1) UNRELEASED; urgency=low
   * debian/README.source
     - Add reference to the quilt patch management system documentation.
 
- -- Michael Biebl <biebl@debian.org>  Wed, 03 Feb 2010 22:42:13 +0100
+ -- Michael Biebl <biebl@debian.org>  Wed, 03 Feb 2010 22:49:42 +0100
 
 dbus (1.2.16-2) unstable; urgency=low
 
