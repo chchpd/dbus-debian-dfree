@@ -1,3 +1,11 @@
+dbus (1.2.20-2) UNRELEASED; urgency=low
+
+  * debian/patches/11_kfreebsd_kqueue_build_fix.patch
+    - Fix kqueue implementation on GNU/kFreeBSD. (Closes: #568338)
+      Thanks to Cyril Brulebois for the patch.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 03 Feb 2010 23:08:12 +0100
+
 dbus (1.2.20-1) unstable; urgency=low
 
   * New upstream release.
