@@ -30,7 +30,6 @@ Depends: ${shlibs:Depends},
          lsb-base (>= 3.2-14)
 Conflicts: dbus-1-utils (<< 1.0.2-5)
 Replaces: dbus-1-utils (<< 1.0.2-5)
-Provides: dbus-1-utils
 Suggests: dbus-x11
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between applications.
