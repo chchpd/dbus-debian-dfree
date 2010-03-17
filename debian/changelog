@@ -1,6 +1,8 @@
 dbus (1.2.22-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * debian/patches/11_kfreebsd_kqueue_build_fix.patch
+    - Removed, merge upstream.
 
  -- Michael Biebl <biebl@debian.org>  Thu, 18 Mar 2010 00:32:27 +0100
 
