@@ -1,12 +1,12 @@
-dbus (1.2.22-1) UNRELEASED; urgency=low
+dbus (1.2.22-1) unstable; urgency=low
 
   * New upstream release.
   * debian/patches/11_kfreebsd_kqueue_build_fix.patch
-    - Removed, merge upstream.
+    - Removed, merged upstream.
   * debian/control
     - Drop Provides: dbus-1-utils, there is no more package depending on it.
 
- -- Michael Biebl <biebl@debian.org>  Thu, 18 Mar 2010 00:32:27 +0100
+ -- Michael Biebl <biebl@debian.org>  Thu, 18 Mar 2010 01:06:13 +0100
 
 dbus (1.2.20-2) unstable; urgency=low
 
