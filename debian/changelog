@@ -7,6 +7,9 @@ dbus (1.2.24-1) UNRELEASED; urgency=low
     - Use new "has_option" function from x11-common instead of grepping the
       option file, to avoid calling an external program. (Closes: #570480)
       Thanks to Martin Pitt for the patch.
+  * debian/control
+    - Add Breaks: x11-common (<< 1:7.5+4) to dbus-x11 to ensure we have a
+      recent enough version with "has_option" support.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 23 Mar 2010 22:28:20 +0100
 
