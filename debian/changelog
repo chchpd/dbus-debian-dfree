@@ -1,3 +1,11 @@
+dbus (1.2.24-1) UNRELEASED; urgency=low
+
+  * New upstream release.
+    - Correctly get pointer data from DBusString when creating a syslog
+      message. (Closes: #574697)
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 23 Mar 2010 22:28:20 +0100
+
 dbus (1.2.22-1) unstable; urgency=low
 
   * New upstream release.
