@@ -3,6 +3,10 @@ dbus (1.2.24-1) UNRELEASED; urgency=low
   * New upstream release.
     - Correctly get pointer data from DBusString when creating a syslog
       message. (Closes: #574697)
+  * debian/dbus-Xsession
+    - Use new "has_option" function from x11-common instead of grepping the
+      option file, to avoid calling an external program. (Closes: #570480)
+      Thanks to Martin Pitt for the patch.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 23 Mar 2010 22:28:20 +0100
 
