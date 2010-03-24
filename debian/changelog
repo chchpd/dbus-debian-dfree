@@ -1,4 +1,4 @@
-dbus (1.2.24-1) UNRELEASED; urgency=low
+dbus (1.2.24-1) unstable; urgency=low
 
   * New upstream release.
     - Correctly get pointer data from DBusString when creating a syslog
@@ -18,7 +18,7 @@ dbus (1.2.24-1) UNRELEASED; urgency=low
   * debian/dbus.postinst
     - Remove old stop symlinks from runlevel 1 on upgrades.
 
- -- Michael Biebl <biebl@debian.org>  Tue, 23 Mar 2010 22:28:20 +0100
+ -- Michael Biebl <biebl@debian.org>  Wed, 24 Mar 2010 02:04:20 +0100
 
 dbus (1.2.22-1) unstable; urgency=low
 
