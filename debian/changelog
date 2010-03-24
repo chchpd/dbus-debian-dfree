@@ -10,6 +10,11 @@ dbus (1.2.24-1) UNRELEASED; urgency=low
   * debian/control
     - Add Breaks: x11-common (<< 1:7.5+4) to dbus-x11 to ensure we have a
       recent enough version with "has_option" support.
+  * debian/dbus.init
+    - Update LSB header: Remove runlevel 1 from Default-Stop and let killprocs
+      do the job for us.
+  * debian/dbus.postinst
+    - Remove old stop symlinks from runlevel 1 on upgrades.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 23 Mar 2010 22:28:20 +0100
 

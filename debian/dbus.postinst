@@ -31,6 +31,11 @@ if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.1.20-1; then
     update-rc.d -f dbus remove >/dev/null
 fi
 
+# Remove stop symlinks for runlevel 1 as killprocs already does the job for us.
+if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.2.24-1; then
+    rm -f /etc/rc1.d/K??dbus
+fi
+
 if [ "$1" = configure ] && [ -n "$2" ] && [ -x "/etc/init.d/dbus" ]; then
     # Restart dbus on upgrades.
     # dh_installinit -r creates the necessary start action.
