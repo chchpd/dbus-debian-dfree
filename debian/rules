@@ -24,7 +24,7 @@ DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-doxygen-docs \
 	--disable-libaudit
 
-DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 . stop  88 1 .
+DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 .
 
 binary-post-install/dbus-x11::
 	mkdir -p debian/dbus-x11/etc/X11/Xsession.d

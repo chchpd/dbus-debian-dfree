@@ -13,6 +13,8 @@ dbus (1.2.24-1) UNRELEASED; urgency=low
   * debian/dbus.init
     - Update LSB header: Remove runlevel 1 from Default-Stop and let killprocs
       do the job for us.
+  * debian/rules
+    - Update DEB_DH_INSTALLINIT_ARGS accordingly.
   * debian/dbus.postinst
     - Remove old stop symlinks from runlevel 1 on upgrades.
 
