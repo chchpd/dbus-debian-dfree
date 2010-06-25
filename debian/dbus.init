@@ -4,7 +4,7 @@
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
-# Default-Stop:      1
+# Default-Stop:
 # Short-Description: D-Bus systemwide message bus
 # Description:       D-Bus is a simple interprocess messaging system, used
 #                    for sending messages between applications.

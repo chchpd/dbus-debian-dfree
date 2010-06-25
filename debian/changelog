@@ -1,8 +1,58 @@
-dbus (1.2.16-3~exp1) experimental; urgency=low
+dbus (1.2.24-1+exp1) UNRELEASED; urgency=low
 
-  [ Michael Biebl ]
+   * Add separate debugging symbols (Closes: 550517)
+   * Install libdbus shared library to a multiarch directory
+     (/lib/i486-linux-gnu or whatever) as now allowed by Policy, and set
+     Multi-Arch: same as befits a shared library
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 25 Jun 2010 13:51:07 +0100
+
+dbus (1.2.24-1) unstable; urgency=low
+
+  * New upstream release.
+    - Correctly get pointer data from DBusString when creating a syslog
+      message. (Closes: #574697)
+  * debian/dbus-Xsession
+    - Use new "has_option" function from x11-common instead of grepping the
+      option file, to avoid calling an external program. (Closes: #570480)
+      Thanks to Martin Pitt for the patch.
+  * debian/control
+    - Add Breaks: x11-common (<< 1:7.5+4) to dbus-x11 to ensure we have a
+      recent enough version with "has_option" support.
+  * debian/dbus.init
+    - Update LSB header: Remove runlevel 1 from Default-Stop and let killprocs
+      do the job for us.
+  * debian/rules
+    - Update DEB_DH_INSTALLINIT_ARGS accordingly.
+  * debian/dbus.postinst
+    - Remove old stop symlinks from runlevel 1 on upgrades.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 24 Mar 2010 02:04:20 +0100
+
+dbus (1.2.22-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches/11_kfreebsd_kqueue_build_fix.patch
+    - Removed, merged upstream.
+  * debian/control
+    - Drop Provides: dbus-1-utils, there is no more package depending on it.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 18 Mar 2010 01:06:13 +0100
+
+dbus (1.2.20-2) unstable; urgency=low
+
+  * debian/patches/11_kfreebsd_kqueue_build_fix.patch
+    - Fix kqueue implementation on GNU/kFreeBSD. (Closes: #568338)
+      Thanks to Cyril Brulebois for the patch.
+
+ -- Michael Biebl <biebl@debian.org>  Wed, 03 Feb 2010 23:08:12 +0100
+
+dbus (1.2.20-1) unstable; urgency=low
+
+  * New upstream release.
   * debian/control
     - Drop Build-Depends on docbook-utils, apparently no longer necessary.
+    - Bump Standards-Version to 3.8.4.
   * debian/rules
     - Explicitly disable audit support so we don't accidentally pick up a
       libaudit shlib dependency.
@@ -10,15 +60,14 @@ dbus (1.2.16-3~exp1) experimental; urgency=low
       (Closes: #533460)
     - Improve the way we create the symlink from /usr/lib/ → /lib by using
       readlink.
+  * Remove patches:
+    - debian/patches/02_dbus_monitor_no_sigint_handler.patch (fixed upstream)
+    - debian/patches/20_kbsd_cmsgcred.patch (merged upstream)
+    - debian/patches/30_rt-as-needed.patch (merged upstream)
+  * debian/README.source
+    - Add reference to the quilt patch management system documentation.
 
-  [ Simon McVittie ]
-  * Add separate debugging symbols (Closes: 550517)
-  * Install libdbus shared library to a multiarch directory
-    (/lib/i486-linux-gnu or whatever) as now allowed by Policy, and set
-    Multi-Arch: same as befits a shared library
-  * Standards-Version: 3.8.4 (no changes needed)
-
- -- Simon McVittie <smcv@debian.org>  Thu, 28 Jan 2010 23:48:25 +0000
+ -- Michael Biebl <biebl@debian.org>  Wed, 03 Feb 2010 22:49:42 +0100
 
 dbus (1.2.16-2) unstable; urgency=low
 
