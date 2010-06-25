@@ -1,9 +1,6 @@
 dbus (1.2.24-1+exp1) UNRELEASED; urgency=low
 
    * Add separate debugging symbols (Closes: 550517)
-   * Install libdbus shared library to a multiarch directory
-     (/lib/i486-linux-gnu or whatever) as now allowed by Policy, and set
-     Multi-Arch: same as befits a shared library
 
  -- Simon McVittie <smcv@debian.org>  Fri, 25 Jun 2010 13:51:07 +0100
 

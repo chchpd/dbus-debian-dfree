@@ -34,14 +34,8 @@ build/dbus-1-doc::
 	doxygen Doxyfile
 	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
 
-install/$(libdbusN)::
-	dh_install -p$(cdbs_curpkg) debian/tmp/usr/lib/libdbus-1*.so.* \
-		lib/$(DEB_HOST_GNU_TYPE)
-
 install/libdbus-1-dev::
-	dh_link -p$(cdbs_curpkg) \
-		lib/$(DEB_HOST_GNU_TYPE)/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) \
-		usr/lib/libdbus-1.so
+	dh_link -p$(cdbs_curpkg) lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
 
 clean::
 	rm -rf doc/api
