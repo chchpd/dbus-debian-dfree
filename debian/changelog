@@ -1,8 +1,8 @@
-dbus (1.2.24-1+exp1) UNRELEASED; urgency=low
+dbus (1.2.24-1+exp1) experimental; urgency=low
 
-   * Add separate debugging symbols (Closes: 550517)
+   * Add separate debugging symbols (Closes: #550517)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 25 Jun 2010 13:51:07 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 27 Jun 2010 17:19:24 +0100
 
 dbus (1.2.24-1) unstable; urgency=low
 
