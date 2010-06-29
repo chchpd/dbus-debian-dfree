@@ -44,3 +44,6 @@ clean::
 	rm -f doc/*.html
 	rm -f dbus.devhelp
 
+# we don't want docs for the debug symbols, just symlink to the library docs
+DEB_INSTALL_CHANGELOGS_dbus-1-dbg := --no-act
+DEB_INSTALL_DOCS_dbus-1-dbg := --no-act
