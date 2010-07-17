@@ -1,3 +1,33 @@
+dbus (1.2.24-2) unstable; urgency=low
+
+  [ Simon McVittie ]
+  * Merge from experimental
+    - add separate debugging symbols (dbus-1-dbg)
+
+  [ Michael Biebl ]
+  * Switch to source format 3.0 (quilt)
+    - Add debian/source/format.
+    - Drop Build-Depends on quilt.
+    - Remove /usr/share/cdbs/1/rules/patchsys-quilt.mk from debian/rules.
+    - Remove debian/README.source.
+  * debian/control
+    - Bump Standards-Version to 3.9.0.
+    - Use architecture wildcard linux-any for libselinux1-dev Build-Depends.
+    - Use Breaks instead of Conflicts as recommended by the new policy.
+    - Remove old Conflicts which is no longer relevant.
+  * debian/dbus.init
+    - Simplify check in start_it_up() by using the existing status action.
+    - Stop restarting dependent services. It was an ugly hack anyway and if
+      people want to restart dbus, they need take care of that themselves.
+      (Closes: #540693, #530395)
+  * debian/dbus.postinst
+    - Stop restarting dbus system bus on upgrades as it breaks too many
+      applications and is not supported by upstream in a sensible way.
+      Instead trigger a reboot-required message using update-notifier.
+      (Closes: #530000, #573386)
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 17 Jul 2010 14:54:54 +0200
+
 dbus (1.2.24-1+exp1) experimental; urgency=low
 
    * Add separate debugging symbols (Closes: #550517)

@@ -37,9 +37,21 @@ if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.2.24-1; then
 fi
 
 if [ "$1" = configure ] && [ -n "$2" ] && [ -x "/etc/init.d/dbus" ]; then
-    # Restart dbus on upgrades.
-    # dh_installinit -r creates the necessary start action.
-    invoke-rc.d dbus stop || true
+    # Do not restart dbus on upgrades, only on fresh installations.
+    # (dh_installinit -r creates a start action)
+    # But do reload it so the machine-id can be generated
+    if /etc/init.d/dbus status > /dev/null; then
+        # trigger an update notification which recommends to reboot
+        [ -x /usr/share/update-notifier/notify-reboot-required ] && \
+            /usr/share/update-notifier/notify-reboot-required || true
+        if [ -x "/etc/init.d/dbus" ]; then
+            if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+                invoke-rc.d dbus reload || true
+            else
+                /etc/init.d/dbus reload || true
+            fi
+        fi
+    fi
 fi
 
 #DEBHELPER#
