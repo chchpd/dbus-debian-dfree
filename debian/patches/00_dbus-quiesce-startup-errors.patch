@@ -1,8 +1,8 @@
-Index: dbus-1.2.14/bus/config-parser.c
+Index: b/bus/config-parser.c
 ===================================================================
---- dbus-1.2.14.orig/bus/config-parser.c	2009-05-05 22:51:37.000000000 +0200
-+++ dbus-1.2.14/bus/config-parser.c	2009-05-07 00:16:25.000000000 +0200
-@@ -2193,8 +2193,18 @@
+--- a/bus/config-parser.c	2010-07-14 00:43:38.000000000 +0200
++++ b/bus/config-parser.c	2010-07-17 15:16:44.226404084 +0200
+@@ -2236,8 +2236,18 @@
          {
            if (!include_file (parser, &full_path, TRUE, error))
              {
