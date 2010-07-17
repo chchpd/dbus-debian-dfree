@@ -10,6 +10,11 @@ dbus (1.2.24-2) UNRELEASED; urgency=low
     - Drop Build-Depends on quilt.
     - Remove /usr/share/cdbs/1/rules/patchsys-quilt.mk from debian/rules.
     - Remove debian/README.source.
+  * debian/control
+    - Bump Standards-Version to 3.9.0.
+    - Use architecture wildcard linux-any for libselinux1-dev Build-Depends.
+    - Use Breaks instead of Conflicts as recommended by the new policy.
+    - Remove old Conflicts which is no longer relevant.
 
  -- Michael Biebl <biebl@debian.org>  Thu, 15 Jul 2010 01:10:46 +0200
 

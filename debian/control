@@ -15,8 +15,8 @@ Build-Depends: cdbs (>= 0.4.43),
                xmlto,
                xsltproc,
                libx11-dev,
-               libselinux1-dev [!hurd-i386 !kfreebsd-i386 !kfreebsd-amd64]
-Standards-Version: 3.8.4
+               libselinux1-dev [linux-any]
+Standards-Version: 3.9.0
 Vcs-Svn: svn://svn.debian.org/pkg-utopia/packages/unstable/dbus/
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus/
 Homepage: http://dbus.freedesktop.org/
@@ -27,7 +27,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          adduser,
          lsb-base (>= 3.2-14)
-Conflicts: dbus-1-utils (<< 1.0.2-5)
+Breaks: dbus-1-utils (<< 1.0.2-5)
 Replaces: dbus-1-utils (<< 1.0.2-5)
 Suggests: dbus-x11
 Description: simple interprocess messaging system
@@ -54,9 +54,9 @@ Section: x11
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          dbus
-Conflicts: dbus (<< 1.1.2)
+Breaks: dbus (<< 1.1.2),
+        x11-common (<< 1:7.5+4)
 Replaces: dbus (<< 1.1.2)
-Breaks: x11-common (<< 1:7.5+4)
 Description: simple interprocess messaging system (X11 deps)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -73,7 +73,6 @@ Depends: ${shlibs:Depends},
          ${misc:Depends}
 Recommends: dbus
 Section: libs
-Conflicts: dbus (<< 0.60)
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
