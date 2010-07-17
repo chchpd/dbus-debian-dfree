@@ -1,4 +1,4 @@
-dbus (1.2.24-2) UNRELEASED; urgency=low
+dbus (1.2.24-2) unstable; urgency=low
 
   [ Simon McVittie ]
   * Merge from experimental
@@ -26,7 +26,7 @@ dbus (1.2.24-2) UNRELEASED; urgency=low
       Instead trigger a reboot-required message using update-notifier.
       (Closes: #530000, #573386)
 
- -- Michael Biebl <biebl@debian.org>  Thu, 15 Jul 2010 01:10:46 +0200
+ -- Michael Biebl <biebl@debian.org>  Sat, 17 Jul 2010 14:54:54 +0200
 
 dbus (1.2.24-1+exp1) experimental; urgency=low
 
