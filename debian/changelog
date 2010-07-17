@@ -1,9 +1,17 @@
 dbus (1.2.24-2) UNRELEASED; urgency=low
 
+  [ Simon McVittie ]
   * Merge from experimental
     - add separate debugging symbols (dbus-1-dbg)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 29 Jun 2010 17:06:14 +0100
+  [ Michael Biebl ]
+  * Switch to source format 3.0 (quilt)
+    - Add debian/source/format.
+    - Drop Build-Depends on quilt.
+    - Remove /usr/share/cdbs/1/rules/patchsys-quilt.mk from debian/rules.
+    - Remove debian/README.source.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 15 Jul 2010 01:10:46 +0200
 
 dbus (1.2.24-1+exp1) experimental; urgency=low
 
