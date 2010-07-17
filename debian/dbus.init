@@ -99,8 +99,7 @@ start_it_up()
   fi
 
   if [ -e $PIDFILE ]; then
-    PIDDIR=/proc/$(cat $PIDFILE)
-    if [ -d ${PIDDIR} -a  "$(readlink -f ${PIDDIR}/exe)" = "${DAEMON}" ]; then 
+    if $0 status > /dev/null ; then
       log_success_msg "$DESC already started; not starting."
       return
     else
