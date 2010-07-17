@@ -17,6 +17,9 @@ dbus (1.2.24-2) UNRELEASED; urgency=low
     - Remove old Conflicts which is no longer relevant.
   * debian/dbus.init
     - Simplify check in start_it_up() by using the existing status action.
+    - Stop restarting dependent services. It was an ugly hack anyway and if
+      people want to restart dbus, they need take care of that themselves.
+      (Closes: #540693, #530395)
 
  -- Michael Biebl <biebl@debian.org>  Thu, 15 Jul 2010 01:10:46 +0200
 
