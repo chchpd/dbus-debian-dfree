@@ -1,10 +1,10 @@
-dbus (1.2.24-3) UNRELEASED; urgency=low
+dbus (1.2.24-3) unstable; urgency=medium
 
   * Add patch from upstream to fix segfaults when reloaded on kFreeBSD
     (Closes: #589662)
   * Work around FTBFS if dh-buildinfo is installed (Closes: #590594)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 27 Jul 2010 19:10:16 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Jul 2010 19:56:43 +0100
 
 dbus (1.2.24-2) unstable; urgency=low
 
