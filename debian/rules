@@ -44,5 +44,13 @@ clean::
 	rm -f dbus.devhelp
 
 # we don't want docs for the debug symbols, just symlink to the library docs
+DEB_INSTALL_DOCS_dbus-1-dbg := --link-doc=$(libdbusN)
 DEB_INSTALL_CHANGELOGS_dbus-1-dbg := --no-act
-DEB_INSTALL_DOCS_dbus-1-dbg := --no-act
+
+# workaround for cdbs running dh-buildinfo (if installed) too early;
+# see #590594
+debian/stamp-buildinfo: insist-on-symlinks
+insist-on-symlinks:
+	@echo "regarding #590594, observe that this is before dh_installdocs"
+	install -d debian/dbus-1-dbg/usr/share/doc
+	ln -s $(libdbusN) debian/dbus-1-dbg/usr/share/doc/dbus-1-dbg
