@@ -44,7 +44,11 @@ clean::
 	rm -f dbus.devhelp
 
 # we don't want docs for the debug symbols, just symlink to the library docs
+DEB_INSTALL_DOCS_ALL =
+DEB_INSTALL_DOCS_DEFAULT = README AUTHORS
 DEB_INSTALL_DOCS_dbus-1-dbg := --link-doc=$(libdbusN)
+DEB_INSTALL_CHANGELOGS_ALL =
+DEB_INSTALL_CHANGELOGS_DEFAULT = NEWS
 DEB_INSTALL_CHANGELOGS_dbus-1-dbg := --no-act
 
 # workaround for cdbs running dh-buildinfo (if installed) too early;
