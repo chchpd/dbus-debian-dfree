@@ -1,6 +1,15 @@
 dbus (1.4.0-1) UNRELEASED; urgency=low
 
   * New upstream release.
+    - Feature negotiation in the bus daemon.
+    - File descriptor passing on Unix socket transports.
+    - Various portability fixes, in particular to Windows platforms.
+    - Support forking bus services, for compatibility.
+    - New standardized PropertiesChanged signal in the properties interface.
+    - Use of GCC atomic intrinsics for better processor support.
+    - Ability for dbus-send to send to any bus (--address).
+    - Fixes reentrancy issue with multi-threaded apps, which affects
+      especially Qt and KDE apps. (Closes: #584522)
   * Bump Standards-Version to 3.9.1. No further changes.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 14 Sep 2010 01:12:41 +0200
