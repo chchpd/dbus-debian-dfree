@@ -15,7 +15,8 @@ Build-Depends: cdbs (>= 0.4.43),
                xmlto,
                xsltproc,
                libx11-dev,
-               libselinux1-dev [linux-any]
+               libselinux1-dev [linux-any],
+               pkg-config
 Standards-Version: 3.9.1
 Vcs-Svn: svn://svn.debian.org/pkg-utopia/packages/unstable/dbus/
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus/
