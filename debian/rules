@@ -21,7 +21,8 @@ DEB_CONFIGURE_LIBEXECDIR := "\$${prefix}/lib/dbus-1.0"
 DEB_CONFIGURE_EXTRA_FLAGS := \
 	--enable-xml-docs \
 	--enable-doxygen-docs \
-	--disable-libaudit
+	--disable-libaudit \
+	--without-systemdsystemunitdir
 
 DEB_DH_INSTALLINIT_ARGS := -r -- start 12 2 3 4 5 .
 

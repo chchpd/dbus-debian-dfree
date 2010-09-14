@@ -8,12 +8,13 @@ dbus (1.4.0-1) UNRELEASED; urgency=low
     - New standardized PropertiesChanged signal in the properties interface.
     - Use of GCC atomic intrinsics for better processor support.
     - Ability for dbus-send to send to any bus (--address).
+    - systemd hookup.
     - Fixes reentrancy issue with multi-threaded apps, which affects
       especially Qt and KDE apps. (Closes: #584522)
   * debian/control
-   - Bump Standards-Version to 3.9.1. No further changes.
-   - Add Build-Depends on pkg-config as the configure check for systemd
-     requires the $PKG_CONFIG variable to be set correctly.
+    - Bump Standards-Version to 3.9.1. No further changes.
+  * debian/rules
+    - Disable installation of systemd unit files.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 14 Sep 2010 01:36:27 +0200
 
