@@ -1,3 +1,9 @@
+dbus (1.4.0-2) UNRELEASED; urgency=low
+
+  * Install systemd unit files.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 16 Nov 2010 21:43:25 +0100
+
 dbus (1.4.0-1) experimental; urgency=low
 
   * New upstream release.
