@@ -1,3 +1,14 @@
+dbus (1.2.24-4) UNRELEASED; urgency=low
+
+  * debian/patches/12-CVE-2010-4352-reject-deeply-nested-variants.patch
+    - Fixes CVE-2010-4352: sending messages with excessively-nested variants
+      can crash the bus. The existing restriction to 64-levels of nesting
+      previously only applied to the static type signature; now it also
+      applies to dynamic nesting using variants.
+      Patch cherry-picked from upstream Git.
+
+ -- Michael Biebl <biebl@debian.org>  Tue, 21 Dec 2010 18:35:07 +0100
+
 dbus (1.2.24-3) unstable; urgency=medium
 
   * Add patch from upstream to fix segfaults when reloaded on kFreeBSD
