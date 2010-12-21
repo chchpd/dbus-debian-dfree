@@ -1,8 +1,8 @@
-dbus (1.4.1-1) UNRELEASED; urgency=low
+dbus (1.4.1-1) experimental; urgency=low
 
   * New upstream release.
 
- -- Michael Biebl <biebl@debian.org>  Tue, 21 Dec 2010 01:26:28 +0100
+ -- Michael Biebl <biebl@debian.org>  Tue, 21 Dec 2010 01:34:13 +0100
 
 dbus (1.4.0-2) experimental; urgency=low
 
