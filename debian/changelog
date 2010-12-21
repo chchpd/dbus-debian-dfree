@@ -1,6 +1,9 @@
 dbus (1.4.1-1) UNRELEASED; urgency=low
 
   * New upstream release.
+  * Remove pre-lenny upgrade code.
+    - Drop old Breaks/Replaces from debian/control.
+    - Drop debian/dbus.preinst and clean up debian/dbus.postinst.
 
  -- Michael Biebl <biebl@debian.org>  Tue, 21 Dec 2010 01:34:13 +0100
 

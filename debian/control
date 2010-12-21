@@ -27,8 +27,6 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          adduser,
          lsb-base (>= 3.2-14)
-Breaks: dbus-1-utils (<< 1.0.2-5)
-Replaces: dbus-1-utils (<< 1.0.2-5)
 Suggests: dbus-x11
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between applications.
@@ -54,9 +52,7 @@ Section: x11
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          dbus
-Breaks: dbus (<< 1.1.2),
-        x11-common (<< 1:7.5+4)
-Replaces: dbus (<< 1.1.2)
+Breaks: x11-common (<< 1:7.5+4)
 Description: simple interprocess messaging system (X11 deps)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in

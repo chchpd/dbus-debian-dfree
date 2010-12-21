@@ -22,15 +22,6 @@ if [ "$1" = configure ]; then
     fi
 fi
 
-# update init script symlinks for new runlevels and priorities for upgrades
-# from older versions
-if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.1.20-1; then
-    echo "Reinstalling init script for new runlevels and priorities ..." >&2
-    # remove old init script symlinks; dh_installinit adds the proper
-    # update-rc.d snippet later on
-    update-rc.d -f dbus remove >/dev/null
-fi
-
 # Remove stop symlinks for runlevel 1 as killprocs already does the job for us.
 if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.2.24-1; then
     rm -f /etc/rc1.d/K??dbus
