@@ -1,18 +1,23 @@
-Index: b/bus/config-parser.c
-===================================================================
---- a/bus/config-parser.c	2010-07-14 00:43:38.000000000 +0200
-+++ b/bus/config-parser.c	2010-07-17 15:16:44.226404084 +0200
-@@ -2236,8 +2236,18 @@
+From: Daniel Silverstone <dsilvers@debian.org>
+Date: Tue, 10 Feb 2004 00:46:52 +0000
+Subject: [PATCH] Quiesce error reports in system.d/*.conf files when loading
+
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=19186
+Bug-Debian: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=230231
+---
+ bus/config-parser.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/bus/config-parser.c b/bus/config-parser.c
+index f128b91..83dc880 100644
+--- a/bus/config-parser.c
++++ b/bus/config-parser.c
+@@ -2237,8 +2237,13 @@ include_dir (BusConfigParser   *parser,
          {
            if (!include_file (parser, &full_path, TRUE, error))
              {
 -              _dbus_string_free (&full_path);
 -              goto failed;
-+              /* Debian patch to skip malformed /etc/dbus-1/system.d entries */
-+              /*
-+               * _dbus_string_free (&full_path);
-+               * goto failed;
-+               */
 +              if (dbus_error_is_set (error))
 +                {
 +                  _dbus_warn("\nEncountered error '%s' while parsing '%s'\n",
