@@ -21,9 +21,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "dbus-sysdeps.h"
 #include "dbus-sysdeps-unix.h"
 #include "dbus-internals.h"
+#include "dbus-pipe.h"
 #include "dbus-protocol.h"
 #include "dbus-string.h"
 #define DBUS_USERDB_INCLUDES_PRIVATE 1
@@ -248,7 +251,8 @@ _dbus_write_pid_to_file_and_pipe (const DBusString *pidfile,
       DBusString pid;
       int bytes;
 
-      _dbus_verbose ("writing our pid to pipe %d\n", print_pid_pipe->fd_or_handle);
+      _dbus_verbose ("writing our pid to pipe %"PRIuPTR"\n",
+                     print_pid_pipe->fd_or_handle);
       
       if (!_dbus_string_init (&pid))
         {
@@ -419,7 +423,7 @@ _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args
     }
 
   vsyslog (flags, msg, args);
-  
+
   if (severity == DBUS_SYSTEM_LOG_FATAL)
     exit (1);
 }
@@ -441,35 +445,6 @@ _dbus_set_signal_handler (int               sig,
   act.sa_mask    = empty_mask;
   act.sa_flags   = 0;
   sigaction (sig,  &act, NULL);
-}
-
-
-/**
- * Removes a directory; Directory must be empty
- * 
- * @param filename directory filename
- * @param error initialized error object
- * @returns #TRUE on success
- */
-dbus_bool_t
-_dbus_delete_directory (const DBusString *filename,
-			DBusError        *error)
-{
-  const char *filename_c;
-  
-  _DBUS_ASSERT_ERROR_IS_CLEAR (error);
-
-  filename_c = _dbus_string_get_const_data (filename);
-
-  if (rmdir (filename_c) != 0)
-    {
-      dbus_set_error (error, DBUS_ERROR_FAILED,
-		      "Failed to remove directory %s: %s\n",
-		      filename_c, _dbus_strerror (errno));
-      return FALSE;
-    }
-  
-  return TRUE;
 }
 
 /** Checks if a file exists
@@ -1076,7 +1051,7 @@ _dbus_string_get_dirname  (const DBusString *filename,
 static void
 string_squash_nonprintable (DBusString *str)
 {
-  char *buf;
+  unsigned char *buf;
   int i, len; 
   
   buf = _dbus_string_get_data (str);
@@ -1172,4 +1147,3 @@ fail:
   _dbus_string_free (&path);
   return FALSE;
 }
-

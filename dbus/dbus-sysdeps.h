@@ -25,9 +25,15 @@
 #ifndef DBUS_SYSDEPS_H
 #define DBUS_SYSDEPS_H
 
-#include <config.h>
+#include "config.h"
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 
 #include <dbus/dbus-errors.h>
+#include <dbus/dbus-file.h>
+#include <dbus/dbus-string.h>
 
 /* this is perhaps bogus, but strcmp() etc. are faster if we use the
  * stuff straight out of string.h, so have this here for now.
@@ -35,13 +41,18 @@
 #include <string.h>
 #include <stdarg.h>
 
- 
 /* AIX sys/poll.h does #define events reqevents, and other
  * wonderousness, so must include sys/poll before declaring
  * DBusPollFD
  */ 
 #ifdef HAVE_POLL
 #include <sys/poll.h>
+#endif
+
+#ifdef DBUS_WINCE
+/* Windows CE lacks some system functions (such as errno and clock).
+   We bring them in here.  */
+#include "dbus-sysdeps-wince-glue.h"
 #endif
 
 DBUS_BEGIN_DECLS
@@ -54,8 +65,6 @@ DBUS_BEGIN_DECLS
 
 /* Forward declarations */
 
-/** An opaque string type */
-typedef struct DBusString DBusString;
 
 /** An opaque list type */
 typedef struct DBusList DBusList;
@@ -63,36 +72,13 @@ typedef struct DBusList DBusList;
 /** Object that contains a list of credentials such as UNIX or Windows user ID */
 typedef struct DBusCredentials DBusCredentials;
 
+/** A wrapper around a pipe descriptor or handle */
+typedef struct DBusPipe DBusPipe;
+
 /**
  * @addtogroup DBusSysdeps
  *
  * @{
- */
-
-/* The idea of this file is to encapsulate everywhere that we're
- * relying on external libc features, for ease of security
- * auditing. The idea is from vsftpd. This also gives us a chance to
- * make things more convenient to use, e.g.  by reading into a
- * DBusString. Operating system headers aren't intended to be used
- * outside of this file and a limited number of others (such as
- * dbus-memory.c)
- */
-
-#if     __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#define _DBUS_GNUC_PRINTF( format_idx, arg_idx )    \
-  __attribute__((__format__ (__printf__, format_idx, arg_idx)))
-#define _DBUS_GNUC_NORETURN                         \
-  __attribute__((__noreturn__))
-#else   /* !__GNUC__ */
-#define _DBUS_GNUC_PRINTF( format_idx, arg_idx )
-#define _DBUS_GNUC_NORETURN
-#endif  /* !__GNUC__ */
-
-/** @def _DBUS_GNUC_PRINTF
- * used to tell gcc about printf format strings
- */
-/** @def _DBUS_GNUC_NORETURN
- * used to tell gcc about functions that never return, such as _dbus_abort()
  */
 
 void _dbus_abort (void) _DBUS_GNUC_NORETURN;
@@ -153,10 +139,39 @@ int         _dbus_write_socket_two (int               fd,
                                     const DBusString *buffer2,
                                     int               start2,
                                     int               len2);
+
+int _dbus_read_socket_with_unix_fds      (int               fd,
+                                          DBusString       *buffer,
+                                          int               count,
+                                          int              *fds,
+                                          int              *n_fds);
+int _dbus_write_socket_with_unix_fds     (int               fd,
+                                          const DBusString *buffer,
+                                          int               start,
+                                          int               len,
+                                          const int        *fds,
+                                          int               n_fds);
+int _dbus_write_socket_with_unix_fds_two (int               fd,
+                                          const DBusString *buffer1,
+                                          int               start1,
+                                          int               len1,
+                                          const DBusString *buffer2,
+                                          int               start2,
+                                          int               len2,
+                                          const int        *fds,
+                                          int               n_fds);
+
+dbus_bool_t _dbus_socket_is_invalid (int              fd);
+
 int _dbus_connect_tcp_socket  (const char     *host,
                                const char     *port,
                                const char     *family,
                                DBusError      *error);
+int _dbus_connect_tcp_socket_with_nonce  (const char     *host,
+                                          const char     *port,
+                                          const char     *family,
+                                          const char     *noncefile,
+                                          DBusError      *error);
 int _dbus_listen_tcp_socket   (const char     *host,
                                const char     *port,
                                const char     *family,
@@ -191,6 +206,14 @@ dbus_bool_t _dbus_windows_user_is_process_owner (const char        *windows_sid)
 
 dbus_bool_t _dbus_append_keyring_directory_for_credentials (DBusString      *directory,
                                                             DBusCredentials *credentials);
+
+dbus_bool_t _dbus_daemon_is_session_bus_address_published (const char *scope);
+
+dbus_bool_t _dbus_daemon_publish_session_bus_address (const char* address, const char* shm_name);
+
+void _dbus_daemon_unpublish_session_bus_address (void);
+
+dbus_bool_t _dbus_socket_can_pass_unix_fd(int fd);
 
 /** Opaque type representing an atomically-modifiable integer
  * that can be used from multiple threads.
@@ -286,23 +309,8 @@ void _dbus_get_current_time (long *tv_sec,
                              long *tv_usec);
 
 /**
- * File/directory interface
+ * directory interface
  */
-dbus_bool_t _dbus_file_exists         (const char       *file);
-dbus_bool_t _dbus_file_get_contents   (DBusString       *str,
-                                       const DBusString *filename,
-                                       DBusError        *error);
-dbus_bool_t _dbus_string_save_to_file (const DBusString *str,
-                                       const DBusString *filename,
-                                       DBusError        *error);
-
-dbus_bool_t _dbus_make_file_world_readable   (const DBusString *filename,
-                                              DBusError *error);
-
-dbus_bool_t    _dbus_create_file_exclusively (const DBusString *filename,
-                                              DBusError        *error);
-dbus_bool_t    _dbus_delete_file             (const DBusString *filename,
-                                              DBusError        *error);
 dbus_bool_t    _dbus_create_directory        (const DBusString *filename,
                                               DBusError        *error);
 dbus_bool_t    _dbus_delete_directory        (const DBusString *filename,
@@ -320,25 +328,6 @@ dbus_bool_t _dbus_get_standard_system_servicedirs (DBusList **dirs);
 dbus_bool_t _dbus_append_system_config_file  (DBusString *str);
 dbus_bool_t _dbus_append_session_config_file (DBusString *str);
 
-typedef struct {
-  int fd_or_handle;
-} DBusPipe;
-
-void        _dbus_pipe_init                (DBusPipe         *pipe,
-                                            int               fd);
-void        _dbus_pipe_init_stdout         (DBusPipe         *pipe);
-int         _dbus_pipe_write               (DBusPipe         *pipe,
-                                            const DBusString *buffer,
-                                            int               start,
-                                            int               len,
-                                            DBusError        *error);
-int         _dbus_pipe_close               (DBusPipe         *pipe,
-                                            DBusError        *error);
-dbus_bool_t _dbus_pipe_is_valid            (DBusPipe         *pipe);
-void        _dbus_pipe_invalidate          (DBusPipe         *pipe);
-dbus_bool_t _dbus_pipe_is_stdout_or_stderr (DBusPipe         *pipe);
-
-
 /** Opaque type for reading a directory listing */
 typedef struct DBusDirIter DBusDirIter;
 
@@ -352,7 +341,7 @@ void         _dbus_directory_close         (DBusDirIter      *iter);
 dbus_bool_t  _dbus_check_dir_is_private_to_user    (DBusString *dir,
                                                     DBusError *error);
 
-void _dbus_fd_set_close_on_exec (int fd);
+void _dbus_fd_set_close_on_exec (intptr_t fd);
 
 const char* _dbus_get_tmpdir      (void);
 
@@ -369,6 +358,7 @@ dbus_bool_t _dbus_generate_random_ascii        (DBusString *str,
                                                 int         n_bytes);
 
 const char* _dbus_error_from_errno (int error_number);
+const char* _dbus_error_from_system_errno (void);
 
 void        _dbus_set_errno_to_zero                  (void);
 dbus_bool_t _dbus_get_is_errno_nonzero               (void);
@@ -418,6 +408,8 @@ dbus_bool_t _dbus_become_daemon   (const DBusString *pidfile,
                                    dbus_bool_t       keep_umask);
 
 dbus_bool_t _dbus_verify_daemon_user    (const char *user);
+dbus_bool_t _dbus_change_to_daemon_user (const char *user,
+                                         DBusError  *error);
 
 dbus_bool_t _dbus_write_pid_to_file_and_pipe (const DBusString *pidfile,
                                               DBusPipe         *print_pid_pipe,
@@ -484,8 +476,9 @@ void _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list
       _DBUS_BYTE_OF_PRIMITIVE (a, 6) == _DBUS_BYTE_OF_PRIMITIVE (b, 6) &&       \
       _DBUS_BYTE_OF_PRIMITIVE (a, 7) == _DBUS_BYTE_OF_PRIMITIVE (b, 7))
 
-dbus_bool_t _dbus_get_autolaunch_address (DBusString *address, 
-					  DBusError *error);
+dbus_bool_t _dbus_get_autolaunch_address (const char *scope,
+                                          DBusString *address,
+					                      DBusError  *error);
 
 dbus_bool_t _dbus_lookup_session_address (dbus_bool_t *supported,
                                           DBusString  *address,
@@ -523,6 +516,16 @@ dbus_bool_t _dbus_change_to_daemon_user (const char *user,
                                          DBusError  *error);
 
 void _dbus_flush_caches (void);
+
+/*
+ * replaces the term DBUS_PREFIX in configure_time_path by the
+ * current dbus installation directory. On unix this function is a noop
+ *
+ * @param configure_time_path
+ * @return real path
+ */
+const char *
+_dbus_replace_install_prefix (const char *configure_time_path);
 
 /** @} */
 

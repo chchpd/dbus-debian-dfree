@@ -2,7 +2,7 @@ SUBDIRS=dbus bus doc tools test
 DIST_SUBDIRS=dbus bus doc tools test
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = dbus-1.pc 
+pkgconfig_DATA = dbus-1.pc
 
 DISTCLEANFILES = 		\
 	dbus-1.pc
@@ -14,7 +14,9 @@ EXTRA_DIST =			\
         ChangeLog.pre-1-0       \
         NEWS.pre-1-0            \
 	ChangeLog.pre-1-2       \
-        NEWS.pre-1-2
+        NEWS.pre-1-2		\
+	README.win \
+	cmake
 
 all-local: Doxyfile
 
@@ -57,3 +59,11 @@ check-coverage:
 	echo "Need to reconfigure with --enable-gcov"
 
 endif
+
+update-authors:
+	git shortlog -s -e | cut -c 8- | sort > AUTHORS
+
+DISTCHECK_CONFIGURE_FLAGS = \
+	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
+
+ACLOCAL_AMFLAGS = -I m4

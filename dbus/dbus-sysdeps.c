@@ -22,6 +22,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-internals.h"
 #include "dbus-sysdeps.h"
 #include "dbus-threads.h"
@@ -34,15 +35,13 @@
  *
  * These are the standard ANSI C headers...
  */
+#if HAVE_LOCALE_H
 #include <locale.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
-/* This is UNIX-specific (on windows it's just in stdlib.h I believe)
- * but OK since the same stuff does exist on Windows in stdlib.h
- * and covered by a configure check.
- */
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
@@ -51,7 +50,14 @@ _DBUS_DEFINE_GLOBAL_LOCK (win_fds);
 _DBUS_DEFINE_GLOBAL_LOCK (sid_atom_cache);
 _DBUS_DEFINE_GLOBAL_LOCK (system_users);
 
+#ifdef DBUS_WIN
+  #include <stdlib.h>
+#elif (defined __APPLE__)
+# include <crt_externs.h>
+# define environ (*_NSGetEnviron())
+#else
 extern char **environ;
+#endif
 
 /**
  * @defgroup DBusSysdeps Internal system-dependent API
@@ -240,65 +246,6 @@ _dbus_get_environment (void)
     }
 
   return environment;
-}
-
-/*
- * init a pipe instance.
- *
- * @param pipe the pipe
- * @param fd the file descriptor to init from 
- */
-void
-_dbus_pipe_init (DBusPipe *pipe,
-                 int       fd)
-{
-  pipe->fd_or_handle = fd;
-}
-
-/**
- * init a pipe with stdout
- *
- * @param pipe the pipe
- */
-void
-_dbus_pipe_init_stdout (DBusPipe *pipe)
-{
-  _dbus_pipe_init (pipe, 1);
-}
-
-/**
- * check if a pipe is valid; pipes can be set invalid, similar to
- * a -1 file descriptor.
- *
- * @param pipe the pipe instance
- * @returns #FALSE if pipe is not valid
- */
-dbus_bool_t
-_dbus_pipe_is_valid(DBusPipe *pipe)
-{
-  return pipe->fd_or_handle >= 0;
-}
-
-/**
- * Check if a pipe is stdout or stderr.
- *
- * @param pipe the pipe instance
- * @returns #TRUE if pipe is one of the standard out/err channels
- */
-dbus_bool_t
-_dbus_pipe_is_stdout_or_stderr (DBusPipe *pipe)
-{
-  return pipe->fd_or_handle == 1 || pipe->fd_or_handle == 2;
-}
-
-/**
- * Initializes a pipe to an invalid value.
- * @param pipe the pipe
- */
-void
-_dbus_pipe_invalidate (DBusPipe *pipe)
-{
-  pipe->fd_or_handle = -1;
 }
 
 /**
@@ -571,7 +518,7 @@ _dbus_string_parse_int (const DBusString *str,
                                        _dbus_string_get_length (str) - start);
 
   end = NULL;
-  errno = 0;
+  _dbus_set_errno_to_zero ();
   v = strtol (p, &end, 0);
   if (end == NULL || end == p || errno != 0)
     return FALSE;
@@ -610,7 +557,7 @@ _dbus_string_parse_uint (const DBusString *str,
                                        _dbus_string_get_length (str) - start);
 
   end = NULL;
-  errno = 0;
+  _dbus_set_errno_to_zero ();
   v = strtoul (p, &end, 0);
   if (end == NULL || end == p || errno != 0)
     return FALSE;
@@ -678,10 +625,14 @@ ascii_strtod (const char *nptr,
 
   fail_pos = NULL;
 
+#if HAVE_LOCALECONV
   locale_data = localeconv ();
   decimal_point = locale_data->decimal_point;
-  decimal_point_len = strlen (decimal_point);
+#else
+  decimal_point = ".";
+#endif
 
+  decimal_point_len = strlen (decimal_point);
   _dbus_assert (decimal_point_len != 0);
   
   decimal_point_pos = NULL;
@@ -748,7 +699,7 @@ ascii_strtod (const char *nptr,
 
   /* Set errno to zero, so that we can distinguish zero results
      and underflows */
-  errno = 0;
+  _dbus_set_errno_to_zero ();
   
   if (decimal_point_pos)
     {
@@ -822,7 +773,7 @@ _dbus_string_parse_double (const DBusString *str,
     return FALSE;
   
   end = NULL;
-  errno = 0;
+  _dbus_set_errno_to_zero ();
   v = ascii_strtod (p, &end);
   if (end == NULL || end == p || errno != 0)
     return FALSE;
@@ -940,8 +891,8 @@ _dbus_generate_random_ascii (DBusString *str,
 }
 
 /**
- * Converts a UNIX or Windows errno
- * into a #DBusError name.
+ * Converts a UNIX errno, or Windows errno or WinSock error value into
+ * a #DBusError name.
  *
  * @todo should cover more errnos, specifically those
  * from open().
@@ -961,8 +912,16 @@ _dbus_error_from_errno (int error_number)
     case EPROTONOSUPPORT:
       return DBUS_ERROR_NOT_SUPPORTED;
 #endif
+#ifdef WSAEPROTONOSUPPORT
+    case WSAEPROTONOSUPPORT:
+      return DBUS_ERROR_NOT_SUPPORTED;
+#endif
 #ifdef EAFNOSUPPORT
     case EAFNOSUPPORT:
+      return DBUS_ERROR_NOT_SUPPORTED;
+#endif
+#ifdef WSAEAFNOSUPPORT
+    case WSAEAFNOSUPPORT:
       return DBUS_ERROR_NOT_SUPPORTED;
 #endif
 #ifdef ENFILE
@@ -989,40 +948,36 @@ _dbus_error_from_errno (int error_number)
     case ENOMEM:
       return DBUS_ERROR_NO_MEMORY;
 #endif
-#ifdef EINVAL
-    case EINVAL:
-      return DBUS_ERROR_FAILED;
-#endif
-#ifdef EBADF
-    case EBADF:
-      return DBUS_ERROR_FAILED;
-#endif
-#ifdef EFAULT
-    case EFAULT:
-      return DBUS_ERROR_FAILED;
-#endif
-#ifdef ENOTSOCK
-    case ENOTSOCK:
-      return DBUS_ERROR_FAILED;
-#endif
-#ifdef EISCONN
-    case EISCONN:
-      return DBUS_ERROR_FAILED;
-#endif
 #ifdef ECONNREFUSED
     case ECONNREFUSED:
+      return DBUS_ERROR_NO_SERVER;
+#endif
+#ifdef WSAECONNREFUSED
+    case WSAECONNREFUSED:
       return DBUS_ERROR_NO_SERVER;
 #endif
 #ifdef ETIMEDOUT
     case ETIMEDOUT:
       return DBUS_ERROR_TIMEOUT;
 #endif
+#ifdef WSAETIMEDOUT
+    case WSAETIMEDOUT:
+      return DBUS_ERROR_TIMEOUT;
+#endif
 #ifdef ENETUNREACH
     case ENETUNREACH:
       return DBUS_ERROR_NO_NETWORK;
 #endif
+#ifdef WSAENETUNREACH
+    case WSAENETUNREACH:
+      return DBUS_ERROR_NO_NETWORK;
+#endif
 #ifdef EADDRINUSE
     case EADDRINUSE:
+      return DBUS_ERROR_ADDRESS_IN_USE;
+#endif
+#ifdef WSAEADDRINUSE
+    case WSAEADDRINUSE:
       return DBUS_ERROR_ADDRESS_IN_USE;
 #endif
 #ifdef EEXIST
@@ -1039,12 +994,27 @@ _dbus_error_from_errno (int error_number)
 }
 
 /**
+ * Converts the current system errno value into a #DBusError name.
+ *
+ * @returns an error name
+ */
+const char*
+_dbus_error_from_system_errno (void)
+{
+  return _dbus_error_from_errno (errno);
+}
+
+/**
  * Assign 0 to the global errno variable
  */
 void
 _dbus_set_errno_to_zero (void)
 {
+#ifdef DBUS_WINCE
+  SetLastError (0);
+#else
   errno = 0;
+#endif
 }
 
 /**

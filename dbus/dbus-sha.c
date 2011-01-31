@@ -22,6 +22,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-internals.h"
 #include "dbus-sha.h"
 #include "dbus-marshal-basic.h" /* for byteswap routines */
@@ -465,7 +466,7 @@ _dbus_sha_final (DBusSHAContext   *context,
   /* some kind of security paranoia, though it seems pointless
    * to me given the nonzeroed stuff flying around
    */
-  memset ((void*)context, '\0', sizeof (DBusSHAContext));
+  _DBUS_ZERO(*context);
 
   return TRUE;
 }

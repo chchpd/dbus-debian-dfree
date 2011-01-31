@@ -21,6 +21,7 @@
  *
  */ 
 
+#include <config.h>
 #include "dbus-server.h"
 #include "dbus-server-unix.h"
 #include "dbus-server-socket.h"
@@ -103,6 +104,7 @@ _dbus_server_init_base (DBusServer             *server,
   server->address = NULL;
   server->watches = NULL;
   server->timeouts = NULL;
+  server->published_address = FALSE;
 
   if (!_dbus_string_init (&server->guid_hex))
     return FALSE;
@@ -572,6 +574,16 @@ dbus_server_listen (const char     *address,
             {
               _dbus_assert (server != NULL);
               _DBUS_ASSERT_ERROR_IS_CLEAR (&tmp_error);
+              handled_once = TRUE;
+              goto out;
+            }
+          else if (result == DBUS_SERVER_LISTEN_ADDRESS_ALREADY_USED)
+            {
+              _dbus_assert (server == NULL);
+              dbus_set_error (error,
+                       DBUS_ERROR_ADDRESS_IN_USE,
+                       "Address '%s' already used",
+                       dbus_address_entry_get_method (entries[0]));
               handled_once = TRUE;
               goto out;
             }

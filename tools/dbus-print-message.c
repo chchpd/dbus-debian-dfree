@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "dbus-print-message.h"
 
 #include <stdlib.h>
@@ -54,7 +56,7 @@ indent (int depth)
 static void
 print_hex (unsigned char *bytes, unsigned int len, int depth)
 {
-  int i, columns;
+  unsigned int i, columns;
 
   printf ("array of bytes [\n");
 

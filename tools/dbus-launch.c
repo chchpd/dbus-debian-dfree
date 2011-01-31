@@ -21,6 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "dbus-launch.h"
 #include <stdlib.h>
 #include <ctype.h>
@@ -363,9 +365,9 @@ print_variables (const char *bus_address, pid_t bus_pid, long bus_wid,
 {
   if (binary_syntax)
     {
-      write (1, bus_address, strlen (bus_address) + 1);
-      write (1, &bus_pid, sizeof bus_pid);
-      write (1, &bus_wid, sizeof bus_wid);
+      do_write (1, bus_address, strlen (bus_address) + 1);
+      do_write (1, &bus_pid, sizeof bus_pid);
+      do_write (1, &bus_wid, sizeof bus_wid);
       return;
     }
   else if (c_shell_syntax)
@@ -699,7 +701,11 @@ pass_info (const char *runprog, const char *bus_address, pid_t bus_pid,
       args = malloc (sizeof (char *) * ((argc-remaining_args)+2));
 
       if (envvar == NULL || args == NULL)
-        goto oom;
+        {
+          free (envvar);
+          free (args);
+          goto oom;
+        }
 
      args[0] = xstrdup (runprog);
       if (!args[0])

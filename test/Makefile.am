@@ -61,17 +61,19 @@ test_sleep_forever_SOURCES =			\
 decode_gcov_SOURCES=				\
 	decode-gcov.c
 
-TEST_LIBS=$(top_builddir)/dbus/libdbus-convenience.la $(DBUS_TEST_LIBS)
+# When any programs are not linked to libdbus-internal, fix this.
+AM_CPPFLAGS=-DDBUS_STATIC_BUILD
+TEST_LIBS=$(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
 
-test_service_LDADD=$(TEST_LIBS) libdbus-testutils.la
+test_service_LDADD=libdbus-testutils.la $(TEST_LIBS)
 test_service_LDFLAGS=@R_DYNAMIC_LDFLAG@
-test_names_LDADD=$(TEST_LIBS) libdbus-testutils.la
+test_names_LDADD=libdbus-testutils.la $(TEST_LIBS)
 test_names_LDFLAGS=@R_DYNAMIC_LDFLAG@
 ## break_loader_LDADD= $(TEST_LIBS)
 ## break_loader_LDFLAGS=@R_DYNAMIC_LDFLAG@
-test_shell_service_LDADD=$(TEST_LIBS) libdbus-testutils.la
+test_shell_service_LDADD=libdbus-testutils.la $(TEST_LIBS)
 test_shell_service_LDFLAGS=@R_DYNAMIC_LDFLAG@
-shell_test_LDADD=$(TEST_LIBS) libdbus-testutils.la
+shell_test_LDADD=libdbus-testutils.la $(TEST_LIBS)
 shell_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
 spawn_test_LDADD=$(TEST_LIBS)
 spawn_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
@@ -105,7 +107,7 @@ TESTDIRS=					\
 	data/equiv-config-files/entities/basic.d
 
 
-FIND_TESTS=find . -name "*.message" -o -name "*.message-raw" -o -name "*.auth-script" -o -name "*.sha1" -o -name "*.txt" -o -name "*.conf" -o -name "*.service"
+FIND_TESTS=find . -type f -a \( -name "*.message" -o -name "*.message-raw" -o -name "*.auth-script" -o -name "*.sha1" -o -name "*.txt" -o -name "*.conf" -o -name "*.service" \)
 
 dist-hook:
 	for D in $(TESTDIRS); do						\
@@ -120,7 +122,7 @@ dist-hook:
 ## copy tests to builddir so that generated tests and static tests 
 ## are all in one place.
 all-local:
-	for D in $(TESTDIRS); do								\
+	$(AM_V_at)for D in $(TESTDIRS); do								\
 		test -d $(top_builddir)/test/$$D || mkdir $(top_builddir)/test/$$D || exit 1 ;	\
 	done ;											\
 	if ! (test $(srcdir) = . || test $(srcdir) -ef .) ; then								\

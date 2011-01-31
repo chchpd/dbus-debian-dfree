@@ -24,8 +24,6 @@
 #ifndef BUS_CONFIG_PARSER_COMMON_H
 #define BUS_CONFIG_PARSER_COMMON_H
 
-#include <config.h>
-
 typedef enum
 {
   ELEMENT_NONE,
@@ -48,8 +46,9 @@ typedef enum
   ELEMENT_ASSOCIATE,
   ELEMENT_STANDARD_SESSION_SERVICEDIRS,
   ELEMENT_STANDARD_SYSTEM_SERVICEDIRS,
+  ELEMENT_KEEP_UMASK,
   ELEMENT_SYSLOG,
-  ELEMENT_KEEP_UMASK
+  ELEMENT_ALLOW_ANONYMOUS
 } ElementType;
 
 ElementType bus_config_parser_element_name_to_type (const char *element_name);

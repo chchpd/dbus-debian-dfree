@@ -1,3 +1,4 @@
+#include <config.h>
 #include <dbus/dbus.h>
 
 #define DBUS_COMPILATION /* cheat and use dbus-sysdeps */
@@ -36,6 +37,8 @@ main (int argc, char **argv)
       fprintf (stderr, "Could not launch application: \"%s\"\n",
 	       error.message);
     }
-  
+
+  dbus_free(argv_copy);
+ 
   return 0;
 }

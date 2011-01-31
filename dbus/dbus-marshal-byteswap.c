@@ -21,6 +21,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-marshal-byteswap.h"
 #include "dbus-marshal-basic.h"
 #include "dbus-signature.h"
@@ -189,6 +190,11 @@ byteswap_body_helper (DBusTypeReader       *reader,
             
             byteswap_body_helper (&sub, TRUE, old_byte_order, new_byte_order, p, &p);
           }
+          break;
+
+        case DBUS_TYPE_UNIX_FD:
+          /* fds can only be passed on a local machine, so byte order must always match */
+          _dbus_assert_not_reached("attempted to byteswap unix fds which makes no sense");
           break;
 
         default:

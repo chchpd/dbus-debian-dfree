@@ -1,6 +1,9 @@
+#include <config.h>
 
 #include "test-utils.h"
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 static DBusLoop *loop;
 static dbus_bool_t already_quit = FALSE;
@@ -234,7 +237,7 @@ handle_delay_echo (DBusConnection     *connection,
 
   _dbus_verbose ("sleeping for a short time\n");
 
-  usleep (50000);
+  _dbus_sleep_milliseconds (50);
 
   _dbus_verbose ("sending reply to DelayEcho method\n");
   
@@ -407,7 +410,11 @@ main (int    argc,
   else
     {
       name = argv[1];
+#ifndef DBUS_WIN
       do_fork = strcmp (argv[2], "fork") == 0;
+#else
+      do_fork = FALSE;
+#endif
     }
 
   /* The bare minimum for simulating a program "daemonizing"; the intent
@@ -415,13 +422,15 @@ main (int    argc,
    * activated services.
    * https://bugzilla.redhat.com/show_bug.cgi?id=545267
    */
-  if (do_fork)
+#ifndef DBUS_WIN
+   if (do_fork)
     {
       pid_t pid = fork ();
       if (pid != 0)
         exit (0);
       sleep (1);
     }
+#endif
 
   dbus_error_init (&error);
   connection = dbus_bus_get (DBUS_BUS_STARTER, &error);

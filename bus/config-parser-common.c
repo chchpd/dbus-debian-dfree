@@ -21,6 +21,7 @@
  *
  */
  
+#include <config.h>
 #include <dbus/dbus-internals.h>
 #include <string.h>
 
@@ -122,6 +123,10 @@ bus_config_parser_element_name_to_type (const char *name)
     {
       return ELEMENT_KEEP_UMASK;
     }
+  else if (strcmp (name, "allow_anonymous") == 0)
+    {
+      return ELEMENT_ALLOW_ANONYMOUS;
+    }
   return ELEMENT_NONE;
 }
 
@@ -174,6 +179,8 @@ bus_config_parser_element_type_to_name (ElementType type)
       return "syslog";
     case ELEMENT_KEEP_UMASK:
       return "keep_umask";
+    case ELEMENT_ALLOW_ANONYMOUS:
+      return "allow_anonymous";
     }
 
   _dbus_assert_not_reached ("bad element type");

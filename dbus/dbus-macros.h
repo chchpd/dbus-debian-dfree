@@ -64,6 +64,24 @@
 #  define _DBUS_GNUC_EXTENSION
 #endif
 
+#if     __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
+#define _DBUS_GNUC_PRINTF( format_idx, arg_idx )    \
+  __attribute__((__format__ (__printf__, format_idx, arg_idx)))
+#define _DBUS_GNUC_NORETURN                         \
+  __attribute__((__noreturn__))
+#else   /* !__GNUC__ */
+#define _DBUS_GNUC_PRINTF( format_idx, arg_idx )
+#define _DBUS_GNUC_NORETURN
+#endif  /* !__GNUC__ */
+
+/** @def _DBUS_GNUC_PRINTF
+ * used to tell gcc about printf format strings
+ */
+/** @def _DBUS_GNUC_NORETURN
+ * used to tell gcc about functions that never return, such as _dbus_abort()
+ */
+
+
 /* Normally docs are in .c files, but there isn't a .c file for this. */
 /**
  * @defgroup DBusMacros Utility macros
@@ -131,6 +149,25 @@
  * following expression, even if compiling with -pedantic. Do not use
  * this macro in your own code; please consider it to be internal to libdbus.
  */
+
+/*
+ * @def DBUS_EXPORT
+ *
+ * Declare the following symbol as public.  This is currently a noop on
+ * platforms other than Windows.
+ */
+
+#if defined(_WIN32)
+#  if defined(DBUS_STATIC_BUILD)
+#  define DBUS_EXPORT
+#  elif defined(dbus_1_EXPORTS)
+#  define DBUS_EXPORT __declspec(dllexport)
+#  else
+#  define DBUS_EXPORT __declspec(dllimport)
+#  endif
+#else
+#define DBUS_EXPORT
+#endif
 
 /** @} */
 

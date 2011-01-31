@@ -24,12 +24,6 @@
 #ifndef DBUS_MARSHAL_VALIDATE_H
 #define DBUS_MARSHAL_VALIDATE_H
 
-#include <config.h>
-
-#ifndef PACKAGE
-#error "config.h not included here"
-#endif
-
 /**
  * @addtogroup DBusMarshal
  *
@@ -117,6 +111,8 @@ typedef enum
   DBUS_INVALID_DICT_ENTRY_HAS_TOO_MANY_FIELDS = 53,
   DBUS_INVALID_DICT_ENTRY_NOT_INSIDE_ARRAY = 54,
   DBUS_INVALID_DICT_KEY_MUST_BE_BASIC_TYPE = 55,
+  DBUS_INVALID_MISSING_UNIX_FDS = 56,
+  DBUS_INVALID_NESTED_TOO_DEEPLY = 57,
   DBUS_VALIDITY_LAST
 } DBusValidity;
 

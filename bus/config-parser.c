@@ -20,6 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "config-parser-common.h"
 #include "config-parser.h"
 #include "test.h"
@@ -115,6 +117,8 @@ struct BusConfigParser
   unsigned int keep_umask : 1; /**< TRUE to keep original umask when forking */
 
   unsigned int is_toplevel : 1; /**< FALSE if we are a sub-config-file inside another one */
+
+  unsigned int allow_anonymous : 1; /**< TRUE to allow anonymous connections */
 };
 
 static Element*
@@ -402,6 +406,15 @@ bus_config_parser_new (const DBusString      *basedir,
       parser->limits.max_incoming_bytes = _DBUS_ONE_MEGABYTE * 127;
       parser->limits.max_outgoing_bytes = _DBUS_ONE_MEGABYTE * 127;
       parser->limits.max_message_size = _DBUS_ONE_MEGABYTE * 32;
+
+      /* We set relatively conservative values here since due to the
+      way SCM_RIGHTS works we need to preallocate an array for the
+      maximum number of file descriptors we can receive. Picking a
+      high value here thus translates directly to more memory
+      allocation. */
+      parser->limits.max_incoming_unix_fds = 1024*4;
+      parser->limits.max_outgoing_unix_fds = 1024*4;
+      parser->limits.max_message_unix_fds = 1024;
       
       /* Making this long means the user has to wait longer for an error
        * message if something screws up, but making it too short means
@@ -849,6 +862,20 @@ start_busconfig_child (BusConfigParser   *parser,
         while ((link = _dbus_list_pop_first_link (&dirs)))
           service_dirs_append_link_unique_or_free (&parser->service_dirs, link);
 
+      return TRUE;
+    }
+  else if (element_type == ELEMENT_ALLOW_ANONYMOUS)
+    {
+      if (!check_no_attributes (parser, "allow_anonymous", attribute_names, attribute_values, error))
+        return FALSE;
+
+      if (push_element (parser, ELEMENT_ALLOW_ANONYMOUS) == NULL)
+        {
+          BUS_SET_OOM (error);
+          return FALSE;
+        }
+
+      parser->allow_anonymous = TRUE;
       return TRUE;
     }
   else if (element_type == ELEMENT_SERVICEDIR)
@@ -1812,15 +1839,30 @@ set_limit (BusConfigParser *parser,
       must_be_positive = TRUE;
       parser->limits.max_incoming_bytes = value;
     }
+  else if (strcmp (name, "max_incoming_unix_fds") == 0)
+    {
+      must_be_positive = TRUE;
+      parser->limits.max_incoming_unix_fds = value;
+    }
   else if (strcmp (name, "max_outgoing_bytes") == 0)
     {
       must_be_positive = TRUE;
       parser->limits.max_outgoing_bytes = value;
     }
+  else if (strcmp (name, "max_outgoing_unix_fds") == 0)
+    {
+      must_be_positive = TRUE;
+      parser->limits.max_outgoing_unix_fds = value;
+    }
   else if (strcmp (name, "max_message_size") == 0)
     {
       must_be_positive = TRUE;
       parser->limits.max_message_size = value;
+    }
+  else if (strcmp (name, "max_message_unix_fds") == 0)
+    {
+      must_be_positive = TRUE;
+      parser->limits.max_message_unix_fds = value;
     }
   else if (strcmp (name, "service_start_timeout") == 0)
     {
@@ -1994,6 +2036,7 @@ bus_config_parser_end_element (BusConfigParser   *parser,
     case ELEMENT_ASSOCIATE:
     case ELEMENT_STANDARD_SESSION_SERVICEDIRS:
     case ELEMENT_STANDARD_SYSTEM_SERVICEDIRS:
+    case ELEMENT_ALLOW_ANONYMOUS:
       break;
     }
 
@@ -2279,6 +2322,7 @@ bus_config_parser_content (BusConfigParser   *parser,
     case ELEMENT_KEEP_UMASK:
     case ELEMENT_STANDARD_SESSION_SERVICEDIRS:    
     case ELEMENT_STANDARD_SYSTEM_SERVICEDIRS:    
+    case ELEMENT_ALLOW_ANONYMOUS:
     case ELEMENT_SELINUX:
     case ELEMENT_ASSOCIATE:
       if (all_whitespace (content))
@@ -2609,6 +2653,12 @@ dbus_bool_t
 bus_config_parser_get_keep_umask (BusConfigParser   *parser)
 {
   return parser->keep_umask;
+}
+
+dbus_bool_t
+bus_config_parser_get_allow_anonymous (BusConfigParser   *parser)
+{
+  return parser->allow_anonymous;
 }
 
 const char *
@@ -2955,8 +3005,11 @@ limits_equal (const BusLimits *a,
 {
   return
     (a->max_incoming_bytes == b->max_incoming_bytes
+     || a->max_incoming_unix_fds == b->max_incoming_unix_fds
      || a->max_outgoing_bytes == b->max_outgoing_bytes
+     || a->max_outgoing_unix_fds == b->max_outgoing_unix_fds
      || a->max_message_size == b->max_message_size
+     || a->max_message_unix_fds == b->max_message_unix_fds
      || a->activation_timeout == b->activation_timeout
      || a->auth_timeout == b->auth_timeout
      || a->max_completed_connections == b->max_completed_connections
@@ -3195,6 +3248,9 @@ static const char *test_session_service_dir_matches[] =
 #ifdef DBUS_UNIX
          "/testhome/foo/.testlocal/testshare/dbus-1/services",
 #endif
+#ifdef DBUS_WIN
+         NULL,
+#endif
          NULL
         };
 
@@ -3318,6 +3374,9 @@ static const char *test_system_service_dir_matches[] =
          "/testusr/testshare/dbus-1/system-services",
 #endif
          DBUS_DATADIR"/dbus-1/system-services",
+#ifdef DBUS_WIN
+         NULL,
+#endif
          NULL
         };
 
@@ -3447,8 +3506,12 @@ bus_config_parser_test (const DBusString *test_data_dir)
   if (!test_default_session_servicedirs())
     return FALSE;
 
+#ifdef DBUS_WIN
+  printf("default system service dir skipped\n");
+#else
   if (!test_default_system_servicedirs())
     return FALSE;
+#endif
 
   if (!process_test_valid_subdir (test_data_dir, "valid-config-files", VALID))
     return FALSE;

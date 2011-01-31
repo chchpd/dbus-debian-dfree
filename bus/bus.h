@@ -4,7 +4,7 @@
  * Copyright (C) 2003 Red Hat, Inc.
  *
  * Licensed under the Academic Free License version 2.1
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -14,7 +14,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -24,11 +24,11 @@
 #ifndef BUS_BUS_H
 #define BUS_BUS_H
 
-#include <config.h>
-
 #include <dbus/dbus.h>
 #include <dbus/dbus-string.h>
 #include <dbus/dbus-mainloop.h>
+#include <dbus/dbus-pipe.h>
+#include <dbus/dbus-sysdeps.h>
 
 typedef struct BusActivation    BusActivation;
 typedef struct BusConnections   BusConnections;
@@ -47,8 +47,11 @@ typedef struct BusMatchRule     BusMatchRule;
 typedef struct
 {
   long max_incoming_bytes;          /**< How many incoming message bytes for a single connection */
+  long max_incoming_unix_fds;       /**< How many incoming message unix fds for a single connection */
   long max_outgoing_bytes;          /**< How many outgoing bytes can be queued for a single connection */
+  long max_outgoing_unix_fds;       /**< How many outgoing unix fds can be queued for a single connection */
   long max_message_size;            /**< Max size of a single message in bytes */
+  long max_message_unix_fds;        /**< Max number of unix fds of a single message*/
   int activation_timeout;           /**< How long to wait for an activation to time out */
   int auth_timeout;                 /**< How long to wait for an authentication to time out */
   int max_completed_connections;    /**< Max number of authorized connections */
@@ -72,6 +75,8 @@ BusContext*       bus_context_new                                (const DBusStri
                                                                   ForceForkSetting  force_fork,
                                                                   DBusPipe         *print_addr_pipe,
                                                                   DBusPipe         *print_pid_pipe,
+                                                                  const DBusString *address,
+                                                                  dbus_bool_t      systemd_activation,
                                                                   DBusError        *error);
 dbus_bool_t       bus_context_reload_config                      (BusContext       *context,
 								  DBusError        *error);
@@ -83,6 +88,7 @@ dbus_bool_t       bus_context_get_id                             (BusContext    
 const char*       bus_context_get_type                           (BusContext       *context);
 const char*       bus_context_get_address                        (BusContext       *context);
 const char*       bus_context_get_servicehelper                  (BusContext       *context);
+dbus_bool_t       bus_context_get_systemd_activation             (BusContext       *context);
 BusRegistry*      bus_context_get_registry                       (BusContext       *context);
 BusConnections*   bus_context_get_connections                    (BusContext       *context);
 BusActivation*    bus_context_get_activation                     (BusContext       *context);
