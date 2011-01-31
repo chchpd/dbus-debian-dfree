@@ -2,6 +2,7 @@ dbus (1.4.1-2) UNRELEASED; urgency=low
 
   * Remove commented-out code from 00_dbus-quiesce-startup-errors.patch and
     forward it upstream
+  * Move to git; add debian/gbp.conf for git-buildpackage
 
  -- Simon McVittie <smcv@debian.org>  Thu, 06 Jan 2011 17:43:18 +0000
 
