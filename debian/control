@@ -17,8 +17,8 @@ Build-Depends: cdbs (>= 0.4.43),
                libx11-dev,
                libselinux1-dev [linux-any]
 Standards-Version: 3.9.0
-Vcs-Svn: svn://svn.debian.org/pkg-utopia/packages/unstable/dbus/
-Vcs-Browser: http://svn.debian.org/wsvn/pkg-utopia/packages/unstable/dbus/
+Vcs-Git: git://git.debian.org/pkg-utopia/dbus.git
+Vcs-Browser: http://git.debian.org/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
 
 Package: dbus

@@ -1,3 +1,9 @@
+dbus (1.2.24-5) UNRELEASED; urgency=low
+
+  * Move to git; add debian/gbp.conf for git-buildpackage
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 31 Jan 2011 17:14:04 +0000
+
 dbus (1.2.24-4) unstable; urgency=high
 
   * debian/patches/12-CVE-2010-4352-reject-deeply-nested-variants.patch
