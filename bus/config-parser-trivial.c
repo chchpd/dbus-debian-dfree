@@ -22,6 +22,7 @@
  *
  */
  
+#include <config.h>
 #include "config-parser-common.h"
 #include "config-parser-trivial.h"
 #include "utils.h"
@@ -128,6 +129,25 @@ bus_config_parser_unref (BusConfigParser *parser)
   _dbus_list_clear (&parser->service_dirs);
 
   dbus_free (parser);
+}
+
+dbus_bool_t
+bus_config_parser_check_doctype (BusConfigParser   *parser,
+                                 const char        *doctype,
+                                 DBusError         *error)
+{
+  _DBUS_ASSERT_ERROR_IS_CLEAR (error);
+
+  if (strcmp (doctype, "busconfig") != 0)
+    {
+      dbus_set_error (error,
+                      DBUS_ERROR_FAILED,
+                      "Configuration file has the wrong document type %s",
+                      doctype);
+      return FALSE;
+    }
+  else
+    return TRUE;
 }
 
 dbus_bool_t

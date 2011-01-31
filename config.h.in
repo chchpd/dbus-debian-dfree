@@ -33,8 +33,14 @@
 /* File to check for console ownerhip */
 #undef DBUS_CONSOLE_OWNER_FILE
 
+/* Defined if we run on a cygwin API based system */
+#undef DBUS_CYGWIN
+
 /* Directory for installing the DBUS daemon */
 #undef DBUS_DAEMONDIR
+
+/* Name of executable */
+#undef DBUS_DAEMON_NAME
 
 /* Directory for installing DBUS data files */
 #undef DBUS_DATADIR
@@ -45,6 +51,9 @@
 /* Disable public API sanity checking */
 #undef DBUS_DISABLE_CHECKS
 
+/* Use launchd autolaunch */
+#undef DBUS_ENABLE_LAUNCHD
+
 /* Build with caching of user data */
 #undef DBUS_ENABLE_USERDB_CACHE
 
@@ -54,10 +63,6 @@
 /* Defined if gcov is enabled to force a rebuild due to config.h changing */
 #undef DBUS_GCOV_ENABLED
 
-/* Always defined; expands to 1 if we have an atomic integer implementation,
-   else 0 */
-#undef DBUS_HAVE_ATOMIC_INT_COND
-
 /* Defined if we have gcc 3.3 and thus the new gcov format */
 #undef DBUS_HAVE_GCC33_GCOV
 
@@ -66,6 +71,9 @@
 
 /* Directory for installing the libexec binaries */
 #undef DBUS_LIBEXECDIR
+
+/* Prefix for installing DBUS */
+#undef DBUS_PREFIX
 
 /* Where per-session bus puts its sockets */
 #undef DBUS_SESSION_SOCKET_DIR
@@ -82,21 +90,26 @@
 /* Where to put test sockets */
 #undef DBUS_TEST_SOCKET_DIR
 
-/* Defined on UNIX and Linux systems and not on Windows */
+/* Defined if we run on a Unix-based system */
 #undef DBUS_UNIX
 
 /* User for running the system BUS daemon */
 #undef DBUS_USER
 
-/* Always defined; expands to 1 if we should use atomic integer implementation
-   for 486, else 0 */
-#undef DBUS_USE_ATOMIC_INT_486_COND
+/* Use the gcc __sync extension */
+#undef DBUS_USE_SYNC
 
 /* A 'va_copy' style function */
 #undef DBUS_VA_COPY
 
 /* 'va_lists' cannot be copies as values */
 #undef DBUS_VA_COPY_AS_ARRAY
+
+/* Defined if we run on a W32 API based system */
+#undef DBUS_WIN
+
+/* Defined if we run on a W32 CE API based system */
+#undef DBUS_WINCE
 
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
@@ -110,11 +123,17 @@
 /* Have abstract socket namespace */
 #undef HAVE_ABSTRACT_SOCKETS
 
+/* Define to 1 if you have the `accept4' function. */
+#undef HAVE_ACCEPT4
+
 /* Adt audit API */
 #undef HAVE_ADT
 
 /* Define to 1 if you have the `backtrace' function. */
 #undef HAVE_BACKTRACE
+
+/* Define to 1 if you have the <byteswap.h> header file. */
+#undef HAVE_BYTESWAP_H
 
 /* Define to 1 if you have the `clearenv' function. */
 #undef HAVE_CLEARENV
@@ -130,6 +149,13 @@
 
 /* Have the ddfd member of DIR */
 #undef HAVE_DDFD
+
+/* Define to 1 if you have the declaration of `MSG_NOSIGNAL', and to 0 if you
+   don't. */
+#undef HAVE_DECL_MSG_NOSIGNAL
+
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
 
 /* Have dirfd function */
 #undef HAVE_DIRFD
@@ -176,6 +202,12 @@
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
 
+/* Define to 1 if you have the `localeconv' function. */
+#undef HAVE_LOCALECONV
+
+/* Define to 1 if you have the <locale.h> header file. */
+#undef HAVE_LOCALE_H
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -191,6 +223,9 @@
 /* Define if your system needs _NSGetEnviron to set up the environment */
 #undef HAVE_NSGETENVIRON
 
+/* Define to 1 if you have the `pipe2' function. */
+#undef HAVE_PIPE2
+
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
 
@@ -203,8 +238,14 @@
 /* Define to 1 if you have the `setenv' function. */
 #undef HAVE_SETENV
 
+/* Define to 1 if you have the `setlocale' function. */
+#undef HAVE_SETLOCALE
+
 /* Define to 1 if you have the `setrlimit' function. */
 #undef HAVE_SETRLIMIT
+
+/* Define to 1 if you have the <signal.h> header file. */
+#undef HAVE_SIGNAL_H
 
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
@@ -224,6 +265,12 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if you have the `strtoll' function. */
+#undef HAVE_STRTOLL
+
+/* Define to 1 if you have the `strtoull' function. */
+#undef HAVE_STRTOULL
+
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H
 
@@ -242,6 +289,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Supports sending UNIX file descriptors */
+#undef HAVE_UNIX_FD_PASSING
+
 /* Define to 1 if you have the `unsetenv' function. */
 #undef HAVE_UNSETENV
 
@@ -256,6 +306,12 @@
 
 /* Define to 1 if you have the `writev' function. */
 #undef HAVE_WRITEV
+
+/* Define to 1 if you have the <ws2tcpip.h> header file. */
+#undef HAVE_WS2TCPIP_H
+
+/* Define to 1 if you have the <wspiapi.h> header file. */
+#undef HAVE_WSPIAPI_H
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
@@ -278,6 +334,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
@@ -340,6 +399,28 @@
 /* Full path to test file test/data/valid-service-files-system in builddir */
 #undef TEST_VALID_SERVICE_SYSTEM_DIR
 
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# undef _TANDEM_SOURCE
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
+
+
 /* Version number of package */
 #undef VERSION
 
@@ -372,6 +453,19 @@
 # define environ (*_NSGetEnviron())
 #endif
 
+
+/* Define to 1 if on MINIX. */
+#undef _MINIX
+
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+#undef _POSIX_1_SOURCE
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+#undef _POSIX_SOURCE
+
+/* Defined to get newer W32 CE APIs */
+#undef _WIN32_WCE
 
 /* Define to `__inline__' or `__inline' if that's what the C compiler
    calls it, or to nothing if 'inline' is not supported under any name.  */

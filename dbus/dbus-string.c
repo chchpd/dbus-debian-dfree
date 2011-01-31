@@ -22,6 +22,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-internals.h"
 #include "dbus-string.h"
 /* we allow a system header here, for speed/convenience */
@@ -2322,7 +2323,6 @@ _dbus_string_equal (const DBusString *a,
   return TRUE;
 }
 
-#ifdef DBUS_BUILD_TESTS
 /**
  * Tests two DBusString for equality up to the given length.
  * The strings may be shorter than the given length.
@@ -2367,7 +2367,6 @@ _dbus_string_equal_len (const DBusString *a,
 
   return TRUE;
 }
-#endif /* DBUS_BUILD_TESTS */
 
 /**
  * Tests two sub-parts of two DBusString for equality.  The specified
@@ -2759,6 +2758,68 @@ _dbus_string_validate_ascii (const DBusString *str,
     }
   
   return TRUE;
+}
+
+/**
+ * Converts the given range of the string to lower case.
+ *
+ * @param str the string
+ * @param start first byte index to convert
+ * @param len number of bytes to convert
+ */
+void
+_dbus_string_tolower_ascii (const DBusString *str,
+                            int               start,
+                            int               len)
+{
+  unsigned char *s;
+  unsigned char *end;
+  DBUS_STRING_PREAMBLE (str);
+  _dbus_assert (start >= 0);
+  _dbus_assert (start <= real->len);
+  _dbus_assert (len >= 0);
+  _dbus_assert (len <= real->len - start);
+
+  s = real->str + start;
+  end = s + len;
+
+  while (s != end)
+    {
+      if (*s >= 'A' && *s <= 'Z')
+          *s += 'a' - 'A';
+      ++s;
+    }
+}
+
+/**
+ * Converts the given range of the string to upper case.
+ *
+ * @param str the string
+ * @param start first byte index to convert
+ * @param len number of bytes to convert
+ */
+void
+_dbus_string_toupper_ascii (const DBusString *str,
+                            int               start,
+                            int               len)
+{
+  unsigned char *s;
+  unsigned char *end;
+  DBUS_STRING_PREAMBLE (str);
+  _dbus_assert (start >= 0);
+  _dbus_assert (start <= real->len);
+  _dbus_assert (len >= 0);
+  _dbus_assert (len <= real->len - start);
+
+  s = real->str + start;
+  end = s + len;
+
+  while (s != end)
+    {
+      if (*s >= 'a' && *s <= 'z')
+          *s += 'A' - 'a';
+      ++s;
+    }
 }
 
 /**

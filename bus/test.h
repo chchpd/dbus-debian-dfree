@@ -24,8 +24,6 @@
 #ifndef BUS_TEST_H
 #define BUS_TEST_H
 
-#include <config.h>
-
 #ifdef DBUS_BUILD_TESTS
 
 #include <dbus/dbus.h>
@@ -51,7 +49,9 @@ void        bus_test_run_everything   (BusContext                   *context);
 BusContext* bus_context_new_test      (const DBusString             *test_data_dir,
                                        const char                   *filename);
 
-
+#ifdef HAVE_UNIX_FD_PASSING
+dbus_bool_t bus_unix_fds_passing_test (const DBusString             *test_data_dir);
+#endif
 
 #endif
 

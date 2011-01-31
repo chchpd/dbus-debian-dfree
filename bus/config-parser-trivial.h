@@ -24,8 +24,6 @@
 #ifndef BUS_CONFIG_PARSER_TRIVIAL_H
 #define BUS_CONFIG_PARSER_TRIVIAL_H
 
-#include <config.h>
-
 #include <dbus/dbus.h>
 #include <dbus/dbus-string.h>
 #include <dbus/dbus-list.h>
@@ -41,6 +39,9 @@ BusConfigParser* bus_config_parser_new (const DBusString      *basedir,
 
 BusConfigParser* bus_config_parser_ref           (BusConfigParser   *parser);
 void             bus_config_parser_unref         (BusConfigParser   *parser);
+dbus_bool_t      bus_config_parser_check_doctype (BusConfigParser   *parser,
+                                                  const char        *doctype,
+                                                  DBusError         *error);
 dbus_bool_t      bus_config_parser_start_element (BusConfigParser   *parser,
                                                   const char        *element_name,
                                                   const char       **attribute_names,

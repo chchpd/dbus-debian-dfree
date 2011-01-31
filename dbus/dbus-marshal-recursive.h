@@ -24,13 +24,8 @@
 #ifndef DBUS_MARSHAL_RECURSIVE_H
 #define DBUS_MARSHAL_RECURSIVE_H
 
-#include <config.h>
 #include <dbus/dbus-protocol.h>
 #include <dbus/dbus-list.h>
-
-#ifndef PACKAGE
-#error "config.h not included here"
-#endif
 
 typedef struct DBusTypeReader      DBusTypeReader;
 typedef struct DBusTypeWriter      DBusTypeWriter;

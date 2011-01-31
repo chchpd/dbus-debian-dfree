@@ -40,8 +40,10 @@ noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
-	$(top_srcdir)/configure.in
+am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -67,7 +69,7 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_decode_gcov_OBJECTS = decode-gcov.$(OBJEXT)
 decode_gcov_OBJECTS = $(am_decode_gcov_OBJECTS)
 am__DEPENDENCIES_1 =
-am__DEPENDENCIES_2 = $(top_builddir)/dbus/libdbus-convenience.la \
+am__DEPENDENCIES_2 = $(top_builddir)/dbus/libdbus-internal.la \
 	$(am__DEPENDENCIES_1)
 decode_gcov_DEPENDENCIES = $(am__DEPENDENCIES_2)
 decode_gcov_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
@@ -75,7 +77,7 @@ decode_gcov_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(decode_gcov_LDFLAGS) $(LDFLAGS) -o $@
 am_shell_test_OBJECTS = shell-test.$(OBJEXT)
 shell_test_OBJECTS = $(am_shell_test_OBJECTS)
-shell_test_DEPENDENCIES = $(am__DEPENDENCIES_2) libdbus-testutils.la
+shell_test_DEPENDENCIES = libdbus-testutils.la $(am__DEPENDENCIES_2)
 shell_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(shell_test_LDFLAGS) $(LDFLAGS) -o $@
@@ -90,7 +92,7 @@ test_exit_OBJECTS = $(am_test_exit_OBJECTS)
 test_exit_LDADD = $(LDADD)
 am_test_names_OBJECTS = test-names.$(OBJEXT)
 test_names_OBJECTS = $(am_test_names_OBJECTS)
-test_names_DEPENDENCIES = $(am__DEPENDENCIES_2) libdbus-testutils.la
+test_names_DEPENDENCIES = libdbus-testutils.la $(am__DEPENDENCIES_2)
 test_names_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(test_names_LDFLAGS) $(LDFLAGS) -o $@
@@ -99,14 +101,14 @@ test_segfault_OBJECTS = $(am_test_segfault_OBJECTS)
 test_segfault_LDADD = $(LDADD)
 am_test_service_OBJECTS = test-service.$(OBJEXT)
 test_service_OBJECTS = $(am_test_service_OBJECTS)
-test_service_DEPENDENCIES = $(am__DEPENDENCIES_2) libdbus-testutils.la
+test_service_DEPENDENCIES = libdbus-testutils.la $(am__DEPENDENCIES_2)
 test_service_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(test_service_LDFLAGS) $(LDFLAGS) -o $@
 am_test_shell_service_OBJECTS = test-shell-service.$(OBJEXT)
 test_shell_service_OBJECTS = $(am_test_shell_service_OBJECTS)
-test_shell_service_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	libdbus-testutils.la
+test_shell_service_DEPENDENCIES = libdbus-testutils.la \
+	$(am__DEPENDENCIES_2)
 test_shell_service_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(AM_CFLAGS) $(CFLAGS) $(test_shell_service_LDFLAGS) \
@@ -196,10 +198,13 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
+AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BUILD_FILEVERSION = @BUILD_FILEVERSION@
+BUILD_TIMESTAMP = @BUILD_TIMESTAMP@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -231,6 +236,8 @@ DBUS_MAJOR_VERSION = @DBUS_MAJOR_VERSION@
 DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
 DBUS_MINOR_VERSION = @DBUS_MINOR_VERSION@
 DBUS_PATH_OR_ABSTRACT = @DBUS_PATH_OR_ABSTRACT@
+DBUS_PREFIX = @DBUS_PREFIX@
+DBUS_SESSION_BUS_DEFAULT_ADDRESS = @DBUS_SESSION_BUS_DEFAULT_ADDRESS@
 DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
@@ -244,6 +251,7 @@ DBUS_X_CFLAGS = @DBUS_X_CFLAGS@
 DBUS_X_LIBS = @DBUS_X_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 DOXYGEN = @DOXYGEN@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -257,6 +265,7 @@ EXPANDED_DATADIR = @EXPANDED_DATADIR@
 EXPANDED_LIBDIR = @EXPANDED_LIBDIR@
 EXPANDED_LIBEXECDIR = @EXPANDED_LIBEXECDIR@
 EXPANDED_LOCALSTATEDIR = @EXPANDED_LOCALSTATEDIR@
+EXPANDED_PREFIX = @EXPANDED_PREFIX@
 EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
@@ -266,6 +275,8 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LAUNCHCTL = @LAUNCHCTL@
+LAUNCHD_AGENT_DIR = @LAUNCHD_AGENT_DIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -281,6 +292,7 @@ LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
+MAN2HTML = @MAN2HTML@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -293,6 +305,7 @@ PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
+PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PIC_CFLAGS = @PIC_CFLAGS@
@@ -322,6 +335,7 @@ TEST_SOCKET_DIR = @TEST_SOCKET_DIR@
 TEST_VALID_SERVICE_DIR = @TEST_VALID_SERVICE_DIR@
 TEST_VALID_SERVICE_SYSTEM_DIR = @TEST_VALID_SERVICE_SYSTEM_DIR@
 VERSION = @VERSION@
+WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
 X_CFLAGS = @X_CFLAGS@
@@ -377,6 +391,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemunitdir = @systemdsystemunitdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
@@ -417,14 +432,17 @@ test_sleep_forever_SOURCES = \
 decode_gcov_SOURCES = \
 	decode-gcov.c
 
-TEST_LIBS = $(top_builddir)/dbus/libdbus-convenience.la $(DBUS_TEST_LIBS)
-test_service_LDADD = $(TEST_LIBS) libdbus-testutils.la
+
+# When any programs are not linked to libdbus-internal, fix this.
+AM_CPPFLAGS = -DDBUS_STATIC_BUILD
+TEST_LIBS = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
+test_service_LDADD = libdbus-testutils.la $(TEST_LIBS)
 test_service_LDFLAGS = @R_DYNAMIC_LDFLAG@
-test_names_LDADD = $(TEST_LIBS) libdbus-testutils.la
+test_names_LDADD = libdbus-testutils.la $(TEST_LIBS)
 test_names_LDFLAGS = @R_DYNAMIC_LDFLAG@
-test_shell_service_LDADD = $(TEST_LIBS) libdbus-testutils.la
+test_shell_service_LDADD = libdbus-testutils.la $(TEST_LIBS)
 test_shell_service_LDFLAGS = @R_DYNAMIC_LDFLAG@
-shell_test_LDADD = $(TEST_LIBS) libdbus-testutils.la
+shell_test_LDADD = libdbus-testutils.la $(TEST_LIBS)
 shell_test_LDFLAGS = @R_DYNAMIC_LDFLAG@
 spawn_test_LDADD = $(TEST_LIBS)
 spawn_test_LDFLAGS = @R_DYNAMIC_LDFLAG@
@@ -454,7 +472,7 @@ TESTDIRS = \
 	data/equiv-config-files/entities	\
 	data/equiv-config-files/entities/basic.d
 
-FIND_TESTS = find . -name "*.message" -o -name "*.message-raw" -o -name "*.auth-script" -o -name "*.sha1" -o -name "*.txt" -o -name "*.conf" -o -name "*.service"
+FIND_TESTS = find . -type f -a \( -name "*.message" -o -name "*.message-raw" -o -name "*.auth-script" -o -name "*.sha1" -o -name "*.txt" -o -name "*.conf" -o -name "*.service" \)
 all: all-recursive
 
 .SUFFIXES:
@@ -1005,7 +1023,7 @@ dist-hook:
 	done
 
 all-local:
-	for D in $(TESTDIRS); do								\
+	$(AM_V_at)for D in $(TESTDIRS); do								\
 		test -d $(top_builddir)/test/$$D || mkdir $(top_builddir)/test/$$D || exit 1 ;	\
 	done ;											\
 	if ! (test $(srcdir) = . || test $(srcdir) -ef .) ; then								\

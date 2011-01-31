@@ -20,9 +20,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include <dbus/dbus-internals.h>
 #include <dbus/dbus-string.h>
+#ifndef DBUS_WIN
 #include <dbus/dbus-userdb.h>
+#endif
 #include "selinux.h"
 #include "services.h"
 #include "policy.h"
@@ -1088,4 +1092,3 @@ _dbus_change_to_daemon_user  (const char    *user,
  return TRUE;
 }
 #endif
-

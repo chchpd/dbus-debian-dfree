@@ -22,6 +22,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-internals.h"
 #include "dbus-server-debug-pipe.h"
 #include "dbus-transport-socket.h"
@@ -253,9 +254,6 @@ _dbus_transport_debug_pipe_new (const char     *server_name,
       return NULL;
     }
 
-  _dbus_fd_set_close_on_exec (client_fd);
-  _dbus_fd_set_close_on_exec (server_fd);
-  
   client_transport = _dbus_transport_new_for_socket (client_fd,
                                                      NULL, &address);
   if (client_transport == NULL)

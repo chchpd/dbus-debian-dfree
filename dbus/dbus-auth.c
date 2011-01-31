@@ -20,6 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "dbus-auth.h"
 #include "dbus-string.h"
 #include "dbus-list.h"
@@ -122,7 +124,9 @@ typedef enum {
   DBUS_AUTH_COMMAND_REJECTED,
   DBUS_AUTH_COMMAND_OK,
   DBUS_AUTH_COMMAND_ERROR,
-  DBUS_AUTH_COMMAND_UNKNOWN
+  DBUS_AUTH_COMMAND_UNKNOWN,
+  DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD,
+  DBUS_AUTH_COMMAND_AGREE_UNIX_FD
 } DBusAuthCommand;
 
 /**
@@ -184,6 +188,9 @@ struct DBusAuth
   unsigned int already_got_mechanisms : 1;       /**< Client already got mech list */
   unsigned int already_asked_for_initial_response : 1; /**< Already sent a blank challenge to get an initial response */
   unsigned int buffer_outstanding : 1; /**< Buffer is "checked out" for reading data into */
+
+  unsigned int unix_fd_possible : 1;  /**< This side could do unix fd passing */
+  unsigned int unix_fd_negotiated : 1; /**< Unix fd was successfully negotiated */
 };
 
 /**
@@ -223,9 +230,10 @@ static dbus_bool_t send_rejected             (DBusAuth *auth);
 static dbus_bool_t send_error                (DBusAuth *auth,
                                               const char *message);
 static dbus_bool_t send_ok                   (DBusAuth *auth);
-static dbus_bool_t send_begin                (DBusAuth *auth,
-                                              const DBusString *args_from_ok);
+static dbus_bool_t send_begin                (DBusAuth *auth);
 static dbus_bool_t send_cancel               (DBusAuth *auth);
+static dbus_bool_t send_negotiate_unix_fd    (DBusAuth *auth);
+static dbus_bool_t send_agree_unix_fd        (DBusAuth *auth);
 
 /**
  * Client states
@@ -264,6 +272,9 @@ static dbus_bool_t handle_client_state_waiting_for_ok     (DBusAuth         *aut
 static dbus_bool_t handle_client_state_waiting_for_reject (DBusAuth         *auth,
                                                            DBusAuthCommand   command,
                                                            const DBusString *args);
+static dbus_bool_t handle_client_state_waiting_for_agree_unix_fd (DBusAuth         *auth,
+                                                           DBusAuthCommand   command,
+                                                           const DBusString *args);
 
 static const DBusAuthStateData client_state_need_send_auth = {
   "NeedSendAuth", NULL
@@ -277,7 +288,10 @@ static const DBusAuthStateData client_state_waiting_for_ok = {
 static const DBusAuthStateData client_state_waiting_for_reject = {
   "WaitingForReject", handle_client_state_waiting_for_reject
 };
-  
+static const DBusAuthStateData client_state_waiting_for_agree_unix_fd = {
+  "WaitingForAgreeUnixFD", handle_client_state_waiting_for_agree_unix_fd
+};
+
 /**
  * Common terminal states.  Terminal states have handler == NULL.
  */
@@ -1192,7 +1206,7 @@ handle_server_data_anonymous_mech (DBusAuth         *auth,
           {
             DBusString plaintext;
             DBusString encoded;
-            _dbus_string_init_const (&plaintext, "D-Bus " VERSION);
+            _dbus_string_init_const (&plaintext, "D-Bus " DBUS_VERSION_STRING);
             _dbus_string_init (&encoded);
             _dbus_string_hex_encode (&plaintext, 0,
                                      &encoded,
@@ -1250,7 +1264,7 @@ handle_client_initial_response_anonymous_mech (DBusAuth         *auth,
     return FALSE;
 
   if (!_dbus_string_append (&plaintext,
-                            "libdbus " VERSION))
+                            "libdbus " DBUS_VERSION_STRING))
     goto failed;
 
   if (!_dbus_string_hex_encode (&plaintext, 0,
@@ -1522,9 +1536,21 @@ send_ok (DBusAuth *auth)
 }
 
 static dbus_bool_t
-send_begin (DBusAuth         *auth,
-            const DBusString *args_from_ok)
+send_begin (DBusAuth         *auth)
 {
+
+  if (!_dbus_string_append (&auth->outgoing,
+                            "BEGIN\r\n"))
+    return FALSE;
+
+  goto_state (auth, &common_state_authenticated);
+  return TRUE;
+}
+
+static dbus_bool_t
+process_ok(DBusAuth *auth,
+          const DBusString *args_from_ok) {
+
   int end_of_hex;
   
   /* "args_from_ok" should be the GUID, whitespace already pulled off the front */
@@ -1549,20 +1575,19 @@ send_begin (DBusAuth         *auth,
       return TRUE;
     }
 
-  if (_dbus_string_copy (args_from_ok, 0, &DBUS_AUTH_CLIENT (auth)->guid_from_server, 0) &&
-      _dbus_string_append (&auth->outgoing, "BEGIN\r\n"))
-    {
-      _dbus_verbose ("Got GUID '%s' from the server\n",
-                     _dbus_string_get_const_data (& DBUS_AUTH_CLIENT (auth)->guid_from_server));
-      
-      goto_state (auth, &common_state_authenticated);
-      return TRUE;
-    }
-  else
-    {
+  if (!_dbus_string_copy (args_from_ok, 0, &DBUS_AUTH_CLIENT (auth)->guid_from_server, 0)) {
       _dbus_string_set_length (& DBUS_AUTH_CLIENT (auth)->guid_from_server, 0);
       return FALSE;
-    }
+  }
+
+  _dbus_verbose ("Got GUID '%s' from the server\n",
+                 _dbus_string_get_const_data (& DBUS_AUTH_CLIENT (auth)->guid_from_server));
+
+  if (auth->unix_fd_possible)
+    return send_negotiate_unix_fd(auth);
+
+  _dbus_verbose("Not negotiating unix fd passing, since not possible\n");
+  return send_begin (auth);
 }
 
 static dbus_bool_t
@@ -1618,6 +1643,33 @@ process_data (DBusAuth             *auth,
     }
 
   _dbus_string_free (&decoded);
+  return TRUE;
+}
+
+static dbus_bool_t
+send_negotiate_unix_fd (DBusAuth *auth)
+{
+  if (!_dbus_string_append (&auth->outgoing,
+                            "NEGOTIATE_UNIX_FD\r\n"))
+    return FALSE;
+
+  goto_state (auth, &client_state_waiting_for_agree_unix_fd);
+  return TRUE;
+}
+
+static dbus_bool_t
+send_agree_unix_fd (DBusAuth *auth)
+{
+  _dbus_assert(auth->unix_fd_possible);
+
+  auth->unix_fd_negotiated = TRUE;
+  _dbus_verbose("Agreed to UNIX FD passing\n");
+
+  if (!_dbus_string_append (&auth->outgoing,
+                            "AGREE_UNIX_FD\r\n"))
+    return FALSE;
+
+  goto_state (auth, &server_state_waiting_for_begin);
   return TRUE;
 }
 
@@ -1712,9 +1764,13 @@ handle_server_state_waiting_for_auth  (DBusAuth         *auth,
     case DBUS_AUTH_COMMAND_ERROR:
       return send_rejected (auth);
 
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+      return send_error (auth, "Need to authenticate first");
+
     case DBUS_AUTH_COMMAND_REJECTED:
     case DBUS_AUTH_COMMAND_OK:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       return send_error (auth, "Unknown command");
     }
@@ -1741,9 +1797,13 @@ handle_server_state_waiting_for_data  (DBusAuth         *auth,
       goto_state (auth, &common_state_need_disconnect);
       return TRUE;
 
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+      return send_error (auth, "Need to authenticate first");
+
     case DBUS_AUTH_COMMAND_REJECTED:
     case DBUS_AUTH_COMMAND_OK:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       return send_error (auth, "Unknown command");
     }
@@ -1766,9 +1826,16 @@ handle_server_state_waiting_for_begin (DBusAuth         *auth,
       goto_state (auth, &common_state_authenticated);
       return TRUE;
 
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+      if (auth->unix_fd_possible)
+        return send_agree_unix_fd(auth);
+      else
+        return send_error(auth, "Unix FD passing not supported, not authenticated or otherwise not possible");
+
     case DBUS_AUTH_COMMAND_REJECTED:
     case DBUS_AUTH_COMMAND_OK:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       return send_error (auth, "Unknown command");
 
@@ -1933,7 +2000,7 @@ handle_client_state_waiting_for_data (DBusAuth         *auth,
       return process_rejected (auth, args);
 
     case DBUS_AUTH_COMMAND_OK:
-      return send_begin (auth, args);
+      return process_ok(auth, args);
 
     case DBUS_AUTH_COMMAND_ERROR:
       return send_cancel (auth);
@@ -1942,6 +2009,8 @@ handle_client_state_waiting_for_data (DBusAuth         *auth,
     case DBUS_AUTH_COMMAND_CANCEL:
     case DBUS_AUTH_COMMAND_BEGIN:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       return send_error (auth, "Unknown command");
     }
@@ -1958,7 +2027,7 @@ handle_client_state_waiting_for_ok (DBusAuth         *auth,
       return process_rejected (auth, args);
 
     case DBUS_AUTH_COMMAND_OK:
-      return send_begin (auth, args);
+      return process_ok(auth, args);
 
     case DBUS_AUTH_COMMAND_DATA:
     case DBUS_AUTH_COMMAND_ERROR:
@@ -1968,6 +2037,8 @@ handle_client_state_waiting_for_ok (DBusAuth         *auth,
     case DBUS_AUTH_COMMAND_CANCEL:
     case DBUS_AUTH_COMMAND_BEGIN:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       return send_error (auth, "Unknown command");
     }
@@ -1990,9 +2061,43 @@ handle_client_state_waiting_for_reject (DBusAuth         *auth,
     case DBUS_AUTH_COMMAND_OK:
     case DBUS_AUTH_COMMAND_ERROR:
     case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
     default:
       goto_state (auth, &common_state_need_disconnect);
       return TRUE;
+    }
+}
+
+static dbus_bool_t
+handle_client_state_waiting_for_agree_unix_fd(DBusAuth         *auth,
+                                              DBusAuthCommand   command,
+                                              const DBusString *args)
+{
+  switch (command)
+    {
+    case DBUS_AUTH_COMMAND_AGREE_UNIX_FD:
+      _dbus_assert(auth->unix_fd_possible);
+      auth->unix_fd_negotiated = TRUE;
+      _dbus_verbose("Sucessfully negotiated UNIX FD passing\n");
+      return send_begin (auth);
+
+    case DBUS_AUTH_COMMAND_ERROR:
+      _dbus_assert(auth->unix_fd_possible);
+      auth->unix_fd_negotiated = FALSE;
+      _dbus_verbose("Failed to negotiate UNIX FD passing\n");
+      return send_begin (auth);
+
+    case DBUS_AUTH_COMMAND_OK:
+    case DBUS_AUTH_COMMAND_DATA:
+    case DBUS_AUTH_COMMAND_REJECTED:
+    case DBUS_AUTH_COMMAND_AUTH:
+    case DBUS_AUTH_COMMAND_CANCEL:
+    case DBUS_AUTH_COMMAND_BEGIN:
+    case DBUS_AUTH_COMMAND_UNKNOWN:
+    case DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD:
+    default:
+      return send_error (auth, "Unknown command");
     }
 }
 
@@ -2005,13 +2110,15 @@ typedef struct {
 } DBusAuthCommandName;
 
 static const DBusAuthCommandName auth_command_names[] = {
-  { "AUTH",     DBUS_AUTH_COMMAND_AUTH },
-  { "CANCEL",   DBUS_AUTH_COMMAND_CANCEL },
-  { "DATA",     DBUS_AUTH_COMMAND_DATA },
-  { "BEGIN",    DBUS_AUTH_COMMAND_BEGIN },
-  { "REJECTED", DBUS_AUTH_COMMAND_REJECTED },
-  { "OK",       DBUS_AUTH_COMMAND_OK },
-  { "ERROR",    DBUS_AUTH_COMMAND_ERROR }
+  { "AUTH",              DBUS_AUTH_COMMAND_AUTH },
+  { "CANCEL",            DBUS_AUTH_COMMAND_CANCEL },
+  { "DATA",              DBUS_AUTH_COMMAND_DATA },
+  { "BEGIN",             DBUS_AUTH_COMMAND_BEGIN },
+  { "REJECTED",          DBUS_AUTH_COMMAND_REJECTED },
+  { "OK",                DBUS_AUTH_COMMAND_OK },
+  { "ERROR",             DBUS_AUTH_COMMAND_ERROR },
+  { "NEGOTIATE_UNIX_FD", DBUS_AUTH_COMMAND_NEGOTIATE_UNIX_FD },
+  { "AGREE_UNIX_FD",     DBUS_AUTH_COMMAND_AGREE_UNIX_FD }
 };
 
 static DBusAuthCommand
@@ -2683,6 +2790,31 @@ _dbus_auth_set_context (DBusAuth               *auth,
 {
   return _dbus_string_replace_len (context, 0, _dbus_string_get_length (context),
                                    &auth->context, 0, _dbus_string_get_length (context));
+}
+
+/**
+ * Sets whether unix fd passing is potentially on the transport and
+ * hence shall be negotiated.
+ *
+ * @param auth the auth conversation
+ * @param b TRUE when unix fd passing shall be negotiated, otherwise FALSE
+ */
+void
+_dbus_auth_set_unix_fd_possible(DBusAuth *auth, dbus_bool_t b)
+{
+  auth->unix_fd_possible = b;
+}
+
+/**
+ * Queries whether unix fd passing was sucessfully negotiated.
+ *
+ * @param auth the auth conversion
+ * @returns #TRUE when unix fd passing was negotiated.
+ */
+dbus_bool_t
+_dbus_auth_get_unix_fd_negotiated(DBusAuth *auth)
+{
+  return auth->unix_fd_negotiated;
 }
 
 /** @} */

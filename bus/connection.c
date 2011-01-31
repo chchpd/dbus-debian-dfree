@@ -20,6 +20,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include "connection.h"
 #include "dispatch.h"
 #include "policy.h"
@@ -118,7 +120,7 @@ get_connections_for_uid (BusConnections *connections,
 
   /* val is NULL is 0 when it isn't in the hash yet */
   
-  val = _dbus_hash_table_lookup_ulong (connections->completed_by_user,
+  val = _dbus_hash_table_lookup_uintptr (connections->completed_by_user,
                                        uid);
 
   current_count = _DBUS_POINTER_TO_INT (val);
@@ -147,14 +149,14 @@ adjust_connections_for_uid (BusConnections *connections,
 
   if (current_count == 0)
     {
-      _dbus_hash_table_remove_ulong (connections->completed_by_user, uid);
+      _dbus_hash_table_remove_uintptr (connections->completed_by_user, uid);
       return TRUE;
     }
   else
     {
       dbus_bool_t retval;
       
-      retval = _dbus_hash_table_insert_ulong (connections->completed_by_user,
+      retval = _dbus_hash_table_insert_uintptr (connections->completed_by_user,
                                               uid, _DBUS_INT_TO_POINTER (current_count));
 
       /* only positive adjustment can fail as otherwise
@@ -437,7 +439,7 @@ bus_connections_new (BusContext *context)
   if (connections == NULL)
     goto failed_1;
 
-  connections->completed_by_user = _dbus_hash_table_new (DBUS_HASH_ULONG,
+  connections->completed_by_user = _dbus_hash_table_new (DBUS_HASH_UINTPTR,
                                                          NULL, NULL);
   if (connections->completed_by_user == NULL)
     goto failed_2;
@@ -584,9 +586,12 @@ cache_peer_loginfo_string (BusConnectionData *d,
 
   if (dbus_connection_get_windows_user (connection, &windows_sid))
     {
-      if (!_dbus_string_append_printf (&loginfo_buf, "sid=\"%s\" ", windows_sid))
-        goto oom;
+      dbus_bool_t did_append;
+      did_append = _dbus_string_append_printf (&loginfo_buf,
+                                               "sid=\"%s\" ", windows_sid);
       dbus_free (windows_sid);
+      if (!did_append)
+        goto oom;
     }
 
   if (!_dbus_string_steal_data (&loginfo_buf, &(d->cached_loginfo_string)))
@@ -837,7 +842,7 @@ expire_incomplete_timeout (void *data)
 {
   BusConnections *connections = data;
 
-  _dbus_verbose ("Running %s\n", _DBUS_FUNCTION_NAME);
+  _dbus_verbose ("Running\n");
   
   /* note that this may remove the timeout */
   bus_connections_expire_incomplete (connections);
@@ -1630,7 +1635,7 @@ cancel_pending_reply (void *data)
 {
   CancelPendingReplyData *d = data;
 
-  _dbus_verbose ("%s: d = %p\n", _DBUS_FUNCTION_NAME, d);
+  _dbus_verbose ("d = %p\n", d);
   
   if (!bus_expire_list_remove (d->connections->pending_replies,
                                &d->pending->expire_item))
@@ -1644,7 +1649,7 @@ cancel_pending_reply_data_free (void *data)
 {
   CancelPendingReplyData *d = data;
 
-  _dbus_verbose ("%s: d = %p\n", _DBUS_FUNCTION_NAME, d);
+  _dbus_verbose ("d = %p\n", d);
   
   /* d->pending should be either freed or still
    * in the list of pending replies (owned by someone
@@ -1781,7 +1786,7 @@ cancel_check_pending_reply (void *data)
 {
   CheckPendingReplyData *d = data;
 
-  _dbus_verbose ("%s: d = %p\n", _DBUS_FUNCTION_NAME, d);
+  _dbus_verbose ("d = %p\n",d);
 
   bus_expire_list_add_link (d->connections->pending_replies,
                             d->link);
@@ -1793,7 +1798,7 @@ check_pending_reply_data_free (void *data)
 {
   CheckPendingReplyData *d = data;
 
-  _dbus_verbose ("%s: d = %p\n", _DBUS_FUNCTION_NAME, d);
+  _dbus_verbose ("d = %p\n",d);
   
   if (d->link != NULL)
     {

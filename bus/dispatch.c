@@ -6,7 +6,7 @@
  * Copyright (C) 2004  Imendio HB
  *
  * Licensed under the Academic Free License version 2.1
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -16,13 +16,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
 
+#include <config.h>
 #include "dispatch.h"
 #include "connection.h"
 #include "driver.h"
@@ -34,6 +35,23 @@
 #include "test.h"
 #include <dbus/dbus-internals.h>
 #include <string.h>
+
+#ifdef HAVE_UNIX_FD_PASSING
+#include <dbus/dbus-sysdeps-unix.h>
+#include <unistd.h>
+#endif
+
+#ifndef TEST_CONNECTION
+/*
+ TODO autotools:
+  move to build system as already done for cmake
+*/
+#ifdef DBUS_UNIX
+#define TEST_CONNECTION "debug-pipe:name=test-server"
+#else
+#define TEST_CONNECTION "tcp:host=localhost,port=1234"
+#endif
+#endif
 
 static dbus_bool_t
 send_one_message (DBusConnection *connection,
@@ -51,7 +69,11 @@ send_one_message (DBusConnection *connection,
                                           message,
                                           NULL))
     return TRUE; /* silently don't send it */
-  
+
+  if (dbus_message_contains_unix_fds(message) &&
+      !dbus_connection_can_send_type(connection, DBUS_TYPE_UNIX_FD))
+    return TRUE; /* silently don't send it */
+
   if (!bus_transaction_send (transaction,
                              connection,
                              message))
@@ -97,6 +119,17 @@ bus_dispatch_matches (BusTransaction *transaction,
                                               message, error))
         return FALSE;
 
+      if (dbus_message_contains_unix_fds (message) &&
+          !dbus_connection_can_send_type (addressed_recipient,
+                                          DBUS_TYPE_UNIX_FD))
+        {
+          dbus_set_error (error,
+                          DBUS_ERROR_NOT_SUPPORTED,
+                          "Tried to send message with Unix file descriptors"
+                          "to a client that doesn't support that.");
+          return FALSE;
+      }
+
       /* Dispatch the message */
       if (!bus_transaction_send (transaction, addressed_recipient, message))
         {
@@ -134,7 +167,7 @@ bus_dispatch_matches (BusTransaction *transaction,
     }
 
   _dbus_list_clear (&recipients);
-  
+
   if (dbus_error_is_set (&tmp_error))
     {
       dbus_move_error (&tmp_error, error);
@@ -154,25 +187,25 @@ bus_dispatch (DBusConnection *connection,
   BusContext *context;
   DBusHandlerResult result;
   DBusConnection *addressed_recipient;
-  
+
   result = DBUS_HANDLER_RESULT_HANDLED;
-  
+
   transaction = NULL;
   addressed_recipient = NULL;
   dbus_error_init (&error);
-  
+
   context = bus_connection_get_context (connection);
   _dbus_assert (context != NULL);
-  
+
   /* If we can't even allocate an OOM error, we just go to sleep
    * until we can.
    */
   while (!bus_connection_preallocate_oom_error (connection))
     _dbus_wait_for_memory ();
-  
+
   /* Ref connection in case we disconnect it at some point in here */
   dbus_connection_ref (connection);
-  
+
   service_name = dbus_message_get_destination (message);
 
 #ifdef DBUS_ENABLE_VERBOSE_MODE
@@ -182,7 +215,7 @@ bus_dispatch (DBusConnection *connection,
     interface_name = dbus_message_get_interface (message);
     member_name = dbus_message_get_member (message);
     error_name = dbus_message_get_error_name (message);
-    
+
     _dbus_verbose ("DISPATCH: %s %s %s to %s\n",
                    interface_name ? interface_name : "(no interface)",
                    member_name ? member_name : "(no member)",
@@ -190,7 +223,7 @@ bus_dispatch (DBusConnection *connection,
                    service_name ? service_name : "peer");
   }
 #endif /* DBUS_ENABLE_VERBOSE_MODE */
-  
+
   /* If service_name is NULL, if it's a signal we send it to all
    * connections with a match rule. If it's not a signal, there
    * are some special cases here but mostly we just bail out.
@@ -214,7 +247,7 @@ bus_dispatch (DBusConnection *connection,
           goto out;
         }
     }
-  
+
   /* Create our transaction */
   transaction = bus_transaction_new (context);
   if (transaction == NULL)
@@ -222,7 +255,7 @@ bus_dispatch (DBusConnection *connection,
       BUS_SET_OOM (&error);
       goto out;
     }
-  
+
   /* Assign a sender to the message */
   if (bus_connection_is_active (connection))
     {
@@ -242,7 +275,7 @@ bus_dispatch (DBusConnection *connection,
        */
       service_name = dbus_message_get_destination (message);
     }
-  
+
   if (service_name &&
       strcmp (service_name, DBUS_SERVICE_DBUS) == 0) /* to bus driver */
     {
@@ -270,9 +303,9 @@ bus_dispatch (DBusConnection *connection,
       BusRegistry *registry;
 
       _dbus_assert (service_name != NULL);
-      
+
       registry = bus_connection_get_registry (connection);
-      
+
       _dbus_string_init_const (&service_string, service_name);
       service = bus_registry_lookup (registry, &service_string);
 
@@ -292,7 +325,7 @@ bus_dispatch (DBusConnection *connection,
               _dbus_verbose ("bus_activation_activate_service() failed: %s\n", error.name);
               goto out;
             }
-          
+
           goto out;
         }
       else if (service == NULL)
@@ -316,7 +349,7 @@ bus_dispatch (DBusConnection *connection,
    */
   if (!bus_dispatch_matches (transaction, connection, addressed_recipient, message, &error))
     goto out;
-  
+
  out:
   if (dbus_error_is_set (&error))
     {
@@ -348,7 +381,7 @@ bus_dispatch (DBusConnection *connection,
                                                  &error, message))
             {
               bus_connection_send_oom_error (connection, message);
-              
+
               /* cancel transaction due to OOM */
               if (transaction != NULL)
                 {
@@ -357,8 +390,8 @@ bus_dispatch (DBusConnection *connection,
                 }
             }
         }
-     
-      
+
+
       dbus_error_free (&error);
     }
 
@@ -382,12 +415,12 @@ bus_dispatch_message_filter (DBusConnection     *connection,
 
 dbus_bool_t
 bus_dispatch_add_connection (DBusConnection *connection)
-{  
+{
   if (!dbus_connection_add_filter (connection,
                                    bus_dispatch_message_filter,
                                    NULL, NULL))
     return FALSE;
-  
+
   return TRUE;
 }
 
@@ -424,7 +457,7 @@ block_connection_until_message_from_bus (BusContext     *context,
                                          const char     *what_is_expected)
 {
   _dbus_verbose ("expecting: %s\n", what_is_expected);
-  
+
   while (dbus_connection_get_dispatch_status (connection) ==
          DBUS_DISPATCH_COMPLETE &&
          dbus_connection_get_is_connected (connection))
@@ -533,13 +566,13 @@ check_service_owner_changed_foreach (DBusConnection *connection,
   DBusError error;
   const char *service_name, *old_owner, *new_owner;
 
-  if (d->expected_kind == SERVICE_CREATED 
+  if (d->expected_kind == SERVICE_CREATED
       && connection == d->skip_connection)
     return TRUE;
 
   dbus_error_init (&error);
   d->failed = TRUE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -573,7 +606,7 @@ check_service_owner_changed_foreach (DBusConnection *connection,
           if (dbus_error_has_name (&error, DBUS_ERROR_NO_MEMORY))
             {
               dbus_error_free (&error);
-              _dbus_wait_for_memory ();              
+              _dbus_wait_for_memory ();
               goto reget_service_info_data;
             }
           else
@@ -599,7 +632,7 @@ check_service_owner_changed_foreach (DBusConnection *connection,
           goto out;
         }
 
-      if (*service_name == ':' && new_owner[0] 
+      if (*service_name == ':' && new_owner[0]
           && strcmp (service_name, new_owner) != 0)
         {
           _dbus_warn ("inconsistent ServiceOwnedChanged message (\"%s\" [ %s -> %s ])\n",
@@ -609,10 +642,10 @@ check_service_owner_changed_foreach (DBusConnection *connection,
     }
 
   d->failed = FALSE;
-  
+
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
 
@@ -629,7 +662,7 @@ kill_client_connection (BusContext     *context,
   CheckServiceOwnerChangedData socd;
 
   _dbus_verbose ("killing connection %p\n", connection);
-  
+
   s = dbus_bus_get_unique_name (connection);
   _dbus_assert (s != NULL);
 
@@ -637,36 +670,36 @@ kill_client_connection (BusContext     *context,
     _dbus_wait_for_memory ();
 
   dbus_connection_ref (connection);
-  
+
   /* kick in the disconnect handler that unrefs the connection */
   dbus_connection_close (connection);
 
   bus_test_run_everything (context);
-  
+
   _dbus_assert (bus_test_client_listed (connection));
-  
+
   /* Run disconnect handler in test.c */
   if (bus_connection_dispatch_one_message (connection))
     _dbus_assert_not_reached ("something received on connection being killed other than the disconnect");
-  
+
   _dbus_assert (!dbus_connection_get_is_connected (connection));
   dbus_connection_unref (connection);
   connection = NULL;
   _dbus_assert (!bus_test_client_listed (connection));
-  
+
   socd.expected_kind = SERVICE_DELETED;
   socd.expected_service_name = base_service;
   socd.failed = FALSE;
   socd.skip_connection = NULL;
-  
+
   bus_test_clients_foreach (check_service_owner_changed_foreach,
                             &socd);
 
   dbus_free (base_service);
-  
+
   if (socd.failed)
     _dbus_assert_not_reached ("didn't get the expected NameOwnerChanged (deletion) messages");
-  
+
   if (!check_no_leftovers (context))
     _dbus_assert_not_reached ("stuff left in message queues after disconnecting a client");
 }
@@ -676,7 +709,7 @@ kill_client_connection_unchecked (DBusConnection *connection)
 {
   /* This kills the connection without expecting it to affect
    * the rest of the bus.
-   */  
+   */
   _dbus_verbose ("Unchecked kill of connection %p\n", connection);
 
   dbus_connection_ref (connection);
@@ -722,11 +755,10 @@ check_no_leftovers (BusContext *context)
   nmd.failed = FALSE;
   bus_test_clients_foreach (check_no_messages_foreach,
                             &nmd);
-  
+
   if (nmd.failed)
     {
-      _dbus_verbose ("%s: leftover message found\n",
-                     _DBUS_FUNCTION_NAME);
+      _dbus_verbose ("leftover message found\n");
       return FALSE;
     }
   else
@@ -756,7 +788,7 @@ check_hello_message (BusContext     *context,
   name_message = NULL;
 
   _dbus_verbose ("check_hello_message for %p\n", connection);
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -766,7 +798,7 @@ check_hello_message (BusContext     *context,
     return TRUE;
 
   dbus_connection_ref (connection); /* because we may get disconnected */
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -775,44 +807,44 @@ check_hello_message (BusContext     *context,
     }
 
   _dbus_assert (dbus_message_has_signature (message, ""));
-  
+
   dbus_message_unref (message);
   message = NULL;
 
   if (!dbus_connection_get_is_connected (connection))
     {
       _dbus_verbose ("connection was disconnected (presumably auth failed)\n");
-      
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
-  
+
   /* send our message */
   bus_test_run_clients_loop (SEND_PENDING (connection));
 
   if (!dbus_connection_get_is_connected (connection))
     {
       _dbus_verbose ("connection was disconnected (presumably auth failed)\n");
-      
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
-  
+
   block_connection_until_message_from_bus (context, connection, "reply to Hello");
 
   if (!dbus_connection_get_is_connected (connection))
     {
       _dbus_verbose ("connection was disconnected (presumably auth failed)\n");
-      
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
 
   dbus_connection_unref (connection);
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -830,7 +862,7 @@ check_hello_message (BusContext     *context,
                   dbus_message_get_sender (message) : "(none)");
       goto out;
     }
-  
+
   if (dbus_message_get_type (message) == DBUS_MESSAGE_TYPE_ERROR)
     {
       if (dbus_message_is_error (message,
@@ -848,7 +880,7 @@ check_hello_message (BusContext     *context,
   else
     {
       CheckServiceOwnerChangedData socd;
-      
+
       if (dbus_message_get_type (message) == DBUS_MESSAGE_TYPE_METHOD_RETURN)
         {
           ; /* good, expected */
@@ -884,14 +916,14 @@ check_hello_message (BusContext     *context,
 
       while (!dbus_bus_set_unique_name (connection, name))
         _dbus_wait_for_memory ();
-      
+
       socd.expected_kind = SERVICE_CREATED;
       socd.expected_service_name = name;
       socd.failed = FALSE;
       socd.skip_connection = connection; /* we haven't done AddMatch so won't get it ourselves */
       bus_test_clients_foreach (check_service_owner_changed_foreach,
                                 &socd);
-      
+
       if (socd.failed)
         goto out;
 
@@ -912,7 +944,7 @@ check_hello_message (BusContext     *context,
                       "NameAcquired");
           goto out;
         }
-      
+
     retry_get_acquired_name:
       if (!dbus_message_get_args (message, &error,
                                   DBUS_TYPE_STRING, &acquired,
@@ -946,20 +978,20 @@ check_hello_message (BusContext     *context,
 
   if (!check_no_leftovers (context))
     goto out;
-  
+
   retval = TRUE;
-  
+
  out:
-  _dbus_verbose ("ending %s retval = %d\n", _DBUS_FUNCTION_NAME, retval);
-  
+  _dbus_verbose ("ending - retval = %d\n", retval);
+
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
 
   if (name_message)
     dbus_message_unref (name_message);
-  
+
   return retval;
 }
 
@@ -980,7 +1012,7 @@ check_double_hello_message (BusContext     *context,
   message = NULL;
 
   _dbus_verbose ("check_double_hello_message for %p\n", connection);
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -988,7 +1020,7 @@ check_double_hello_message (BusContext     *context,
 
   if (message == NULL)
     return TRUE;
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -1006,15 +1038,15 @@ check_double_hello_message (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
-      
+      _dbus_verbose ("connection was disconnected\n");
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
 
   dbus_connection_unref (connection);
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -1032,7 +1064,7 @@ check_double_hello_message (BusContext     *context,
                   dbus_message_get_sender (message) : "(none)");
       goto out;
     }
-  
+
   if (dbus_message_get_type (message) != DBUS_MESSAGE_TYPE_ERROR)
     {
       warn_unexpected (connection, message, "method return for Hello");
@@ -1041,15 +1073,15 @@ check_double_hello_message (BusContext     *context,
 
   if (!check_no_leftovers (context))
     goto out;
-  
+
   retval = TRUE;
-  
+
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1072,7 +1104,7 @@ check_get_connection_unix_user (BusContext     *context,
   message = NULL;
 
   _dbus_verbose ("check_get_connection_unix_user for %p\n", connection);
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -1083,7 +1115,7 @@ check_get_connection_unix_user (BusContext     *context,
 
   base_service_name = dbus_bus_get_unique_name (connection);
 
-  if (!dbus_message_append_args (message, 
+  if (!dbus_message_append_args (message,
                                  DBUS_TYPE_STRING, &base_service_name,
                                  DBUS_TYPE_INVALID))
     {
@@ -1108,10 +1140,10 @@ check_get_connection_unix_user (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
-      
+      _dbus_verbose ("connection was disconnected\n");
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
 
@@ -1183,10 +1215,10 @@ check_get_connection_unix_user (BusContext     *context,
 
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1209,7 +1241,7 @@ check_get_connection_unix_process_id (BusContext     *context,
   message = NULL;
 
   _dbus_verbose ("check_get_connection_unix_process_id for %p\n", connection);
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -1220,7 +1252,7 @@ check_get_connection_unix_process_id (BusContext     *context,
 
   base_service_name = dbus_bus_get_unique_name (connection);
 
-  if (!dbus_message_append_args (message, 
+  if (!dbus_message_append_args (message,
                                  DBUS_TYPE_STRING, &base_service_name,
                                  DBUS_TYPE_INVALID))
     {
@@ -1245,10 +1277,10 @@ check_get_connection_unix_process_id (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
-      
+      _dbus_verbose ("connection was disconnected\n");
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
 
@@ -1278,11 +1310,11 @@ check_get_connection_unix_process_id (BusContext     *context,
            */
           _dbus_verbose ("Windows correctly does not support GetConnectionUnixProcessID\n");
         }
-#endif   
+#endif
       else
         {
           warn_unexpected (connection, message, "not this error");
-          
+
           goto out;
         }
     }
@@ -1291,7 +1323,7 @@ check_get_connection_unix_process_id (BusContext     *context,
 #ifdef DBUS_WIN
       warn_unexpected (connection, message, "GetConnectionUnixProcessID to fail on Windows");
       goto out;
-#else      
+#else
       if (dbus_message_get_type (message) == DBUS_MESSAGE_TYPE_METHOD_RETURN)
         {
           ; /* good, expected */
@@ -1350,10 +1382,10 @@ check_get_connection_unix_process_id (BusContext     *context,
 
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1375,7 +1407,7 @@ check_add_match_all (BusContext     *context,
   message = NULL;
 
   _dbus_verbose ("check_add_match_all for %p\n", connection);
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -1391,7 +1423,7 @@ check_add_match_all (BusContext     *context,
       dbus_message_unref (message);
       return TRUE;
     }
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -1402,32 +1434,32 @@ check_add_match_all (BusContext     *context,
   message = NULL;
 
   dbus_connection_ref (connection); /* because we may get disconnected */
-  
+
   /* send our message */
   bus_test_run_clients_loop (SEND_PENDING (connection));
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
-      
+      _dbus_verbose ("connection was disconnected\n");
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
-  
+
   block_connection_until_message_from_bus (context, connection, "reply to AddMatch");
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
-      
+      _dbus_verbose ("connection was disconnected\n");
+
       dbus_connection_unref (connection);
-      
+
       return TRUE;
     }
 
   dbus_connection_unref (connection);
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -1445,7 +1477,7 @@ check_add_match_all (BusContext     *context,
                   dbus_message_get_sender (message) : "(none)");
       goto out;
     }
-  
+
   if (dbus_message_get_type (message) == DBUS_MESSAGE_TYPE_ERROR)
     {
       if (dbus_message_is_error (message,
@@ -1477,15 +1509,15 @@ check_add_match_all (BusContext     *context,
 
   if (!check_no_leftovers (context))
     goto out;
-  
+
   retval = TRUE;
-  
+
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1500,7 +1532,7 @@ check_hello_connection (BusContext *context)
 
   dbus_error_init (&error);
 
-  connection = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+  connection = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (connection == NULL)
     {
       _DBUS_ASSERT_ERROR_IS_SET (&error);
@@ -1516,10 +1548,10 @@ check_hello_connection (BusContext *context)
     }
 
   spin_connection_until_authenticated (context, connection);
-  
+
   if (!check_hello_message (context, connection))
     return FALSE;
-  
+
   if (dbus_bus_get_unique_name (connection) == NULL)
     {
       /* We didn't successfully register, so we can't
@@ -1531,7 +1563,7 @@ check_hello_connection (BusContext *context)
     {
       if (!check_add_match_all (context, connection))
         return FALSE;
-      
+
       kill_client_connection (context, connection);
     }
 
@@ -1552,17 +1584,17 @@ check_nonexistent_service_no_auto_start (BusContext     *context,
   dbus_bool_t retval;
   const char *nonexistent = NONEXISTENT_SERVICE_NAME;
   dbus_uint32_t flags;
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
                                           "StartServiceByName");
-  
+
   if (message == NULL)
     return TRUE;
 
   dbus_message_set_auto_start (message, FALSE);
-  
+
   flags = 0;
   if (!dbus_message_append_args (message,
                                  DBUS_TYPE_STRING, &nonexistent,
@@ -1572,7 +1604,7 @@ check_nonexistent_service_no_auto_start (BusContext     *context,
       dbus_message_unref (message);
       return TRUE;
     }
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -1588,12 +1620,12 @@ check_nonexistent_service_no_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -1613,7 +1645,7 @@ check_nonexistent_service_no_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -1638,11 +1670,11 @@ check_nonexistent_service_no_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1656,15 +1688,15 @@ check_nonexistent_service_auto_start (BusContext     *context,
   DBusMessage *message;
   dbus_uint32_t serial;
   dbus_bool_t retval;
-    
+
   message = dbus_message_new_method_call (NONEXISTENT_SERVICE_NAME,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
- 
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -1680,12 +1712,12 @@ check_nonexistent_service_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
 
   if (message == NULL)
@@ -1706,7 +1738,7 @@ check_nonexistent_service_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -1731,11 +1763,11 @@ check_nonexistent_service_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -1749,16 +1781,16 @@ check_base_service_activated (BusContext     *context,
   dbus_bool_t retval;
   DBusError error;
   const char *base_service, *base_service_from_bus, *old_owner;
-  
+
   retval = FALSE;
-  
+
   dbus_error_init (&error);
   base_service = NULL;
   old_owner = NULL;
   base_service_from_bus = NULL;
 
   message = initial_message;
-  dbus_message_ref (message);  
+  dbus_message_ref (message);
 
   if (dbus_message_is_signal (message,
                               DBUS_INTERFACE_DBUS,
@@ -1798,7 +1830,7 @@ check_base_service_activated (BusContext     *context,
                       base_service);
           goto out;
         }
-         
+
       if (strcmp (base_service, base_service_from_bus) != 0)
         {
           _dbus_warn ("Expected base service activation, got \"%s\" instead with owner \"%s\"\n",
@@ -1812,14 +1844,14 @@ check_base_service_activated (BusContext     *context,
                       old_owner);
           goto out;
         }
-     
+
       socd.expected_kind = SERVICE_CREATED;
       socd.expected_service_name = base_service;
       socd.failed = FALSE;
       socd.skip_connection = connection;
       bus_test_clients_foreach (check_service_owner_changed_foreach,
                                 &socd);
-      
+
       if (socd.failed)
         goto out;
     }
@@ -1834,7 +1866,7 @@ check_base_service_activated (BusContext     *context,
     *base_service_p = base_service;
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
@@ -1854,9 +1886,9 @@ check_service_activated (BusContext     *context,
   dbus_bool_t retval;
   DBusError error;
   dbus_uint32_t activation_result;
-  
+
   retval = FALSE;
-  
+
   dbus_error_init (&error);
 
   message = initial_message;
@@ -1923,15 +1955,15 @@ check_service_activated (BusContext     *context,
       socd.expected_service_name = service_name;
       bus_test_clients_foreach (check_service_owner_changed_foreach,
                                 &socd);
-          
+
       if (socd.failed)
         goto out;
-          
+
       dbus_message_unref (message);
       service_name = NULL;
       old_owner = NULL;
       base_service_from_bus = NULL;
-      
+
       message = pop_message_waiting_for_memory (connection);
       if (message == NULL)
         {
@@ -1943,10 +1975,10 @@ check_service_activated (BusContext     *context,
   else
     {
       warn_unexpected (connection, message, "NameOwnerChanged for the activated name");
-      
+
       goto out;
     }
-  
+
   if (dbus_message_get_type (message) != DBUS_MESSAGE_TYPE_METHOD_RETURN)
     {
       warn_unexpected (connection, message, "reply to StartServiceByName");
@@ -1984,7 +2016,7 @@ check_service_activated (BusContext     *context,
 
   dbus_message_unref (message);
   message = NULL;
-      
+
   if (!check_no_leftovers (context))
     {
       _dbus_warn ("Messages were left over after verifying existent activation results\n");
@@ -1992,12 +2024,12 @@ check_service_activated (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
   dbus_error_free (&error);
-  
+
   return retval;
 }
 
@@ -2011,9 +2043,9 @@ check_service_auto_activated (BusContext     *context,
   DBusMessage *message;
   dbus_bool_t retval;
   DBusError error;
-  
+
   retval = FALSE;
-  
+
   dbus_error_init (&error);
 
   message = initial_message;
@@ -2025,7 +2057,7 @@ check_service_auto_activated (BusContext     *context,
     {
       const char *service_name;
       CheckServiceOwnerChangedData socd;
-      
+
     reget_service_name_arg:
       if (!dbus_message_get_args (message, &error,
                                   DBUS_TYPE_STRING, &service_name,
@@ -2046,28 +2078,28 @@ check_service_auto_activated (BusContext     *context,
               goto out;
             }
         }
-      
+
       if (strcmp (service_name, activated_name) != 0)
         {
           _dbus_warn ("Expected to see service %s created, saw %s instead\n",
                       activated_name, service_name);
           goto out;
         }
-      
+
       socd.expected_kind = SERVICE_CREATED;
       socd.expected_service_name = service_name;
       socd.failed = FALSE;
-      socd.skip_connection = connection; 
+      socd.skip_connection = connection;
       bus_test_clients_foreach (check_service_owner_changed_foreach,
                                 &socd);
-      
+
       if (socd.failed)
         goto out;
-      
+
       /* Note that this differs from regular activation in that we don't get a
        * reply to ActivateService here.
        */
-      
+
       dbus_message_unref (message);
       message = NULL;
       service_name = NULL;
@@ -2075,16 +2107,16 @@ check_service_auto_activated (BusContext     *context,
   else
     {
       warn_unexpected (connection, message, "NameOwnerChanged for the activated name");
-      
+
       goto out;
     }
-  
+
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -2098,7 +2130,7 @@ check_service_deactivated (BusContext     *context,
   CheckServiceOwnerChangedData socd;
 
   retval = FALSE;
-  
+
   /* Now we are expecting ServiceOwnerChanged (deletion) messages for the base
    * service and the activated_name.  The base service
    * notification is required to come last.
@@ -2108,11 +2140,11 @@ check_service_deactivated (BusContext     *context,
   socd.failed = FALSE;
   socd.skip_connection = NULL;
   bus_test_clients_foreach (check_service_owner_changed_foreach,
-                            &socd);      
+                            &socd);
 
   if (socd.failed)
     goto out;
-      
+
   socd.expected_kind = SERVICE_DELETED;
   socd.expected_service_name = base_service;
   socd.failed = FALSE;
@@ -2124,7 +2156,7 @@ check_service_deactivated (BusContext     *context,
     goto out;
 
   retval = TRUE;
-  
+
  out:
   return retval;
 }
@@ -2139,27 +2171,27 @@ check_send_exit_to_service (BusContext     *context,
   DBusMessage *message;
   dbus_uint32_t serial;
   dbus_bool_t retval;
-  
+
   _dbus_verbose ("Sending exit message to the test service\n");
 
   retval = FALSE;
-  
+
   /* Kill off the test service by sending it a quit message */
   message = dbus_message_new_method_call (service_name,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Exit");
-      
+
   if (message == NULL)
     {
       /* Do this again; we still need the service to exit... */
       if (!check_send_exit_to_service (context, connection,
                                        service_name, base_service))
         goto out;
-      
+
       return TRUE;
     }
-      
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -2168,7 +2200,7 @@ check_send_exit_to_service (BusContext     *context,
       if (!check_send_exit_to_service (context, connection,
                                        service_name, base_service))
         goto out;
-      
+
       return TRUE;
     }
 
@@ -2190,12 +2222,12 @@ check_send_exit_to_service (BusContext     *context,
       dbus_connection_return_message (connection, message);
       message = NULL;
     }
-          
+
   if (!got_error)
     {
       /* If no error, wait for the test service to exit */
       block_connection_until_message_from_bus (context, connection, "test service to exit");
-              
+
       bus_test_run_everything (context);
     }
 
@@ -2210,7 +2242,7 @@ check_send_exit_to_service (BusContext     *context,
                            "error with the correct reply serial");
           goto out;
         }
-      
+
       if (!dbus_message_is_error (message,
                                   DBUS_ERROR_NO_MEMORY))
         {
@@ -2238,7 +2270,7 @@ check_send_exit_to_service (BusContext     *context,
        * stuff.
        */
       message = pop_message_waiting_for_memory (connection);
-          
+
       if (message == NULL)
         {
           warn_unexpected (connection, NULL,
@@ -2259,10 +2291,10 @@ check_send_exit_to_service (BusContext     *context,
                            "error with the correct reply serial");
           goto out;
         }
-          
+
       _dbus_verbose ("Got error %s after test service exited\n",
                      dbus_message_get_error_name (message));
-      
+
       if (!check_no_leftovers (context))
         {
           _dbus_warn ("Messages were left over after %s\n",
@@ -2270,13 +2302,13 @@ check_send_exit_to_service (BusContext     *context,
           goto out;
         }
     }
-  
+
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -2291,9 +2323,9 @@ check_got_error (BusContext     *context,
   va_list ap;
   dbus_bool_t error_found;
   const char *error_name;
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2332,20 +2364,20 @@ check_got_error (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
-          
+
 typedef enum
-{ 
+{
   GOT_SERVICE_CREATED,
   GOT_SERVICE_DELETED,
   GOT_ERROR,
-  GOT_SOMETHING_ELSE 
+  GOT_SOMETHING_ELSE
 } GotServiceInfo;
 
 static GotServiceInfo
@@ -2419,7 +2451,7 @@ check_existent_service_no_auto_start (BusContext     *context,
   dbus_uint32_t flags;
 
   base_service_message = NULL;
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -2429,7 +2461,7 @@ check_existent_service_no_auto_start (BusContext     *context,
     return TRUE;
 
   dbus_message_set_auto_start (message, FALSE);
-  
+
   flags = 0;
   if (!dbus_message_append_args (message,
                                  DBUS_TYPE_STRING, &existent,
@@ -2439,7 +2471,7 @@ check_existent_service_no_auto_start (BusContext     *context,
       dbus_message_unref (message);
       return TRUE;
     }
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -2460,12 +2492,12 @@ check_existent_service_no_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2486,7 +2518,7 @@ check_existent_service_no_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -2511,7 +2543,7 @@ check_existent_service_no_auto_start (BusContext     *context,
   else
     {
       GotServiceInfo message_kind;
-      
+
       if (!check_base_service_activated (context, connection,
                                          message, &base_service))
         goto out;
@@ -2521,7 +2553,7 @@ check_existent_service_no_auto_start (BusContext     *context,
 
       /* We may need to block here for the test service to exit or finish up */
       block_connection_until_message_from_bus (context, connection, "test service to exit or finish up");
-      
+
       message = dbus_connection_borrow_message (connection);
       if (message == NULL)
         {
@@ -2564,7 +2596,7 @@ check_existent_service_no_auto_start (BusContext     *context,
             socd.expected_service_name = base_service;
             socd.failed = FALSE;
             socd.skip_connection = NULL;
-            
+
             bus_test_clients_foreach (check_service_owner_changed_foreach,
                                       &socd);
 
@@ -2577,10 +2609,10 @@ check_existent_service_no_auto_start (BusContext     *context,
             if (message_kind != GOT_ERROR)
               {
                 block_connection_until_message_from_bus (context, connection, "error about service exiting");
-		
+
                 /* and process everything again */
                 bus_test_run_everything (context);
-              
+
                 if (!check_got_error (context, connection,
                                       DBUS_ERROR_SPAWN_CHILD_EXITED,
 				      DBUS_ERROR_NO_MEMORY,
@@ -2598,11 +2630,11 @@ check_existent_service_no_auto_start (BusContext     *context,
                           "should have been a NameOwnerChanged (creation)\n");
               goto out;
             }
-          
+
           if (!check_service_activated (context, connection, EXISTENT_SERVICE_NAME,
                                         base_service, message))
             goto out;
-          
+
           dbus_message_unref (message);
           message = NULL;
 
@@ -2621,14 +2653,14 @@ check_existent_service_no_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
 
   if (base_service_message)
     dbus_message_unref (base_service_message);
-  
+
   return retval;
 }
 
@@ -2645,7 +2677,7 @@ check_segfault_service_no_auto_start (BusContext     *context,
   dbus_bool_t retval;
   const char *segv_service;
   dbus_uint32_t flags;
-  
+
   message = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
                                           DBUS_PATH_DBUS,
                                           DBUS_INTERFACE_DBUS,
@@ -2655,7 +2687,7 @@ check_segfault_service_no_auto_start (BusContext     *context,
     return TRUE;
 
   dbus_message_set_auto_start (message, FALSE);
-  
+
   segv_service = "org.freedesktop.DBus.TestSuiteSegfaultService";
   flags = 0;
   if (!dbus_message_append_args (message,
@@ -2666,7 +2698,7 @@ check_segfault_service_no_auto_start (BusContext     *context,
       dbus_message_unref (message);
       return TRUE;
     }
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -2682,12 +2714,12 @@ check_segfault_service_no_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2707,7 +2739,7 @@ check_segfault_service_no_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -2740,11 +2772,11 @@ check_segfault_service_no_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -2764,10 +2796,10 @@ check_segfault_service_auto_start (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -2783,12 +2815,12 @@ check_segfault_service_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2808,7 +2840,7 @@ check_segfault_service_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -2833,11 +2865,11 @@ check_segfault_service_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 #endif
@@ -2860,7 +2892,7 @@ check_existent_hello_from_self (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "RunHelloFromSelf");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -2888,7 +2920,7 @@ check_existent_hello_from_self (BusContext     *context,
    * doesn't send a reply due to OOM.
    */
   block_connection_until_message_from_bus (context, connection, "reply from running hello from self");
-      
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2905,7 +2937,7 @@ check_existent_hello_from_self (BusContext     *context,
 
   dbus_message_unref (message);
   message = NULL;
-      
+
   return TRUE;
 }
 
@@ -2922,7 +2954,7 @@ check_existent_ping (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.DBus.Peer",
                                           "Ping");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -2941,7 +2973,7 @@ check_existent_ping (BusContext     *context,
    * doesn't send a reply due to OOM.
    */
   block_connection_until_message_from_bus (context, connection, "reply from running Ping");
-      
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -2965,7 +2997,7 @@ check_existent_ping (BusContext     *context,
 
   dbus_message_unref (message);
   message = NULL;
-      
+
   return TRUE;
 }
 
@@ -2979,12 +3011,12 @@ check_existent_get_machine_id (BusContext     *context,
   DBusMessage *message;
   dbus_uint32_t serial;
   const char *machine_id;
-  
+
   message = dbus_message_new_method_call (EXISTENT_SERVICE_NAME,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.DBus.Peer",
                                           "GetMachineId");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -3003,7 +3035,7 @@ check_existent_get_machine_id (BusContext     *context,
    * doesn't send a reply due to OOM.
    */
   block_connection_until_message_from_bus (context, connection, "reply from running GetMachineId");
-      
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3039,14 +3071,14 @@ check_existent_get_machine_id (BusContext     *context,
       dbus_message_unref (message);
       return FALSE;
     }
-  
+
   /* We can't check that the machine id is correct because during make check it is
    * just made up for each process separately
    */
-  
+
   dbus_message_unref (message);
   message = NULL;
-      
+
   return TRUE;
 }
 
@@ -3070,7 +3102,7 @@ check_existent_service_auto_start (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -3102,12 +3134,12 @@ check_existent_service_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
 
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3152,7 +3184,7 @@ check_existent_service_auto_start (BusContext     *context,
       dbus_connection_return_message (connection, message);
       message = NULL;
 
-      switch (message_kind) 
+      switch (message_kind)
         {
         case GOT_SERVICE_CREATED:
           message = pop_message_waiting_for_memory (connection);
@@ -3162,12 +3194,12 @@ check_existent_service_auto_start (BusContext     *context,
                           "should have been a NameOwnerChanged (creation)\n");
               goto out;
             }
-            
+
           /* Check that ServiceOwnerChanged (creation) was correctly received */
           if (!check_service_auto_activated (context, connection, EXISTENT_SERVICE_NAME,
                                              base_service, message))
             goto out;
-          
+
           dbus_message_unref (message);
           message = NULL;
 
@@ -3179,7 +3211,7 @@ check_existent_service_auto_start (BusContext     *context,
              * failed to register under EXISTENT_SERVICE_NAME
              */
             CheckServiceOwnerChangedData socd;
-          
+
             socd.expected_kind = SERVICE_DELETED;
             socd.expected_service_name = base_service;
             socd.failed = FALSE;
@@ -3208,7 +3240,7 @@ check_existent_service_auto_start (BusContext     *context,
    * doesn't send a reply due to OOM.
    */
   block_connection_until_message_from_bus (context, connection, "reply from echo message after auto-activation");
-      
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3230,7 +3262,7 @@ check_existent_service_auto_start (BusContext     *context,
 
   if (!check_existent_get_machine_id (context, connection))
     goto out;
-  
+
   if (!check_existent_hello_from_self (context, connection))
     goto out;
 
@@ -3238,7 +3270,7 @@ check_existent_service_auto_start (BusContext     *context,
                                    EXISTENT_SERVICE_NAME,
                                    base_service))
     goto out;
-  
+
   retval = TRUE;
 
  out:
@@ -3268,7 +3300,7 @@ check_launch_service_file_missing (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -3287,12 +3319,12 @@ check_launch_service_file_missing (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3312,7 +3344,7 @@ check_launch_service_file_missing (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -3338,11 +3370,11 @@ check_launch_service_file_missing (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -3383,12 +3415,12 @@ check_launch_service_user_missing (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_warn ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_warn ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3408,7 +3440,7 @@ check_launch_service_user_missing (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -3434,11 +3466,11 @@ check_launch_service_user_missing (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -3479,12 +3511,12 @@ check_launch_service_exec_missing (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_warn ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_warn ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3504,7 +3536,7 @@ check_launch_service_exec_missing (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -3538,11 +3570,11 @@ check_launch_service_exec_missing (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -3583,12 +3615,12 @@ check_launch_service_service_missing (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_warn ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_warn ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3608,7 +3640,7 @@ check_launch_service_service_missing (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -3642,11 +3674,11 @@ check_launch_service_service_missing (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -3667,10 +3699,10 @@ check_shell_fail_service_auto_start (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
-  
+
   if (!dbus_connection_send (connection, message, &serial))
     {
       dbus_message_unref (message);
@@ -3686,12 +3718,12 @@ check_shell_fail_service_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
-  
+
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3711,7 +3743,7 @@ check_shell_fail_service_auto_start (BusContext     *context,
                       dbus_message_get_sender (message) : "(none)");
           goto out;
         }
-      
+
       if (dbus_message_is_error (message,
                                  DBUS_ERROR_NO_MEMORY))
         {
@@ -3737,11 +3769,11 @@ check_shell_fail_service_auto_start (BusContext     *context,
     }
 
   retval = TRUE;
-  
+
  out:
   if (message)
     dbus_message_unref (message);
-  
+
   return retval;
 }
 
@@ -3767,7 +3799,7 @@ check_shell_service_success_auto_start (BusContext     *context,
                                           "/org/freedesktop/TestSuite",
                                           "org.freedesktop.TestSuite",
                                           "Echo");
-  
+
   if (message == NULL)
     return TRUE;
 
@@ -3790,12 +3822,12 @@ check_shell_service_success_auto_start (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
 
   retval = FALSE;
-  
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3840,7 +3872,7 @@ check_shell_service_success_auto_start (BusContext     *context,
       dbus_connection_return_message (connection, message);
       message = NULL;
 
-      switch (message_kind) 
+      switch (message_kind)
         {
         case GOT_SERVICE_CREATED:
           message = pop_message_waiting_for_memory (connection);
@@ -3850,12 +3882,12 @@ check_shell_service_success_auto_start (BusContext     *context,
                           "should have been a NameOwnerChanged (creation)\n");
               goto out;
             }
-            
+
           /* Check that ServiceOwnerChanged (creation) was correctly received */
           if (!check_service_auto_activated (context, connection, SHELL_SUCCESS_SERVICE_NAME,
                                              base_service, message))
             goto out;
-          
+
           dbus_message_unref (message);
           message = NULL;
 
@@ -3867,7 +3899,7 @@ check_shell_service_success_auto_start (BusContext     *context,
              * failed to register under SHELL_SUCCESS_SERVICE_NAME
              */
             CheckServiceOwnerChangedData socd;
-          
+
             socd.expected_kind = SERVICE_DELETED;
             socd.expected_service_name = base_service;
             socd.failed = FALSE;
@@ -3896,7 +3928,7 @@ check_shell_service_success_auto_start (BusContext     *context,
    * doesn't send a reply due to OOM.
    */
   block_connection_until_message_from_bus (context, connection, "reply from echo message after auto-activation");
-      
+
   message = pop_message_waiting_for_memory (connection);
   if (message == NULL)
     {
@@ -3911,7 +3943,7 @@ check_shell_service_success_auto_start (BusContext     *context,
     }
 
   if (!dbus_message_get_args (message, NULL,
-                                       DBUS_TYPE_STRING, &argv[0], 
+                                       DBUS_TYPE_STRING, &argv[0],
                                        DBUS_TYPE_STRING, &argv[1],
                                        DBUS_TYPE_STRING, &argv[2],
                                        DBUS_TYPE_STRING, &argv[3],
@@ -3924,59 +3956,59 @@ check_shell_service_success_auto_start (BusContext     *context,
       goto out;
     }
 
-   /* don't worry about arg[0] as it may be different 
+   /* don't worry about arg[0] as it may be different
       depending on the path to the tests
    */
   if (strcmp("-test", argv[1]) != 0)
     {
-      _dbus_warn ("Unexpected argv[1] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[1] in shell success service test (expected: %s, got: %s)\n",
                   "-test", argv[1]);
       goto out;
-    } 
+    }
 
   if (strcmp("that", argv[2]) != 0)
     {
-      _dbus_warn ("Unexpected argv[2] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[2] in shell success service test (expected: %s, got: %s)\n",
                    "that", argv[2]);
       goto out;
-    } 
+    }
 
   if (strcmp("we get", argv[3]) != 0)
     {
-      _dbus_warn ("Unexpected argv[3] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[3] in shell success service test (expected: %s, got: %s)\n",
                    "we get", argv[3]);
       goto out;
-    } 
-   
+    }
+
   if (strcmp("back", argv[4]) != 0)
     {
-      _dbus_warn ("Unexpected argv[4] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[4] in shell success service test (expected: %s, got: %s)\n",
                    "back", argv[4]);
       goto out;
-    } 
+    }
 
   if (strcmp("--what", argv[5]) != 0)
     {
-      _dbus_warn ("Unexpected argv[5] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[5] in shell success service test (expected: %s, got: %s)\n",
                    "--what", argv[5]);
       goto out;
-    } 
+    }
 
   if (strcmp("we put in", argv[6]) != 0)
     {
-      _dbus_warn ("Unexpected argv[6] in shell success service test (expected: %s, got: %s)\n", 
+      _dbus_warn ("Unexpected argv[6] in shell success service test (expected: %s, got: %s)\n",
                    "we put in", argv[6]);
       goto out;
-    } 
+    }
 
   dbus_message_unref (message);
   message = NULL;
-      
+
   if (!check_send_exit_to_service (context, connection,
                                    SHELL_SUCCESS_SERVICE_NAME,
                                    base_service))
     goto out;
-  
+
   retval = TRUE;
 
  out:
@@ -4002,7 +4034,7 @@ check_oom_check1_func (void *data)
 
   if (! (* d->func) (d->context))
     return FALSE;
-  
+
   if (!check_no_leftovers (d->context))
     {
       _dbus_warn ("Messages were left over, should be covered by test suite\n");
@@ -4070,7 +4102,7 @@ check_get_services (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
 
       dbus_connection_unref (connection);
 
@@ -4142,15 +4174,15 @@ check_get_services (BusContext     *context,
 	  *len = l;
 	}
     }
-  
+
   if (!check_no_leftovers (context))
     goto out;
-  
+
   retval = TRUE;
-  
+
  out:
   dbus_error_free (&error);
-  
+
   if (message)
     dbus_message_unref (message);
 
@@ -4184,6 +4216,7 @@ check_list_services (BusContext     *context,
   if (!_dbus_string_array_contains ((const char **)services, existent))
     {
       _dbus_warn ("Did not get the expected %s from ListActivatableNames\n", existent);
+      dbus_free_string_array (services);
       return FALSE;
     }
 
@@ -4231,7 +4264,7 @@ check_list_services (BusContext     *context,
 
   if (!dbus_connection_get_is_connected (connection))
     {
-      _dbus_verbose ("connection was disconnected: %s %d\n", _DBUS_FUNCTION_NAME, __LINE__);
+      _dbus_verbose ("connection was disconnected\n");
       return TRUE;
     }
 
@@ -4322,7 +4355,7 @@ check_list_services (BusContext     *context,
 			  "should have been a NameOwnerChanged (creation)\n");
 	      goto out;
 	    }
-	  
+
 	  if (!check_service_activated (context, connection, EXISTENT_SERVICE_NAME,
 					base_service, message))
 	    goto out;
@@ -4339,7 +4372,7 @@ check_list_services (BusContext     *context,
 	  break;
 	}
     }
-  
+
   if (!check_get_services (context, connection, "ListNames", &services, &len))
     {
       return TRUE;
@@ -4383,7 +4416,7 @@ check_oom_check2_func (void *data)
 
   if (! (* d->func) (d->context, d->connection))
     return FALSE;
-  
+
   if (!check_no_leftovers (d->context))
     {
       _dbus_warn ("Messages were left over, should be covered by test suite\n");
@@ -4404,7 +4437,7 @@ check2_try_iterations (BusContext     *context,
   d.func = func;
   d.context = context;
   d.connection = connection;
-  
+
   if (!_dbus_test_oom_handling (description, check_oom_check2_func,
                                 &d))
     {
@@ -4427,19 +4460,19 @@ setenv_TEST_LAUNCH_HELPER_CONFIG(const DBusString *test_data_dir,
     {
       _dbus_string_free (&full);
       return FALSE;
-    }      
+    }
 
   _dbus_string_init_const (&file, filename);
-  
+
   if (!_dbus_concat_dir_and_file (&full, &file))
     {
       _dbus_string_free (&full);
       return FALSE;
     }
 
-  _dbus_verbose ("Setting TEST_LAUNCH_HELPER_CONFIG to '%s'\n", 
+  _dbus_verbose ("Setting TEST_LAUNCH_HELPER_CONFIG to '%s'\n",
                  _dbus_string_get_const_data (&full));
-  
+
   _dbus_setenv ("TEST_LAUNCH_HELPER_CONFIG", _dbus_string_get_const_data (&full));
 
   _dbus_string_free (&full);
@@ -4463,12 +4496,12 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
     _dbus_assert_not_reached ("no memory setting TEST_LAUNCH_HELPER_CONFIG");
 
   dbus_error_init (&error);
-  
+
   context = bus_context_new_test (test_data_dir, filename);
   if (context == NULL)
     return FALSE;
-  
-  foo = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+
+  foo = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (foo == NULL)
     _dbus_assert_not_reached ("could not alloc connection");
 
@@ -4476,7 +4509,7 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
     _dbus_assert_not_reached ("could not set up connection");
 
   spin_connection_until_authenticated (context, foo);
-  
+
   if (!check_hello_message (context, foo))
     _dbus_assert_not_reached ("hello message failed");
 
@@ -4485,8 +4518,8 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
 
   if (!check_add_match_all (context, foo))
     _dbus_assert_not_reached ("AddMatch message failed");
-  
-  bar = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+
+  bar = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (bar == NULL)
     _dbus_assert_not_reached ("could not alloc connection");
 
@@ -4494,14 +4527,14 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
     _dbus_assert_not_reached ("could not set up connection");
 
   spin_connection_until_authenticated (context, bar);
-  
+
   if (!check_hello_message (context, bar))
     _dbus_assert_not_reached ("hello message failed");
 
   if (!check_add_match_all (context, bar))
     _dbus_assert_not_reached ("AddMatch message failed");
-  
-  baz = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+
+  baz = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (baz == NULL)
     _dbus_assert_not_reached ("could not alloc connection");
 
@@ -4509,31 +4542,36 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
     _dbus_assert_not_reached ("could not set up connection");
 
   spin_connection_until_authenticated (context, baz);
-  
+
   if (!check_hello_message (context, baz))
     _dbus_assert_not_reached ("hello message failed");
 
   if (!check_add_match_all (context, baz))
     _dbus_assert_not_reached ("AddMatch message failed");
 
+#ifdef DBUS_WIN_FIXME
+  _dbus_warn("TODO: testing of GetConnectionUnixUser message skipped for now\n");
+  _dbus_warn("TODO: testing of GetConnectionUnixProcessID message skipped for now\n");
+#else
   if (!check_get_connection_unix_user (context, baz))
     _dbus_assert_not_reached ("GetConnectionUnixUser message failed");
 
   if (!check_get_connection_unix_process_id (context, baz))
     _dbus_assert_not_reached ("GetConnectionUnixProcessID message failed");
+#endif
 
   if (!check_list_services (context, baz))
     _dbus_assert_not_reached ("ListActivatableNames message failed");
-  
+
   if (!check_no_leftovers (context))
     {
       _dbus_warn ("Messages were left over after setting up initial connections\n");
       _dbus_assert_not_reached ("initial connection setup failed");
     }
-  
+
   check1_try_iterations (context, "create_and_hello",
                          check_hello_connection);
-  
+
   check2_try_iterations (context, foo, "nonexistent_service_no_auto_start",
                          check_nonexistent_service_no_auto_start);
 
@@ -4543,15 +4581,15 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
   check2_try_iterations (context, foo, "segfault_service_no_auto_start",
                          check_segfault_service_no_auto_start);
 #endif
-  
+
   check2_try_iterations (context, foo, "existent_service_no_auto_start",
                          check_existent_service_no_auto_start);
-  
+
   check2_try_iterations (context, foo, "nonexistent_service_auto_start",
                          check_nonexistent_service_auto_start);
-  
 
-#ifdef DBUS_WIN_FIXME    
+
+#ifdef DBUS_WIN_FIXME
   _dbus_warn("TODO: dispatch.c segfault_service_auto_start test\n");
 #else
   /* only do the segfault test if we are not using the launcher */
@@ -4576,7 +4614,7 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
   check2_try_iterations (context, foo, "existent_service_auto_auto_start",
                          check_existent_service_auto_start);
 #endif
-  
+
   if (!check_existent_service_auto_start (context, foo))
     _dbus_assert_not_reached ("existent service auto start failed");
 
@@ -4590,7 +4628,7 @@ bus_dispatch_test_conf (const DBusString *test_data_dir,
   kill_client_connection_unchecked (baz);
 
   bus_context_unref (context);
-  
+
   return TRUE;
 }
 
@@ -4605,14 +4643,14 @@ bus_dispatch_test_conf_fail (const DBusString *test_data_dir,
   /* save the config name for the activation helper */
   if (!setenv_TEST_LAUNCH_HELPER_CONFIG (test_data_dir, filename))
     _dbus_assert_not_reached ("no memory setting TEST_LAUNCH_HELPER_CONFIG");
-  
+
   dbus_error_init (&error);
-  
+
   context = bus_context_new_test (test_data_dir, filename);
   if (context == NULL)
     return FALSE;
-  
-  foo = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+
+  foo = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (foo == NULL)
     _dbus_assert_not_reached ("could not alloc connection");
 
@@ -4647,7 +4685,7 @@ bus_dispatch_test_conf_fail (const DBusString *test_data_dir,
   kill_client_connection_unchecked (foo);
 
   bus_context_unref (context);
-  
+
   return TRUE;
 }
 
@@ -4660,6 +4698,9 @@ bus_dispatch_test (const DBusString *test_data_dir)
   			       "valid-config-files/debug-allow-all.conf", FALSE))
     return FALSE;
 
+#ifdef DBUS_WIN
+  _dbus_warn("Info: Launch helper activation tests skipped because launch-helper is not supported yet\n");
+#else
   /* run launch-helper activation tests */
   _dbus_verbose ("Launch helper activation tests\n");
   if (!bus_dispatch_test_conf (test_data_dir,
@@ -4670,6 +4711,7 @@ bus_dispatch_test (const DBusString *test_data_dir)
   if (!bus_dispatch_test_conf_fail (test_data_dir,
   			            "valid-config-files-system/debug-allow-all-fail.conf"))
     return FALSE;
+#endif
 
   return TRUE;
 }
@@ -4682,16 +4724,16 @@ bus_dispatch_sha1_test (const DBusString *test_data_dir)
   DBusError error;
 
   dbus_error_init (&error);
-  
+
   /* Test SHA1 authentication */
   _dbus_verbose ("Testing SHA1 context\n");
-  
+
   context = bus_context_new_test (test_data_dir,
                                   "valid-config-files/debug-allow-all-sha1.conf");
   if (context == NULL)
     return FALSE;
 
-  foo = dbus_connection_open_private ("debug-pipe:name=test-server", &error);
+  foo = dbus_connection_open_private (TEST_CONNECTION, &error);
   if (foo == NULL)
     _dbus_assert_not_reached ("could not alloc connection");
 
@@ -4699,19 +4741,19 @@ bus_dispatch_sha1_test (const DBusString *test_data_dir)
     _dbus_assert_not_reached ("could not set up connection");
 
   spin_connection_until_authenticated (context, foo);
-  
+
   if (!check_hello_message (context, foo))
     _dbus_assert_not_reached ("hello message failed");
 
   if (!check_add_match_all (context, foo))
     _dbus_assert_not_reached ("addmatch message failed");
-  
+
   if (!check_no_leftovers (context))
     {
       _dbus_warn ("Messages were left over after setting up initial SHA-1 connection\n");
       _dbus_assert_not_reached ("initial connection setup failed");
     }
-  
+
   check1_try_iterations (context, "create_and_hello_sha1",
                          check_hello_connection);
 
@@ -4721,5 +4763,156 @@ bus_dispatch_sha1_test (const DBusString *test_data_dir)
 
   return TRUE;
 }
+
+#ifdef HAVE_UNIX_FD_PASSING
+
+dbus_bool_t
+bus_unix_fds_passing_test(const DBusString *test_data_dir)
+{
+  BusContext *context;
+  DBusConnection *foo, *bar;
+  DBusError error;
+  DBusMessage *m;
+  dbus_bool_t b;
+  int one[2], two[2], x, y, z;
+  char r;
+
+  dbus_error_init (&error);
+
+  context = bus_context_new_test (test_data_dir, "valid-config-files/debug-allow-all.conf");
+  if (context == NULL)
+    _dbus_assert_not_reached ("could not alloc context");
+
+  foo = dbus_connection_open_private (TEST_CONNECTION, &error);
+  if (foo == NULL)
+    _dbus_assert_not_reached ("could not alloc connection");
+
+  if (!bus_setup_debug_client (foo))
+    _dbus_assert_not_reached ("could not set up connection");
+
+  spin_connection_until_authenticated (context, foo);
+
+  if (!check_hello_message (context, foo))
+    _dbus_assert_not_reached ("hello message failed");
+
+  if (!check_add_match_all (context, foo))
+    _dbus_assert_not_reached ("AddMatch message failed");
+
+  bar = dbus_connection_open_private (TEST_CONNECTION, &error);
+  if (bar == NULL)
+    _dbus_assert_not_reached ("could not alloc connection");
+
+  if (!bus_setup_debug_client (bar))
+    _dbus_assert_not_reached ("could not set up connection");
+
+  spin_connection_until_authenticated (context, bar);
+
+  if (!check_hello_message (context, bar))
+    _dbus_assert_not_reached ("hello message failed");
+
+  if (!check_add_match_all (context, bar))
+    _dbus_assert_not_reached ("AddMatch message failed");
+
+  if (!(m = dbus_message_new_signal("/", "a.b.c", "d")))
+    _dbus_assert_not_reached ("could not alloc message");
+
+  if (!(_dbus_full_duplex_pipe(one, one+1, TRUE, &error)))
+    _dbus_assert_not_reached("Failed to allocate pipe #1");
+
+  if (!(_dbus_full_duplex_pipe(two, two+1, TRUE, &error)))
+    _dbus_assert_not_reached("Failed to allocate pipe #2");
+
+  if (!dbus_message_append_args(m,
+                                DBUS_TYPE_UNIX_FD, one,
+                                DBUS_TYPE_UNIX_FD, two,
+                                DBUS_TYPE_UNIX_FD, two,
+                                DBUS_TYPE_INVALID))
+    _dbus_assert_not_reached("Failed to attach fds.");
+
+  if (!_dbus_close(one[0], &error))
+    _dbus_assert_not_reached("Failed to close pipe #1 ");
+  if (!_dbus_close(two[0], &error))
+    _dbus_assert_not_reached("Failed to close pipe #2 ");
+
+  if (!(dbus_connection_can_send_type(foo, DBUS_TYPE_UNIX_FD)))
+    _dbus_assert_not_reached("Connection cannot do fd passing");
+
+  if (!(dbus_connection_can_send_type(bar, DBUS_TYPE_UNIX_FD)))
+    _dbus_assert_not_reached("Connection cannot do fd passing");
+
+  if (!dbus_connection_send (foo, m, NULL))
+    _dbus_assert_not_reached("Failed to send fds");
+
+  dbus_message_unref(m);
+
+  bus_test_run_clients_loop (SEND_PENDING (foo));
+
+  bus_test_run_everything (context);
+
+  block_connection_until_message_from_bus (context, foo, "unix fd reception on foo");
+
+  if (!(m = pop_message_waiting_for_memory (foo)))
+    _dbus_assert_not_reached("Failed to receive msg");
+
+  if (!dbus_message_is_signal(m, "a.b.c", "d"))
+    _dbus_assert_not_reached("bogus message received");
+
+  dbus_message_unref(m);
+
+  block_connection_until_message_from_bus (context, bar, "unix fd reception on bar");
+
+  if (!(m = pop_message_waiting_for_memory (bar)))
+    _dbus_assert_not_reached("Failed to receive msg");
+
+  if (!dbus_message_is_signal(m, "a.b.c", "d"))
+    _dbus_assert_not_reached("bogus message received");
+
+  if (!dbus_message_get_args(m,
+                             &error,
+                             DBUS_TYPE_UNIX_FD, &x,
+                             DBUS_TYPE_UNIX_FD, &y,
+                             DBUS_TYPE_UNIX_FD, &z,
+                             DBUS_TYPE_INVALID))
+    _dbus_assert_not_reached("Failed to parse fds.");
+
+  dbus_message_unref(m);
+
+  if (write(x, "X", 1) != 1)
+    _dbus_assert_not_reached("Failed to write to pipe #1");
+  if (write(y, "Y", 1) != 1)
+    _dbus_assert_not_reached("Failed to write to pipe #2");
+  if (write(z, "Z", 1) != 1)
+    _dbus_assert_not_reached("Failed to write to pipe #2/2nd fd");
+
+  if (!_dbus_close(x, &error))
+    _dbus_assert_not_reached("Failed to close pipe #1/other side ");
+  if (!_dbus_close(y, &error))
+    _dbus_assert_not_reached("Failed to close pipe #2/other side ");
+  if (!_dbus_close(z, &error))
+    _dbus_assert_not_reached("Failed to close pipe #2/other size 2nd fd ");
+
+  if (read(one[1], &r, 1) != 1 || r != 'X')
+    _dbus_assert_not_reached("Failed to read value from pipe.");
+  if (read(two[1], &r, 1) != 1 || r != 'Y')
+    _dbus_assert_not_reached("Failed to read value from pipe.");
+  if (read(two[1], &r, 1) != 1 || r != 'Z')
+    _dbus_assert_not_reached("Failed to read value from pipe.");
+
+  if (!_dbus_close(one[1], &error))
+    _dbus_assert_not_reached("Failed to close pipe #1 ");
+  if (!_dbus_close(two[1], &error))
+    _dbus_assert_not_reached("Failed to close pipe #2 ");
+
+  _dbus_verbose ("Disconnecting foo\n");
+  kill_client_connection_unchecked (foo);
+
+  _dbus_verbose ("Disconnecting bar\n");
+  kill_client_connection_unchecked (bar);
+
+  bus_context_unref (context);
+
+  return TRUE;
+}
+#endif
 
 #endif /* DBUS_BUILD_TESTS */

@@ -24,13 +24,8 @@
 #ifndef DBUS_MARSHAL_BYTESWAP_H
 #define DBUS_MARSHAL_BYTESWAP_H
 
-#include <config.h>
 #include <dbus/dbus-protocol.h>
 #include <dbus/dbus-marshal-recursive.h>
-
-#ifndef PACKAGE
-#error "config.h not included here"
-#endif
 
 void _dbus_marshal_byteswap (const DBusString *signature,
                              int               signature_start,

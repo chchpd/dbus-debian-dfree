@@ -1,4 +1,4 @@
 [D-BUS Service]
 Name=org.freedesktop.DBus.TestSuiteSegfaultService
-Exec=/src/jhbuild/checkout/dbus/test/test-segfault
+Exec=/home/wjt/src/dbus/test/test-segfault
 

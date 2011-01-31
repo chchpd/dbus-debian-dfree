@@ -21,6 +21,8 @@
  *
  */
 
+#include <config.h>
+
 #include "dbus-signature.h"
 #include "dbus-marshal-recursive.h"
 #include "dbus-marshal-basic.h"
@@ -355,6 +357,7 @@ dbus_type_is_fixed (int typecode)
     case DBUS_TYPE_INT64:
     case DBUS_TYPE_UINT64:
     case DBUS_TYPE_DOUBLE:
+    case DBUS_TYPE_UNIX_FD:
       return TRUE;
     default:
       return FALSE;

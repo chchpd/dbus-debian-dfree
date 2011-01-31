@@ -21,6 +21,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  *
  */
+
+#include <config.h>
 #include <dbus/dbus-sysdeps.h>
 #include <dbus/dbus-internals.h>
 #include "desktop-file.h"
@@ -330,7 +332,7 @@ new_line (BusDesktopFileParser *parser)
 
   line = &section->lines[section->n_lines++];
 
-  memset (line, 0, sizeof (BusDesktopFileLine));
+  _DBUS_ZERO(*line);
     
   return line;
 }

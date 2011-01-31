@@ -21,6 +21,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus-keyring.h"
 #include "dbus-protocol.h"
 #include <dbus/dbus-string.h>
@@ -142,8 +143,6 @@ _dbus_keyring_new (void)
 
   return keyring;
 
-  /*  out_4: */
-  _dbus_string_free (&keyring->filename_lock);
  out_3:
   _dbus_string_free (&keyring->filename);
  out_2:
@@ -604,7 +603,7 @@ _dbus_keyring_reload (DBusKeyring *keyring,
         }
       
       if (!_dbus_string_save_to_file (&contents, &keyring->filename,
-                                      error))
+                                      FALSE, error))
         goto out;
     }
 

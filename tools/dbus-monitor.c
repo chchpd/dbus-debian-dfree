@@ -41,6 +41,24 @@
 #define DBUS_SECONDS_SINCE_1601 11644473600LL
 #define DBUS_USEC_IN_SEC        1000000LL
 
+#ifdef DBUS_WINCE
+
+#ifndef _IOLBF
+#define _IOLBF 0x40
+#endif
+#ifndef _IONBF
+#define _IONBF 0x04
+#endif
+
+void
+GetSystemTimeAsFileTime (LPFILETIME ftp)
+{
+  SYSTEMTIME st;
+  GetSystemTime (&st);
+  SystemTimeToFileTime (&st, ftp);
+}
+#endif
+
 static int
 gettimeofday (struct timeval *__p,
 	      void *__t)
@@ -77,7 +95,11 @@ monitor_filter_func (DBusConnection     *connection,
   return DBUS_HANDLER_RESULT_HANDLED;
 }
 
+#ifdef __APPLE__
+#define PROFILE_TIMED_FORMAT "%s\t%lu\t%d"
+#else
 #define PROFILE_TIMED_FORMAT "%s\t%lu\t%lu"
+#endif
 #define TRAP_NULL_STRING(str) ((str) ? (str) : "<none>")
 
 typedef enum
@@ -217,7 +239,12 @@ main (int argc, char *argv[])
    * do dbus-monitor > file, then send SIGINT via Control-C, they
    * don't lose the last chunk of messages.
    */
+
+#ifdef DBUS_WIN
+  setvbuf (stdout, NULL, _IONBF, 0);
+#else
   setvbuf (stdout, NULL, _IOLBF, 0);
+#endif
 
   for (i = 1; i < argc; i++)
     {

@@ -21,6 +21,7 @@
  *
  */
 
+#include <config.h>
 #include "dbus/dbus-shared.h"
 #include "dbus-marshal-header.h"
 #include "dbus-marshal-recursive.h"
@@ -81,7 +82,8 @@ _dbus_header_field_types[DBUS_HEADER_FIELD_LAST+1] = {
   { DBUS_HEADER_FIELD_REPLY_SERIAL, DBUS_TYPE_UINT32 },
   { DBUS_HEADER_FIELD_DESTINATION, DBUS_TYPE_STRING },
   { DBUS_HEADER_FIELD_SENDER, DBUS_TYPE_STRING },
-  { DBUS_HEADER_FIELD_SIGNATURE, DBUS_TYPE_SIGNATURE }
+  { DBUS_HEADER_FIELD_SIGNATURE, DBUS_TYPE_SIGNATURE },
+  { DBUS_HEADER_FIELD_UNIX_FDS, DBUS_TYPE_UINT32 }
 };
 
 /** Macro to look up the correct type for a field */
@@ -886,6 +888,10 @@ load_and_validate_field (DBusHeader     *header,
         {
           return DBUS_INVALID_BAD_SERIAL;
         }
+      break;
+
+    case DBUS_HEADER_FIELD_UNIX_FDS:
+      /* Every value makes sense */
       break;
 
     case DBUS_HEADER_FIELD_SIGNATURE:

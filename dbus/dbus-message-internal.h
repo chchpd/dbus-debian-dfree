@@ -35,14 +35,17 @@ typedef struct DBusMessageLoader DBusMessageLoader;
 void _dbus_message_get_network_data  (DBusMessage       *message,
 				      const DBusString **header,
 				      const DBusString **body);
+void _dbus_message_get_unix_fds      (DBusMessage *message,
+                                      const int **fds,
+                                      unsigned *n_fds);
 
 void        _dbus_message_lock                  (DBusMessage  *message);
 void        _dbus_message_unlock                (DBusMessage  *message);
-dbus_bool_t _dbus_message_add_size_counter      (DBusMessage  *message,
+dbus_bool_t _dbus_message_add_counter           (DBusMessage  *message,
                                                  DBusCounter  *counter);
-void        _dbus_message_add_size_counter_link (DBusMessage  *message,
+void        _dbus_message_add_counter_link      (DBusMessage  *message,
                                                  DBusList     *link);
-void        _dbus_message_remove_size_counter   (DBusMessage  *message,
+void        _dbus_message_remove_counter        (DBusMessage  *message,
                                                  DBusCounter  *counter,
                                                  DBusList    **link_return);
 
@@ -55,6 +58,14 @@ void               _dbus_message_loader_get_buffer            (DBusMessageLoader
 void               _dbus_message_loader_return_buffer         (DBusMessageLoader  *loader,
                                                                DBusString         *buffer,
                                                                int                 bytes_read);
+
+dbus_bool_t        _dbus_message_loader_get_unix_fds          (DBusMessageLoader  *loader,
+                                                               int               **fds,
+                                                               unsigned           *max_n_fds);
+void               _dbus_message_loader_return_unix_fds       (DBusMessageLoader  *loader,
+                                                               int                *fds,
+                                                               unsigned            n_fds);
+
 dbus_bool_t        _dbus_message_loader_queue_messages        (DBusMessageLoader  *loader);
 DBusMessage*       _dbus_message_loader_peek_message          (DBusMessageLoader  *loader);
 DBusMessage*       _dbus_message_loader_pop_message           (DBusMessageLoader  *loader);
@@ -68,6 +79,10 @@ DBusValidity       _dbus_message_loader_get_corruption_reason (DBusMessageLoader
 void               _dbus_message_loader_set_max_message_size  (DBusMessageLoader  *loader,
                                                                long                size);
 long               _dbus_message_loader_get_max_message_size  (DBusMessageLoader  *loader);
+
+void               _dbus_message_loader_set_max_message_unix_fds(DBusMessageLoader  *loader,
+                                                                 long                n);
+long               _dbus_message_loader_get_max_message_unix_fds(DBusMessageLoader  *loader);
 
 DBUS_END_DECLS
 

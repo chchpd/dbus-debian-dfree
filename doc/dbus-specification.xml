@@ -1,14 +1,13 @@
-<?xml version="1.0" standalone="no"?>
+<?xml version="1.0" standalone="no" ?>
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd"
 [
 ]>
-
 <article id="index">
   <articleinfo>
     <title>D-Bus Specification</title>
-    <releaseinfo>Version 0.12</releaseinfo>
-    <date>7 November 2006</date>
+    <releaseinfo>Version 0.15</releaseinfo>
+    <date>3 November 2010</date>
     <authorgroup>
       <author>
 	<firstname>Havoc</firstname>
@@ -41,6 +40,62 @@
 	</affiliation>
       </author>
     </authorgroup>
+   <revhistory>
+     <revision>
+       <revnumber>current</revnumber>
+       <date><ulink url='http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml'>commit log</ulink></date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.15</revnumber>
+       <date>3 November 2010</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.14</revnumber>
+       <date>12 May 2010</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.13</revnumber>
+       <date>23 Dezember 2009</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.12</revnumber>
+       <date>7 November, 2006</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.11</revnumber>
+       <date>6 February 2005</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.10</revnumber>
+       <date>28 January 2005</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.9</revnumber>
+       <date>7 Januar 2005</date>
+       <authorinitials></authorinitials>
+       <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.8</revnumber>
+       <date>06 September 2003</date>
+       <authorinitials></authorinitials>
+       <revremark>First released document.</revremark>
+     </revision>
+   </revhistory>
   </articleinfo>
 
   <sect1 id="introduction">
@@ -415,6 +470,10 @@
                 <entry><literal>DICT_ENTRY</literal></entry>
                 <entry>101 (ASCII 'e'), 123 (ASCII '{'), 125 (ASCII '}') </entry>
                 <entry>Entry in a dict or map (array of key-value pairs)</entry>
+              </row><row>
+                <entry><literal>UNIX_FD</literal></entry>
+                <entry>104 (ASCII 'h')</entry>
+                <entry>Unix file descriptor</entry>
               </row>
             </tbody>
           </tgroup>
@@ -561,12 +620,14 @@
 	      </row><row>
                 <entry><literal>VARIANT</literal></entry>
                 <entry>
-                  A variant type has a marshaled <literal>SIGNATURE</literal>
-                  followed by a marshaled value with the type
-                  given in the signature.
-                  Unlike a message signature, the variant signature 
-                  can contain only a single complete type.
-                  So "i", "ai" or "(ii)" is OK, but "ii" is not.
+                  A variant type has a marshaled
+                  <literal>SIGNATURE</literal> followed by a marshaled
+                  value with the type given in the signature.  Unlike
+                  a message signature, the variant signature can
+                  contain only a single complete type.  So "i", "ai"
+                  or "(ii)" is OK, but "ii" is not.  Use of variants may not
+                  cause a total message depth to be larger than 64, including
+		  other container types such as structures.
                 </entry>
                 <entry>
                   1 (alignment of the signature)
@@ -579,6 +640,15 @@
                 <entry>
                   8
                 </entry>
+              </row><row>
+                <entry><literal>UNIX_FD</literal></entry>
+                <entry>32-bit unsigned integer in the message's byte
+                order. The actual file descriptors need to be
+                transferred out-of-band via some platform specific
+                mechanism. On the wire, values of this type store the index to the
+                file descriptor in the array of file descriptors that
+                accompany the message.</entry>
+                <entry>4</entry>
 	      </row>
             </tbody>
           </tgroup>
@@ -999,6 +1069,22 @@
                   If omitted, it is assumed to be the 
                   empty signature "" (i.e. the body must be 0-length).</entry>
                 </row>
+                <row>
+                  <entry><literal>UNIX_FDS</literal></entry>
+                  <entry>9</entry>
+                  <entry><literal>UINT32</literal></entry>
+                  <entry>optional</entry>
+                  <entry>The number of Unix file descriptors that
+                  accompany the message.  If omitted, it is assumed
+                  that no Unix file descriptors accompany the
+                  message. The actual file descriptors need to be
+                  transferred via platform specific mechanism
+                  out-of-band. They must be sent at the same time as
+                  part of the message itself. They may not be sent
+                  before the first byte of the message itself is
+                  transferred or after the last byte of the message
+                  itself.</entry>
+                </row>
               </tbody>
             </tgroup>
           </informaltable>
@@ -1410,6 +1496,7 @@
 	  <listitem><para>BEGIN</para></listitem>
 	  <listitem><para>DATA &lt;data in hex encoding&gt;</para></listitem>
 	  <listitem><para>ERROR [human-readable error explanation]</para></listitem>
+	  <listitem><para>NEGOTIATE_UNIX_FD</para></listitem>
 	</itemizedlist>
 
         From server to client are as follows:
@@ -1419,6 +1506,7 @@
 	  <listitem><para>OK &lt;GUID in hex&gt;</para></listitem>
 	  <listitem><para>DATA &lt;data in hex encoding&gt;</para></listitem>
 	  <listitem><para>ERROR</para></listitem>
+	  <listitem><para>AGREE_UNIX_FD</para></listitem>
 	</itemizedlist>
       </para>
       <para>
@@ -1480,14 +1568,15 @@
         an OK command must be sent to the client.
       </para>
       <para>
-        The first octet received by the client after the \r\n of the OK
-        command must be the first octet of the authenticated/encrypted 
-        stream of D-Bus messages.
-      </para>
-      <para>
         The first octet received by the server after the \r\n of the BEGIN
         command from the client must be the first octet of the
         authenticated/encrypted stream of D-Bus messages.
+      </para>
+      <para>
+        If BEGIN is received by the server, the first octet received
+        by the client after the \r\n of the OK command must be the
+        first octet of the authenticated/encrypted stream of D-Bus
+        messages.
       </para>
     </sect2>
     <sect2 id="auth-command-cancel">
@@ -1542,20 +1631,24 @@
     <sect2 id="auth-command-ok">
       <title>OK Command</title>
       <para>
-        The OK command indicates that the client has been authenticated,
-        and that further communication will be a stream of D-Bus messages
-        (optionally encrypted, as negotiated) rather than this protocol.
+        The OK command indicates that the client has been
+        authenticated. The client may now proceed with negotiating
+        Unix file descriptor passing. To do that it shall send
+        NEGOTIATE_UNIX_FD to the server.
       </para>
       <para>
-        The first octet received by the client after the \r\n of the OK
-        command must be the first octet of the authenticated/encrypted 
-        stream of D-Bus messages.
+        Otherwise, the client must respond to the OK command by
+        sending a BEGIN command, followed by its stream of messages,
+        or by disconnecting.  The server must not accept additional
+        commands using this protocol after the BEGIN command has been
+        received. Further communication will be a stream of D-Bus
+        messages (optionally encrypted, as negotiated) rather than
+        this protocol.
       </para>
       <para>
-        The client must respond to the OK command by sending a BEGIN
-        command, followed by its stream of messages, or by disconnecting.
-        The server must not accept additional commands using this protocol 
-        after the OK command has been sent.
+        If a client sends BEGIN the first octet received by the client
+        after the \r\n of the OK command must be the first octet of
+        the authenticated/encrypted stream of D-Bus messages.
       </para>
       <para>
         The OK command has one argument, which is the GUID of the server.
@@ -1587,6 +1680,56 @@
         receiving an ERROR from applications that don't understand it. Thus the
         ERROR feature of the auth protocol is an escape hatch that lets us
         negotiate extensions or changes to the D-Bus protocol in the future.
+      </para>
+    </sect2>
+    <sect2 id="auth-command-negotiate-unix-fd">
+      <title>NEGOTIATE_UNIX_FD Command</title>
+      <para>
+        The NEGOTIATE_UNIX_FD command indicates that the client
+        supports Unix file descriptor passing. This command may only
+        be sent after the connection is authenticated, i.e. after OK
+        was received by the client. This command may only be sent on
+        transports that support Unix file descriptor passing.
+      </para>
+      <para>
+        On receiving NEGOTIATE_UNIX_FD the server must respond with
+        either AGREE_UNIX_FD or ERROR. It shall respond the former if
+        the transport chosen supports Unix file descriptor passing and
+        the server supports this feature. It shall respond the latter
+        if the transport does not support Unix file descriptor
+        passing, the server does not support this feature, or the
+        server decides not to enable file descriptor passing due to
+        security or other reasons.
+      </para>
+    </sect2>
+    <sect2 id="auth-command-agree-unix-fd">
+      <title>AGREE_UNIX_FD Command</title>
+      <para>
+        The AGREE_UNIX_FD command indicates that the server supports
+        Unix file descriptor passing. This command may only be sent
+        after the connection is authenticated, and the client sent
+        NEGOTIATE_UNIX_FD to enable Unix file descriptor passing. This
+        command may only be sent on transports that support Unix file
+        descriptor passing.
+      </para>
+      <para>
+        On receiving AGREE_UNIX_FD the client must respond with BEGIN,
+        followed by its stream of messages, or by disconnecting.  The
+        server must not accept additional commands using this protocol
+        after the BEGIN command has been received. Further
+        communication will be a stream of D-Bus messages (optionally
+        encrypted, as negotiated) rather than this protocol.
+      </para>
+    </sect2>
+    <sect2 id="auth-command-future">
+      <title>Future Extensions</title>
+      <para>
+        Future extensions to the authentication and negotiation
+        protocol are possible. For that new commands may be
+        introduced. If a client or server receives an unknown command
+        it shall respond with ERROR and not consider this fatal. New
+        commands may be introduced both before, and after
+        authentication, i.e. both before and after the OK command.
       </para>
     </sect2>
     <sect2 id="auth-examples">
@@ -1666,6 +1809,30 @@
             S: DATA 8799cabb2ea93e
             C: DATA 8ac876e8f68ee9809bfa876e6f9876g8fa8e76e98f
             S: OK 1234deadbeef
+            C: BEGIN
+          </programlisting>
+	</figure>
+        <figure>
+	  <title>Example of successful magic cookie authentication with successful negotiation of Unix FD passing</title>
+	  <programlisting>
+            (MAGIC_COOKIE is a made up mechanism)
+
+            C: AUTH MAGIC_COOKIE 3138363935333137393635383634
+            S: OK 1234deadbeef
+            C: NEGOTIATE_UNIX_FD
+            S: AGREE_UNIX_FD
+            C: BEGIN
+          </programlisting>
+	</figure>
+        <figure>
+	  <title>Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</title>
+	  <programlisting>
+            (MAGIC_COOKIE is a made up mechanism)
+
+            C: AUTH MAGIC_COOKIE 3138363935333137393635383634
+            S: OK 1234deadbeef
+            C: NEGOTIATE_UNIX_FD
+            S: ERROR
             C: BEGIN
           </programlisting>
 	</figure>
@@ -2299,8 +2466,8 @@
       [FIXME we need to specify in detail each transport and its possible arguments]
     
       Current transports include: unix domain sockets (including 
-      abstract namespace on linux), TCP/IP, and a debug/testing transport using 
-      in-process pipes. Future possible transports include one that 
+      abstract namespace on linux), launchd, TCP/IP, and a debug/testing transport
+      using in-process pipes. Future possible transports include one that
       tunnels over X11 protocol.
     </para>
   
@@ -2320,10 +2487,311 @@
 	length path name.  Names which were shorter than the fixed length
 	would be padded by Nul bytes.
       </para>
+      <para>
+        Unix domain sockets are not available on windows. 
+      </para>
+      <sect3 id="transports-unix-domain-sockets-addresses">
+        <title>Server Address Format</title>
+        <para> 
+          Unix domain socket addresses are identified by the "unix:" prefix 
+          and support the following key/value pairs:
+        </para>
+        <informaltable>
+         <tgroup cols="3">
+          <thead>
+           <row>
+            <entry>Name</entry>
+            <entry>Values</entry>
+            <entry>Description</entry>
+           </row>
+          </thead>
+          <tbody>
+           <row>
+            <entry>path</entry>
+            <entry>(path)</entry>
+            <entry>path of the unix domain socket. If set, the "tmpdir" and "abstract" key must not be set.</entry>
+          </row>
+          <row>
+            <entry>tmpdir</entry>
+            <entry>(path)</entry>
+            <entry>temporary directory in which a socket file with a random file name starting with 'dbus-' will be created by the server. This key can only be used in server addresses, not in client addresses. If set, the "path" and "abstract" key must not be set.</entry>
+          </row>
+          <row>
+            <entry>abstract</entry>
+            <entry>(string)</entry>
+            <entry>unique string (path) in the abstract namespace. If set, the "path" or "tempdir" key must not be set.</entry>
+          </row>
+        </tbody>
+        </tgroup>
+       </informaltable>
+      </sect3>
     </sect2>
-  </sect1>
+    <sect2 id="transports-launchd">
+      <title>launchd</title>
+      <para>
+        launchd is a open-source server management system that replaces init, inetd
+        and cron on Apple Mac OS X versions 10.4 and above. It provides a common session
+        bus address for each user and deprecates the X11-enabled D-Bus launcher on OSX.
+      </para>
 
-  <sect1 id="naming-conventions">
+      <para>
+        launchd allocates a socket and provides it with the unix path through the
+        DBUS_LAUNCHD_SESSION_BUS_SOCKET variable in launchd's environment. Every process
+        spawned by launchd (or dbus-daemon, if it was started by launchd) can access
+        it through its environment.
+        Other processes can query for the launchd socket by executing:
+        $ launchctl getenv DBUS_LAUNCHD_SESSION_BUS_SOCKET
+        This is normally done by the D-Bus client library so doesn't have to be done
+        manually.
+      </para>
+      <para>
+        launchd is not available on Microsoft Windows.
+      </para>
+      <sect3 id="transports-launchd-addresses">
+        <title>Server Address Format</title>
+        <para>
+          launchd addresses are identified by the "launchd:" prefix
+          and support the following key/value pairs:
+        </para>
+        <informaltable>
+         <tgroup cols="3">
+          <thead>
+           <row>
+            <entry>Name</entry>
+            <entry>Values</entry>
+            <entry>Description</entry>
+           </row>
+          </thead>
+          <tbody>
+           <row>
+            <entry>env</entry>
+            <entry>(environment variable)</entry>
+            <entry>path of the unix domain socket for the launchd created dbus-daemon.</entry>
+          </row>
+        </tbody>
+        </tgroup>
+       </informaltable>
+      </sect3>
+    </sect2>
+    <sect2 id="transports-tcp-sockets">
+      <title>TCP Sockets</title>
+      <para>
+        The tcp transport provides TCP/IP based connections between clients
+        located on the same or different hosts. 
+      </para>
+      <para>
+        Using tcp transport without any additional secure authentification mechanismus 
+        over a network is unsecure. 
+      </para>
+      <para>  
+        Windows notes: Because of the tcp stack on windows does not provide sending 
+        credentials over a tcp connection, the EXTERNAL authentification 
+        mechanismus does not work. 
+      </para>
+      <sect3 id="transports-tcp-sockets-addresses">
+        <title>Server Address Format</title>
+        <para> 
+         TCP/IP socket addresses are identified by the "tcp:" prefix 
+         and support the following key/value pairs:
+        </para>
+        <informaltable>
+         <tgroup cols="3">
+          <thead>
+           <row>
+            <entry>Name</entry>
+            <entry>Values</entry>
+            <entry>Description</entry>
+           </row>
+          </thead>
+          <tbody>
+           <row>
+            <entry>host</entry>
+            <entry>(string)</entry>
+            <entry>dns name or ip address</entry>
+          </row>
+          <row>
+           <entry>port</entry>
+           <entry>(number)</entry>
+           <entry>The tcp port the server will open. A zero value let the server 
+            choose a free port provided from the underlaying operating system. 
+            libdbus is able to retrieve the real used port from the server.  
+           </entry>
+          </row>
+          <row>
+           <entry>family</entry>
+           <entry>(string)</entry>
+           <entry>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
+      </sect3>
+    </sect2>
+    <sect2 id="transports-nonce-tcp-sockets">
+      <title>Nonce-secured TCP Sockets</title>
+      <para>
+        The nonce-tcp transport provides a secured TCP transport, using a
+        simple authentication mechanism to ensure that only clients with read
+        access to a certain location in the filesystem can connect to the server.
+        The server writes a secret, the nonce, to a file and an incoming client
+        connection is only accepted if the client sends the nonce right after
+        the connect. The nonce mechanism requires no setup and is orthogonal to
+        the higher-level authentication mechanisms described in the
+        Authentication section.
+      </para>
+
+      <para>
+        On start, the server generates a random 16 byte nonce and writes it
+        to a file in the user's temporary directory. The nonce file location
+        is published as part of the server's D-Bus address using the
+        "noncefile" key-value pair.
+
+        After an accept, the server reads 16 bytes from the socket. If the
+        read bytes do not match the nonce stored in the nonce file, the
+        server MUST immediately drop the connection.
+        If the nonce match the received byte sequence, the client is accepted
+        and the transport behaves like an unsecured tcp transport.
+      </para>
+      <para>
+        After a successful connect to the server socket, the client MUST read
+        the nonce from the file published by the server via the noncefile=
+        key-value pair and send it over the socket. After that, the
+        transport behaves like an unsecured tcp transport.
+      </para>
+      <sect3 id="transports-nonce-tcp-sockets-addresses">
+        <title>Server Address Format</title>
+        <para> 
+         Nonce TCP/IP socket addresses uses the "nonce-tcp:" prefix 
+         and support the following key/value pairs:
+        </para>
+        <informaltable>
+         <tgroup cols="3">
+          <thead>
+           <row>
+            <entry>Name</entry>
+            <entry>Values</entry>
+            <entry>Description</entry>
+           </row>
+          </thead>
+          <tbody>
+           <row>
+            <entry>host</entry>
+            <entry>(string)</entry>
+            <entry>dns name or ip address</entry>
+          </row>
+          <row>
+           <entry>port</entry>
+           <entry>(number)</entry>
+           <entry>The tcp port the server will open. A zero value let the server 
+            choose a free port provided from the underlaying operating system. 
+            libdbus is able to retrieve the real used port from the server.  
+           </entry>
+          </row>
+          <row>
+           <entry>family</entry>
+           <entry>(string)</entry>
+           <entry>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</entry>
+          </row>
+          <row>
+           <entry>noncefile</entry>
+           <entry>(path)</entry>
+           <entry>file location containing the secret</entry>
+          </row>
+         </tbody>
+        </tgroup>
+       </informaltable>
+      </sect3>
+    </sect2>
+   </sect1>
+   <sect1 id="meta-transports">
+    <title>Meta Transports</title>
+    <para>
+      Meta transports are a kind of transport with special enhancements or
+      behavior. Currently available meta transports include: autolaunch
+    </para>
+
+    <sect2 id="meta-transports-autolaunch">
+     <title>Autolaunch</title>
+     <para>The autolaunch transport provides a way for dbus clients to autodetect
+       a running dbus session bus and to autolaunch a session bus if not present.
+     </para>
+     <sect3 id="meta-transports-autolaunch-addresses">
+       <title>Server Address Format</title>
+       <para>
+         Autolaunch addresses uses the "autolaunch:" prefix and support the
+         following key/value pairs:
+       </para>
+       <informaltable>
+        <tgroup cols="3">
+         <thead>
+          <row>
+           <entry>Name</entry>
+           <entry>Values</entry>
+           <entry>Description</entry>
+          </row>
+         </thead>
+         <tbody>
+          <row>
+           <entry>scope</entry>
+           <entry>(string)</entry>
+           <entry>scope of autolaunch (Windows only)
+            <itemizedlist>
+             <listitem>
+              <para>
+               "*install-path" - limit session bus to dbus installation path.
+               The dbus installation path is determined from the location of
+               the shared dbus library. If the library is located in a 'bin'
+               subdirectory the installation root is the directory above,
+               otherwise the directory where the library lives is taken as
+               installation root.
+               <programlisting>
+                   &lt;install-root&gt;/bin/[lib]dbus-1.dll
+                   &lt;install-root&gt;/[lib]dbus-1.dll
+               </programlisting>
+              </para>
+             </listitem>
+             <listitem>
+              <para>
+               "*user" - limit session bus to the recent user.
+              </para>
+             </listitem>
+             <listitem>
+              <para>
+               other values - specify dedicated session bus like "release",
+               "debug" or other
+              </para>
+             </listitem>
+            </itemizedlist>
+           </entry>
+         </row>
+        </tbody>
+       </tgroup>
+      </informaltable>
+     </sect3>
+
+     <sect3 id="meta-transports-autolaunch-windows-implementation">
+      <title>Windows implementation</title>
+      <para>
+        On start, the server opens a platform specific transport, creates a mutex
+        and a shared memory section containing the related session bus address.
+        This mutex will be inspected by the dbus client library to detect a
+        running dbus session bus. The access to the mutex and the shared memory
+        section are protected by global locks.
+      </para>
+      <para>
+       In the recent implementation the autolaunch transport uses a tcp transport
+       on localhost with a port choosen from the operating system. This detail may
+       change in the future.
+      </para>
+      <para>
+        Disclaimer: The recent implementation is in an early state and may not
+        work in all cirumstances and/or may have security issues. Because of this
+        the implementation is not documentated yet.
+      </para>
+     </sect3>
+    </sect2>
+   </sect1>
+   <sect1 id="naming-conventions">
     <title>Naming Conventions</title>
     
     <para>
@@ -2479,6 +2947,39 @@
         deterministic rule, or returning an error, are the reasonable 
         possibilities).
       </para>
+      <para>
+        If one or more properties change on an object, the
+        <literal>org.freedesktop.DBus.Properties.PropertiesChanged</literal>
+        signal may be emitted (this signal was added in 0.14):
+      </para>
+      <para>
+        <programlisting>
+              org.freedesktop.DBus.Properties.PropertiesChanged (STRING interface_name,
+                                                                 DICT&lt;STRING,VARIANT&gt; changed_properties,
+                                                                 ARRAY&lt;STRING&gt; invalidated_properties);
+        </programlisting>
+      </para>
+      <para>
+        where <literal>changed_properties</literal> is a dictionary
+        containing the changed properties with the new values and
+        <literal>invalidated_properties</literal> is an array of
+        properties that changed but the value is not conveyed.
+      </para>
+      <para>
+        Whether the <literal>PropertiesChanged</literal> signal is
+        supported can be determined by calling
+        <literal>org.freedesktop.DBus.Introspectable.Introspect</literal>. Note
+        that the signal may be supported for an object but it may
+        differ how whether and how it is used on a per-property basis
+        (for e.g. performance or security reasons). Each property (or
+        the parent interface) must be annotated with the
+        <literal>org.freedesktop.DBus.Property.EmitsChangedSignal</literal>
+        annotation to convey this (usually the default value
+        <literal>true</literal> is sufficient meaning that the
+        annotation does not need to be used). See <xref
+        linkend="introspection-format"/> for details on this
+        annotation.
+      </para>
     </sect2>
   </sect1>
 
@@ -2609,6 +3110,35 @@
 	     <entry>true,false</entry>
 	     <entry>If set, don't expect a reply to the method call; defaults to false.</entry>
 	   </row>
+	   <row>
+	     <entry>org.freedesktop.DBus.Property.EmitsChangedSignal</entry>
+	     <entry>true,invalidates,false</entry>
+	     <entry>
+               <para>
+                 If set to <literal>false</literal>, the
+                 <literal>org.freedesktop.DBus.Properties.PropertiesChanged</literal>
+                 signal, see <xref
+                 linkend="standard-interfaces-properties"/> is not
+                 guaranteed to be emitted if the property changes.
+               </para>
+               <para>
+                 If set to <literal>invalidates</literal> the signal
+                 is emitted but the value is not included in the
+                 signal.
+               </para>
+               <para>
+                 If set to <literal>true</literal> the signal is
+                 emitted with the value included.
+               </para>
+               <para>
+                 The value for the annotation defaults to
+                 <literal>true</literal> if the enclosing interface
+                 element does not specify the annotation. Otherwise it
+                 defaults to the value specified in the enclosing
+                 interface element.
+               </para>
+             </entry>
+	   </row>
 	 </tbody>
        </tgroup>
      </informaltable>
@@ -2657,6 +3187,10 @@
         linkend="message-protocol-header-fields"/>).  If the
         <literal>DESTINATION</literal> field is present, it specifies a message
         recipient by name. Method calls and replies normally specify this field.
+        The message bus must send messages (of any type) with the
+        <literal>DESTINATION</literal> field set to the specified recipient,
+        regardless of whether the recipient has set up a match rule matching
+        the message.
       </para>
 
       <para>
@@ -3054,7 +3588,63 @@
 	    </tgroup>
 	  </informaltable>
         </para>
-      </sect3>
+       </sect3>
+
+       <sect3 id="bus-messages-list-queued-owners">
+        <title><literal>org.freedesktop.DBus.ListQueuedOwners</literal></title>
+        <para>
+          As a method:
+          <programlisting>
+            ARRAY of STRING ListQueuedOwners (in STRING name)
+          </programlisting>
+          Message arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>STRING</entry>
+                  <entry>The well-known bus name to query, such as
+                    <literal>com.example.cappuccino</literal></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          Reply arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>ARRAY of STRING</entry>
+                  <entry>The unique bus names of connections currently queued
+                    for the name</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        </para>
+        <para>
+          This method call should be sent to
+          <literal>org.freedesktop.DBus</literal> and lists the connections
+          currently queued for a bus name (see
+          <xref linkend="term-queued-owner"/>).
+        </para>
+       </sect3>
     </sect2>
 
     <sect2 id="message-bus-routing">
@@ -3076,7 +3666,7 @@
         </para>
         <para>
           Match rules are added using the AddMatch bus method 
-          (see xref linkend="bus-messages-add-match"/>).  Rules are 
+          (see <xref linkend="bus-messages-add-match"/>).  Rules are
           specified as a string of comma separated key/value pairs. 
           Excluding a key from the rule indicates a wildcard match.  
           For instance excluding the the member from a match rule but 
@@ -3197,7 +3787,7 @@
         extension. The message bus will only load service description files
         ending with .service; all other files will be ignored.  The file format
         is similar to that of <ulink
-        url="http://www.freedesktop.org/standards/desktop-entry-spec/desktop-entry-spec.html">desktop
+        url="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">desktop
         entries</ulink>. All service description files must be in UTF-8
         encoding. To ensure that there will be no name collisions, service files
         must be namespaced using the same mechanism as messages and service
@@ -3296,11 +3886,221 @@
           The environment variable should have precedence over the 
           root window property.
         </para>
-        <para>
-          [FIXME specify location of .service files, probably using 
-          DESKTOP_DIRS etc. from basedir specification, though login session 
-          bus is not really desktop-specific]
-        </para>
+        <para>The address of the login session message bus is given in the
+        <literal>DBUS_SESSION_BUS_ADDRESS</literal> environment variable. If
+        DBUS_SESSION_BUS_ADDRESS is not set, or if it's set to the string
+        "autolaunch:", the system should use platform-specific methods of
+        locating a running D-Bus session server, or starting one if a running
+        instance cannot be found. Note that this mechanism is not recommended
+        for attempting to determine if a daemon is running. It is inherently
+        racy to attempt to make this determination, since the bus daemon may
+        be started just before or just after the determination is made.
+        Therefore, it is recommended that applications do not try to make this
+        determination for their functionality purposes, and instead they
+        should attempt to start the server.</para>
+
+        <sect4 id="message-bus-types-login-x-windows">
+          <title>X Windowing System</title>
+          <para>
+            For the X Windowing System, the application must locate the
+            window owner of the selection represented by the atom formed by
+            concatenating:
+            <itemizedlist>
+              <listitem>
+                <para>the literal string "_DBUS_SESSION_BUS_SELECTION_"</para>
+              </listitem>
+
+              <listitem>
+                <para>the current user's username</para>
+              </listitem>
+
+              <listitem>
+                <para>the literal character '_' (underscore)</para>
+              </listitem>
+
+              <listitem>
+                <para>the machine's ID</para>
+              </listitem>
+            </itemizedlist>
+          </para>
+
+          <para>
+            The following properties are defined for the window that owns
+            this X selection:
+            <informaltable frame="all">
+              <tgroup cols="2">
+                <tbody>
+                  <row>
+                    <entry>
+                      <para>Atom</para>
+                    </entry>
+
+                    <entry>
+                      <para>meaning</para>
+                    </entry>
+                  </row>
+
+                  <row>
+                    <entry>
+                      <para>_DBUS_SESSION_BUS_ADDRESS</para>
+                    </entry>
+
+                    <entry>
+                      <para>the actual address of the server socket</para>
+                    </entry>
+                  </row>
+
+                  <row>
+                    <entry>
+                      <para>_DBUS_SESSION_BUS_PID</para>
+                    </entry>
+
+                    <entry>
+                      <para>the PID of the server process</para>
+                    </entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable>
+          </para>
+
+          <para>
+            At least the _DBUS_SESSION_BUS_ADDRESS property MUST be
+            present in this window.
+          </para>
+
+          <para>
+            If the X selection cannot be located or if reading the
+            properties from the window fails, the implementation MUST conclude
+            that there is no D-Bus server running and proceed to start a new
+            server. (See below on concurrency issues)
+          </para>
+
+          <para>
+            Failure to connect to the D-Bus server address thus obtained
+            MUST be treated as a fatal connection error and should be reported
+            to the application.
+          </para>
+
+          <para>
+            As an alternative, an implementation MAY find the information
+            in the following file located in the current user's home directory,
+            in subdirectory .dbus/session-bus/:
+            <itemizedlist>
+              <listitem>
+                <para>the machine's ID</para>
+              </listitem>
+
+              <listitem>
+                <para>the literal character '-' (dash)</para>
+              </listitem>
+
+              <listitem>
+                <para>the X display without the screen number, with the
+                following prefixes removed, if present: ":", "localhost:"
+                ."localhost.localdomain:". That is, a display of
+                "localhost:10.0" produces just the number "10"</para>
+              </listitem>
+            </itemizedlist>
+          </para>
+
+          <para>
+            The contents of this file NAME=value assignment pairs and
+            lines starting with # are comments (no comments are allowed
+            otherwise). The following variable names are defined:
+            <informaltable
+              frame="all">
+              <tgroup cols="2">
+                <tbody>
+                  <row>
+                    <entry>
+                      <para>Variable</para>
+                    </entry>
+
+                    <entry>
+                      <para>meaning</para>
+                    </entry>
+                  </row>
+
+                  <row>
+                    <entry>
+                      <para>DBUS_SESSION_BUS_ADDRESS</para>
+                    </entry>
+
+                    <entry>
+                      <para>the actual address of the server socket</para>
+                    </entry>
+                  </row>
+
+                  <row>
+                    <entry>
+                      <para>DBUS_SESSION_BUS_PID</para>
+                    </entry>
+
+                    <entry>
+                      <para>the PID of the server process</para>
+                    </entry>
+                  </row>
+
+                  <row>
+                    <entry>
+                      <para>DBUS_SESSION_BUS_WINDOWID</para>
+                    </entry>
+
+                    <entry>
+                      <para>the window ID</para>
+                    </entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </informaltable>
+          </para>
+
+          <para>
+            At least the DBUS_SESSION_BUS_ADDRESS variable MUST be present
+            in this file.
+          </para>
+
+          <para>
+            Failure to open this file MUST be interpreted as absence of a
+            running server. Therefore, the implementation MUST proceed to
+            attempting to launch a new bus server if the file cannot be
+            opened.
+          </para>
+
+          <para>
+            However, success in opening this file MUST NOT lead to the
+            conclusion that the server is running. Thus, a failure to connect to
+            the bus address obtained by the alternative method MUST NOT be
+            considered a fatal error. If the connection cannot be established,
+            the implementation MUST proceed to check the X selection settings or
+            to start the server on its own.
+          </para>
+
+          <para>
+            If the implementation concludes that the D-Bus server is not
+            running it MUST attempt to start a new server and it MUST also
+            ensure that the daemon started as an effect of the "autolaunch"
+            mechanism provides the lookup mechanisms described above, so
+            subsequent calls can locate the newly started server. The
+            implementation MUST also ensure that if two or more concurrent
+            initiations happen, only one server remains running and all other
+            initiations are able to obtain the address of this server and
+            connect to it. In other words, the implementation MUST ensure that
+            the X selection is not present when it attempts to set it, without
+            allowing another process to set the selection between the
+            verification and the setting (e.g., by using XGrabServer /
+            XungrabServer).
+          </para>
+        </sect4>
+        <sect4>
+          <title></title>
+          <para>
+            [FIXME specify location of .service files, probably using
+            DESKTOP_DIRS etc. from basedir specification, though login session
+            bus is not really desktop-specific]
+          </para>
+        </sect4>
       </sect3>
       <sect3 id="message-bus-types-system">
         <title>System message bus</title>
@@ -3714,6 +4514,9 @@
         <para>
           Some bus instances, such as the standard system bus, may disable access to this method for some or all callers.
         </para>
+        <para>
+          Note, both the environment variable names and values must be valid UTF-8.  There's no way to update the activation environment with data that is invalid UTF-8.
+        </para>
 
       </sect3>
 
@@ -3773,7 +4576,7 @@
         <para>
           As a method:
           <programlisting>
-            UINT32 GetConnectionUnixUser (in STRING connection_name)
+            UINT32 GetConnectionUnixUser (in STRING bus_name)
           </programlisting>
           Message arguments:
           <informaltable>
@@ -3789,7 +4592,9 @@
                 <row>
                   <entry>0</entry>
                   <entry>STRING</entry>
-                  <entry>Name of the connection to query</entry>
+                  <entry>Unique or well-known bus name of the connection to
+                    query, such as <literal>:12.34</literal> or
+                    <literal>com.example.tea</literal></entry>
                 </row>
               </tbody>
             </tgroup>
@@ -3808,14 +4613,67 @@
               <row>
                 <entry>0</entry>
                 <entry>UINT32</entry>
-                <entry>unix user id</entry>
+                <entry>Unix user ID</entry>
               </row>
             </tbody>
           </tgroup>
         </informaltable>
-        Returns the unix uid of the process connected to the server. If unable to
-	determine it, a <literal>org.freedesktop.DBus.Error.Failed</literal>
-	error is returned.
+        Returns the Unix user ID of the process connected to the server. If
+        unable to determine it (for instance, because the process is not on the
+        same machine as the bus daemon), an error is returned.
+       </para>
+      </sect3>
+
+      <sect3 id="bus-messages-get-connection-unix-process-id">
+        <title><literal>org.freedesktop.DBus.GetConnectionUnixProcessID</literal></title>
+        <para>
+          As a method:
+          <programlisting>
+            UINT32 GetConnectionUnixProcessID (in STRING bus_name)
+          </programlisting>
+          Message arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>STRING</entry>
+                  <entry>Unique or well-known bus name of the connection to
+                    query, such as <literal>:12.34</literal> or
+                    <literal>com.example.tea</literal></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        Reply arguments:
+        <informaltable>
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Argument</entry>
+                <entry>Type</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>0</entry>
+                <entry>UINT32</entry>
+                <entry>Unix process id</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+        Returns the Unix process ID of the process connected to the server. If
+        unable to determine it (for instance, because the process is not on the
+        same machine as the bus daemon), an error is returned.
        </para>
       </sect3>
 
@@ -4083,4 +4941,3 @@
 
   </glossary>
 </article>
-

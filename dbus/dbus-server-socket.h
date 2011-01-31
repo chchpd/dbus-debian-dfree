@@ -25,17 +25,22 @@
 
 #include <dbus/dbus-internals.h>
 #include <dbus/dbus-server-protected.h>
+#include <dbus/dbus-nonce.h>
 
 DBUS_BEGIN_DECLS
 
 DBusServer* _dbus_server_new_for_socket           (int              *fds,
                                                    int               n_fds,
-                                                   const DBusString *address);
+                                                   const DBusString *address,
+                                                   DBusNonceFile    *noncefile);
+DBusServer* _dbus_server_new_for_autolaunch       (const DBusString *address,
+                                                   DBusError        *error);
 DBusServer* _dbus_server_new_for_tcp_socket       (const char       *host,
                                                    const char       *bind,
                                                    const char       *port,
                                                    const char       *family,
-                                                   DBusError        *error);
+                                                   DBusError        *error,
+                                                   dbus_bool_t      use_nonce);
 DBusServerListenResult _dbus_server_listen_socket (DBusAddressEntry  *entry,
                                                    DBusServer       **server_p,
                                                    DBusError         *error);

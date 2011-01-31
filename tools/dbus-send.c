@@ -26,6 +26,24 @@
 
 #include <dbus/dbus.h>
 
+#ifndef HAVE_STRTOLL
+#undef strtoll
+#define strtoll mystrtoll
+#include "strtoll.c"
+#endif
+
+#ifndef HAVE_STRTOULL
+#undef strtoull
+#define strtoull mystrtoull
+#include "strtoull.c"
+#endif
+
+#ifdef DBUS_WINCE
+#ifndef strdup
+#define strdup _strdup
+#endif
+#endif
+
 #include "dbus-print-message.h"
 
 static const char *appname;
