@@ -1,10 +1,14 @@
 dbus (1.4.1-2) UNRELEASED; urgency=low
 
+  [ Simon McVittie ]
   * Move to git; add debian/gbp.conf for git-buildpackage
   * Replace 00_dbus-quiesce-startup-errors.patch with the version that was
     merged upstream
 
- -- Simon McVittie <smcv@debian.org>  Thu, 06 Jan 2011 17:43:18 +0000
+  [ Michael Biebl ]
+  * Upload to unstable.
+
+ -- Michael Biebl <biebl@debian.org>  Mon, 07 Feb 2011 01:45:35 +0100
 
 dbus (1.4.1-1) experimental; urgency=low
 
