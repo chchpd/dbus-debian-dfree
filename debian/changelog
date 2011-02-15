@@ -2,6 +2,8 @@ dbus (1.4.1-3) UNRELEASED; urgency=low
 
   * Switch from cdbs to dh.
   * Bump debhelper compatibility level to 8.
+  * Remove doxygen call from debian/rules and cleaning up doc/api manually.
+    The upstream build system takes care of that already.
 
  -- Michael Biebl <biebl@debian.org>  Sat, 12 Feb 2011 13:31:06 +0100
 

@@ -21,7 +21,6 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	dh_auto_build
-	doxygen Doxyfile
 	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
 
 override_dh_link:
