@@ -42,6 +42,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
 #include <grp.h>
 #include <sys/socket.h>
 #include <dirent.h>
@@ -369,6 +372,56 @@ _dbus_change_to_daemon_user  (const char    *user,
 }
 #endif /* !HAVE_LIBAUDIT */
 
+
+/**
+ * Attempt to ensure that the current process can open
+ * at least @limit file descriptors.
+ *
+ * If @limit is lower than the current, it will not be
+ * lowered.  No error is returned if the request can
+ * not be satisfied.
+ *
+ * @limit Number of file descriptors
+ */
+void
+_dbus_request_file_descriptor_limit (unsigned int limit)
+{
+#ifdef HAVE_SETRLIMIT
+  struct rlimit lim;
+  struct rlimit target_lim;
+  unsigned int current_limit;
+
+  /* No point to doing this practically speaking
+   * if we're not uid 0.  We expect the system
+   * bus to use this before we change UID, and
+   * the session bus takes the Linux default
+   * of 1024 for both cur and max.
+   */
+  if (getuid () != 0)
+    return;
+
+  if (getrlimit (RLIMIT_NOFILE, &lim) < 0)
+    return;
+
+  if (lim.rlim_cur >= limit)
+    return;
+
+  /* Ignore "maximum limit", assume we have the "superuser"
+   * privileges.  On Linux this is CAP_SYS_RESOURCE.
+   */
+  target_lim.rlim_cur = target_lim.rlim_max = limit;
+  /* Also ignore errors; if we fail, we will at least work
+   * up to whatever limit we had, which seems better than
+   * just outright aborting.
+   *
+   * However, in the future we should probably log this so OS builders
+   * have a chance to notice any misconfiguration like dbus-daemon
+   * being started without CAP_SYS_RESOURCE.
+   */
+  setrlimit (RLIMIT_NOFILE, &target_lim);
+#endif
+}
+
 void 
 _dbus_init_system_log (void)
 {
@@ -418,6 +471,7 @@ _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args
         break;
       case DBUS_SYSTEM_LOG_FATAL:
         flags = LOG_DAEMON|LOG_CRIT;
+        break;
       default:
         return;
     }
@@ -607,53 +661,13 @@ _dbus_directory_open (const DBusString *filename,
   return iter;
 }
 
-/* Calculate the required buffer size (in bytes) for directory
- * entries read from the given directory handle.  Return -1 if this
- * this cannot be done. 
- *
- * If you use autoconf, include fpathconf and dirfd in your
- * AC_CHECK_FUNCS list.  Otherwise use some other method to detect
- * and use them where available.
- */
-static dbus_bool_t
-dirent_buf_size(DIR * dirp, size_t *size)
-{
- long name_max;
-#   if defined(HAVE_FPATHCONF) && defined(_PC_NAME_MAX)
-#      if defined(HAVE_DIRFD)
-          name_max = fpathconf(dirfd(dirp), _PC_NAME_MAX);
-#      elif defined(HAVE_DDFD)
-          name_max = fpathconf(dirp->dd_fd, _PC_NAME_MAX);
-#      else
-          name_max = fpathconf(dirp->__dd_fd, _PC_NAME_MAX);
-#      endif /* HAVE_DIRFD */
-     if (name_max == -1)
-#           if defined(NAME_MAX)
-	     name_max = NAME_MAX;
-#           else
-	     return FALSE;
-#           endif
-#   elif defined(MAXNAMELEN)
-     name_max = MAXNAMELEN;
-#   else
-#       if defined(NAME_MAX)
-	 name_max = NAME_MAX;
-#       else
-#           error "buffer size for readdir_r cannot be determined"
-#       endif
-#   endif
-  if (size)
-    *size = (size_t)offsetof(struct dirent, d_name) + name_max + 1;
-  else
-    return FALSE;
-
-  return TRUE;
-}
-
 /**
  * Get next file in the directory. Will not return "." or ".."  on
  * UNIX. If an error occurs, the contents of "filename" are
  * undefined. The error is never set if the function succeeds.
+ *
+ * This function is not re-entrant, and not necessarily thread-safe.
+ * Only use it for test code or single-threaded utilities.
  *
  * @param iter the iterator
  * @param filename string to be set to the next file in the dir
@@ -665,37 +679,24 @@ _dbus_directory_get_next_file (DBusDirIter      *iter,
                                DBusString       *filename,
                                DBusError        *error)
 {
-  struct dirent *d, *ent;
-  size_t buf_size;
+  struct dirent *ent;
   int err;
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
- 
-  if (!dirent_buf_size (iter->d, &buf_size))
-    {
-      dbus_set_error (error, DBUS_ERROR_FAILED,
-                      "Can't calculate buffer size when reading directory");
-      return FALSE;
-    }
-
-  d = (struct dirent *)dbus_malloc (buf_size);
-  if (!d)
-    {
-      dbus_set_error (error, DBUS_ERROR_NO_MEMORY,
-                      "No memory to read directory entry");
-      return FALSE;
-    }
 
  again:
-  err = readdir_r (iter->d, d, &ent);
-  if (err || !ent)
+  errno = 0;
+  ent = readdir (iter->d);
+
+  if (!ent)
     {
+      err = errno;
+
       if (err != 0)
         dbus_set_error (error,
                         _dbus_error_from_errno (err),
                         "%s", _dbus_strerror (err));
 
-      dbus_free (d);
       return FALSE;
     }
   else if (ent->d_name[0] == '.' &&
@@ -709,12 +710,10 @@ _dbus_directory_get_next_file (DBusDirIter      *iter,
         {
           dbus_set_error (error, DBUS_ERROR_NO_MEMORY,
                           "No memory to read directory entry");
-          dbus_free (d);
           return FALSE;
         }
       else
         {
-          dbus_free (d);
           return TRUE;
         }
     }
@@ -1059,11 +1058,11 @@ string_squash_nonprintable (DBusString *str)
   
   for (i = 0; i < len; i++)
     {
-	  unsigned char c = (unsigned char) buf[i];
+      unsigned char c = (unsigned char) buf[i];
       if (c == '\0')
-        c = ' ';
+        buf[i] = ' ';
       else if (c < 0x20 || c > 127)
-        c = '?';
+        buf[i] = '?';
     }
 }
 
@@ -1133,10 +1132,10 @@ _dbus_command_for_pid (unsigned long  pid,
     goto fail;
   
   string_squash_nonprintable (&cmdline);  
-  
+
   if (!_dbus_string_copy (&cmdline, 0, str, _dbus_string_get_length (str)))
     goto oom;
-  
+
   _dbus_string_free (&cmdline);  
   _dbus_string_free (&path);
   return TRUE;

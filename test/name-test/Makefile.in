@@ -47,10 +47,11 @@ host_triplet = @host@
 subdir = test/name-test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -263,6 +264,8 @@ EXPANDED_PREFIX = @EXPANDED_PREFIX@
 EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_CFLAGS = @GLIB_CFLAGS@
+GLIB_LIBS = @GLIB_LIBS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -393,11 +396,6 @@ top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) $(DBUS_GLIB_CFLAGS) $(DBUS_TEST_CFLAGS) -DDBUS_COMPILATION
 @DBUS_BUILD_TESTS_TRUE@TESTS_ENVIRONMENT = DBUS_TOP_BUILDDIR=@abs_top_builddir@ DBUS_TOP_SRCDIR=@abs_top_srcdir@
 EXTRA_DIST = run-test.sh run-test-systemserver.sh test-wait-for-echo.py test-activation-forking.py
-@DBUS_BUILD_TESTS_TRUE@test_names_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-names.c
-
-@DBUS_BUILD_TESTS_TRUE@test_names_LDADD = $(top_builddir)/dbus/libdbus-convenience.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_names_LDFLAGS = @R_DYNAMIC_LDFLAG@
 @DBUS_BUILD_TESTS_TRUE@AM_CPPFLAGS = -DDBUS_STATIC_BUILD
 @DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_SOURCES = \
 @DBUS_BUILD_TESTS_TRUE@	test-pending-call-dispatch.c

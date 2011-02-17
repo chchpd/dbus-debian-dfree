@@ -1,4 +1,0 @@
-[D-BUS Service]
-Exec=/home/wjt/src/dbus/test/test-service
-User=anyrandomuser
-

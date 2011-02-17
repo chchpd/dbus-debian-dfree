@@ -15,6 +15,28 @@
 
 @SET_MAKE@
 
+# Copyright © 2008-2011 Collabora Ltd.
+# Copyright © 2008-2011 Nokia Corporation
+#
+# Permission is hereby granted, free of charge, to any person obtaining
+# a copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so, subject to
+# the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -34,11 +56,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Doxyfile.in \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in $(srcdir)/dbus-1.pc.in \
-	$(top_srcdir)/configure \
+	$(srcdir)/tools/lcov.am $(top_srcdir)/configure \
 	$(top_srcdir)/test/data/invalid-service-files-system/org.freedesktop.DBus.TestSuiteNoExec.service.in \
 	$(top_srcdir)/test/data/invalid-service-files-system/org.freedesktop.DBus.TestSuiteNoService.service.in \
 	$(top_srcdir)/test/data/invalid-service-files-system/org.freedesktop.DBus.TestSuiteNoUser.service.in \
@@ -58,11 +79,13 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/Doxyfile.in \
 	$(top_srcdir)/test/data/valid-service-files/org.freedesktop.DBus.TestSuiteShellEchoServiceSuccess.service.in \
 	AUTHORS COPYING ChangeLog INSTALL NEWS compile config.guess \
 	config.sub depcomp install-sh ltmain.sh missing
+subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -244,6 +267,8 @@ EXPANDED_PREFIX = @EXPANDED_PREFIX@
 EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_CFLAGS = @GLIB_CFLAGS@
+GLIB_LIBS = @GLIB_LIBS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -386,10 +411,12 @@ EXTRA_DIST = \
         NEWS.pre-1-0            \
 	ChangeLog.pre-1-2       \
         NEWS.pre-1-2		\
-	README.win \
+	README.win		\
+	README.wince		\
+	README.cygwin		\
+	README.launchd		\
 	cmake
 
-@DBUS_GCOV_ENABLED_TRUE@GCOV_DIRS = dbus bus
 DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
 
@@ -400,7 +427,7 @@ all: config.h
 .SUFFIXES:
 am--refresh:
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/tools/lcov.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -954,41 +981,31 @@ uninstall-am: uninstall-pkgconfigDATA
 
 all-local: Doxyfile
 
-@DBUS_GCOV_ENABLED_TRUE@clean-gcov:
-@DBUS_GCOV_ENABLED_TRUE@	find -name "*.da" -o -name "*.gcov" | xargs rm || true
-
-@DBUS_GCOV_ENABLED_TRUE@clean-bbg:
-@DBUS_GCOV_ENABLED_TRUE@	find -name "*.bbg" -o -name "*.bb" | xargs rm || true
-
-@DBUS_GCOV_ENABLED_TRUE@.PHONY: coverage-report.txt
-@DBUS_GCOV_ENABLED_TRUE@coverage-report.txt:
-@DBUS_GCOV_ENABLED_TRUE@	BBG_FILES=`find $(GCOV_DIRS) -name "*.bbg" -o -name "*.gcno"` ;			\
-@DBUS_GCOV_ENABLED_TRUE@	C_FILES= ;									\
-@DBUS_GCOV_ENABLED_TRUE@	for F in $$BBG_FILES ; do							\
-@DBUS_GCOV_ENABLED_TRUE@		F_nolibs=`echo $$F | sed -e 's/.libs\///g'` ;				\
-@DBUS_GCOV_ENABLED_TRUE@		C=`echo $$F_nolibs | sed -e 's/.bbg/.c/g' | sed -e 's/.gcno/.c/g'`  ;	\
-@DBUS_GCOV_ENABLED_TRUE@		B=`basename $$F .bbg` ;							\
-@DBUS_GCOV_ENABLED_TRUE@		D=`dirname $$F` ;							\
-@DBUS_GCOV_ENABLED_TRUE@		DA=`echo $$F | sed -e 's/.bbg/.da/g'` ;					\
-@DBUS_GCOV_ENABLED_TRUE@		DA_libs=`echo $$D/.libs/$$B/.da` ;					\
-@DBUS_GCOV_ENABLED_TRUE@		if test -e $$DA || test -e $$DA_libs; then				\
-@DBUS_GCOV_ENABLED_TRUE@			C_FILES="$$C_FILES $$C" ;					\
-@DBUS_GCOV_ENABLED_TRUE@		fi ;									\
-@DBUS_GCOV_ENABLED_TRUE@	done ;										\
-@DBUS_GCOV_ENABLED_TRUE@	echo $$C_FILES ;								\
-@DBUS_GCOV_ENABLED_TRUE@	$(top_builddir)/test/decode-gcov --report $$C_FILES > coverage-report.txt
-
-@DBUS_GCOV_ENABLED_TRUE@check-coverage: clean-gcov all check coverage-report.txt
-@DBUS_GCOV_ENABLED_TRUE@	cat coverage-report.txt
-
-@DBUS_GCOV_ENABLED_FALSE@coverage-report.txt:
-@DBUS_GCOV_ENABLED_FALSE@	echo "Need to reconfigure with --enable-gcov"
-
-@DBUS_GCOV_ENABLED_FALSE@check-coverage:
-@DBUS_GCOV_ENABLED_FALSE@	echo "Need to reconfigure with --enable-gcov"
-
 update-authors:
 	git shortlog -s -e | cut -c 8- | sort > AUTHORS
+
+lcov-reset:
+	lcov --directory @abs_top_srcdir@ --zerocounters
+
+# gcov takes ~forever to process config-parser.c for some reason?
+lcov-report:
+	true > bus/bus_test-config-parser.gcno
+	true > bus/dbus_daemon-config-parser.gcno
+	lcov --directory @abs_top_srcdir@ --capture \
+		--output-file @abs_top_builddir@/lcov.info
+	$(mkdir_p) @abs_top_builddir@/lcov.html
+	git_commit=`GIT_DIR=@abs_top_srcdir@/.git git log -1 --pretty=format:%h 2>/dev/null`;\
+	genhtml --title "@PACKAGE_STRING@ $$git_commit" \
+		--output-directory @abs_top_builddir@/lcov.html lcov.info
+	@echo
+	@echo 'lcov report can be found in:'
+	@echo 'file://@abs_top_builddir@/lcov.html/index.html'
+	@echo
+
+lcov-check:
+	$(MAKE) lcov-reset
+	$(MAKE) check $(LCOV_CHECK_ARGS)
+	$(MAKE) lcov-report
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
