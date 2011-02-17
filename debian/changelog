@@ -1,4 +1,4 @@
-dbus (1.4.1-3) UNRELEASED; urgency=low
+dbus (1.4.4-1) UNRELEASED; urgency=low
 
   * Switch from cdbs to dh.
   * Bump debhelper compatibility level to 8.
@@ -6,6 +6,8 @@ dbus (1.4.1-3) UNRELEASED; urgency=low
     The upstream build system takes care of that already.
 
   [ Simon McVittie ]
+  * New upstream version
+    - remove 00_dbus-quiesce-startup-errors.patch, no longer needed
   * Ignore changes to generated Doxygen HTML instead of deleting it in clean,
     for easier use of git-buildpackage
 
