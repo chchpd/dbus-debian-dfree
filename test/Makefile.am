@@ -23,13 +23,7 @@ TEST_BINARIES=
 TESTS=
 endif
 
-if DBUS_GCOV_ENABLED
-GCOV_BINARIES=decode-gcov
-else
-GCOV_BINARIES=
-endif
-
-noinst_PROGRAMS= $(TEST_BINARIES) $(GCOV_BINARIES)
+noinst_PROGRAMS= $(TEST_BINARIES)
 
 test_service_SOURCES=				\
 	test-service.c
@@ -58,9 +52,6 @@ test_segfault_SOURCES =				\
 test_sleep_forever_SOURCES =			\
 	test-sleep-forever.c
 
-decode_gcov_SOURCES=				\
-	decode-gcov.c
-
 # When any programs are not linked to libdbus-internal, fix this.
 AM_CPPFLAGS=-DDBUS_STATIC_BUILD
 TEST_LIBS=$(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
@@ -77,8 +68,6 @@ shell_test_LDADD=libdbus-testutils.la $(TEST_LIBS)
 shell_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
 spawn_test_LDADD=$(TEST_LIBS)
 spawn_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
-decode_gcov_LDADD=$(TEST_LIBS)
-decode_gcov_LDFLAGS=@R_DYNAMIC_LDFLAG@
 
 EXTRA_DIST=
 
@@ -115,8 +104,17 @@ dist-hook:
 	done ;									\
 	FILES=`(cd $(srcdir) && $(FIND_TESTS) -o -name "*.in" -a -not -name Makefile.in | grep -Ev "(.svn|CVS)" )` ;					\
         for F in $$FILES; do							\
-                echo '-- Disting file '$$F ;					\
-		cp -f $(srcdir)/$$F $(distdir)/$$F || exit 1 ;				\
+		B=`basename $$F`; \
+		if test -e $$F.in; then \
+			echo "-- Skipping file $$F (.in version exists)"; \
+		elif test "x$$B" = xrun-with-tmp-session-bus.conf; then \
+			echo "-- Skipping file $$F (generated)"; \
+		elif test -e "$(top_srcdir)/bus/$$B"; then \
+			echo "-- Skipping file $$F (from /bus/)"; \
+		else \
+			echo '-- Disting file '$$F ; \
+			cp -f $(srcdir)/$$F $(distdir)/$$F || exit 1; \
+		fi; \
 	done
 
 ## copy tests to builddir so that generated tests and static tests 

@@ -204,7 +204,7 @@ _dbus_write_socket (int               fd,
                     int               start,
                     int               len)
 {
-#ifdef HAVE_DECL_MSG_NOSIGNAL
+#if HAVE_DECL_MSG_NOSIGNAL
   const char *data;
   int bytes_written;
 
@@ -442,7 +442,7 @@ _dbus_write_socket_with_unix_fds_two(int               fd,
  again:
 
   bytes_written = sendmsg (fd, &m, 0
-#ifdef HAVE_DECL_MSG_NOSIGNAL
+#if HAVE_DECL_MSG_NOSIGNAL
                            |MSG_NOSIGNAL
 #endif
                            );
@@ -481,7 +481,7 @@ _dbus_write_socket_two (int               fd,
                         int               start2,
                         int               len2)
 {
-#ifdef HAVE_DECL_MSG_NOSIGNAL
+#if HAVE_DECL_MSG_NOSIGNAL
   struct iovec vectors[2];
   const char *data1;
   const char *data2;
@@ -1388,16 +1388,18 @@ _dbus_listen_tcp_socket (const char     *host,
              to use the same port */
           if (!port || !strcmp(port, "0"))
             {
+              int result;
               struct sockaddr_storage addr;
               socklen_t addrlen;
               char portbuf[50];
 
               addrlen = sizeof(addr);
-              getsockname(fd, (struct sockaddr*) &addr, &addrlen);
+              result = getsockname(fd, (struct sockaddr*) &addr, &addrlen);
 
-              if ((res = getnameinfo((struct sockaddr*)&addr, addrlen, NULL, 0,
-                                     portbuf, sizeof(portbuf),
-                                     NI_NUMERICHOST)) != 0)
+              if (result == -1 ||
+                  (res = getnameinfo ((struct sockaddr*)&addr, addrlen, NULL, 0,
+                                      portbuf, sizeof(portbuf),
+                                      NI_NUMERICHOST)) != 0)
                 {
                   dbus_set_error (error, _dbus_error_from_errno (errno),
                                   "Failed to resolve port \"%s:%s\": %s (%s)",
@@ -1436,7 +1438,7 @@ _dbus_listen_tcp_socket (const char     *host,
       dbus_set_error (error, _dbus_error_from_errno (errno),
                       "Failed to bind socket \"%s:%s\": %s",
                       host ? host : "*", port, _dbus_strerror (errno));
-      return -1;
+      goto failed;
     }
 
   for (i = 0 ; i < nlisten_fd ; i++)
@@ -1494,13 +1496,13 @@ write_credentials_byte (int             server_fd,
 
 #if defined(HAVE_CMSGCRED)
   bytes_written = sendmsg (server_fd, &msg, 0
-#ifdef HAVE_DECL_MSG_NOSIGNAL
+#if HAVE_DECL_MSG_NOSIGNAL
                            |MSG_NOSIGNAL
 #endif
                            );
 #else
   bytes_written = send (server_fd, buf, 1, 0
-#ifdef HAVE_DECL_MSG_NOSIGNAL
+#if HAVE_DECL_MSG_NOSIGNAL
                         |MSG_NOSIGNAL
 #endif
                         );
@@ -1658,7 +1660,11 @@ _dbus_read_credentials_socket  (int              client_fd,
 
   {
 #ifdef SO_PEERCRED
+#ifdef __OpenBSD__
+    struct sockpeercred cr;
+#else
     struct ucred cr;
+#endif
     int cr_len = sizeof (cr);
 
     if (getsockopt (client_fd, SOL_SOCKET, SO_PEERCRED, &cr, &cr_len) == 0 &&
@@ -3188,7 +3194,12 @@ _read_subprocess_line_argv (const char *progpath,
     {
       /* The process ended with error */
       DBusString error_message;
-      _dbus_string_init (&error_message);
+      if (!_dbus_string_init (&error_message))
+        {
+          _DBUS_SET_OOM (error);
+          goto out;
+        }
+
       ret = 0;
       do
         {

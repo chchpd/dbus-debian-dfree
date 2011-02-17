@@ -63,9 +63,6 @@
 /* Defined if gcov is enabled to force a rebuild due to config.h changing */
 #undef DBUS_GCOV_ENABLED
 
-/* Defined if we have gcc 3.3 and thus the new gcov format */
-#undef DBUS_HAVE_GCC33_GCOV
-
 /* Define to printf modifier for 64 bit integer type */
 #undef DBUS_INT64_PRINTF_MODIFIER
 
@@ -273,6 +270,9 @@
 
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H
+
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#undef HAVE_SYS_RESOURCE_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

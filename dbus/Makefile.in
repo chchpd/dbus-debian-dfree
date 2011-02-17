@@ -40,14 +40,15 @@ host_triplet = @host@
 @DBUS_BUILD_TESTS_TRUE@TESTS = dbus-test$(EXEEXT)
 noinst_PROGRAMS = $(am__EXEEXT_1)
 subdir = dbus
-DIST_COMMON = $(dbusarchinclude_HEADERS) $(dbusinclude_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dbus-arch-deps.h.in $(srcdir)/versioninfo.rc.in
+DIST_COMMON = $(dbusinclude_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/dbus-arch-deps.h.in \
+	$(srcdir)/versioninfo.rc.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
+	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/acinclude.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -75,9 +76,8 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(libdir)" \
-	"$(DESTDIR)$(dbusarchincludedir)" \
-	"$(DESTDIR)$(dbusincludedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(dbusincludedir)" \
+	"$(DESTDIR)$(dbusarchincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__libdbus_1_la_SOURCES_DIST = dbus-address.c dbus-auth.c dbus-auth.h \
@@ -337,7 +337,7 @@ SOURCES = $(libdbus_1_la_SOURCES) $(libdbus_internal_la_SOURCES) \
 	$(dbus_test_SOURCES)
 DIST_SOURCES = $(am__libdbus_1_la_SOURCES_DIST) \
 	$(am__libdbus_internal_la_SOURCES_DIST) $(dbus_test_SOURCES)
-HEADERS = $(dbusarchinclude_HEADERS) $(dbusinclude_HEADERS)
+HEADERS = $(dbusinclude_HEADERS) $(nodist_dbusarchinclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -418,6 +418,8 @@ EXPANDED_PREFIX = @EXPANDED_PREFIX@
 EXPANDED_SYSCONFDIR = @EXPANDED_SYSCONFDIR@
 FGREP = @FGREP@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_CFLAGS = @GLIB_CFLAGS@
+GLIB_LIBS = @GLIB_LIBS@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -642,7 +644,7 @@ dbusinclude_HEADERS = \
 	dbus-threads.h				\
 	dbus-types.h
 
-dbusarchinclude_HEADERS = \
+nodist_dbusarchinclude_HEADERS = \
 	dbus-arch-deps.h
 
 
@@ -769,7 +771,7 @@ libdbus_internal_la_SOURCES = \
 	$(DBUS_SHARED_SOURCES)			\
 	$(DBUS_UTIL_SOURCES)
 
-BUILT_SOURCES = $(dbusarchinclude_HEADERS)
+BUILT_SOURCES = $(nodist_dbusarchinclude_HEADERS)
 EXTRA_DIST = dbus-arch-deps.h.in
 noinst_LTLIBRARIES = libdbus-internal.la
 libdbus_1_la_CPPFLAGS = -Ddbus_1_EXPORTS
@@ -2078,26 +2080,6 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-dbusarchincludeHEADERS: $(dbusarchinclude_HEADERS)
-	@$(NORMAL_INSTALL)
-	test -z "$(dbusarchincludedir)" || $(MKDIR_P) "$(DESTDIR)$(dbusarchincludedir)"
-	@list='$(dbusarchinclude_HEADERS)'; test -n "$(dbusarchincludedir)" || list=; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(dbusarchincludedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(dbusarchincludedir)" || exit $$?; \
-	done
-
-uninstall-dbusarchincludeHEADERS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dbusarchinclude_HEADERS)'; test -n "$(dbusarchincludedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(dbusarchincludedir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(dbusarchincludedir)" && rm -f $$files
 install-dbusincludeHEADERS: $(dbusinclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	test -z "$(dbusincludedir)" || $(MKDIR_P) "$(DESTDIR)$(dbusincludedir)"
@@ -2118,6 +2100,26 @@ uninstall-dbusincludeHEADERS:
 	test -n "$$files" || exit 0; \
 	echo " ( cd '$(DESTDIR)$(dbusincludedir)' && rm -f" $$files ")"; \
 	cd "$(DESTDIR)$(dbusincludedir)" && rm -f $$files
+install-nodist_dbusarchincludeHEADERS: $(nodist_dbusarchinclude_HEADERS)
+	@$(NORMAL_INSTALL)
+	test -z "$(dbusarchincludedir)" || $(MKDIR_P) "$(DESTDIR)$(dbusarchincludedir)"
+	@list='$(nodist_dbusarchinclude_HEADERS)'; test -n "$(dbusarchincludedir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(dbusarchincludedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(dbusarchincludedir)" || exit $$?; \
+	done
+
+uninstall-nodist_dbusarchincludeHEADERS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nodist_dbusarchinclude_HEADERS)'; test -n "$(dbusarchincludedir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(dbusarchincludedir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(dbusarchincludedir)" && rm -f $$files
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -2299,7 +2301,7 @@ check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(dbusarchincludedir)" "$(DESTDIR)$(dbusincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(dbusincludedir)" "$(DESTDIR)$(dbusarchincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -2352,8 +2354,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dbusarchincludeHEADERS \
-	install-dbusincludeHEADERS
+install-data-am: install-dbusincludeHEADERS \
+	install-nodist_dbusarchincludeHEADERS
 
 install-dvi: install-dvi-am
 
@@ -2399,8 +2401,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dbusarchincludeHEADERS \
-	uninstall-dbusincludeHEADERS uninstall-libLTLIBRARIES
+uninstall-am: uninstall-dbusincludeHEADERS uninstall-libLTLIBRARIES \
+	uninstall-nodist_dbusarchincludeHEADERS
 
 .MAKE: all check check-am install install-am install-strip
 
@@ -2410,16 +2412,17 @@ uninstall-am: uninstall-dbusarchincludeHEADERS \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am \
-	install-dbusarchincludeHEADERS install-dbusincludeHEADERS \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+	install-dbusincludeHEADERS install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-nodist_dbusarchincludeHEADERS install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-dbusarchincludeHEADERS \
-	uninstall-dbusincludeHEADERS uninstall-libLTLIBRARIES
+	tags uninstall uninstall-am uninstall-dbusincludeHEADERS \
+	uninstall-libLTLIBRARIES \
+	uninstall-nodist_dbusarchincludeHEADERS
 
 
 @DBUS_WIN_TRUE@.rc.o:
