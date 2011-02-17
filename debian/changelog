@@ -1,4 +1,4 @@
-dbus (1.4.4-1) unstable; urgency=low
+dbus (1.4.6-1) UNRELEASED; urgency=low
 
   * Switch from cdbs to dh.
   * Bump debhelper compatibility level to 8.
