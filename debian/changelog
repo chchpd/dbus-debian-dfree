@@ -1,4 +1,4 @@
-dbus (1.4.6-1) UNRELEASED; urgency=low
+dbus (1.4.6-1) unstable; urgency=low
 
   * Switch from cdbs to dh.
   * Bump debhelper compatibility level to 8.
@@ -12,7 +12,7 @@ dbus (1.4.6-1) UNRELEASED; urgency=low
     for easier use of git-buildpackage
   * Unapply patches after building from git
 
- -- Simon McVittie <smcv@debian.org>  Thu, 17 Feb 2011 18:59:02 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Feb 2011 20:12:59 +0000
 
 dbus (1.4.1-2) unstable; urgency=low
 
