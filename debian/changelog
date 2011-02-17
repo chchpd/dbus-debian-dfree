@@ -10,6 +10,7 @@ dbus (1.4.4-1) UNRELEASED; urgency=low
     - remove 00_dbus-quiesce-startup-errors.patch, no longer needed
   * Ignore changes to generated Doxygen HTML instead of deleting it in clean,
     for easier use of git-buildpackage
+  * Unapply patches after building from git
 
  -- Michael Biebl <biebl@debian.org>  Sat, 12 Feb 2011 13:31:06 +0100
 
