@@ -5,6 +5,10 @@ dbus (1.4.1-3) UNRELEASED; urgency=low
   * Remove doxygen call from debian/rules and cleaning up doc/api manually.
     The upstream build system takes care of that already.
 
+  [ Simon McVittie ]
+  * Ignore changes to generated Doxygen HTML instead of deleting it in clean,
+    for easier use of git-buildpackage
+
  -- Michael Biebl <biebl@debian.org>  Sat, 12 Feb 2011 13:31:06 +0100
 
 dbus (1.4.1-2) unstable; urgency=low

@@ -49,7 +49,6 @@ override_dh_auto_clean:
 	dh_auto_clean
 	rm -f test/data/valid-config-files/session.conf
 	rm -f test/data/valid-config-files/system.conf
-	rm -f doc/*.html
 	rm -f dbus.devhelp
 
 
