@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
@@ -12,7 +12,7 @@
 /* Build test code */
 #undef DBUS_BUILD_TESTS
 
-/* Build X11-dependent code */
+/* Define to enable X11 auto-launch */
 #undef DBUS_BUILD_X11
 
 /* whether -export-dynamic was passed to libtool */
