@@ -3257,6 +3257,11 @@ _dbus_get_autolaunch_address (const char *scope,
                               DBusString *address,
                               DBusError  *error)
 {
+#ifdef DBUS_BUILD_X11
+  /* Perform X11-based autolaunch. (We also support launchd-based autolaunch,
+   * but that's done elsewhere, and if it worked, this function wouldn't
+   * be called.) */
+  const char *display;
   static char *argv[6];
   int i;
   DBusString uuid;
@@ -3264,6 +3269,18 @@ _dbus_get_autolaunch_address (const char *scope,
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
   retval = FALSE;
+
+  /* fd.o #19997: if $DISPLAY isn't set to something useful, then
+   * dbus-launch-x11 is just going to fail. Rather than trying to
+   * run it, we might as well bail out early with a nice error. */
+  display = _dbus_getenv ("DISPLAY");
+
+  if (display == NULL || display[0] == '\0')
+    {
+      dbus_set_error_const (error, DBUS_ERROR_NOT_SUPPORTED,
+          "Unable to autolaunch a dbus-daemon without a $DISPLAY for X11");
+      return FALSE;
+    }
 
   if (!_dbus_string_init (&uuid))
     {
@@ -3300,6 +3317,12 @@ _dbus_get_autolaunch_address (const char *scope,
  out:
   _dbus_string_free (&uuid);
   return retval;
+#else
+  dbus_set_error_const (error, DBUS_ERROR_NOT_SUPPORTED,
+      "Using X11 for dbus-daemon autolaunch was disabled at compile time, "
+      "set your DBUS_SESSION_BUS_ADDRESS instead");
+  return FALSE;
+#endif
 }
 
 /**
@@ -3502,29 +3525,6 @@ _dbus_get_standard_session_servicedirs (DBusList **dirs)
   xdg_data_home = _dbus_getenv ("XDG_DATA_HOME");
   xdg_data_dirs = _dbus_getenv ("XDG_DATA_DIRS");
 
-  if (xdg_data_dirs != NULL)
-    {
-      if (!_dbus_string_append (&servicedir_path, xdg_data_dirs))
-        goto oom;
-
-      if (!_dbus_string_append (&servicedir_path, ":"))
-        goto oom;
-    }
-  else
-    {
-      if (!_dbus_string_append (&servicedir_path, "/usr/local/share:/usr/share:"))
-        goto oom;
-    }
-
-  /*
-   * add configured datadir to defaults
-   * this may be the same as an xdg dir
-   * however the config parser should take
-   * care of duplicates
-   */
-  if (!_dbus_string_append (&servicedir_path, DBUS_DATADIR":"))
-        goto oom;
-
   if (xdg_data_home != NULL)
     {
       if (!_dbus_string_append (&servicedir_path, xdg_data_home))
@@ -3545,6 +3545,32 @@ _dbus_get_standard_session_servicedirs (DBusList **dirs)
       if (!_dbus_concat_dir_and_file (&servicedir_path, &local_share))
         goto oom;
     }
+
+  if (!_dbus_string_append (&servicedir_path, ":"))
+    goto oom;
+
+  if (xdg_data_dirs != NULL)
+    {
+      if (!_dbus_string_append (&servicedir_path, xdg_data_dirs))
+        goto oom;
+
+      if (!_dbus_string_append (&servicedir_path, ":"))
+        goto oom;
+    }
+  else
+    {
+      if (!_dbus_string_append (&servicedir_path, "/usr/local/share:/usr/share:"))
+        goto oom;
+    }
+
+  /*
+   * add configured datadir to defaults
+   * this may be the same as an xdg dir
+   * however the config parser should take
+   * care of duplicates
+   */
+  if (!_dbus_string_append (&servicedir_path, DBUS_DATADIR))
+    goto oom;
 
   if (!_dbus_split_paths_and_append (&servicedir_path,
                                      DBUS_UNIX_STANDARD_SESSION_SERVICEDIR,

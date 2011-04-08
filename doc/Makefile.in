@@ -14,6 +14,7 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -42,7 +43,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
 	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.in
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -79,15 +80,15 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 man1dir = $(mandir)/man1
-am__installdirs = "$(DESTDIR)$(man1dir)"
+am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(apidir)"
 NROFF = nroff
 MANS = $(dist_man1_MANS) $(man1_MANS)
+DATA = $(api_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
-AS = @AS@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -140,7 +141,6 @@ DBUS_X_CFLAGS = @DBUS_X_CFLAGS@
 DBUS_X_LIBS = @DBUS_X_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
-DLLTOOL = @DLLTOOL@
 DOXYGEN = @DOXYGEN@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -203,6 +203,7 @@ PIE_CFLAGS = @PIE_CFLAGS@
 PIE_LDFLAGS = @PIE_LDFLAGS@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
+RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
 SECTION_FLAGS = @SECTION_FLAGS@
 SECTION_LDFLAGS = @SECTION_LDFLAGS@
@@ -227,6 +228,7 @@ VERSION = @VERSION@
 WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
+XSLTPROC = @XSLTPROC@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_LIBS = @X_LIBS@
@@ -285,6 +287,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+apidir = @htmldir@/api
 
 # automake normally assumes that man pages are generated files;
 # these ones aren't, so we need the dist_ prefix to say that they're
@@ -326,17 +329,15 @@ STATIC_DOCS = \
 	system-activation.txt \
 	$(DTDS)
 
-EXTRA_DIST = file-boilerplate.c $(STATIC_DOCS) $(MAN_IN_FILES) \
-	$(am__append_1)
+EXTRA_DIST = file-boilerplate.c doxygen_to_devhelp.xsl $(STATIC_DOCS) \
+	$(MAN_IN_FILES) $(am__append_1)
 HTML_FILES = \
 	dbus-faq.html				\
 	dbus-specification.html			\
 	dbus-test-plan.html			\
 	dbus-tutorial.html
 
-
-# Use the index as a proxy for the entire doc tree.
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@DOXYGEN_HTML_INDEX = api/html/index.html
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@api_DATA = dbus.devhelp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@BONUS_FILES = \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(top_srcdir)/README \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(top_srcdir)/HACKING \
@@ -424,6 +425,26 @@ uninstall-man1:
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man1dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man1dir)" && rm -f $$files; }
+install-apiDATA: $(api_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(apidir)" || $(MKDIR_P) "$(DESTDIR)$(apidir)"
+	@list='$(api_DATA)'; test -n "$(apidir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(apidir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(apidir)" || exit $$?; \
+	done
+
+uninstall-apiDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(api_DATA)'; test -n "$(apidir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(apidir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(apidir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -477,9 +498,9 @@ distdir: $(DISTFILES)
 check-am: all-am
 check: check-am
 @DBUS_DOXYGEN_DOCS_ENABLED_FALSE@@DBUS_HAVE_MAN2HTML_FALSE@@DBUS_XML_DOCS_ENABLED_FALSE@all-local:
-all-am: Makefile $(MANS) all-local
+all-am: Makefile $(MANS) $(DATA) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(apidir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -507,6 +528,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@uninstall-local:
+@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@install-data-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -527,7 +550,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am: install-apiDATA install-data-local install-man
 
 install-dvi: install-dvi-am
 
@@ -572,7 +595,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-man
+uninstall-am: uninstall-apiDATA uninstall-local uninstall-man
 
 uninstall-man: uninstall-man1
 
@@ -581,15 +604,16 @@ uninstall-man: uninstall-man1
 .PHONY: all all-am all-local check check-am clean clean-generic \
 	clean-libtool clean-local distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-man1 install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
+	install install-am install-apiDATA install-data \
+	install-data-am install-data-local install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-man1 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic \
 	maintainer-clean-local mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-man uninstall-man1
+	uninstall-apiDATA uninstall-local uninstall-man uninstall-man1
 
 
 @DBUS_XML_DOCS_ENABLED_TRUE@all-local:: $(HTML_FILES)
@@ -606,19 +630,36 @@ uninstall-man: uninstall-man1
 @DBUS_XML_DOCS_ENABLED_TRUE@dbus-faq.html: dbus-faq.xml
 @DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
 
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@all-local:: $(DOXYGEN_HTML_INDEX)
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@all-local:: doxygen.stamp
 
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@$(DOXYGEN_HTML_INDEX): $(wildcard $(top_srcdir)/dbus/*.[ch])
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@doxygen.stamp: $(wildcard $(top_srcdir)/dbus/*.[ch])
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	$(AM_V_GEN)cd $(top_builddir) && doxygen Doxyfile
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	@touch $@
+
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@dbus.devhelp: $(srcdir)/doxygen_to_devhelp.xsl doxygen.stamp
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@	$(XSLTPROC) -o $@ $< api/xml/index.xml
+
+# this assumes CREATE_SUBDIRS isn't set to YES in Doxyfile
+# (which it isn't currently)
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@install-data-local:: doxygen.stamp
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	$(MKDIR_P) $(DESTDIR)$(apidir)
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	$(INSTALL_DATA) api/html/* $(DESTDIR)$(apidir)
+
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@uninstall-local::
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.html
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.png
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.css
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(apidir) || \
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@		rmdir $(DESTDIR)$(apidir)
 
 @DBUS_HAVE_MAN2HTML_TRUE@all-local:: $(MAN_HTML_FILES)
 
 @DBUS_HAVE_MAN2HTML_TRUE@%.1.html: %.1
 @DBUS_HAVE_MAN2HTML_TRUE@	$(AM_V_GEN)( $(MAN2HTML) $< > $@.tmp && mv $@.tmp $@ )
 
-@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(HTML_FILES) $(MAN_HTML_FILES) $(BONUS_FILES) $(DOXYGEN_HTML_INDEX)
+@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(HTML_FILES) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)rm -rf $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)mkdir -p $@/api
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)$(MKDIR_P) $@/api
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(STATIC_DOCS) $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(HTML_FILES) $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_HTML_FILES) $@
@@ -643,6 +684,7 @@ clean-local:
 	rm -rf api
 	rm -rf dbus-docs
 	rm -f *.1.html
+	rm -f doxygen.stamp
 
 maintainer-clean-local:
 	rm -f $(HTML_FILES)
