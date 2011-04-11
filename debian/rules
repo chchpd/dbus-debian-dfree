@@ -28,7 +28,9 @@ override_dh_link:
 	dh_link -plibdbus-1-dev lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
 	dh_link --remaining-packages
 
+# jquery.js isn't actually used at the moment, and is an embedded code copy
 override_dh_install:
+	rm -f debian/tmp/usr/share/doc/dbus-1-doc/html/api/jquery.js
 	dh_install --list-missing
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
 
