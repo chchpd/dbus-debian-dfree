@@ -1,5 +1,6 @@
-dbus (1.4.8-2) UNRELEASED; urgency=low
+dbus (1.5.0-1) UNRELEASED; urgency=low
 
+  * New upstream development version (targeting experimental)
   * Remove jquery.js at the right location
 
  -- Simon McVittie <smcv@debian.org>  Mon, 11 Apr 2011 16:51:24 +0100
