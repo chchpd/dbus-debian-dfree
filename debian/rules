@@ -17,7 +17,7 @@ override_dh_auto_configure:
 		--enable-doxygen-docs \
 		--disable-libaudit \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
-		--htmldir=\$${prefix}/share/doc/dbus-1-doc/html \
+		--htmldir=\$${prefix}/share/doc/dbus \
 		--with-systemdsystemunitdir=/lib/systemd/system
 
 override_dh_auto_build:

@@ -4,9 +4,12 @@ dbus (1.4.8-1) UNRELEASED; urgency=low
     - Use upstream-merged support for installing HTML docs
     - Use upstream-supplied doxygen_to_devhelp.xsl (the Automake integration
       is still a bit broken, so we build it ourselves)
-  * Don't install dbus-specification twice: make one of them a symlink
   * Mark dbus, dbus-x11 as Multi-Arch: foreign
   * Remove the unused copy of jquery.js that doxygen now wants to install
+  * Move HTML and text documentation from /u/s/d/dbus-1-doc to /u/s/d/dbus
+    (see Policy bug #107073 for discussion), leaving behind symlinks to their
+    historical locations; this also results in shipping one copy of
+    dbus-specification.html rather than two
   * Correctly credit Michael for his changes in the previous changelog entry
 
  -- Simon McVittie <smcv@debian.org>  Fri, 18 Feb 2011 10:45:35 +0000
