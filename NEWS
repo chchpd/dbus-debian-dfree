@@ -1,3 +1,25 @@
+D-Bus 1.5.0 (2011-04-11)
+==
+
+The "you never know when you need to tow something from your giant
+flying shark" release.
+
+  • D-Bus Specification v0.16
+    · Add support for path_namespace and arg0namespace in match rules
+      (fd.o #24317, #34870; Will Thompson, David Zeuthen, Simon McVittie)
+    · Make argNpath support object paths, not just object-path-like strings,
+      and document it better (fd.o #31818, Will Thompson)
+  • Let the bus daemon implement more than one interface (fd.o #33757,
+    Simon McVittie)
+  • Optimize _dbus_string_replace_len to reduce waste (fd.o #21261,
+    Roberto Guido)
+  • Require user intervention to compile with missing 64-bit support
+    (fd.o #35114, Simon McVittie)
+  • Add dbus_type_is_valid as public API (fd.o #20496, Simon McVittie)
+  • Raise UnknownObject instead of UnknownMethod for calls to methods on
+    paths that are not part of the object tree, and UnknownInterface for calls
+    to unknown interfaces in the bus daemon (fd.o #34527, Lennart Poettering)
+
 D-Bus 1.4.8 (2011-04-08)
 ==
 
