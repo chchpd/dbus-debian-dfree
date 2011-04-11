@@ -27,6 +27,7 @@ Depends: ${shlibs:Depends},
          adduser,
          lsb-base (>= 3.2-14)
 Suggests: dbus-x11
+Multi-Arch: foreign
 Description: simple interprocess messaging system
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
@@ -52,6 +53,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          dbus
 Breaks: x11-common (<< 1:7.5+4)
+Multi-Arch: foreign
 Description: simple interprocess messaging system (X11 deps)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
