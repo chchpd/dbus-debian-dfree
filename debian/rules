@@ -22,7 +22,7 @@ override_dh_auto_configure:
 
 override_dh_auto_build:
 	dh_auto_build
-	xsltproc -o dbus.devhelp debian/doxygen_to_devhelp.xsl doc/api/xml/index.xml
+	xsltproc -o doc/dbus.devhelp doc/doxygen_to_devhelp.xsl doc/api/xml/index.xml
 
 override_dh_link:
 	dh_link -plibdbus-1-dev lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
