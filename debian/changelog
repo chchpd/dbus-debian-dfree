@@ -1,4 +1,4 @@
-dbus (1.4.8-1) UNRELEASED; urgency=low
+dbus (1.4.8-1) unstable; urgency=low
 
   * New upstream version
     - Use upstream-merged support for installing HTML docs
@@ -12,7 +12,7 @@ dbus (1.4.8-1) UNRELEASED; urgency=low
     dbus-specification.html rather than two
   * Correctly credit Michael for his changes in the previous changelog entry
 
- -- Simon McVittie <smcv@debian.org>  Fri, 18 Feb 2011 10:45:35 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 11 Apr 2011 16:22:48 +0100
 
 dbus (1.4.6-1) unstable; urgency=low
 
