@@ -2,8 +2,8 @@ dnl -*- mode: m4 -*-
 AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
-m4_define([dbus_minor_version], [4])
-m4_define([dbus_micro_version], [8])
+m4_define([dbus_minor_version], [5])
+m4_define([dbus_micro_version], [0])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -32,16 +32,16 @@ AC_DEFINE_UNQUOTED(DBUS_DAEMON_NAME,"dbus-daemon",[Name of executable])
 #
 
 ## increment if the interface has additions, changes, removals.
-LT_CURRENT=8
+LT_CURRENT=9
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=5
+LT_REVISION=0
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
 ## precedence over adding, so set to 0 if both happened.
-LT_AGE=5
+LT_AGE=6
 
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
@@ -228,6 +228,12 @@ AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(__int64)
 
+AC_ARG_WITH([64-bit],
+  [AS_HELP_STRING([--without-64-bit],
+    [If you have to use this option, please report it as a bug])],
+  [],
+  [with_64_bit=yes])
+
 ### See what our 64 bit type is called
 AC_MSG_CHECKING([64-bit integer type])
 
@@ -265,13 +271,32 @@ $ac_cv_sizeof___int64)
   ;;
 esac
 
-if test -z "$dbusint64" ; then
+AS_IF(
+  [test "x$with_64_bit" = xno],
+  [
         DBUS_INT64_TYPE="no_int64_type_detected"
         DBUS_HAVE_INT64=0
         DBUS_INT64_CONSTANT=
         DBUS_UINT64_CONSTANT=
-        AC_MSG_RESULT([none found])
-else
+        AC_MSG_RESULT([disabled via --without-64-bit])
+  ],
+  dnl else if
+  [test -z "$dbusint64"],
+  [AC_MSG_RESULT([not found])
+  AC_MSG_ERROR([Could not find a 64-bit integer type.
+
+Please report a bug here with details of your platform and compiler:
+
+    http://bugs.freedesktop.org/enter_bug.cgi?product=DBus&component=core
+
+To compile D-Bus with all 64-bit integer types removed (not recommended), use
+the option "--without-64-bit".
+
+This option is likely to be removed in future, unless you report that your
+platform needs it.])
+  ],
+  dnl else
+  [
         DBUS_INT64_TYPE="$dbusint64"
         DBUS_HAVE_INT64=1
         DBUS_INT64_CONSTANT="$dbusint64_constant"
@@ -280,7 +305,7 @@ else
 		AC_DEFINE_UNQUOTED(DBUS_INT64_PRINTF_MODIFIER, [$dbusint64_printf_modifier], [Define to printf modifier for 64 bit integer type])
 	fi
         AC_MSG_RESULT($DBUS_INT64_TYPE)
-fi
+  ])
 
 AC_SUBST(DBUS_INT64_TYPE)
 AC_SUBST(DBUS_INT64_CONSTANT)
@@ -1744,4 +1769,17 @@ fi
 if test x$dbus_use_libxml = xtrue; then
         echo
 	echo "WARNING: You have chosen to use libxml as your xml parser however this code path is not maintained by the D-Bus developers and if it breaks you get to keep the pieces.  If you have selected this option in err please reconfigure with expat (e.g. --with-xml=expat)."
+fi
+
+if test "x$DBUS_HAVE_INT64" = x0; then
+  AC_MSG_WARN([You have disabled 64-bit integers via --without-64-bit.
+
+  This removes parts of the standard D-Bus API and ABI (the 't' and 'x'
+  typecodes, the dbus_int64_t and dbus_uint64_t types, etc.) and should only be
+  used if your compiler lacks support for 64-bit integers. Please report a bug
+  with details of your platform and compiler.
+
+  This option is likely to be removed in future, unless the D-Bus developers
+  receive reports that it is still needed.
+  ])
 fi
