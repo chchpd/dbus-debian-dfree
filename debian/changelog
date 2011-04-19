@@ -1,8 +1,9 @@
-dbus (1.4.8-2) UNRELEASED; urgency=low
+dbus (1.4.8-2) unstable; urgency=low
 
   * Remove jquery.js at the right location
+  * Re-upload with non-broken .changes file
 
- -- Simon McVittie <smcv@debian.org>  Mon, 11 Apr 2011 16:51:24 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 19 Apr 2011 09:15:04 +0100
 
 dbus (1.4.8-1) unstable; urgency=low
 
