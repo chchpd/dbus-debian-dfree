@@ -28,7 +28,7 @@ Depends: ${shlibs:Depends},
          lsb-base (>= 3.2-14)
 Suggests: dbus-x11
 Multi-Arch: foreign
-Description: simple interprocess messaging system
+Description: simple interprocess messaging system (daemon and utilities)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
  terms of complexity.
@@ -72,7 +72,7 @@ Breaks: kdebase-workspace-bin (<< 4:4.4.5-9),
         kde-window-manager (<< 4:4.4.5-9)
 Recommends: dbus
 Section: libs
-Description: simple interprocess messaging system
+Description: simple interprocess messaging system (library)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
  terms of complexity.
