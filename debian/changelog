@@ -5,6 +5,7 @@ dbus (1.4.8-3) UNRELEASED; urgency=low
     (Closes: #624333)
   * Policy 3.9.2 (no changes required)
   * De-duplicate short descriptions
+  * Add DEP-3 metadata to 01_no-fatal-warnings.patch
 
  -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 15:29:59 +0100
 
