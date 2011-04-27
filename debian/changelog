@@ -1,3 +1,27 @@
+dbus (1.5.0-2) experimental; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 16:41:52 +0100
+
+dbus (1.4.8-3) unstable; urgency=low
+
+  * libdbus-1-3 Breaks versions of kdebase-workspace-bin and kde-window-manager
+    that suffer from #623492, so partial upgrades don't make KDE unusable
+    (Closes: #624333)
+  * Policy 3.9.2 (no changes required)
+  * De-duplicate short descriptions
+  * Add DEP-3 metadata to 01_no-fatal-warnings.patch
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 16:11:18 +0100
+
+dbus (1.4.8-2) unstable; urgency=low
+
+  * Remove jquery.js at the right location
+  * Re-upload with non-broken .changes file
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 19 Apr 2011 09:15:04 +0100
+
 dbus (1.5.0-1) experimental; urgency=low
 
   * New upstream development version (targeting experimental)

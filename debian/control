@@ -15,7 +15,7 @@ Build-Depends: debhelper (>= 8),
                xsltproc,
                libx11-dev,
                libselinux1-dev [linux-any]
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Vcs-Git: git://git.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://git.debian.org/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
@@ -28,7 +28,7 @@ Depends: ${shlibs:Depends},
          lsb-base (>= 3.2-14)
 Suggests: dbus-x11
 Multi-Arch: foreign
-Description: simple interprocess messaging system
+Description: simple interprocess messaging system (daemon and utilities)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
  terms of complexity.
@@ -68,9 +68,11 @@ Package: libdbus-1-3
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends}
+Breaks: kdebase-workspace-bin (<< 4:4.4.5-9),
+        kde-window-manager (<< 4:4.4.5-9)
 Recommends: dbus
 Section: libs
-Description: simple interprocess messaging system
+Description: simple interprocess messaging system (library)
  D-Bus is a message bus, used for sending messages between applications.
  Conceptually, it fits somewhere in between raw sockets and CORBA in
  terms of complexity.
