@@ -1,3 +1,11 @@
+dbus (1.4.8-3) UNRELEASED; urgency=low
+
+  * libdbus-1-3 Breaks versions of kdebase-workspace-bin and kde-window-manager
+    that suffer from #623492, so partial upgrades don't make KDE unusable
+    (Closes: #624333)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 15:29:59 +0100
+
 dbus (1.4.8-2) unstable; urgency=low
 
   * Remove jquery.js at the right location
