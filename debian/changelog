@@ -3,6 +3,7 @@ dbus (1.4.8-3) UNRELEASED; urgency=low
   * libdbus-1-3 Breaks versions of kdebase-workspace-bin and kde-window-manager
     that suffer from #623492, so partial upgrades don't make KDE unusable
     (Closes: #624333)
+  * Policy 3.9.2 (no changes required)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 15:29:59 +0100
 

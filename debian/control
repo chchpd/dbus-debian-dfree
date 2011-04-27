@@ -15,7 +15,7 @@ Build-Depends: debhelper (>= 8),
                xsltproc,
                libx11-dev,
                libselinux1-dev [linux-any]
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Vcs-Git: git://git.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://git.debian.org/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
