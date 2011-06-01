@@ -3,6 +3,9 @@ dbus (1.4.8-4) UNRELEASED; urgency=low
   * Use a separate build directory
   * Explicitly set compiler flags
   * Don't complain about not installing libdbus-1.la
+  * Don't pass a version to dh_makeshlibs -V - the symbols file gives us
+    exact dependencies, so the legacy shlibs mechanism is just a guard against
+    old systems now, and everyone forgets to update it
 
  -- Simon McVittie <smcv@debian.org>  Wed, 01 Jun 2011 14:08:58 +0100
 
