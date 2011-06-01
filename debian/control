@@ -7,14 +7,14 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
            Michael Biebl <biebl@debian.org>,
            Loic Minier <lool@dooz.org>,
            Simon McVittie <smcv@debian.org>
-Build-Depends: debhelper (>= 8),
-               autotools-dev,
-               libexpat-dev,
+Build-Depends: autotools-dev,
+               debhelper (>= 8),
                doxygen,
-               xmlto,
-               xsltproc,
+               libexpat-dev,
+               libselinux1-dev [linux-any],
                libx11-dev,
-               libselinux1-dev [linux-any]
+               xmlto,
+               xsltproc
 Standards-Version: 3.9.2
 Vcs-Git: git://git.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://git.debian.org/?p=pkg-utopia/dbus.git
