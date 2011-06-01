@@ -11,8 +11,14 @@ libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*
 
 multiarch := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 cflags := $(shell dpkg-buildflags --get CFLAGS)
-ldflags := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
-common_configure_flags = \
+ldflags := $(shell dpkg-buildflags --get LDFLAGS)
+ldflags += -Wl,--as-needed
+
+include /usr/share/hardening-includes/hardening.make
+cflags += $(HARDENING_CFLAGS)
+ldflags += $(HARDENING_LDFLAGS)
+
+common_configure_flags := \
 		--disable-libaudit \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
 		--htmldir=\$${prefix}/share/doc/dbus \
