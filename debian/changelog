@@ -1,6 +1,7 @@
-dbus (1.5.0-3) UNRELEASED; urgency=low
+dbus (1.5.2-1) UNRELEASED; urgency=low
 
   * Merge from unstable
+  * New(er) upstream version
 
  -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 16:41:52 +0100
 
