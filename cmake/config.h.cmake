@@ -83,6 +83,11 @@
 #endif
 
 #cmakedefine DBUS_BUILD_X11 1
+/* For the moment, the cmake build system doesn't have an equivalent of
+ * the autoconf build system's --disable-x11-autolaunch */
+#ifdef DBUS_BUILD_X11
+# define DBUS_ENABLE_X11_AUTOLAUNCH 1
+#endif
 
 #define _DBUS_VA_COPY_ASSIGN(a1,a2) { a1 = a2; }
 
@@ -246,10 +251,5 @@
 #else
 #define _dbus_verbose_C_S _dbus_verbose
 #endif 
-
-#ifdef _MSC_VER
-/* avoid defines of ELEMENT_TYPE */
-#define _WINIOCTL_
-#endif
 
 #endif  // _DBUS_CONFIG_H

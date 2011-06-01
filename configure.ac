@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [4])
-m4_define([dbus_micro_version], [8])
+m4_define([dbus_micro_version], [10])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=8
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=5
+LT_REVISION=6
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -357,7 +357,7 @@ dnl **********************************
 dnl we currently check for all three va_copy possibilities, so we get
 dnl all results in config.log for bug reports.
 AC_CACHE_CHECK([for an implementation of va_copy()],dbus_cv_va_copy,[
-	AC_LINK_IFELSE([#include <stdarg.h>
+	AC_LINK_IFELSE([AC_LANG_SOURCE([#include <stdarg.h>
 #include <stdlib.h>
 	static void f (int i, ...) {
 	va_list args1, args2;
@@ -370,12 +370,12 @@ AC_CACHE_CHECK([for an implementation of va_copy()],dbus_cv_va_copy,[
 	int main() {
 	  f (0, 42);
 	  return 0;
-	}],
+	}])],
 	[dbus_cv_va_copy=yes],
 	[dbus_cv_va_copy=no])
 ])
 AC_CACHE_CHECK([for an implementation of __va_copy()],dbus_cv___va_copy,[
-	AC_LINK_IFELSE([#include <stdarg.h>
+	AC_LINK_IFELSE([AC_LANG_SOURCE([#include <stdarg.h>
 #include <stdlib.h>
 	static void f (int i, ...) {
 	va_list args1, args2;
@@ -388,7 +388,7 @@ AC_CACHE_CHECK([for an implementation of __va_copy()],dbus_cv___va_copy,[
 	int main() {
 	  f (0, 42);
 	  return 0;
-	}],
+	}])],
 	[dbus_cv___va_copy=yes],
 	[dbus_cv___va_copy=no])
 ])
@@ -441,8 +441,8 @@ fi
 
 AC_CACHE_CHECK([whether $CC knows __sync_sub_and_fetch()],
   dbus_cv_sync_sub_and_fetch,
-  [AC_LINK_IFELSE(
-     AC_LANG_PROGRAM([], [[int a = 4; int b = __sync_sub_and_fetch(&a, 4); exit(b); ]]),
+  [AC_LINK_IFELSE([
+     AC_LANG_PROGRAM([[]], [[int a = 4; int b = __sync_sub_and_fetch(&a, 4); exit(b); ]])],
      [dbus_cv_sync_sub_and_fetch=yes],
      [dbus_cv_sync_sub_and_fetch=no])
   ])
@@ -1075,9 +1075,6 @@ if test "x$dbus_win" = xyes; then
     fi
 
     enable_x11_autolaunch=no
-fi
-
-if test "x$enable_x11_autolaunch" = xno; then
     have_x11=no
 else
     AC_PATH_XTRA
@@ -1095,11 +1092,17 @@ if test "x$enable_x11_autolaunch,$have_x11" = xyes,no; then
     AC_MSG_ERROR([X11 auto-launch requires X headers/libraries])
 else
     # move from "auto" to "yes" or "no" if necessary
-    enable_x11_autolaunch="$have_x11"
+    if test "x$enable_x11_autolaunch" != xno; then
+        enable_x11_autolaunch="$have_x11"
+    fi
+fi
+
+if test "x$have_x11" = xyes ; then
+   AC_DEFINE([DBUS_BUILD_X11], [1], [Define to build X11 functionality])
 fi
 
 if test "x$enable_x11_autolaunch" = xyes ; then
-   AC_DEFINE([DBUS_BUILD_X11], [1], [Define to enable X11 auto-launch])
+   AC_DEFINE([DBUS_ENABLE_X11_AUTOLAUNCH], [1], [Define to enable X11 auto-launch])
 fi
 
 AC_SUBST([DBUS_X_CFLAGS])
@@ -1117,204 +1120,81 @@ cc_supports_flag() {
   test "x$rc" = xyes
 }
 
-ld_supports_flag() {
-  AC_MSG_CHECKING([whether $LD supports "$@"])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    int one(void) { return 1; }
-    int two(void) { return 2; }
-  ]], [[ two();  ]])],
-    [_ac_ld_flag_supported=yes],
-    [_ac_ld_flag_supported=no])
+TP_COMPILER_WARNINGS([WARNING_CFLAGS],
+  dnl Use -Werror by default if:
+  dnl - we're not on Windows (too many warnings), and
+  dnl - we're in maintainer mode (a D-Bus developer, not a distro or end-user)
+  dnl Override with --enable-Werror or --disable-Werror
+  [test x$dbus_win != xyes -a x$dbus_cygwin != xyes -a x$USE_MAINTAINER_MODE = xyes],
 
-  if test "$_ac_ld_flag_supported" = "yes"; then
-    rm -f conftest.c
-    touch conftest.c
-    if $CC -c conftest.c; then
-      ld_out=`$LD $@ -o conftest conftest.o 2>&1`
-      ld_ret=$?
-      if test $ld_ret -ne 0 ; then
-        _ac_ld_flag_supported=no
-      elif echo "$ld_out" | egrep 'option ignored|^usage:|unrecognized option|illegal option' >/dev/null ; then
-        _ac_ld_flag_supported=no
-      fi
-    fi
-    rm -f conftest.c conftest.o conftest
-  fi
+  dnl enable these warnings if possible:
+  [all \
+   char-subscripts \
+   missing-declarations \
+   missing-prototypes \
+   nested-externs \
+   pointer-arith \
+   cast-align \
+   no-address \
+   float-equal \
+   declaration-after-statement \
+  ],
 
-  AC_MSG_RESULT($_ac_ld_flag_supported)
-  if test "$_ac_ld_flag_supported" = "yes" ; then
-    return 0
-  else
-    return 1
-  fi
-}
+  dnl disable these warnings if possible, make them non-fatal if possible,
+  dnl and don't enable -Werror unless we succeeded:
+  dnl (unused is by design, sign-compare and pointer-sign are fd.o #17433)
+  [unused \
+   sign-compare \
+   pointer-sign \
+  ])
 
-# Don't bother with -Werror on Windows for now, too many warnings
-if test x$dbus_win != xyes -a x$dbus_cygwin != xyes -a x$USE_MAINTAINER_MODE = xyes; then
-  if cc_supports_flag "-Werror"; then
-    CFLAGS="$CFLAGS -Werror"
-  fi
-fi
+if test "x$GCC" = "xyes"; then
+  # We're treating -fno-common like a warning: it makes the linker more
+  # strict, because on some systems the linker is *always* this strict
+  TP_ADD_COMPILER_FLAG([WARNING_CFLAGS], [-fno-common])
 
-dnl This whole "if" block is in m4 quotes ([]) because it uses them
-dnl for character ranges internally. m4 macros cannot be used inside this
-dnl block.
-[if test "x$GCC" = "xyes"; then
-  case " $CFLAGS " in
-  *[\ \	]-Wall[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wall" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wchar-subscripts[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wchar-subscripts" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wmissing-declarations[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wmissing-declarations" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wmissing-prototypes[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wmissing-prototypes" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wnested-externs[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wnested-externs" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wpointer-arith[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wpointer-arith" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wcast-align[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wcast-align" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wno-address[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wno-address" ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wfloat-equal[\ \	]*) ;;
-  *) if cc_supports_flag -Wfloat-equal; then
-        CFLAGS="$CFLAGS -Wfloat-equal"
-     fi
-     ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-Wdeclaration-after-statement[\ \	]*) ;;
-  *) if cc_supports_flag -Wdeclaration-after-statement; then
-        CFLAGS="$CFLAGS -Wdeclaration-after-statement"
-     fi
-     ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-fno-common[\ \	]*) ;;
-  *) if cc_supports_flag -fno-common; then
-        CFLAGS="$CFLAGS -fno-common"
-     fi
-     ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-fPIC[\ \	]*) ;;
-  *) if test x$dbus_win = xno && cc_supports_flag -fPIC; then
-        PIC_CFLAGS="-fPIC"
-        if ld_supports_flag -z,relro; then
-           PIC_LDFLAGS="-Wl,-z,relro"
-        fi
-     fi
-     ;;
-  esac
-
-  case " $CFLAGS " in
-  *[\ \	]-fPIE[\ \	]*) ;;
-  *) if test x$dbus_win = xno && cc_supports_flag -fPIE; then
-        PIE_CFLAGS="-fPIE"
-        if ld_supports_flag -z,relro; then
-           PIE_LDFLAGS="-pie -Wl,-z,relro"
-        else
-           PIE_LDFLAGS="-pie"
-        fi
-     fi
-     ;;
-  esac
-
-  ### Disabled warnings, and compiler flag overrides
-
-  # Let's just ignore unused for now
-  case " $CFLAGS " in
-  *[\ \	]-Wno-unused[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wno-unused" ;;
-  esac
-
-  # This group is for warnings we currently don't pass.
-  # We would like to, however.  Please fix.
-
-  # http://bugs.freedesktop.org/show_bug.cgi?id=17433
-  case " $CFLAGS " in
-  *[\ \	]-Wno-sign-compare[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -Wno-sign-compare" ;;
-  esac
-  case " $CFLAGS " in
-  *[\ \	]-Wno-pointer-sign[\ \	]*) ;;
-  *) if cc_supports_flag -Wno-pointer-sign; then
-        CFLAGS="$CFLAGS -Wno-pointer-sign"
-     fi
-     ;;
-  esac
-
-  # This one is special - it's not a warning override.
   # http://bugs.freedesktop.org/show_bug.cgi?id=10599
-  case " $CFLAGS " in
-  *[\ \	]-fno-strict-aliasing[\ \	]*) ;;
-  *) CFLAGS="$CFLAGS -fno-strict-aliasing" ;;
-  esac
-  ### End disabled warnings
+  TP_ADD_COMPILER_FLAG([WARNING_CFLAGS], [-fno-strict-aliasing])
 
   if test "x$enable_ansi" = "xyes"; then
-    case " $CFLAGS " in
-    *[\ \	]-ansi[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -ansi" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-D_POSIX_C_SOURCE*) ;;
-    *) CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199309L" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-D_BSD_SOURCE[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -D_BSD_SOURCE" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-pedantic[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -pedantic" ;;
-    esac
+    TP_ADD_COMPILER_FLAG([WARNING_CFLAGS],
+      [-ansi -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE -pedantic])
   fi
-fi]
-
-AC_SUBST(PIC_CFLAGS)
-AC_SUBST(PIC_LDFLAGS)
-AC_SUBST(PIE_CFLAGS)
-AC_SUBST(PIE_LDFLAGS)
-
-if ld_supports_flag --gc-sections; then
-  SECTION_LDFLAGS="-Wl,--gc-sections $SECTION_LDFLAGS"
-  CFLAGS="-ffunction-sections -fdata-sections $CFLAGS"
 fi
-AC_SUBST(SECTION_FLAGS)
-AC_SUBST(SECTION_LDFLAGS)
-AC_MSG_RESULT($ac_gcsections)
+
+dnl In principle we should put WARNING_CFLAGS in each Makefile.am like
+dnl telepathy-glib does, since CFLAGS is meant to be reserved for the user...
+dnl but prepending to CFLAGS (so the user can override it with later CFLAGS)
+dnl is the next best thing
+CFLAGS="$WARNING_CFLAGS $CFLAGS"
+
+# Disabling gc-sections makes our binaries bigger, but some toolchains
+# have known-broken support for it which discards sections that are needed.
+# See https://bugs.freedesktop.org/show_bug.cgi?id=33466
+SECTION_LDFLAGS=
+AC_ARG_ENABLE([gc-sections],
+  [AS_HELP_STRING([--disable-gc-sections],
+    [disable --gc-sections to work around broken toolchains])],
+  [enable_gc_sections=$enableval],
+  [enable_gc_sections=yes])
+if test "x$GCC,$enable_gc_sections,$dbus_win" = xyes,yes,no; then
+  save_CFLAGS="$CFLAGS"
+  save_LDFLAGS="$LDFLAGS"
+  AC_MSG_CHECKING([for ability to link with --gc-sections])
+  CFLAGS="-ffunction-sections -fdata-sections"
+  LDFLAGS="-Wl,--gc-sections"
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
+    [rc=yes],
+    [rc=no])
+  AC_MSG_RESULT([$rc])
+  CFLAGS="$save_CFLAGS"
+  LDFLAGS="$save_LDFLAGS"
+  if test "x$rc" = xyes; then
+    SECTION_LDFLAGS="-Wl,--gc-sections"
+    CFLAGS="-ffunction-sections -fdata-sections $CFLAGS"
+  fi
+fi
+AC_SUBST([SECTION_LDFLAGS])
 
 case $host_os in
     solaris*)
@@ -1643,6 +1523,7 @@ test/name-test/Makefile
 doc/Makefile
 doc/dbus-daemon.1
 dbus-1.pc
+dbus-1-uninstalled.pc
 test/data/valid-config-files/debug-allow-all.conf
 test/data/valid-config-files/debug-allow-all-sha1.conf
 test/data/valid-config-files-system/debug-allow-all-pass.conf

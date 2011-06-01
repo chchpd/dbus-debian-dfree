@@ -36,14 +36,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@DBUS_UNIX_TRUE@am__append_1 = bus-test-launch-helper
-@DBUS_UNIX_TRUE@am__append_2 = dbus-daemon-launch-helper dbus-daemon-launch-helper-test dbus-daemon
-@DBUS_WIN_TRUE@am__append_3 = dbus-daemon
-@DBUS_BUILD_TESTS_TRUE@TESTS = bus-test$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	bus-test-system$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	$(am__EXEEXT_4)
-noinst_PROGRAMS = $(am__EXEEXT_5) $(am__EXEEXT_7)
-bin_PROGRAMS = $(am__EXEEXT_2)
+noinst_PROGRAMS = $(am__EXEEXT_3) $(am__EXEEXT_4)
+dbus_daemon_exec_PROGRAMS = dbus-daemon$(EXEEXT)
+libexec_PROGRAMS = dbus-daemon-launch-helper$(EXEEXT)
+TESTS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+@DBUS_BUILD_TESTS_TRUE@am__append_1 = bus-test bus-test-system
+@DBUS_BUILD_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_2 = bus-test-launch-helper
+# this is used by the tests but is not,itself, a test
+@DBUS_BUILD_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_3 = dbus-daemon-launch-helper-test
 @HAVE_SYSTEMD_TRUE@am__append_4 = \
 @HAVE_SYSTEMD_TRUE@	dbus.service.in \
 @HAVE_SYSTEMD_TRUE@	dbus.socket.in
@@ -60,7 +60,9 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
 	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/pkg.m4 $(top_srcdir)/m4/tp-compiler-flag.m4 \
+	$(top_srcdir)/m4/tp-compiler-warnings.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -69,21 +71,17 @@ CONFIG_CLEAN_FILES = system.conf session.conf messagebus \
 	messagebus-config org.freedesktop.dbus-session.plist \
 	rc.messagebus dbus.service dbus.socket
 CONFIG_CLEAN_VPATH_FILES =
-@DBUS_WIN_TRUE@am__EXEEXT_1 = dbus-daemon$(EXEEXT)
-am__EXEEXT_2 = $(am__EXEEXT_1)
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
+am__installdirs = "$(DESTDIR)$(dbus_daemon_execdir)" \
+	"$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(initddir)" "$(DESTDIR)$(agentdir)" \
 	"$(DESTDIR)$(configdir)" "$(DESTDIR)$(systemdsystemunitdir)"
-@DBUS_UNIX_TRUE@am__EXEEXT_3 = bus-test-launch-helper$(EXEEXT)
-am__EXEEXT_4 = $(am__EXEEXT_3)
-@DBUS_BUILD_TESTS_TRUE@am__EXEEXT_5 = bus-test$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	bus-test-system$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	$(am__EXEEXT_4)
-@DBUS_UNIX_TRUE@am__EXEEXT_6 = dbus-daemon-launch-helper$(EXEEXT) \
-@DBUS_UNIX_TRUE@	dbus-daemon-launch-helper-test$(EXEEXT) \
-@DBUS_UNIX_TRUE@	dbus-daemon$(EXEEXT)
-am__EXEEXT_7 = $(am__EXEEXT_6)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+@DBUS_BUILD_TESTS_TRUE@am__EXEEXT_1 = bus-test$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	bus-test-system$(EXEEXT)
+@DBUS_BUILD_TESTS_TRUE@@DBUS_UNIX_TRUE@am__EXEEXT_2 = bus-test-launch-helper$(EXEEXT)
+am__EXEEXT_3 = $(am__EXEEXT_1) $(am__EXEEXT_2)
+@DBUS_BUILD_TESTS_TRUE@@DBUS_UNIX_TRUE@am__EXEEXT_4 = dbus-daemon-launch-helper-test$(EXEEXT)
+PROGRAMS = $(dbus_daemon_exec_PROGRAMS) $(libexec_PROGRAMS) \
+	$(noinst_PROGRAMS)
 am__bus_test_SOURCES_DIST = activation.c activation.h \
 	activation-exit-codes.h bus.c bus.h config-parser.c \
 	config-parser.h config-parser-common.c config-parser-common.h \
@@ -367,6 +365,7 @@ DBUS_X_CFLAGS = @DBUS_X_CFLAGS@
 DBUS_X_LIBS = @DBUS_X_LIBS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DLLTOOL = @DLLTOOL@
 DOXYGEN = @DOXYGEN@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
@@ -408,6 +407,7 @@ LT_REVISION = @LT_REVISION@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MAN2HTML = @MAN2HTML@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@
@@ -423,15 +423,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PIC_CFLAGS = @PIC_CFLAGS@
-PIC_LDFLAGS = @PIC_LDFLAGS@
-PIE_CFLAGS = @PIE_CFLAGS@
-PIE_LDFLAGS = @PIE_LDFLAGS@
 PKG_CONFIG = @PKG_CONFIG@
 RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
-SECTION_FLAGS = @SECTION_FLAGS@
 SECTION_LDFLAGS = @SECTION_LDFLAGS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -463,6 +458,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
@@ -496,7 +492,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -514,8 +509,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 configdir = $(sysconfdir)/dbus-1
-INCLUDES = -I$(top_srcdir) $(DBUS_BUS_CFLAGS) @PIE_CFLAGS@		\
-	-DDBUS_SYSTEM_CONFIG_FILE=\""$(configdir)/system.conf"\"	\
+dbus_daemon_execdir = $(DBUS_DAEMONDIR)
+INCLUDES = -I$(top_srcdir) \
+	$(DBUS_BUS_CFLAGS) \
+	-DDBUS_SYSTEM_CONFIG_FILE=\""$(configdir)/system.conf"\" \
 	-DDBUS_COMPILATION
 
 EFENCE = 
@@ -582,7 +579,7 @@ dbus_daemon_LDADD = \
 	$(EFENCE)					\
 	$(DBUS_BUS_LIBS)
 
-dbus_daemon_LDFLAGS = @R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@ @PIE_LDFLAGS@
+dbus_daemon_LDFLAGS = @R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@
 LAUNCH_HELPER_SOURCES = \
 	$(XML_SOURCES)				\
 	config-parser-common.c			\
@@ -632,9 +629,6 @@ bus_test_launch_helper_CPPFLAGS = -DDBUS_STATIC_BUILD	\
 	-DACTIVATION_LAUNCHER_TEST	\
 	-DACTIVATION_LAUNCHER_DO_OOM
 
-extra_tests = $(am__append_1)
-extra_noinst_programs = $(am__append_2)
-extra_inst_programs = $(am__append_3)
 @DBUS_BUILD_TESTS_TRUE@TESTS_ENVIRONMENT = DBUS_TEST_DATA=$(top_builddir)/test/data DBUS_TEST_HOMEDIR=$(top_builddir)/dbus DBUS_FATAL_WARNINGS=1 DBUS_BLOCK_ON_ABORT=1
 bus_test_system_SOURCES = \
 	$(XML_SOURCES)				\
@@ -728,10 +722,10 @@ dbus.service: $(top_builddir)/config.status $(srcdir)/dbus.service.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 dbus.socket: $(top_builddir)/config.status $(srcdir)/dbus.socket.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-install-binPROGRAMS: $(bin_PROGRAMS)
+install-dbus_daemon_execPROGRAMS: $(dbus_daemon_exec_PROGRAMS)
 	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	test -z "$(dbus_daemon_execdir)" || $(MKDIR_P) "$(DESTDIR)$(dbus_daemon_execdir)"
+	@list='$(dbus_daemon_exec_PROGRAMS)'; test -n "$(dbus_daemon_execdir)" || list=; \
 	for p in $$list; do echo "$$p $$p"; done | \
 	sed 's/$(EXEEXT)$$//' | \
 	while read p p1; do if test -f $$p || test -f $$p1; \
@@ -748,23 +742,66 @@ install-binPROGRAMS: $(bin_PROGRAMS)
 	while read type dir files; do \
 	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
 	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(dbus_daemon_execdir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(dbus_daemon_execdir)$$dir" || exit $$?; \
 	    } \
 	; done
 
-uninstall-binPROGRAMS:
+uninstall-dbus_daemon_execPROGRAMS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
+	@list='$(dbus_daemon_exec_PROGRAMS)'; test -n "$(dbus_daemon_execdir)" || list=; \
 	files=`for p in $$list; do echo "$$p"; done | \
 	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
 	      -e 's/$$/$(EXEEXT)/' `; \
 	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(dbus_daemon_execdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(dbus_daemon_execdir)" && rm -f $$files
 
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
+clean-dbus_daemon_execPROGRAMS:
+	@list='$(dbus_daemon_exec_PROGRAMS)'; test -n "$$list" || exit 0; \
+	echo " rm -f" $$list; \
+	rm -f $$list || exit $$?; \
+	test -n "$(EXEEXT)" || exit 0; \
+	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
+	echo " rm -f" $$list; \
+	rm -f $$list
+install-libexecPROGRAMS: $(libexec_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	test -z "$(libexecdir)" || $(MKDIR_P) "$(DESTDIR)$(libexecdir)"
+	@list='$(libexec_PROGRAMS)'; test -n "$(libexecdir)" || list=; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p || test -f $$p1; \
+	  then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(libexecdir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(libexecdir)$$dir" || exit $$?; \
+	    } \
+	; done
+
+uninstall-libexecPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(libexec_PROGRAMS)'; test -n "$(libexecdir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' `; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(libexecdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(libexecdir)" && rm -f $$files
+
+clean-libexecPROGRAMS:
+	@list='$(libexec_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -2401,7 +2438,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(initddir)" "$(DESTDIR)$(agentdir)" "$(DESTDIR)$(configdir)" "$(DESTDIR)$(systemdsystemunitdir)"; do \
+	for dir in "$(DESTDIR)$(dbus_daemon_execdir)" "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(initddir)" "$(DESTDIR)$(agentdir)" "$(DESTDIR)$(configdir)" "$(DESTDIR)$(systemdsystemunitdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -2429,9 +2466,11 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+@DBUS_UNIX_FALSE@install-exec-hook:
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool clean-local \
+clean-am: clean-dbus_daemon_execPROGRAMS clean-generic \
+	clean-libexecPROGRAMS clean-libtool clean-local \
 	clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
@@ -2460,8 +2499,10 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS install-binSCRIPTS
-
+install-exec-am: install-binSCRIPTS install-dbus_daemon_execPROGRAMS \
+	install-libexecPROGRAMS
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-am
 
 install-html-am:
@@ -2500,39 +2541,39 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-agentDATA uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-configDATA \
-	uninstall-initdSCRIPTS uninstall-systemdsystemunitDATA
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) uninstall-hook
-.MAKE: check-am install-am install-data-am install-strip uninstall-am
+uninstall-am: uninstall-agentDATA uninstall-binSCRIPTS \
+	uninstall-configDATA uninstall-dbus_daemon_execPROGRAMS \
+	uninstall-initdSCRIPTS uninstall-libexecPROGRAMS \
+	uninstall-systemdsystemunitDATA
+
+.MAKE: check-am install-am install-data-am install-exec-am \
+	install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-binPROGRAMS clean-generic clean-libtool clean-local \
+	clean-dbus_daemon_execPROGRAMS clean-generic \
+	clean-libexecPROGRAMS clean-libtool clean-local \
 	clean-noinstPROGRAMS ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-agentDATA \
-	install-am install-binPROGRAMS install-binSCRIPTS \
-	install-configDATA install-data install-data-am \
-	install-data-hook install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-initdSCRIPTS install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	install-systemdsystemunitDATA installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags uninstall \
-	uninstall-agentDATA uninstall-am uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS uninstall-configDATA uninstall-hook \
-	uninstall-initdSCRIPTS uninstall-systemdsystemunitDATA
+	install-am install-binSCRIPTS install-configDATA install-data \
+	install-data-am install-data-hook \
+	install-dbus_daemon_execPROGRAMS install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-hook install-html \
+	install-html-am install-info install-info-am \
+	install-initdSCRIPTS install-libexecPROGRAMS install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip install-systemdsystemunitDATA installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-agentDATA uninstall-am \
+	uninstall-binSCRIPTS uninstall-configDATA \
+	uninstall-dbus_daemon_execPROGRAMS uninstall-initdSCRIPTS \
+	uninstall-libexecPROGRAMS uninstall-systemdsystemunitDATA
 
 
 clean-local:
 	/bin/rm *.bb *.bbg *.da *.gcov || true
-
-uninstall-hook:
-	rm -f $(DESTDIR)$(DBUS_DAEMONDIR)/dbus-daemon$(EXEEXT)
-	rm -f $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper$(EXEEXT)
 
 install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(localstatedir)/run/dbus
@@ -2540,22 +2581,6 @@ install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(configdir)/session.d
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/dbus-1/services
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/dbus-1/system-services
-@DBUS_UNIX_TRUE@	if test '!' -d $(DESTDIR)$(DBUS_DAEMONDIR); then \
-@DBUS_UNIX_TRUE@		$(mkinstalldirs) $(DESTDIR)$(DBUS_DAEMONDIR); \
-@DBUS_UNIX_TRUE@		chmod 755 $(DESTDIR)$(DBUS_DAEMONDIR); \
-@DBUS_UNIX_TRUE@	fi
-@DBUS_UNIX_TRUE@	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) dbus-daemon$(EXEEXT) $(DESTDIR)$(DBUS_DAEMONDIR)
-@DBUS_UNIX_TRUE@	$(mkinstalldirs) $(DESTDIR)$(libexecdir)/dbus-1
-@DBUS_UNIX_TRUE@	if test -f dbus-daemon-launch-helper$(EXEEXT) ; then \
-@DBUS_UNIX_TRUE@	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) dbus-daemon-launch-helper$(EXEEXT) $(DESTDIR)$(libexecdir); \
-@DBUS_UNIX_TRUE@	if test `id -u` -eq 0; then \
-@DBUS_UNIX_TRUE@		chown root:$(DBUS_USER) $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper$(EXEEXT); \
-@DBUS_UNIX_TRUE@		chmod 4750 $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper$(EXEEXT); \
-@DBUS_UNIX_TRUE@	else \
-@DBUS_UNIX_TRUE@		echo "Not installing $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper binary setuid!"; \
-@DBUS_UNIX_TRUE@		echo "You'll need to manually set permissions to root:$(DBUS_USER) and permissions 4750"; \
-@DBUS_UNIX_TRUE@	fi \
-@DBUS_UNIX_TRUE@	fi
 # Install dbus.socket as default implementation of a D-Bus stack
 @HAVE_SYSTEMD_TRUE@	$(mkinstalldirs) $(DESTDIR)$(systemdsystemunitdir)/dbus.target.wants
 @HAVE_SYSTEMD_TRUE@	$(LN_S) ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/dbus.target.wants/dbus.socket
@@ -2564,6 +2589,15 @@ install-data-hook:
 @HAVE_SYSTEMD_TRUE@	$(LN_S) ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/sockets.target.wants/dbus.socket
 @HAVE_SYSTEMD_TRUE@	$(mkinstalldirs) $(DESTDIR)$(systemdsystemunitdir)/multi-user.target.wants
 @HAVE_SYSTEMD_TRUE@	$(LN_S) ../dbus.service $(DESTDIR)$(systemdsystemunitdir)/multi-user.target.wants/dbus.service
+
+@DBUS_UNIX_TRUE@install-exec-hook:
+@DBUS_UNIX_TRUE@	if test `id -u` -eq 0; then \
+@DBUS_UNIX_TRUE@		chown root:$(DBUS_USER) $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper$(EXEEXT); \
+@DBUS_UNIX_TRUE@		chmod 4750 $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper$(EXEEXT); \
+@DBUS_UNIX_TRUE@	else \
+@DBUS_UNIX_TRUE@		echo "Not installing $(DESTDIR)$(libexecdir)/dbus-daemon-launch-helper binary setuid!"; \
+@DBUS_UNIX_TRUE@		echo "You'll need to manually set permissions to root:$(DBUS_USER) and permissions 4750"; \
+@DBUS_UNIX_TRUE@	fi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
