@@ -9,6 +9,7 @@ dbus (1.4.8-4) UNRELEASED; urgency=low
   * Do a second build with tests, verbosity etc. enabled, and install it
     in /usr/lib/$DEB_HOST_MULTIARCH/dbus-1.0/debug-build (Closes: #498185)
   * Run autoconf during build, and allow parallel building
+  * Don't install dcop-howto.txt - this isn't DCOP
 
  -- Simon McVittie <smcv@debian.org>  Wed, 01 Jun 2011 14:08:58 +0100
 
