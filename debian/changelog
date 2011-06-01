@@ -1,5 +1,6 @@
-dbus (1.4.8-4) UNRELEASED; urgency=low
+dbus (1.4.10-1) UNRELEASED; urgency=low
 
+  * New upstream version
   * Use a separate build directory
   * Explicitly set compiler flags
   * Don't complain about not installing libdbus-1.la
