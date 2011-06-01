@@ -81,6 +81,14 @@ override_dh_strip:
 override_dh_makeshlibs:
 	dh_makeshlibs -V
 
+override_dh_autoreconf:
+	mv INSTALL INSTALL.orig
+	dh_autoreconf
+	mv INSTALL.orig INSTALL
+
+override_dh_autoreconf_clean:
+	dh_autoreconf_clean -XINSTALL
+
 override_dh_auto_clean:
 	dh_auto_clean
 	dh_auto_clean --builddirectory=build-debug
