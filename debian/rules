@@ -9,23 +9,43 @@
 
 libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
 
+multiarch := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 cflags := $(shell dpkg-buildflags --get CFLAGS)
 ldflags := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
-
-override_dh_auto_configure:
-	dh_auto_configure -- \
-		--enable-xml-docs \
-		--enable-doxygen-docs \
+common_configure_flags = \
 		--disable-libaudit \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
 		--htmldir=\$${prefix}/share/doc/dbus \
 		--with-systemdsystemunitdir=/lib/systemd/system \
 		CFLAGS="$(cflags)" LDFLAGS="$(ldflags)"
 
+override_dh_auto_configure:
+	dh_auto_configure \
+		-- \
+		$(common_configure_flags) \
+		--enable-xml-docs \
+		--enable-doxygen-docs
+	dh_auto_configure \
+		--builddirectory=build-debug \
+		-- \
+		$(common_configure_flags) \
+		--disable-xml-docs \
+		--disable-doxygen-docs \
+		--enable-asserts \
+		--enable-checks \
+		--enable-tests \
+		--enable-verbose-mode \
+		--prefix=/usr/lib/$(multiarch)/dbus-1.0/debug-build
+
 override_dh_auto_build:
 	dh_auto_build
+	dh_auto_build --builddirectory=build-debug
 	# work around fd.o #36156
 	xsltproc -o build/doc/dbus.devhelp doc/doxygen_to_devhelp.xsl build/doc/api/xml/index.xml
+
+override_dh_auto_install:
+	dh_auto_install
+	make -C build-debug install-exec DESTDIR=$(CURDIR)/debian/tmp
 
 override_dh_link:
 	dh_link -plibdbus-1-dev lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
@@ -53,6 +73,9 @@ override_dh_makeshlibs:
 
 override_dh_auto_clean:
 	dh_auto_clean
+	dh_auto_clean --builddirectory=build-debug
 	rm -f build/test/data/valid-config-files/session.conf
 	rm -f build/test/data/valid-config-files/system.conf
+	rm -f build-debug/test/data/valid-config-files/session.conf
+	rm -f build-debug/test/data/valid-config-files/system.conf
 	rm -f dbus.devhelp

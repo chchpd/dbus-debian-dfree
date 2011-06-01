@@ -6,6 +6,8 @@ dbus (1.4.8-4) UNRELEASED; urgency=low
   * Don't pass a version to dh_makeshlibs -V - the symbols file gives us
     exact dependencies, so the legacy shlibs mechanism is just a guard against
     old systems now, and everyone forgets to update it
+  * Do a second build with tests, verbosity etc. enabled, and install it
+    in /usr/lib/$DEB_HOST_MULTIARCH/dbus-1.0/debug-build (Closes: #498185)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 01 Jun 2011 14:08:58 +0100
 
