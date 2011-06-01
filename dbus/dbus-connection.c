@@ -3084,7 +3084,7 @@ dbus_connection_get_server_id (DBusConnection *connection)
  * This function can be used to do runtime checking for types that
  * might be unknown to the specific D-Bus client implementation
  * version, i.e. it will return FALSE for all types this
- * implementation does not know.
+ * implementation does not know, including invalid or reserved types.
  *
  * @param connection the connection
  * @param type the type to check
@@ -4615,9 +4615,6 @@ dbus_connection_dispatch (DBusConnection *connection)
       /* unlocks and calls user code */
       _dbus_connection_update_dispatch_status_and_unlock (connection,
                                                           DBUS_DISPATCH_NEED_MEMORY);
-
-      if (pending)
-        dbus_pending_call_unref (pending);
       dbus_connection_unref (connection);
       
       return DBUS_DISPATCH_NEED_MEMORY;
