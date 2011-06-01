@@ -6,8 +6,13 @@
             <code class="email">&lt;<a class="email" href="mailto:alexl@redhat.com">alexl@redhat.com</a>&gt;</code><br>
           </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">Sven</span> <span class="surname">Herzberg</span></h3><div class="affiliation"><span class="orgname">Imendio AB<br></span><div class="address"><p><br>
             <code class="email">&lt;<a class="email" href="mailto:sven@imendio.com">sven@imendio.com</a>&gt;</code><br>
-          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.16</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.16</td><td align="left">11 April 2011</td><td align="left"></td></tr><tr><td align="left" colspan="3">add path_namespace, arg0namespace; argNpath matches object
-        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#naming-conventions">Naming Conventions</a></span></dt><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5813168">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
+          </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">Simon</span> <span class="surname">McVittie</span></h3><div class="affiliation"><span class="orgname">Collabora Ltd.<br></span><div class="address"><p><br>
+            <code class="email">&lt;<a class="email" href="mailto:simon.mcvittie@collabora.co.uk">simon.mcvittie@collabora.co.uk</a>&gt;</code><br>
+          </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">David</span> <span class="surname">Zeuthen</span></h3><div class="affiliation"><span class="orgname">Red Hat, Inc.<br></span><div class="address"><p><br>
+            <code class="email">&lt;<a class="email" href="mailto:davidz@redhat.com">davidz@redhat.com</a>&gt;</code><br>
+          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.17</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.17</td><td align="left">1 June 2011</td><td align="left">smcv/davidz</td></tr><tr><td align="left" colspan="3">define ObjectManager; reserve extra pseudo-type-codes used
+         by GVariant</td></tr><tr><td align="left">Revision 0.16</td><td align="left">11 April 2011</td><td align="left"></td></tr><tr><td align="left" colspan="3">add path_namespace, arg0namespace; argNpath matches object
+        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#naming-conventions">Naming Conventions</a></span></dt><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp30273856">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
       D-Bus is a system for low-latency, low-overhead, easy to use
       interprocess communication (IPC). In more detail:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
@@ -222,7 +227,25 @@
         map, hash table, or dict object.
       </p><p>
         The following table summarizes the D-Bus types.
-        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Conventional Name</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">INVALID</code></td><td>0 (ASCII NUL)</td><td>Not a valid type code, used to terminate signatures</td></tr><tr><td><code class="literal">BYTE</code></td><td>121 (ASCII 'y')</td><td>8-bit unsigned integer</td></tr><tr><td><code class="literal">BOOLEAN</code></td><td>98 (ASCII 'b')</td><td>Boolean value, 0 is <code class="literal">FALSE</code> and 1 is <code class="literal">TRUE</code>. Everything else is invalid.</td></tr><tr><td><code class="literal">INT16</code></td><td>110 (ASCII 'n')</td><td>16-bit signed integer</td></tr><tr><td><code class="literal">UINT16</code></td><td>113 (ASCII 'q')</td><td>16-bit unsigned integer</td></tr><tr><td><code class="literal">INT32</code></td><td>105 (ASCII 'i')</td><td>32-bit signed integer</td></tr><tr><td><code class="literal">UINT32</code></td><td>117 (ASCII 'u')</td><td>32-bit unsigned integer</td></tr><tr><td><code class="literal">INT64</code></td><td>120 (ASCII 'x')</td><td>64-bit signed integer</td></tr><tr><td><code class="literal">UINT64</code></td><td>116 (ASCII 't')</td><td>64-bit unsigned integer</td></tr><tr><td><code class="literal">DOUBLE</code></td><td>100 (ASCII 'd')</td><td>IEEE 754 double</td></tr><tr><td><code class="literal">STRING</code></td><td>115 (ASCII 's')</td><td>UTF-8 string (<span class="emphasis"><em>must</em></span> be valid UTF-8). Must be nul terminated and contain no other nul bytes.</td></tr><tr><td><code class="literal">OBJECT_PATH</code></td><td>111 (ASCII 'o')</td><td>Name of an object instance</td></tr><tr><td><code class="literal">SIGNATURE</code></td><td>103 (ASCII 'g')</td><td>A type signature</td></tr><tr><td><code class="literal">ARRAY</code></td><td>97 (ASCII 'a')</td><td>Array</td></tr><tr><td><code class="literal">STRUCT</code></td><td>114 (ASCII 'r'), 40 (ASCII '('), 41 (ASCII ')')</td><td>Struct</td></tr><tr><td><code class="literal">VARIANT</code></td><td>118 (ASCII 'v') </td><td>Variant type (the type of the value is part of the value itself)</td></tr><tr><td><code class="literal">DICT_ENTRY</code></td><td>101 (ASCII 'e'), 123 (ASCII '{'), 125 (ASCII '}') </td><td>Entry in a dict or map (array of key-value pairs)</td></tr><tr><td><code class="literal">UNIX_FD</code></td><td>104 (ASCII 'h')</td><td>Unix file descriptor</td></tr></tbody></table></div><p>
+        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Conventional Name</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">INVALID</code></td><td>0 (ASCII NUL)</td><td>Not a valid type code, used to terminate signatures</td></tr><tr><td><code class="literal">BYTE</code></td><td>121 (ASCII 'y')</td><td>8-bit unsigned integer</td></tr><tr><td><code class="literal">BOOLEAN</code></td><td>98 (ASCII 'b')</td><td>Boolean value, 0 is <code class="literal">FALSE</code> and 1 is <code class="literal">TRUE</code>. Everything else is invalid.</td></tr><tr><td><code class="literal">INT16</code></td><td>110 (ASCII 'n')</td><td>16-bit signed integer</td></tr><tr><td><code class="literal">UINT16</code></td><td>113 (ASCII 'q')</td><td>16-bit unsigned integer</td></tr><tr><td><code class="literal">INT32</code></td><td>105 (ASCII 'i')</td><td>32-bit signed integer</td></tr><tr><td><code class="literal">UINT32</code></td><td>117 (ASCII 'u')</td><td>32-bit unsigned integer</td></tr><tr><td><code class="literal">INT64</code></td><td>120 (ASCII 'x')</td><td>64-bit signed integer</td></tr><tr><td><code class="literal">UINT64</code></td><td>116 (ASCII 't')</td><td>64-bit unsigned integer</td></tr><tr><td><code class="literal">DOUBLE</code></td><td>100 (ASCII 'd')</td><td>IEEE 754 double</td></tr><tr><td><code class="literal">STRING</code></td><td>115 (ASCII 's')</td><td>UTF-8 string (<span class="emphasis"><em>must</em></span> be valid UTF-8). Must be nul terminated and contain no other nul bytes.</td></tr><tr><td><code class="literal">OBJECT_PATH</code></td><td>111 (ASCII 'o')</td><td>Name of an object instance</td></tr><tr><td><code class="literal">SIGNATURE</code></td><td>103 (ASCII 'g')</td><td>A type signature</td></tr><tr><td><code class="literal">ARRAY</code></td><td>97 (ASCII 'a')</td><td>Array</td></tr><tr><td><code class="literal">STRUCT</code></td><td>114 (ASCII 'r'), 40 (ASCII '('), 41 (ASCII ')')</td><td>Struct; type code 114 'r' is reserved for use in
+                  bindings and implementations to represent the general
+                  concept of a struct, and must not appear in signatures
+                  used on D-Bus.</td></tr><tr><td><code class="literal">VARIANT</code></td><td>118 (ASCII 'v') </td><td>Variant type (the type of the value is part of the value itself)</td></tr><tr><td><code class="literal">DICT_ENTRY</code></td><td>101 (ASCII 'e'), 123 (ASCII '{'), 125 (ASCII '}') </td><td>Entry in a dict or map (array of key-value pairs).
+                  Type code 101 'e' is reserved for use in bindings and
+                  implementations to represent the general concept of a
+                  dict or dict-entry, and must not appear in signatures
+                  used on D-Bus.</td></tr><tr><td><code class="literal">UNIX_FD</code></td><td>104 (ASCII 'h')</td><td>Unix file descriptor</td></tr><tr><td>(reserved)</td><td>109 (ASCII 'm')</td><td>Reserved for <a class="ulink" href="https://bugs.freedesktop.org/show_bug.cgi?id=27857" target="_top">a
+                  'maybe' type compatible with the one in GVariant</a>,
+                  and must not appear in signatures used on D-Bus until
+                  specified here</td></tr><tr><td>(reserved)</td><td>42 (ASCII '*')</td><td>Reserved for use in bindings/implementations to
+                  represent any <em class="firstterm">single complete type</em>,
+                  and must not appear in signatures used on D-Bus.</td></tr><tr><td>(reserved)</td><td>63 (ASCII '?')</td><td>Reserved for use in bindings/implementations to
+                  represent any <em class="firstterm">basic type</em>, and must
+                  not appear in signatures used on D-Bus.</td></tr><tr><td>(reserved)</td><td>64 (ASCII '@'), 38 (ASCII '&amp;'),
+                  94 (ASCII '^')</td><td>Reserved for internal use by bindings/implementations,
+                  and must not appear in signatures used on D-Bus.
+                  GVariant uses these type-codes to encode calling
+                  conventions.</td></tr></tbody></table></div><p>
       </p></div><div class="sect2" title="Marshaling (Wire Format)"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-marshaling"></a>Marshaling (Wire Format)</h3></div></div></div><p>
         Given a type signature, a block of bytes can be converted into typed
         values. This section describes the format of the block of bytes.  Byte
@@ -900,14 +923,14 @@
         commands may be introduced both before, and after
         authentication, i.e. both before and after the OK command.
       </p></div><div class="sect2" title="Authentication examples"><div class="titlepage"><div><div><h3 class="title"><a name="auth-examples"></a>Authentication examples</h3></div></div></div><p>
-        </p><div class="figure"><a name="idp5162640"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29600496"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5164464"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29602320"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -916,14 +939,14 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5166368"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29604224"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
             C: FOOBAR
             S: ERROR
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5168256"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29606112"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -932,7 +955,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5170272"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29608128"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -945,7 +968,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5172448"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29610304"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -958,7 +981,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5174512"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29612368"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -967,7 +990,7 @@
             S: AGREE_UNIX_FD
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5176512"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp29614368"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -1245,7 +1268,7 @@
                 fails, the lock fails. Servers should retry for a reasonable
                 period of time, then they may choose to delete an existing lock
                 to keep users from having to manually delete a stale
-                lock. <sup>[<a name="idp5261968" href="#ftn.idp5261968" class="footnote">1</a>]</sup>
+                lock. <sup>[<a name="idp29699728" href="#ftn.idp29699728" class="footnote">1</a>]</sup>
               </p></li><li class="listitem"><p>
                 Once the lockfile has been created, the server loads the cookie
                 file. It should then delete any cookies that are old (the
@@ -1589,6 +1612,94 @@
         <code class="literal">true</code> is sufficient meaning that the
         annotation does not need to be used). See <a class="xref" href="#introspection-format" title="Introspection Data Format">the section called &#8220;Introspection Data Format&#8221;</a> for details on this
         annotation.
+      </p></div><div class="sect2" title="org.freedesktop.DBus.ObjectManager"><div class="titlepage"><div><div><h3 class="title"><a name="standard-interfaces-objectmanager"></a><code class="literal">org.freedesktop.DBus.ObjectManager</code></h3></div></div></div><p>
+        An API can optionally make use of this interface for one or
+        more sub-trees of objects. The root of each sub-tree implements
+        this interface so other applications can get all objects,
+        interfaces and properties in a single method call.  It is
+        appropriate to use this interface if users of the tree of
+        objects are expected to be interested in all interfaces of all
+        objects in the tree; a more granular API should be used if
+        users of the objects are expected to be interested in a small
+        subset of the objects, a small subset of their interfaces, or
+        both.
+      </p><p>
+        The method that applications can use to get all objects and
+        properties is <code class="literal">GetManagedObjects</code>:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.ObjectManager.GetManagedObjects (out DICT&lt;OBJPATH,DICT&lt;STRING,DICT&lt;STRING,VARIANT&gt;&gt;&gt; objpath_interfaces_and_properties);
+        </pre><p>
+      </p><p>
+        The return value of this method is a dict whose keys are
+        object paths. All returned object paths are children of the
+        object path implementing this interface, i.e. their object
+        paths start with the ObjectManager's object path plus '/'.
+      </p><p>
+        Each value is a dict whose keys are interfaces names.  Each
+        value in this inner dict is the same dict that would be
+        returned by the <a class="link" href="#standard-interfaces-properties" title="org.freedesktop.DBus.Properties">org.freedesktop.DBus.Properties.GetAll()</a>
+        method for that combination of object path and interface. If
+        an interface has no properties, the empty dict is returned.
+      </p><p>
+        Changes are emitted using the following two signals:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.ObjectManager.InterfacesAdded (OBJPATH object_path,
+                                                              DICT&lt;STRING,DICT&lt;STRING,VARIANT&gt;&gt; interfaces_and_properties);
+          org.freedesktop.DBus.ObjectManager.InterfacesRemoved (OBJPATH object_path,
+                                                                ARRAY&lt;STRING&gt; interfaces);
+        </pre><p>
+      </p><p>
+        The <code class="literal">InterfacesAdded</code> signal is emitted when
+        either a new object is added or when an existing object gains
+        one or more interfaces. The
+        <code class="literal">InterfacesRemoved</code> signal is emitted
+        whenever an object is removed or it loses one or more
+        interfaces. The second parameter of the
+        <code class="literal">InterfacesAdded</code> signal contains a dict with
+        the interfaces and properties (if any) that have been added to
+        the given object path. Similarly, the second parameter of the
+        <code class="literal">InterfacesRemoved</code> signal contains an array
+        of the interfaces that were removed. Note that changes on
+        properties on existing interfaces are not reported using this
+        interface - an application should also monitor the existing <a class="link" href="#standard-interfaces-properties" title="org.freedesktop.DBus.Properties">PropertiesChanged</a>
+        signal on each object.
+      </p><p>
+        Applications SHOULD NOT export objects that are children of an
+        object (directly or otherwise) implementing this interface but
+        which are not returned in the reply from the
+        <code class="literal">GetManagedObjects()</code> method of this
+        interface on the given object.
+      </p><p>
+        The intent of the <code class="literal">ObjectManager</code> interface
+        is to make it easy to write a robust client
+        implementation. The trivial client implementation only needs
+        to make two method calls:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.AddMatch (bus_proxy,
+                                         "type='signal',name='org.example.App',path_namespace='/org/example/App'");
+          objects = org.freedesktop.DBus.ObjectManager.GetManagedObjects (app_proxy);
+        </pre><p>
+      </p><p>
+        on the message bus and the remote application's
+        <code class="literal">ObjectManager</code>, respectively. Whenever a new
+        remote object is created (or an existing object gains a new
+        interface), the <code class="literal">InterfacesAdded</code> signal is
+        emitted, and since this signal contains all properties for the
+        interfaces, no calls to the
+        <code class="literal">org.freedesktop.Properties</code> interface on the
+        remote object are needed. Additionally, since the initial
+        <code class="literal">AddMatch()</code> rule already includes signal
+        messages from the newly created child object, no new
+        <code class="literal">AddMatch()</code> call is needed.
+      </p><p>
+        <span class="emphasis"><em>
+          The <code class="literal">org.freedesktop.DBus.ObjectManager</code>
+          interface was added in version 0.17 of the D-Bus
+          specification.
+        </em></span>
       </p></div></div><div class="sect1" title="Introspection Data Format"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introspection-format"></a>Introspection Data Format</h2></div></div></div><p>
       As described in <a class="xref" href="#standard-interfaces-introspectable" title="org.freedesktop.DBus.Introspectable">the section called &#8220;<code class="literal">org.freedesktop.DBus.Introspectable</code>&#8221;</a>, 
       objects may be introspected at runtime, returning an XML string 
@@ -2091,7 +2202,7 @@
 
         </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>General syntax</p></li><li class="listitem"><p>Comment format</p></li></ul></div><p>
 
-        </p><div class="figure"><a name="idp5589776"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp30050032"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
             # Sample service description file
             [D-BUS Service]
             Names=org.freedesktop.ConfigurationDatabase;org.gnome.GConf;
@@ -2261,7 +2372,7 @@
             allowing another process to set the selection between the
             verification and the setting (e.g., by using XGrabServer /
             XungrabServer).
-          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5642544"></a></h5></div></div></div><p>
+          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp30103232"></a></h5></div></div></div><p>
             [FIXME specify location of .service files, probably using
             DESKTOP_DIRS etc. from basedir specification, though login session
             bus is not really desktop-specific]
@@ -2276,7 +2387,7 @@
           variable. If that variable is not set, applications should try 
           to connect to the well-known address
           <code class="literal">unix:path=/var/run/dbus/system_bus_socket</code>.
-          <sup>[<a name="idp5647568" href="#ftn.idp5647568" class="footnote">2</a>]</sup>
+          <sup>[<a name="idp30108256" href="#ftn.idp30108256" class="footnote">2</a>]</sup>
         </p><p>
           [FIXME specify location of system bus .service files]
         </p></div></div><div class="sect2" title="Message Bus Messages"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-messages"></a>Message Bus Messages</h3></div></div></div><p>
@@ -2461,7 +2572,7 @@
         There is also a per-machine ID, described in <a class="xref" href="#standard-interfaces-peer" title="org.freedesktop.DBus.Peer">the section called &#8220;<code class="literal">org.freedesktop.DBus.Peer</code>&#8221;</a> and returned
         by org.freedesktop.DBus.Peer.GetMachineId().
         For a desktop session bus, the bus ID can be used as a way to uniquely identify a user's session.
-        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5813168"></a>Glossary</h2></div></div></div><p>
+        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp30273856"></a>Glossary</h2></div></div></div><p>
       This glossary defines some of the terms used in this specification.
     </p><dl><dt><a name="term-bus-name"></a>Bus Name</dt><dd><p>
           The message bus maintains an association between names and
@@ -2535,10 +2646,10 @@
           message bus. This name will never change owner, and will be unique
           (never reused during the lifetime of the message bus).
           It will begin with a ':' character.
-        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.idp5261968" href="#idp5261968" class="para">1</a>] </sup>Lockfiles are used instead of real file
+        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.idp29699728" href="#idp29699728" class="para">1</a>] </sup>Lockfiles are used instead of real file
                 locking <code class="literal">fcntl()</code> because real locking
                 implementations are still flaky on network
-                filesystems.</p></div><div class="footnote"><p><sup>[<a name="ftn.idp5647568" href="#idp5647568" class="para">2</a>] </sup>
+                filesystems.</p></div><div class="footnote"><p><sup>[<a name="ftn.idp30108256" href="#idp30108256" class="para">2</a>] </sup>
               The D-Bus reference implementation actually honors the 
               <code class="literal">$(localstatedir)</code> configure option 
               for this address, on both client and server side.

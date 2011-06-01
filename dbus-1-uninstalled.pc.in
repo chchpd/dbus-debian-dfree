@@ -1,7 +1,7 @@
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-libdir=@libdir@
-includedir=@includedir@
+abs_top_builddir=@abs_top_builddir@
+abs_top_srcdir=@abs_top_srcdir@
+prefix=
+exec_prefix=
 system_bus_default_address=@DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 sysconfdir=@EXPANDED_SYSCONFDIR@
 session_bus_services_dir=@EXPANDED_DATADIR@/dbus-1/services
@@ -10,8 +10,8 @@ interfaces_dir=@EXPANDED_DATADIR@/dbus-1/interfaces
 daemondir=@DBUS_DAEMONDIR@
 
 Name: dbus
-Description: Free desktop message bus
+Description: Free desktop message bus (uninstalled copy)
 Version: @VERSION@
-Libs: -L${libdir} -ldbus-1
+Libs: ${abs_top_builddir}/dbus/libdbus-1.la
 Libs.private: @DBUS_CLIENT_LIBS@
-Cflags: -I${includedir}/dbus-1.0 -I${libdir}/dbus-1.0/include
+Cflags: -I${abs_top_srcdir}

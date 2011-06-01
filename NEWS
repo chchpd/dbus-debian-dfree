@@ -1,3 +1,52 @@
+D-Bus 1.5.2 (2011-06-01)
+==
+
+Notes for distributors:
+
+  This version of D-Bus no longer uses -fPIE by default. Distributions wishing
+  to harden the dbus-daemon and dbus-launch-helper can re-enable this if their
+  toolchain supports it reliably, via something like:
+
+    ./configure CFLAGS=-fPIE LDFLAGS="-pie -Wl,-z,relro"
+
+  or by using distribution-specific wrappers such as Debian's hardening-wrapper.
+
+Changes:
+
+  • D-Bus Specification v0.17
+    · Reserve the extra characters used in signatures by GVariant
+      (fd.o #34529, Simon McVittie)
+    · Define the ObjectManager interface (fd.o #34869, David Zeuthen)
+  • Don't force -fPIE: distributions and libtool know better than we do whether
+    it's desirable (fd.o #16621, fd.o #27215; Simon McVittie)
+  • Allow --disable-gc-sections, in case your toolchain offers the
+    -ffunction-sections, -fdata-sections and -Wl,--gc-sections options
+    but they're broken, as seen on Solaris (fd.o #33466, Simon McVittie)
+  • Install dbus-daemon and dbus-daemon-launch-helper in a more normal way
+    (fd.o #14512; Simon McVittie, loosely based on a patch from Luca Barbato)
+  • Ensure that maintainers upload documentation with the right permissions
+    (fd.o #36130, Simon McVittie)
+  • Don't force users of libdbus to be linked against -lpthread, -lrt
+    (fd.o #32827, Simon McVittie)
+  • Log system-bus activation information to syslog (fd.o #35705,
+    Colin Walters)
+  • Log messages dropped due to quotas to syslog (fd.o #35358,
+    Simon McVittie)
+  • Make the nonce-tcp transport work on Unix (fd.o #34569, Simon McVittie)
+  • On Unix, if /var/lib/dbus/machine-id cannot be read, try /etc/machine-id
+    (fd.o #35228, Lennart Poettering)
+  • In the regression tests, don't report fds as "leaked" if they were open
+    on startup (fd.o #35173, Simon McVittie)
+  • Make dbus-monitor bail out if asked to monitor more than one bus,
+    rather than silently using the last one (fd.o #26548, Will Thompson)
+  • Clarify documentation (fd.o #35182, Simon McVittie)
+  • Clean up minor dead code and some incorrect error handling
+    (fd.o #33128, fd.o #29881; Simon McVittie)
+  • Check that compiler options are supported before using them (fd.o #19681,
+    Simon McVittie)
+  • Windows:
+    • Remove obsolete workaround for winioctl.h (fd.o #35083, Ralf Habacker)
+
 D-Bus 1.5.0 (2011-04-11)
 ==
 
