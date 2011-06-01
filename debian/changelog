@@ -13,6 +13,8 @@ dbus (1.4.10-1) UNRELEASED; urgency=low
     - increase dependencies of dbus-1-dbg to allow for this
     - run the debug build's regression tests during build, but don't make
       failures fatal yet
+    - build-depend on xvfb and run the tests under xvfb-run, since one
+      needs a $DISPLAY
   * Run autoconf during build, and allow parallel building
   * Don't install dcop-howto.txt - this isn't DCOP
 
