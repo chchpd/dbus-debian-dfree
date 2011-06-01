@@ -1,3 +1,31 @@
+dbus (1.5.0-3) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Apr 2011 16:41:52 +0100
+
+dbus (1.4.10-1) unstable; urgency=low
+
+  * New upstream version
+  * Use a separate build directory
+  * Explicitly set compiler flags
+  * Don't complain about not installing libdbus-1.la
+  * Don't pass a version to dh_makeshlibs -V - the symbols file gives us
+    exact dependencies, so the legacy shlibs mechanism is just a guard against
+    old systems now, and everyone forgets to update it
+  * Do a second build with tests, verbosity etc. enabled, and install it
+    in /usr/lib/$DEB_HOST_MULTIARCH/dbus-1.0/debug-build in dbus-1-dbg
+    (Closes: #498185)
+    - increase dependencies of dbus-1-dbg to allow for this
+    - run the debug build's regression tests during build, but don't make
+      failures fatal yet
+    - build-depend on xvfb and run the tests under xvfb-run, since one
+      needs a $DISPLAY
+  * Run autoconf during build, and allow parallel building
+  * Don't install dcop-howto.txt - this isn't DCOP
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 01 Jun 2011 16:18:45 +0100
+
 dbus (1.5.0-2) experimental; urgency=low
 
   * Merge from unstable

@@ -1,7 +1,6 @@
-doc/dcop-howto.txt usr/share/doc/dbus
 doc/dbus-faq.html usr/share/doc/dbus
 doc/dbus-specification.html usr/share/doc/dbus
 doc/dbus-test-plan.html usr/share/doc/dbus
 doc/dbus-tutorial.html usr/share/doc/dbus
-doc/dbus.devhelp usr/share/doc/dbus
+build/doc/dbus.devhelp usr/share/doc/dbus
 usr/share/doc/dbus
