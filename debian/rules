@@ -5,7 +5,7 @@
 # Copyright © 2011 Michael Biebl <biebl@debian.org>
 
 %:
-	dh $@ --builddirectory=build
+	dh $@ --builddirectory=build --with autoreconf --parallel
 
 libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
 
