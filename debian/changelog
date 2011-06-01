@@ -11,6 +11,8 @@ dbus (1.4.10-1) UNRELEASED; urgency=low
     in /usr/lib/$DEB_HOST_MULTIARCH/dbus-1.0/debug-build in dbus-1-dbg
     (Closes: #498185)
     - increase dependencies of dbus-1-dbg to allow for this
+    - run the debug build's regression tests during build, but don't make
+      failures fatal yet
   * Run autoconf during build, and allow parallel building
   * Don't install dcop-howto.txt - this isn't DCOP
 

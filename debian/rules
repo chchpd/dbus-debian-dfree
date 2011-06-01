@@ -49,6 +49,10 @@ override_dh_auto_build:
 	# work around fd.o #36156
 	xsltproc -o build/doc/dbus.devhelp doc/doxygen_to_devhelp.xsl build/doc/api/xml/index.xml
 
+override_dh_auto_test:
+	dh_auto_test
+	make -C build-debug -k check || echo "Tests failed, ignoring for now"
+
 override_dh_auto_install:
 	dh_auto_install
 	make -C build-debug install-exec DESTDIR=$(CURDIR)/debian/tmp
