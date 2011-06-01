@@ -21,8 +21,8 @@ Build-Depends: autotools-dev,
                xsltproc,
                xvfb
 Standards-Version: 3.9.2
-Vcs-Git: git://git.debian.org/pkg-utopia/dbus.git
-Vcs-Browser: http://git.debian.org/?p=pkg-utopia/dbus.git
+Vcs-Git: git://anonscm.debian.org/pkg-utopia/dbus.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
 
 Package: dbus
