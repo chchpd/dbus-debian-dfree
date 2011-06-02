@@ -1,3 +1,21 @@
+dbus (1.5.2-2) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 02 Jun 2011 17:37:24 +0100
+
+dbus (1.4.10-2) unstable; urgency=low
+
+  * Disable silent rules so we can have useful buildd logs
+  * Update Vcs-Git, Vcs-Browser to the form preferred by the Alioth admins
+  * Disable -Wl,--gc-sections and related flags: the size decrease is
+    negligible, and these options currently segfault ld on armel and mips*
+    (Closes: #628834)
+  * Disable the build-time tests for now, they need more upstream work before
+    they'll pass in a minimal build chroot
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 02 Jun 2011 17:08:25 +0100
+
 dbus (1.5.2-1) experimental; urgency=low
 
   * Merge from unstable
