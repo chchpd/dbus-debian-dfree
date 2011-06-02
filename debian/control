@@ -16,10 +16,8 @@ Build-Depends: autotools-dev,
                libexpat-dev,
                libselinux1-dev [linux-any],
                libx11-dev,
-               xauth,
                xmlto,
-               xsltproc,
-               xvfb
+               xsltproc
 Standards-Version: 3.9.2
 Vcs-Git: git://anonscm.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-utopia/dbus.git

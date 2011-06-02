@@ -52,8 +52,7 @@ override_dh_auto_build:
 	xsltproc -o build/doc/dbus.devhelp doc/doxygen_to_devhelp.xsl build/doc/api/xml/index.xml
 
 override_dh_auto_test:
-	xvfb-run make -C build -k check || echo "Tests failed, ignoring for now"
-	xvfb-run make -C build-debug -k check || echo "Tests failed, ignoring for now"
+	: # tests need more environmental setup at the moment
 
 override_dh_auto_install:
 	dh_auto_install
