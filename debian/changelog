@@ -2,6 +2,9 @@ dbus (1.4.10-2) UNRELEASED; urgency=low
 
   * Disable silent rules so we can have useful buildd logs
   * Update Vcs-Git, Vcs-Browser to the form preferred by the Alioth admins
+  * Disable -Wl,--gc-sections and related flags: the size decrease is
+    negligible, and these options currently segfault ld on armel and mips*
+    (Closes: #628834)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 01 Jun 2011 18:01:41 +0100
 

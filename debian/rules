@@ -19,6 +19,7 @@ cflags += $(HARDENING_CFLAGS)
 ldflags += $(HARDENING_LDFLAGS)
 
 common_configure_flags := \
+		--disable-gc-sections \
 		--disable-silent-rules \
 		--disable-libaudit \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
