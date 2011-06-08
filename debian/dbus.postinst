@@ -22,6 +22,9 @@ if [ "$1" = configure ]; then
             chown root:"$MESSAGEUSER" "$LAUNCHER"
             chmod 4754 "$LAUNCHER"
     fi
+
+    # this is idempotent, the init script also does it
+    dbus-uuidgen --ensure
 fi
 
 # Remove stop symlinks for runlevel 1 as killprocs already does the job for us.
