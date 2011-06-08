@@ -33,20 +33,20 @@ fi
 if [ "$1" = configure ] && [ -n "$2" ] && [ -x "/etc/init.d/dbus" ]; then
     # Do not restart dbus on upgrades, only on fresh installations.
     # (dh_installinit -r creates a start action)
-    # But do reload it so the machine-id can be generated
+    # We don't use the init script to reload here either, to reduce divergence
+    # between Debian (sysvinit) and Ubuntu (Upstart) - the thing to do is the
+    # same in either case so just do it
+
     if /etc/init.d/dbus status > /dev/null; then
         # trigger an update notification which recommends to reboot
         [ -x /usr/share/update-notifier/notify-reboot-required ] && \
             /usr/share/update-notifier/notify-reboot-required || true
-        if [ -x "/etc/init.d/dbus" ]; then
-            if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-                invoke-rc.d dbus reload || true
-            else
-                /etc/init.d/dbus reload || true
-            fi
-        fi
     fi
+    # If it's not running (perhaps we're in a chroot) this will just fail
+    # harmlessly
+    dbus-send --print-reply --system --type=method_call \
+            --dest=org.freedesktop.DBus \
+            / org.freedesktop.DBus.ReloadConfig > /dev/null || true
 fi
 
 #DEBHELPER#
-
