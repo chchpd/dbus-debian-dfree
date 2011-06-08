@@ -35,7 +35,7 @@ override_dh_auto_configure:
 		--enable-doxygen-docs \
 		--exec-prefix=/ \
 		--libexecdir=/lib/dbus-1.0 \
-		--libdir=\$${exec_prefix}/lib/$(DEB_HOST_MULTIARCH)
+		--libdir=/lib/$(DEB_HOST_MULTIARCH)
 	dh_auto_configure \
 		--builddirectory=build-debug \
 		-- \
@@ -67,7 +67,7 @@ override_dh_link:
 
 override_dh_install:
 	rm -f debian/tmp/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
-	sed -i -e 's@\$${exec_prefix}/lib@\$${prefix}/lib@' \
+	sed -i -e 's@^libdir=.*@libdir=/lib/$(DEB_HOST_MULTIARCH)@' \
 		debian/tmp/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/dbus-1.pc
 	sed -e "s@\$${DEB_HOST_MULTIARCH}@$(DEB_HOST_MULTIARCH)@g" \
 		< debian/libdbus-1-dev.install.in > debian/libdbus-1-dev.install
