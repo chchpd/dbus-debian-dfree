@@ -1,6 +1,8 @@
 dbus (1.5.2-2) UNRELEASED; urgency=low
 
   * Merge from unstable
+  * Merge and adapt from Ubuntu:
+    - create, chown messagebus' home directory in postinst
 
  -- Simon McVittie <smcv@debian.org>  Thu, 02 Jun 2011 17:37:24 +0100
 
