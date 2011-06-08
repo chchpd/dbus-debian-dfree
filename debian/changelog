@@ -8,6 +8,8 @@ dbus (1.5.2-2) UNRELEASED; urgency=low
       regardless of whether dbus was started with sysvinit or Upstart; just
       call it unconditionally, and ignore any failures we might see (in
       chroots or if dbus-daemon wasn't running)
+    - move dbus-daemon and its helpers from /usr to /
+    - move libraries into multiarch locations
   * Don't delete jquery.js, no longer installed by recent Doxygen
 
  -- Simon McVittie <smcv@debian.org>  Thu, 02 Jun 2011 17:37:24 +0100

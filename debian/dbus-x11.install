@@ -1,2 +1,2 @@
-debian/tmp/usr/bin/dbus-launch
+debian/tmp/bin/dbus-launch usr/bin
 debian/tmp/usr/share/man/man1/dbus-launch.1
