@@ -4,6 +4,10 @@ dbus (1.5.2-2) UNRELEASED; urgency=low
   * Merge and adapt from Ubuntu:
     - create, chown messagebus' home directory in postinst
     - run dbus-uuidgen --ensure in postinst
+    - call ReloadConfig with dbus-send in the postinst, since that'll work
+      regardless of whether dbus was started with sysvinit or Upstart; just
+      call it unconditionally, and ignore any failures we might see (in
+      chroots or if dbus-daemon wasn't running)
 
  -- Simon McVittie <smcv@debian.org>  Thu, 02 Jun 2011 17:37:24 +0100
 
