@@ -1,5 +1,0 @@
-debian/tmp/usr/include/dbus*/dbus/dbus*.h
-debian/tmp/lib/${DEB_HOST_MULTIARCH}/dbus-1.0/include/dbus/dbus*.h usr/lib/${DEB_HOST_MULTIARCH}/dbus-1.0/include/dbus
-debian/tmp/lib/${DEB_HOST_MULTIARCH}/libdbus-1*.a usr/lib/${DEB_HOST_MULTIARCH}
-debian/tmp/lib/${DEB_HOST_MULTIARCH}/pkgconfig/dbus-1.pc usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig
-debian/tmp/lib/${DEB_HOST_MULTIARCH}/libdbus-1*.so usr/lib/${DEB_HOST_MULTIARCH}

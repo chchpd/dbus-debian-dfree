@@ -1,1 +1,1 @@
-debian/tmp/lib/*/libdbus-1*.so.*
+debian/tmp/usr/lib/*/libdbus-1*.so.* lib

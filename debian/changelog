@@ -1,8 +1,13 @@
 dbus (1.5.2-3) UNRELEASED; urgency=low
 
-  * Revert some of the changes merged from Ubuntu:
+  * Revert some of the changes merged from Ubuntu, which look as though
+    they shouldn't be needed on either distribution:
     - there's no need to create/chown messagebus' home directory, the sysvinit
       script and the Upstart job both do that on-demand
+  * Revert changes which are useful in Ubuntu but not Debian:
+    - move everything except the library back into /usr; Debian doesn't have
+      any uses for dbus-daemon in early boot, and if we do later, we'd need to
+      get libexpat moved first
 
  -- Simon McVittie <smcv@debian.org>  Thu, 09 Jun 2011 13:59:31 +0100
 

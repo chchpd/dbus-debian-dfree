@@ -1,10 +1,10 @@
 debian/tmp/etc/dbus-1/
-debian/tmp/bin/dbus-daemon
-debian/tmp/bin/dbus-cleanup-sockets
-debian/tmp/bin/dbus-send usr/bin
-debian/tmp/bin/dbus-uuidgen
-debian/tmp/bin/dbus-monitor usr/bin
-debian/tmp/lib/dbus-1.0/dbus-daemon-launch-helper
+debian/tmp/usr/bin/dbus-daemon
+debian/tmp/usr/bin/dbus-cleanup-sockets
+debian/tmp/usr/bin/dbus-send
+debian/tmp/usr/bin/dbus-uuidgen
+debian/tmp/usr/bin/dbus-monitor
+debian/tmp/usr/lib/dbus-1.0/dbus-daemon-launch-helper
 debian/tmp/usr/share/man/man1/dbus-daemon.1
 debian/tmp/usr/share/man/man1/dbus-cleanup-sockets.1
 debian/tmp/usr/share/dbus-1/services

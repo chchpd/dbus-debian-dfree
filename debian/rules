@@ -33,10 +33,7 @@ override_dh_auto_configure:
 		$(common_configure_flags) \
 		--enable-xml-docs \
 		--enable-doxygen-docs \
-		--exec-prefix=/ \
-		--bindir=/bin \
-		--libexecdir=/lib/dbus-1.0 \
-		--libdir=/lib/$(DEB_HOST_MULTIARCH)
+		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)
 	dh_auto_configure \
 		--builddirectory=build-debug \
 		-- \
@@ -63,15 +60,11 @@ override_dh_auto_install:
 	make -C build-debug install-exec DESTDIR=$(CURDIR)/debian/tmp
 
 override_dh_link:
-	dh_link -plibdbus-1-dev lib/$(DEB_HOST_MULTIARCH)/$$(basename $$(readlink debian/tmp/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so)) usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so
+	dh_link -plibdbus-1-dev lib/$(DEB_HOST_MULTIARCH)/$$(basename $$(readlink debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so)) usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so
 	dh_link --remaining-packages
 
 override_dh_install:
-	rm -f debian/tmp/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
-	sed -i -e 's@^libdir=.*@libdir=/usr/lib/$(DEB_HOST_MULTIARCH)@' \
-		debian/tmp/lib/$(DEB_HOST_MULTIARCH)/pkgconfig/dbus-1.pc
-	sed -e "s@\$${DEB_HOST_MULTIARCH}@$(DEB_HOST_MULTIARCH)@g" \
-		< debian/libdbus-1-dev.install.in > debian/libdbus-1-dev.install
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
 	dh_install --list-missing
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
 
