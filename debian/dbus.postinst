@@ -33,11 +33,12 @@ if [ "$1" = configure ] && dpkg --compare-versions "$2" lt-nl 1.2.24-1; then
     rm -f /etc/rc1.d/K??dbus
 fi
 
-if [ "$1" = configure ] && [ -n "$2" ] && [ -x "/etc/init.d/dbus" ]; then
-    # Do not restart dbus on upgrades, only on fresh installations.
-    # (dh_installinit -r creates a start action)
+if [ "$1" = configure ] && [ -n "$2" ]; then
+    # On upgrades, we only reload config, and don't restart (restarting the
+    # system bus is not supported by upstream). The code added by
+    # dh_installinit -r creates a start action, below.
 
-    if /etc/init.d/dbus status > /dev/null; then
+    if [ -x "/etc/init.d/dbus" ] && /etc/init.d/dbus status > /dev/null; then
         # trigger an update notification which recommends to reboot
         [ -x /usr/share/update-notifier/notify-reboot-required ] && \
             /usr/share/update-notifier/notify-reboot-required || true
