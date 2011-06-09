@@ -21,7 +21,10 @@ if [ "$1" = configure ]; then
             chmod 4754 "$LAUNCHER"
     fi
 
-    # this is idempotent, the init script also does it
+    # This is idempotent, so it's OK to do every time. The system bus' init
+    # script does this anyway, but you also have to do this before a session
+    # bus will work, so we do this here for the benefit of people starting
+    # a temporary session bus in a chroot
     dbus-uuidgen --ensure
 fi
 
@@ -33,17 +36,17 @@ fi
 if [ "$1" = configure ] && [ -n "$2" ] && [ -x "/etc/init.d/dbus" ]; then
     # Do not restart dbus on upgrades, only on fresh installations.
     # (dh_installinit -r creates a start action)
-    # We don't use the init script to reload here either, to reduce divergence
-    # between Debian (sysvinit) and Ubuntu (Upstart) - the thing to do is the
-    # same in either case so just do it
 
     if /etc/init.d/dbus status > /dev/null; then
         # trigger an update notification which recommends to reboot
         [ -x /usr/share/update-notifier/notify-reboot-required ] && \
             /usr/share/update-notifier/notify-reboot-required || true
     fi
+
+    # This is what the init script would do, but it's simpler (and less
+    # dependent on sysvinit vs. Upstart) if we do it directly.
     # If it's not running (perhaps we're in a chroot) this will just fail
-    # harmlessly
+    # harmlessly, so there's no need to condition on status.
     dbus-send --print-reply --system --type=method_call \
             --dest=org.freedesktop.DBus \
             / org.freedesktop.DBus.ReloadConfig > /dev/null || true
