@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [5])
-m4_define([dbus_micro_version], [2])
+m4_define([dbus_micro_version], [4])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=9
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=1
+LT_REVISION=2
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -122,7 +122,6 @@ AM_CONDITIONAL(DBUS_WINCE, test "$dbus_wince" = yes)
 AM_CONDITIONAL(DBUS_UNIX, test "$dbus_unix" = yes)
 AM_CONDITIONAL(DBUS_CYGWIN, test "$dbus_cygwin" = yes)
 
-AC_ARG_ENABLE(tests, AS_HELP_STRING([--enable-tests],[enable unit test code in the library and binaries]),enable_tests=$enableval,enable_tests=$USE_MAINTAINER_MODE)
 AC_ARG_ENABLE(ansi, AS_HELP_STRING([--enable-ansi],[enable -ansi -pedantic gcc flags]),enable_ansi=$enableval,enable_ansi=no)
 AC_ARG_ENABLE(verbose-mode, AS_HELP_STRING([--enable-verbose-mode],[support verbose debug mode]),enable_verbose_mode=$enableval,enable_verbose_mode=$USE_MAINTAINER_MODE)
 AC_ARG_ENABLE(asserts, AS_HELP_STRING([--enable-asserts],[include assertion checks]),enable_asserts=$enableval,enable_asserts=$USE_MAINTAINER_MODE)
@@ -151,12 +150,73 @@ AC_ARG_WITH(launchd-agent-dir, AS_HELP_STRING([--with-launchd-agent-dir=[dirname
 AC_ARG_WITH(dbus_user, AS_HELP_STRING([--with-dbus-user=<user>],[User for running the DBUS daemon (messagebus)]))
 AC_ARG_WITH(dbus_daemondir, AS_HELP_STRING([--with-dbus-daemondir=[dirname]],[Directory for installing the DBUS daemon]))
 
-dnl DBUS_BUILD_TESTS controls unit tests built in to .c files
-dnl and also some stuff in the test/ subdir
-AM_CONDITIONAL(DBUS_BUILD_TESTS, test x$enable_tests = xyes)
-if test x$enable_tests = xyes; then
-    AC_DEFINE(DBUS_BUILD_TESTS,1,[Build test code])
+AC_ARG_ENABLE([embedded-tests],
+  AS_HELP_STRING([--enable-embedded-tests],
+    [enable unit test code in the library and binaries]),
+  [], [enable_embedded_tests=$USE_MAINTAINER_MODE])
+AC_ARG_ENABLE([modular-tests],
+  AS_HELP_STRING([--enable-modular-tests],
+    [enable modular regression tests (requires GLib)]),
+  [], [enable_modular_tests=auto])
+# --enable-tests overrides both --enable-embedded-tests and
+# --enable-modular-tests
+AC_ARG_ENABLE([tests],
+  AS_HELP_STRING([--enable-tests],
+    [enable/disable all tests, overriding embedded-tests/modular-tests]),
+  [enable_embedded_tests=$enableval; enable_modular_tests=$enableval],
+  [])
+
+# DBUS_ENABLE_EMBEDDED_TESTS controls unit tests built in to .c files
+# and also some stuff in the test/ subdir. DBUS_BUILD_TESTS was an older
+# name for this.
+AM_CONDITIONAL([DBUS_BUILD_TESTS], [test "x$enable_embedded_tests" = xyes])
+AM_CONDITIONAL([DBUS_ENABLE_EMBEDDED_TESTS],
+  [test "x$enable_embedded_tests" = xyes])
+if test "x$enable_embedded_tests" = xyes; then
+    AC_DEFINE([DBUS_ENABLE_EMBEDDED_TESTS], [1],
+      [Define to build test code into the library and binaries])
+    AC_DEFINE([DBUS_BUILD_TESTS], [1],
+      [Define to build test code into the library and binaries])
 fi
+
+# DBUS_ENABLE_MODULAR_TESTS controls tests that work based on public API.
+# These use GTest, from GLib, because life's too short. They're enabled by
+# default (unless you don't have GLib), because they don't bloat the library
+# or binaries.
+if test "x$enable_modular_tests" != xno; then
+  PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22, gio-2.0 >= 2.22],
+    [],
+    [if test "x$enable_modular_tests" = xyes; then
+      AC_MSG_ERROR([GLib is required by the modular tests])
+    else # assumed to be "auto"
+      enable_modular_tests=no
+    fi])
+  # If dbus-gmain.[ch] returned to libdbus then we wouldn't need this
+  PKG_CHECK_MODULES([DBUS_GLIB], [dbus-glib-1],
+    [],
+    [if test "x$enable_modular_tests" = xyes; then
+      AC_MSG_ERROR([dbus-glib is required by the modular tests (for now)])
+    else # assumed to be "auto"
+      enable_modular_tests=no
+    fi])
+  if test "x$enable_modular_tests" != xno; then
+    # dependencies checked, switch from auto to yes
+    enable_modular_tests=yes
+  fi
+fi
+if test "x$enable_modular_tests" = xyes; then
+  AC_DEFINE([DBUS_ENABLE_MODULAR_TESTS], [1],
+    [Define to build independent test binaries (requires GLib)])
+fi
+AM_CONDITIONAL([DBUS_ENABLE_MODULAR_TESTS],
+  [test "x$enable_modular_tests" = xyes])
+
+AC_ARG_ENABLE([installed-tests],
+  AS_HELP_STRING([--enable-installed-tests],
+    [enable unit test code in the library and binaries]),
+  [], [enable_installed_tests=no])
+AM_CONDITIONAL([DBUS_ENABLE_INSTALLED_TESTS],
+  [test "x$enable_installed_tests" = xyes])
 
 if test x$enable_verbose_mode = xyes; then
     AC_DEFINE(DBUS_ENABLE_VERBOSE_MODE,1,[Support a verbose mode])
@@ -164,7 +224,6 @@ fi
 
 if test x$enable_asserts = xno; then
     AC_DEFINE(DBUS_DISABLE_ASSERT,1,[Disable assertion checking])
-    AC_DEFINE(G_DISABLE_ASSERT,1,[Disable GLib assertion macros])
     R_DYNAMIC_LDFLAG=""
 else
     # -rdynamic is needed for glibc's backtrace_symbols to work.
@@ -1193,34 +1252,6 @@ dnl but prepending to CFLAGS (so the user can override it with later CFLAGS)
 dnl is the next best thing
 CFLAGS="$WARNING_CFLAGS $CFLAGS"
 
-# Disabling gc-sections makes our binaries bigger, but some toolchains
-# have known-broken support for it which discards sections that are needed.
-# See https://bugs.freedesktop.org/show_bug.cgi?id=33466
-SECTION_LDFLAGS=
-AC_ARG_ENABLE([gc-sections],
-  [AS_HELP_STRING([--disable-gc-sections],
-    [disable --gc-sections to work around broken toolchains])],
-  [enable_gc_sections=$enableval],
-  [enable_gc_sections=yes])
-if test "x$GCC,$enable_gc_sections,$dbus_win" = xyes,yes,no; then
-  save_CFLAGS="$CFLAGS"
-  save_LDFLAGS="$LDFLAGS"
-  AC_MSG_CHECKING([for ability to link with --gc-sections])
-  CFLAGS="-ffunction-sections -fdata-sections"
-  LDFLAGS="-Wl,--gc-sections"
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [])],
-    [rc=yes],
-    [rc=no])
-  AC_MSG_RESULT([$rc])
-  CFLAGS="$save_CFLAGS"
-  LDFLAGS="$save_LDFLAGS"
-  if test "x$rc" = xyes; then
-    SECTION_LDFLAGS="-Wl,--gc-sections"
-    CFLAGS="-ffunction-sections -fdata-sections $CFLAGS"
-  fi
-fi
-AC_SUBST([SECTION_LDFLAGS])
-
 case $host_os in
     solaris*)
         # Solaris' C library apparently needs these runes to be threadsafe...
@@ -1597,7 +1628,8 @@ echo "
 echo "
         Maintainer mode:          ${USE_MAINTAINER_MODE}
         gcc coverage profiling:   ${enable_compiler_coverage}
-        Building unit tests:      ${enable_tests}
+        Building embedded tests:  ${enable_embedded_tests}
+        Building modular tests:   ${enable_modular_tests}
         Building verbose mode:    ${enable_verbose_mode}
         Building assertions:      ${enable_asserts}
         Building checks:          ${enable_checks}
@@ -1629,11 +1661,11 @@ if test x$have_launchd = xyes; then
 fi
 echo
 
-if test x$enable_tests = xyes; then
+if test x$enable_embedded_tests = xyes; then
         echo "NOTE: building with unit tests increases the size of the installed library and renders it insecure."
 fi
-if test x$enable_tests = xyes -a x$enable_asserts = xno; then
-        echo "NOTE: building with unit tests but without assertions means tests may not properly report failures (this configuration is only useful when doing something like profiling the tests)"
+if test x$enable_embedded_tests = xyes -a x$enable_asserts = xno; then
+        echo "NOTE: building with embedded tests but without assertions means tests may not properly report failures (this configuration is only useful when doing something like profiling the tests)"
 fi
 if test x$enable_compiler_coverage = xyes; then
         echo "NOTE: building with coverage profiling is definitely for developers only."
