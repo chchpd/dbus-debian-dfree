@@ -1,6 +1,7 @@
 dbus (1.4.12-1) UNRELEASED; urgency=medium
 
   * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
+  * Don't delete jquery.js, no longer installed by recent Doxygen
 
  -- Simon McVittie <smcv@debian.org>  Fri, 10 Jun 2011 20:51:33 +0100
 
