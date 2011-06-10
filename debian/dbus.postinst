@@ -6,7 +6,7 @@ set -e
 
 MESSAGEUSER=messagebus
 MESSAGEHOME=/var/run/dbus
-LAUNCHER=/lib/dbus-1.0/dbus-daemon-launch-helper
+LAUNCHER=/usr/lib/dbus-1.0/dbus-daemon-launch-helper
 
 if [ "$1" = configure ]; then
     adduser --system \
