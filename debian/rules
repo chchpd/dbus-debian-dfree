@@ -22,6 +22,7 @@ common_configure_flags := \
 		--disable-gc-sections \
 		--disable-silent-rules \
 		--disable-libaudit \
+		--enable-installed-tests \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
 		--htmldir=\$${prefix}/share/doc/dbus \
 		--with-systemdsystemunitdir=/lib/systemd/system \
@@ -51,8 +52,10 @@ override_dh_auto_build:
 	# work around fd.o #36156
 	xsltproc -o build/doc/dbus.devhelp doc/doxygen_to_devhelp.xsl build/doc/api/xml/index.xml
 
+# tests in the debug build need more environmental setup at the moment, so
+# only run the smaller set of tests from the normal build
 override_dh_auto_test:
-	: # tests need more environmental setup at the moment
+	dh_auto_test
 
 override_dh_auto_install:
 	dh_auto_install
@@ -62,7 +65,11 @@ override_dh_link:
 	dh_link -plibdbus-1-dev lib/$$(basename $$(readlink debian/tmp/usr/lib/libdbus-1.so)) usr/lib/libdbus-1.so
 	dh_link --remaining-packages
 
+# if bootstrapping (without dbus-glib), no tests will get installed - create
+# the directory in case that's happened, so the .install file doesn't need
+# modification
 override_dh_install:
+	install -d debian/tmp/usr/lib/dbus-1.0/test
 	dh_install -Xlibdbus-1.la --list-missing
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
 

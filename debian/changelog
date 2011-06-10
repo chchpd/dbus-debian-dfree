@@ -2,6 +2,9 @@ dbus (1.4.12-1) UNRELEASED; urgency=medium
 
   * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
   * Don't delete jquery.js, no longer installed by recent Doxygen
+  * Build-depend on libglib2.0-dev, libdbus-glib-1-dev for better regression
+    test coverage (dbus-glib is a circular dependency, but both of these
+    dependencies can be dropped if bootstrapping new architectures)
 
  -- Simon McVittie <smcv@debian.org>  Fri, 10 Jun 2011 20:51:33 +0100
 
