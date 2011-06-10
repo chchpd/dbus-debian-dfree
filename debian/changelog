@@ -1,4 +1,4 @@
-dbus (1.5.4-1) UNRELEASED; urgency=low
+dbus (1.5.4-1) experimental; urgency=low
 
   * Merge from unstable
   * New(er) upstream version fixing local DoS (Closes: #629938)
@@ -14,7 +14,7 @@ dbus (1.5.4-1) UNRELEASED; urgency=low
         Xsession hook (Closes: #630011) and the init script (Closes: #629954)
   * Improve comments in postinst explaining why it behaves as it does
 
- -- Simon McVittie <smcv@debian.org>  Thu, 09 Jun 2011 13:59:31 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 Jun 2011 23:35:51 +0100
 
 dbus (1.4.12-1) unstable; urgency=medium
 
