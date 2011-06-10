@@ -74,7 +74,7 @@ override_dh_install:
 	install -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/test
 	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
 	dh_install -p$(libdbusN) \
-		usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)* \
+		"usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)*" \
 		lib/$(DEB_HOST_MULTIARCH)
 	dh_install --remaining-packages --list-missing
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
