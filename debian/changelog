@@ -1,6 +1,7 @@
-dbus (1.5.2-3) UNRELEASED; urgency=low
+dbus (1.5.4-1) UNRELEASED; urgency=low
 
   * Merge from unstable
+  * New(er) upstream version fixing local DoS (Closes: #629938)
   * Revert some of the changes merged from Ubuntu, which look as though
     they shouldn't be needed on either distribution:
     - there's no need to create/chown messagebus' home directory, the sysvinit
