@@ -8,6 +8,8 @@ dbus (1.5.2-3) UNRELEASED; urgency=low
     - move everything except the library back into /usr; Debian doesn't have
       any uses for dbus-daemon in early boot, and if we do later, we'd need to
       get libexpat moved first
+      - this gets the locations back into sync with what it says in the
+        Xsession hook (Closes: #630011) and the init script (Closes: #629954)
   * Improve comments in postinst explaining why it behaves as it does
 
  -- Simon McVittie <smcv@debian.org>  Thu, 09 Jun 2011 13:59:31 +0100
