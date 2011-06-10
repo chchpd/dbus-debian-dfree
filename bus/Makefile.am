@@ -89,7 +89,7 @@ dbus_daemon_LDADD=					\
 	$(EFENCE)					\
 	$(DBUS_BUS_LIBS)
 
-dbus_daemon_LDFLAGS=@R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@
+dbus_daemon_LDFLAGS=@R_DYNAMIC_LDFLAG@
 
 LAUNCH_HELPER_SOURCES=				\
 	$(XML_SOURCES)				\
@@ -115,7 +115,7 @@ dbus_daemon_launch_helper_LDADD=		\
 	$(top_builddir)/dbus/libdbus-internal.la \
 	$(DBUS_LAUNCHER_LIBS)
 
-dbus_daemon_launch_helper_LDFLAGS=@R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@
+dbus_daemon_launch_helper_LDFLAGS=@R_DYNAMIC_LDFLAG@
 
 ## we build another binary so we can do the launch testing without root privs.
 ## DO NOT INSTALL THIS FILE
@@ -127,7 +127,7 @@ dbus_daemon_launch_helper_test_LDADD=		\
 	$(top_builddir)/dbus/libdbus-internal.la \
 	$(DBUS_LAUNCHER_LIBS)
 
-dbus_daemon_launch_helper_test_LDFLAGS=@R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@
+dbus_daemon_launch_helper_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
 dbus_daemon_launch_helper_test_CPPFLAGS= -DDBUS_STATIC_BUILD	\
 	-DACTIVATION_LAUNCHER_TEST
 
@@ -141,7 +141,7 @@ bus_test_launch_helper_LDADD=		\
 	$(top_builddir)/dbus/libdbus-internal.la \
 	$(DBUS_LAUNCHER_LIBS)
 
-bus_test_launch_helper_LDFLAGS=@R_DYNAMIC_LDFLAG@ @SECTION_LDFLAGS@
+bus_test_launch_helper_LDFLAGS=@R_DYNAMIC_LDFLAG@
 bus_test_launch_helper_CPPFLAGS= -DDBUS_STATIC_BUILD	\
 	-DACTIVATION_LAUNCHER_TEST	\
 	-DACTIVATION_LAUNCHER_DO_OOM
@@ -150,7 +150,9 @@ bus_test_launch_helper_CPPFLAGS= -DDBUS_STATIC_BUILD	\
 ## even when not doing "make check"
 noinst_PROGRAMS = $(TESTS)
 dbus_daemon_exec_PROGRAMS = dbus-daemon
+if DBUS_UNIX
 libexec_PROGRAMS = dbus-daemon-launch-helper
+endif DBUS_UNIX
 
 ## note that TESTS has special meaning (stuff to use in make check)
 ## so if adding tests not to be run in make check, don't add them to
@@ -202,14 +204,16 @@ install-data-hook:
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/dbus-1/services
 	$(mkinstalldirs) $(DESTDIR)$(datadir)/dbus-1/system-services
 if HAVE_SYSTEMD
-# Install dbus.socket as default implementation of a D-Bus stack
+# Install dbus.socket as default implementation of a D-Bus stack.
+# Deliberately not using $(LN_S) here: ln -fs is not universally portable,
+# but neither is systemd, so it's OK to assume here that ln complies with SUS.
 	$(mkinstalldirs) $(DESTDIR)$(systemdsystemunitdir)/dbus.target.wants
-	$(LN_S) ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/dbus.target.wants/dbus.socket
+	ln -fs ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/dbus.target.wants/dbus.socket
 # Unconditionally enable D-Bus on systemd installations
 	$(mkinstalldirs) $(DESTDIR)$(systemdsystemunitdir)/sockets.target.wants
-	$(LN_S) ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/sockets.target.wants/dbus.socket
+	ln -fs ../dbus.socket $(DESTDIR)$(systemdsystemunitdir)/sockets.target.wants/dbus.socket
 	$(mkinstalldirs) $(DESTDIR)$(systemdsystemunitdir)/multi-user.target.wants
-	$(LN_S) ../dbus.service $(DESTDIR)$(systemdsystemunitdir)/multi-user.target.wants/dbus.service
+	ln -fs ../dbus.service $(DESTDIR)$(systemdsystemunitdir)/multi-user.target.wants/dbus.service
 endif
 
 if DBUS_UNIX
