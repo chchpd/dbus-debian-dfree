@@ -1,4 +1,4 @@
-dbus (1.4.12-1) UNRELEASED; urgency=medium
+dbus (1.4.12-1) unstable; urgency=medium
 
   * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
   * Don't delete jquery.js, no longer installed by recent Doxygen
@@ -6,7 +6,7 @@ dbus (1.4.12-1) UNRELEASED; urgency=medium
     test coverage (dbus-glib is a circular dependency, but both of these
     dependencies can be dropped if bootstrapping new architectures)
 
- -- Simon McVittie <smcv@debian.org>  Fri, 10 Jun 2011 20:51:33 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 10 Jun 2011 22:39:14 +0100
 
 dbus (1.4.10-2) unstable; urgency=low
 
