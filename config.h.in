@@ -9,7 +9,7 @@
 /* Directory for installing the binaries */
 #undef DBUS_BINDIR
 
-/* Build test code */
+/* Define to build test code into the library and binaries */
 #undef DBUS_BUILD_TESTS
 
 /* Define to build X11 functionality */
@@ -51,8 +51,14 @@
 /* Disable public API sanity checking */
 #undef DBUS_DISABLE_CHECKS
 
+/* Define to build test code into the library and binaries */
+#undef DBUS_ENABLE_EMBEDDED_TESTS
+
 /* Use launchd autolaunch */
 #undef DBUS_ENABLE_LAUNCHD
+
+/* Define to build independent test binaries (requires GLib) */
+#undef DBUS_ENABLE_MODULAR_TESTS
 
 /* Build with caching of user data */
 #undef DBUS_ENABLE_USERDB_CACHE
@@ -113,9 +119,6 @@
 
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
-
-/* Disable GLib assertion macros */
-#undef G_DISABLE_ASSERT
 
 /* Disable GLib public API sanity checking */
 #undef G_DISABLE_CHECKS
