@@ -54,10 +54,9 @@ override_dh_auto_build:
 	# work around fd.o #36156
 	xsltproc -o build/doc/dbus.devhelp doc/doxygen_to_devhelp.xsl build/doc/api/xml/index.xml
 
-# tests in the debug build need more environmental setup at the moment, so
-# only run the smaller set of tests from the normal build
+# tests need more environmental setup at the moment
 override_dh_auto_test:
-	dh_auto_test
+	:
 
 override_dh_auto_install:
 	dh_auto_install

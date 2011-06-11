@@ -1,3 +1,18 @@
+dbus (1.5.4-2) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 11 Jun 2011 14:53:26 +0100
+
+dbus (1.4.12-2) unstable; urgency=medium
+
+  * Don't run tests during build (again), it appears they time out on most of
+    of the buildds
+  * Explicitly build-depend on automake 1.10, so buildds won't try and fail
+    with automake1.9 like kfreebsd-i386 did
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 11 Jun 2011 14:11:04 +0100
+
 dbus (1.5.4-1) experimental; urgency=low
 
   * Merge from unstable

@@ -9,7 +9,8 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
            Simon McVittie <smcv@debian.org>
 # libdbus-glib-1-dev and libglib2.0-dev can be omitted for bootstrapping,
 # but if you have them in Build-Depends, more tests can be run
-Build-Depends: autotools-dev,
+Build-Depends: automake (>= 1:1.10),
+               autotools-dev,
                debhelper (>= 8.1.3),
                dh-autoreconf,
                doxygen,
