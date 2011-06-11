@@ -1,8 +1,8 @@
-dbus (1.5.4-2) UNRELEASED; urgency=low
+dbus (1.5.4-2) experimental; urgency=low
 
   * Merge from unstable
 
- -- Simon McVittie <smcv@debian.org>  Sat, 11 Jun 2011 14:53:26 +0100
+ -- Simon McVittie <smcv@debian.org>  Sat, 11 Jun 2011 19:33:40 +0100
 
 dbus (1.4.12-2) unstable; urgency=medium
 
