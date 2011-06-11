@@ -1,3 +1,10 @@
+dbus (1.4.12-2) UNRELEASED; urgency=medium
+
+  * Explicitly build-depend on automake 1.10, so buildds won't try and fail
+    with automake1.9 like kfreebsd-i386 did
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 11 Jun 2011 12:47:01 +0100
+
 dbus (1.4.12-1) unstable; urgency=medium
 
   * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
