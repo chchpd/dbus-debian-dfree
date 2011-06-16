@@ -1,3 +1,9 @@
+dbus (1.4.12-3) UNRELEASED; urgency=low
+
+  * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
+
 dbus (1.4.12-2) unstable; urgency=medium
 
   * Don't run tests during build (again), it appears they time out on most of
@@ -9,7 +15,7 @@ dbus (1.4.12-2) unstable; urgency=medium
 
 dbus (1.4.12-1) unstable; urgency=medium
 
-  * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
+  * New upstream release fixes local DoS (Closes: #629938, CVE-2011-2200)
   * Don't delete jquery.js, no longer installed by recent Doxygen
   * Build-depend on libglib2.0-dev, libdbus-glib-1-dev for better regression
     test coverage (dbus-glib is a circular dependency, but both of these
