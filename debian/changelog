@@ -7,6 +7,8 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
       regardless of whether dbus was started with sysvinit or Upstart; just
       call it unconditionally, and ignore any failures we might see (in
       chroots or if dbus-daemon wasn't running)
+  * and more things from experimental:
+    - improve comments in postinst explaining why it behaves as it does
 
  -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
 
