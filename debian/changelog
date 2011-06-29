@@ -2,6 +2,8 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
 
   * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
   * Merge some things from Ubuntu, via experimental:
+    - move libraries into multiarch locations (but don't move binaries
+      from /usr to /, which is not needed on Debian)
     - run dbus-uuidgen --ensure in postinst
     - call ReloadConfig with dbus-send in the postinst, since that'll work
       regardless of whether dbus was started with sysvinit or Upstart; just
@@ -9,6 +11,8 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
       chroots or if dbus-daemon wasn't running)
   * and more things from experimental:
     - improve comments in postinst explaining why it behaves as it does
+    - libdbus-1-dev: explicitly pre-depend on multiarch-support to work around
+      debhelper and lintian disagreeing whether it's necessary
 
  -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
 
