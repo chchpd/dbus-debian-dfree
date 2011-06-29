@@ -1,6 +1,8 @@
 dbus (1.4.12-3) UNRELEASED; urgency=low
 
   * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
+  * Merge some things from Ubuntu, via experimental:
+    - run dbus-uuidgen --ensure in postinst
 
  -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
 
