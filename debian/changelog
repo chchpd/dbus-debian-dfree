@@ -11,8 +11,6 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
       chroots or if dbus-daemon wasn't running)
   * and more things from experimental:
     - improve comments in postinst explaining why it behaves as it does
-    - libdbus-1-dev: explicitly pre-depend on multiarch-support to work around
-      debhelper and lintian disagreeing whether it's necessary
 
  -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
 
