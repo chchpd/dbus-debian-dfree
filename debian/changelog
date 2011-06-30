@@ -1,4 +1,4 @@
-dbus (1.4.12-3) UNRELEASED; urgency=low
+dbus (1.4.12-3) unstable; urgency=low
 
   * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
   * Merge some things from Ubuntu, via experimental:
@@ -16,7 +16,7 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
     (known to affect slim, but not xdm or gdm) (Closes: #453755)
   * Remove the .la file for the debug build, not just the normal build
 
- -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 30 Jun 2011 17:21:03 +0100
 
 dbus (1.4.12-2) unstable; urgency=medium
 
