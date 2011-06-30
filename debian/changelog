@@ -11,6 +11,9 @@ dbus (1.4.12-3) UNRELEASED; urgency=low
       chroots or if dbus-daemon wasn't running)
   * and more things from experimental:
     - improve comments in postinst explaining why it behaves as it does
+  * Run dbus-launch for X sessions in a way that doesn't consume characters
+    from startx's stdin, or the stdin of certain display managers' init scripts
+    (known to affect slim, but not xdm or gdm) (Closes: #453755)
 
  -- Simon McVittie <smcv@debian.org>  Thu, 16 Jun 2011 08:21:35 +0100
 
