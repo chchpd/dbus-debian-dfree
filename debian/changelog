@@ -1,3 +1,10 @@
+dbus (1.4.12-4) unstable; urgency=low
+
+  * Override missing-pre-dependency-on-multiarch-support for the -dev
+    package, ftp-master doesn't have lintian 2.5.1 yet
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 01 Jul 2011 07:55:01 +0100
+
 dbus (1.4.12-3) unstable; urgency=low
 
   * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
