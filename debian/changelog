@@ -2,6 +2,8 @@ dbus (1.4.12-4) unstable; urgency=low
 
   * Override missing-pre-dependency-on-multiarch-support for the -dev
     package, ftp-master doesn't have lintian 2.5.1 yet
+  * Check all Description fields for correct use of dbus (package name)
+    vs. D-Bus (project name), and override lintian false-positives
 
  -- Simon McVittie <smcv@debian.org>  Fri, 01 Jul 2011 07:55:01 +0100
 
