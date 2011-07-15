@@ -72,6 +72,7 @@ override_dh_link:
 override_dh_install:
 	install -d debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/test
 	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.la
+	rm -f debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build/lib/libdbus-1.la
 	dh_install -p$(libdbusN) \
 		"usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)*" \
 		lib/$(DEB_HOST_MULTIARCH)

@@ -1,3 +1,48 @@
+dbus (1.5.4-3) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Jul 2011 11:23:48 +0100
+
+dbus (1.4.12-5) unstable; urgency=low
+
+  * Undo the changed invocation for dbus-launch, which seems to cause
+    more problems than it solves (LP: #807614, LP: #809900, probably also
+    Closes: #633652)
+  * Work around #453755 by just reopening stdin from /dev/null instead,
+    until fd.o #39197 gets fixed
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Jul 2011 10:45:56 +0100
+
+dbus (1.4.12-4) unstable; urgency=low
+
+  * Override missing-pre-dependency-on-multiarch-support for the -dev
+    package, ftp-master doesn't have lintian 2.5.1 yet
+  * Check all Description fields for correct use of dbus (package name)
+    vs. D-Bus (project name), and override lintian false-positives
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 01 Jul 2011 07:55:01 +0100
+
+dbus (1.4.12-3) unstable; urgency=low
+
+  * Mention CVE-2011-2200 in the changelog for 1.4.12-1 now it has a CVE ID
+  * Merge some things from Ubuntu, via experimental:
+    - move libraries into multiarch locations (but don't move binaries
+      from /usr to /, which is not needed on Debian)
+    - run dbus-uuidgen --ensure in postinst
+    - call ReloadConfig with dbus-send in the postinst, since that'll work
+      regardless of whether dbus was started with sysvinit or Upstart; just
+      call it unconditionally, and ignore any failures we might see (in
+      chroots or if dbus-daemon wasn't running)
+  * and more things from experimental:
+    - improve comments in postinst explaining why it behaves as it does
+  * Run dbus-launch for X sessions in a way that doesn't consume characters
+    from startx's stdin, or the stdin of certain display managers' init scripts
+    (known to affect slim, but not xdm or gdm) (Closes: #453755)
+  * Remove the .la file for the debug build, not just the normal build
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 30 Jun 2011 17:21:03 +0100
+
 dbus (1.5.4-2) experimental; urgency=low
 
   * Merge from unstable
@@ -33,7 +78,7 @@ dbus (1.5.4-1) experimental; urgency=low
 
 dbus (1.4.12-1) unstable; urgency=medium
 
-  * New upstream release fixes local DoS (Closes: #629938, no CVE number yet)
+  * New upstream release fixes local DoS (Closes: #629938, CVE-2011-2200)
   * Don't delete jquery.js, no longer installed by recent Doxygen
   * Build-depend on libglib2.0-dev, libdbus-glib-1-dev for better regression
     test coverage (dbus-glib is a circular dependency, but both of these
