@@ -1,4 +1,4 @@
-dbus (1.4.12-5) UNRELEASED; urgency=low
+dbus (1.4.12-5) unstable; urgency=low
 
   * Undo the changed invocation for dbus-launch, which seems to cause
     more problems than it solves (LP: #807614, LP: #809900, probably also
@@ -6,7 +6,7 @@ dbus (1.4.12-5) UNRELEASED; urgency=low
   * Work around #453755 by just reopening stdin from /dev/null instead,
     until fd.o #39197 gets fixed
 
- -- Simon McVittie <smcv@debian.org>  Fri, 15 Jul 2011 10:26:34 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Jul 2011 10:45:56 +0100
 
 dbus (1.4.12-4) unstable; urgency=low
 
