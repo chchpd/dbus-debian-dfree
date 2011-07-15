@@ -3,11 +3,15 @@
 # simply place use-session-dbus into your /etc/X11/Xsession.options file
 #
 
+STARTDBUS=
 DBUSLAUNCH=/usr/bin/dbus-launch
 
-if has_option use-session-dbus && [ -x "$DBUSLAUNCH" ]; then
-  # we're doing it this way instead of setting
-  # STARTUP="$DBUSLAUNCH --exit-with-session $STARTUP"
-  # due to <http://bugs.debian.org/453755>
-  eval `$DBUSLAUNCH --sh-syntax --exit-with-session < /dev/null`
+if has_option use-session-dbus; then
+  if [ -x "$DBUSLAUNCH" ]; then
+    STARTDBUS=yes
+  fi
+fi
+
+if [ -n "$STARTDBUS" ]; then
+  STARTUP="$DBUSLAUNCH --exit-with-session $STARTUP"
 fi

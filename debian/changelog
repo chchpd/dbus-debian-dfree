@@ -1,3 +1,11 @@
+dbus (1.4.12-5) UNRELEASED; urgency=low
+
+  * Undo the changed invocation for dbus-launch, which seems to cause
+    more problems than it solves (LP: #807614, LP: #809900, probably also
+    Closes: #633652)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 15 Jul 2011 10:26:34 +0100
+
 dbus (1.4.12-4) unstable; urgency=low
 
   * Override missing-pre-dependency-on-multiarch-support for the -dev
