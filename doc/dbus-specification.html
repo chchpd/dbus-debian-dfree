@@ -10,9 +10,10 @@
             <code class="email">&lt;<a class="email" href="mailto:simon.mcvittie@collabora.co.uk">simon.mcvittie@collabora.co.uk</a>&gt;</code><br>
           </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">David</span> <span class="surname">Zeuthen</span></h3><div class="affiliation"><span class="orgname">Red Hat, Inc.<br></span><div class="address"><p><br>
             <code class="email">&lt;<a class="email" href="mailto:davidz@redhat.com">davidz@redhat.com</a>&gt;</code><br>
-          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.17</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.17</td><td align="left">1 June 2011</td><td align="left">smcv/davidz</td></tr><tr><td align="left" colspan="3">define ObjectManager; reserve extra pseudo-type-codes used
+          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.17</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.18</td><td align="left">29 July 2011</td><td align="left">smcv</td></tr><tr><td align="left" colspan="3">define eavesdropping, unicast, broadcast; add eavesdrop
+         match keyword; promote type system to a top-level section</td></tr><tr><td align="left">Revision 0.17</td><td align="left">1 June 2011</td><td align="left">smcv/davidz</td></tr><tr><td align="left" colspan="3">define ObjectManager; reserve extra pseudo-type-codes used
          by GVariant</td></tr><tr><td align="left">Revision 0.16</td><td align="left">11 April 2011</td><td align="left"></td></tr><tr><td align="left" colspan="3">add path_namespace, arg0namespace; argNpath matches object
-        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#naming-conventions">Naming Conventions</a></span></dt><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp30273536">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
+        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#type-system">Type System</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#naming-conventions">Naming Conventions</a></span></dt><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5877344">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
       D-Bus is a system for low-latency, low-overhead, easy to use
       interprocess communication (IPC). In more detail:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
@@ -91,20 +92,10 @@
       </p><p>
         Nonetheless, this document should be a useful starting point and is 
         to our knowledge accurate, though incomplete.
-      </p></div></div><div class="sect1" title="Message Protocol"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="message-protocol"></a>Message Protocol</h2></div></div></div><p>
-      A <em class="firstterm">message</em> consists of a
-      <em class="firstterm">header</em> and a <em class="firstterm">body</em>. If you
-      think of a message as a package, the header is the address, and the body
-      contains the package contents. The message delivery system uses the header
-      information to figure out where to send the message and how to interpret
-      it; the recipient interprets the body of the message.
-    </p><p>
-      The body of the message is made up of zero or more
-      <em class="firstterm">arguments</em>, which are typed values, such as an
-      integer or a byte array.
-    </p><p>
-      Both header and body use the same type system and format for 
-      serializing data. Each type of value has a wire format. 
+      </p></div></div><div class="sect1" title="Type System"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="type-system"></a>Type System</h2></div></div></div><p>
+      D-Bus has a type system, in which values of various types can be
+      serialized into a sequence of bytes referred to as the
+      <em class="firstterm">wire format</em> in a standard way.
       Converting a value from some other representation into the wire
       format is called <em class="firstterm">marshaling</em> and converting
       it back from the wire format is <em class="firstterm">unmarshaling</em>.
@@ -373,7 +364,21 @@
               </p></li><li class="listitem"><p>
                 Signatures must be nul-terminated.
               </p></li></ul></div><p>
-        </p></div></div><div class="sect2" title="Message Format"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-messages"></a>Message Format</h3></div></div></div><p>
+        </p></div></div></div><div class="sect1" title="Message Protocol"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="message-protocol"></a>Message Protocol</h2></div></div></div><p>
+      A <em class="firstterm">message</em> consists of a
+      <em class="firstterm">header</em> and a <em class="firstterm">body</em>. If you
+      think of a message as a package, the header is the address, and the body
+      contains the package contents. The message delivery system uses the header
+      information to figure out where to send the message and how to interpret
+      it; the recipient interprets the body of the message.
+    </p><p>
+      The body of the message is made up of zero or more
+      <em class="firstterm">arguments</em>, which are typed values, such as an
+      integer or a byte array.
+    </p><p>
+      Both header and body use the D-Bus <a class="link" href="#type-system" title="Type System">type
+        system</a> and format for serializing data.
+    </p><div class="sect2" title="Message Format"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-messages"></a>Message Format</h3></div></div></div><p>
         A message consists of a header and a body. The header is a block of
         values with a fixed signature and meaning.  The body is a separate block
         of values, with a signature specified in the header.
@@ -923,14 +928,14 @@
         commands may be introduced both before, and after
         authentication, i.e. both before and after the OK command.
       </p></div><div class="sect2" title="Authentication examples"><div class="titlepage"><div><div><h3 class="title"><a name="auth-examples"></a>Authentication examples</h3></div></div></div><p>
-        </p><div class="figure"><a name="idp29600080"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5183376"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29601904"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5185200"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -939,14 +944,14 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29603808"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5187104"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
             C: FOOBAR
             S: ERROR
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29605696"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5188992"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -955,7 +960,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29607712"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5191008"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -968,7 +973,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29609888"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5193184"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -981,7 +986,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29611952"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5195248"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -990,7 +995,7 @@
             S: AGREE_UNIX_FD
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp29613952"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5197248"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -1268,7 +1273,7 @@
                 fails, the lock fails. Servers should retry for a reasonable
                 period of time, then they may choose to delete an existing lock
                 to keep users from having to manually delete a stale
-                lock. <sup>[<a name="idp29699408" href="#ftn.idp29699408" class="footnote">1</a>]</sup>
+                lock. <sup>[<a name="idp5282704" href="#ftn.idp5282704" class="footnote">1</a>]</sup>
               </p></li><li class="listitem"><p>
                 Once the lockfile has been created, the server loads the cookie
                 file. It should then delete any cookies that are old (the
@@ -1826,32 +1831,10 @@
         and the second will be queued as a possible owner of that name. When 
         the first exits, the second will take over.
       </p><p>
-        Messages may have a <code class="literal">DESTINATION</code> field (see <a class="xref" href="#message-protocol-header-fields" title="Header Fields">the section called &#8220;Header Fields&#8221;</a>).  If the
-        <code class="literal">DESTINATION</code> field is present, it specifies a message
-        recipient by name. Method calls and replies normally specify this field.
-        The message bus must send messages (of any type) with the
-        <code class="literal">DESTINATION</code> field set to the specified recipient,
-        regardless of whether the recipient has set up a match rule matching
-        the message.
-      </p><p>
-        Signals normally do not specify a destination; they are sent to all
-        applications with <em class="firstterm">message matching rules</em> that
-        match the message.
-      </p><p>
-        When the message bus receives a method call, if the
-        <code class="literal">DESTINATION</code> field is absent, the call is taken to be
-        a standard one-to-one message and interpreted by the message bus
-        itself. For example, sending an
-        <code class="literal">org.freedesktop.DBus.Peer.Ping</code> message with no
-        <code class="literal">DESTINATION</code> will cause the message bus itself to
-        reply to the ping immediately; the message bus will not make this
-        message visible to other applications.
-      </p><p>
-        Continuing the <code class="literal">org.freedesktop.DBus.Peer.Ping</code> example, if
-        the ping message were sent with a <code class="literal">DESTINATION</code> name of
-        <code class="literal">com.yoyodyne.Screensaver</code>, then the ping would be
-        forwarded, and the Yoyodyne Corporation screensaver application would be
-        expected to reply to the ping.
+        Applications may send <em class="firstterm">unicast messages</em> to
+        a specific recipient or to the message bus itself, or
+        <em class="firstterm">broadcast messages</em> to all interested recipients.
+        See <a class="xref" href="#message-bus-routing" title="Message Bus Message Routing">the section called &#8220;Message Bus Message Routing&#8221;</a> for details.
       </p></div><div class="sect2" title="Message Bus Names"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-names"></a>Message Bus Names</h3></div></div></div><p>
         Each connection has at least one name, assigned at connection time and
         returned in response to the
@@ -2040,16 +2023,94 @@
           currently queued for a bus name (see
           <a class="xref" href="#term-queued-owner" title="Queued Name Owner">Queued Name Owner</a>).
         </p></div></div><div class="sect2" title="Message Bus Message Routing"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-routing"></a>Message Bus Message Routing</h3></div></div></div><p>
-        FIXME 
-      </p><div class="sect3" title="Match Rules"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-match-rules"></a>Match Rules</h4></div></div></div><p>
-	  An important part of the message bus routing protocol is match  
-	  rules. Match rules describe what messages can be sent to a client
-          based on the contents of the message.  When a message is routed
-          through the bus it is compared to clients' match rules.  If any
-          of the rules match, the message is dispatched to the client.
-          If none of the rules match the message never leaves the bus.  This
-          is an effective way to control traffic over the bus and to make sure
-          only relevant message need to be processed by the client.
+        Messages may have a <code class="literal">DESTINATION</code> field (see <a class="xref" href="#message-protocol-header-fields" title="Header Fields">the section called &#8220;Header Fields&#8221;</a>), resulting in a
+        <em class="firstterm">unicast message</em>.  If the
+        <code class="literal">DESTINATION</code> field is present, it specifies a message
+        recipient by name. Method calls and replies normally specify this field.
+        The message bus must send messages (of any type) with the
+        <code class="literal">DESTINATION</code> field set to the specified recipient,
+        regardless of whether the recipient has set up a match rule matching
+        the message.
+      </p><p>
+        When the message bus receives a signal, if the
+        <code class="literal">DESTINATION</code> field is absent, it is considered to
+        be a <em class="firstterm">broadcast signal</em>, and is sent to all
+        applications with <em class="firstterm">message matching rules</em> that
+        match the message. Most signal messages are broadcasts.
+      </p><p>
+        Unicast signal messages (those with a <code class="literal">DESTINATION</code>
+        field) are not commonly used, but they are treated like any unicast
+        message: they are delivered to the specified receipient,
+        regardless of its match rules.  One use for unicast signals is to
+        avoid a race condition in which a signal is emitted before the intended
+        recipient can call <a class="xref" href="#bus-messages-add-match" title="org.freedesktop.DBus.AddMatch">the section called &#8220;<code class="literal">org.freedesktop.DBus.AddMatch</code>&#8221;</a> to
+        receive that signal: if the signal is sent directly to that recipient
+        using a unicast message, it does not need to add a match rule at all,
+        and there is no race condition.  Another use for unicast signals,
+        on message buses whose security policy prevents eavesdropping, is to
+        send sensitive information which should only be visible to one
+        recipient.
+      </p><p>
+        When the message bus receives a method call, if the
+        <code class="literal">DESTINATION</code> field is absent, the call is taken to be
+        a standard one-to-one message and interpreted by the message bus
+        itself. For example, sending an
+        <code class="literal">org.freedesktop.DBus.Peer.Ping</code> message with no
+        <code class="literal">DESTINATION</code> will cause the message bus itself to
+        reply to the ping immediately; the message bus will not make this
+        message visible to other applications.
+      </p><p>
+        Continuing the <code class="literal">org.freedesktop.DBus.Peer.Ping</code> example, if
+        the ping message were sent with a <code class="literal">DESTINATION</code> name of
+        <code class="literal">com.yoyodyne.Screensaver</code>, then the ping would be
+        forwarded, and the Yoyodyne Corporation screensaver application would be
+        expected to reply to the ping.
+      </p><p>
+        Message bus implementations may impose a security policy which
+        prevents certain messages from being sent or received.
+        When a message cannot be sent or received due to a security
+        policy, the message bus should send an error reply, unless the
+        original message had the <code class="literal">NO_REPLY</code> flag.
+      </p><div class="sect3" title="Eavesdropping"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-eavesdropping"></a>Eavesdropping</h4></div></div></div><p>
+          Receiving a unicast message whose <code class="literal">DESTINATION</code>
+          indicates a different recipient is called
+          <em class="firstterm">eavesdropping</em>. On a message bus which acts as
+          a security boundary (like the standard system bus), the security
+          policy should usually prevent eavesdropping, since unicast messages
+          are normally kept private and may contain security-sensitive
+          information.
+        </p><p>
+          Eavesdropping is mainly useful for debugging tools, such as
+          the <code class="literal">dbus-monitor</code> tool in the reference
+          implementation of D-Bus. Tools which eavesdrop on the message bus
+          should be careful to avoid sending a reply or error in response to
+          messages intended for a different client.
+        </p><p>
+          Clients may attempt to eavesdrop by adding match rules
+          (see <a class="xref" href="#message-bus-routing-match-rules" title="Match Rules">the section called &#8220;Match Rules&#8221;</a>) containing
+          the <code class="literal">eavesdrop='true'</code> match. If the message bus'
+          security policy does not allow eavesdropping, the match rule can
+          still be added, but will not have any practical effect. For
+          compatibility with older message bus implementations, if adding such
+          a match rule results in an error reply, the client may fall back to
+          adding the same rule with the <code class="literal">eavesdrop</code> match
+          omitted.
+        </p></div><div class="sect3" title="Match Rules"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-match-rules"></a>Match Rules</h4></div></div></div><p>
+	  An important part of the message bus routing protocol is match
+          rules. Match rules describe the messages that should be sent to a
+          client, based on the contents of the message.  Broadcast signals
+          are only sent to clients which have a suitable match rule: this
+          avoids waking up client processes to deal with signals that are
+          not relevant to that client.
+        </p><p>
+          Messages that list a client as their <code class="literal">DESTINATION</code>
+          do not need to match the client's match rules, and are sent to that
+          client regardless. As a result, match rules are mainly used to
+          receive a subset of broadcast signals.
+        </p><p>
+          Match rules can also be used for eavesdropping
+          (see <a class="xref" href="#message-bus-routing-eavesdropping" title="Eavesdropping">the section called &#8220;Eavesdropping&#8221;</a>),
+          if the security policy of the message bus allows it.
         </p><p>
           Match rules are added using the AddMatch bus method 
           (see <a class="xref" href="#bus-messages-add-match" title="org.freedesktop.DBus.AddMatch">the section called &#8220;<code class="literal">org.freedesktop.DBus.AddMatch</code>&#8221;</a>).  Rules are
@@ -2165,6 +2226,23 @@
                         daemon in dbus 1.5.0 and later.
                       </em></span>
                     </p>
+                  </td></tr><tr><td><code class="literal">eavesdrop</code></td><td><code class="literal">'true'</code>, <code class="literal">'false'</code></td><td>Since D-Bus 1.5.6, match rules do not
+                    match messages which have a <code class="literal">DESTINATION</code>
+                    field unless the match rule specifically
+                    requests this
+                    (see <a class="xref" href="#message-bus-routing-eavesdropping" title="Eavesdropping">the section called &#8220;Eavesdropping&#8221;</a>)
+                    by specifying <code class="literal">eavesdrop='true'</code>
+                    in the match rule.  <code class="literal">eavesdrop='false'</code>
+                    restores the default behaviour. Messages are
+                    delivered to their <code class="literal">DESTINATION</code>
+                    regardless of match rules, so this match does not
+                    affect normal delivery of unicast messages.
+                    If the message bus has a security policy which forbids
+                    eavesdropping, this match may still be used without error,
+                    but will not have any practical effect.
+                    In older versions of D-Bus, this match was not allowed
+                    in match rules, and all match rules behaved as if
+                    <code class="literal">eavesdrop='true'</code> had been used.
                   </td></tr></tbody></table></div><p>
         </p></div></div><div class="sect2" title="Message Bus Starting Services"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-starting-services"></a>Message Bus Starting Services</h3></div></div></div><p>
         The message bus can start applications on behalf of other applications.
@@ -2202,7 +2280,7 @@
 
         </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>General syntax</p></li><li class="listitem"><p>Comment format</p></li></ul></div><p>
 
-        </p><div class="figure"><a name="idp30049712"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5653952"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
             # Sample service description file
             [D-BUS Service]
             Names=org.freedesktop.ConfigurationDatabase;org.gnome.GConf;
@@ -2372,7 +2450,7 @@
             allowing another process to set the selection between the
             verification and the setting (e.g., by using XGrabServer /
             XungrabServer).
-          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp30102912"></a></h5></div></div></div><p>
+          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5706720"></a></h5></div></div></div><p>
             [FIXME specify location of .service files, probably using
             DESKTOP_DIRS etc. from basedir specification, though login session
             bus is not really desktop-specific]
@@ -2387,7 +2465,7 @@
           variable. If that variable is not set, applications should try 
           to connect to the well-known address
           <code class="literal">unix:path=/var/run/dbus/system_bus_socket</code>.
-          <sup>[<a name="idp30107936" href="#ftn.idp30107936" class="footnote">2</a>]</sup>
+          <sup>[<a name="idp5711744" href="#ftn.idp5711744" class="footnote">2</a>]</sup>
         </p><p>
           [FIXME specify location of system bus .service files]
         </p></div></div><div class="sect2" title="Message Bus Messages"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-messages"></a>Message Bus Messages</h3></div></div></div><p>
@@ -2572,7 +2650,7 @@
         There is also a per-machine ID, described in <a class="xref" href="#standard-interfaces-peer" title="org.freedesktop.DBus.Peer">the section called &#8220;<code class="literal">org.freedesktop.DBus.Peer</code>&#8221;</a> and returned
         by org.freedesktop.DBus.Peer.GetMachineId().
         For a desktop session bus, the bus ID can be used as a way to uniquely identify a user's session.
-        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp30273536"></a>Glossary</h2></div></div></div><p>
+        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5877344"></a>Glossary</h2></div></div></div><p>
       This glossary defines some of the terms used in this specification.
     </p><dl><dt><a name="term-bus-name"></a>Bus Name</dt><dd><p>
           The message bus maintains an association between names and
@@ -2646,10 +2724,10 @@
           message bus. This name will never change owner, and will be unique
           (never reused during the lifetime of the message bus).
           It will begin with a ':' character.
-        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.idp29699408" href="#idp29699408" class="para">1</a>] </sup>Lockfiles are used instead of real file
+        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a name="ftn.idp5282704" href="#idp5282704" class="para">1</a>] </sup>Lockfiles are used instead of real file
                 locking <code class="literal">fcntl()</code> because real locking
                 implementations are still flaky on network
-                filesystems.</p></div><div class="footnote"><p><sup>[<a name="ftn.idp30107936" href="#idp30107936" class="para">2</a>] </sup>
+                filesystems.</p></div><div class="footnote"><p><sup>[<a name="ftn.idp5711744" href="#idp5711744" class="para">2</a>] </sup>
               The D-Bus reference implementation actually honors the 
               <code class="literal">$(localstatedir)</code> configure option 
               for this address, on both client and server side.

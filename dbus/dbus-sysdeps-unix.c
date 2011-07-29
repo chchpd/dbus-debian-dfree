@@ -132,13 +132,6 @@ _dbus_open_socket (int              *fd_p,
     }
 }
 
-dbus_bool_t
-_dbus_open_tcp_socket (int              *fd,
-                       DBusError        *error)
-{
-  return _dbus_open_socket(fd, AF_INET, SOCK_STREAM, 0, error);
-}
-
 /**
  * Opens a UNIX domain socket (as in the socket() call).
  * Does not bind the socket.
@@ -149,7 +142,7 @@ _dbus_open_tcp_socket (int              *fd,
  * @param error return location for an error
  * @returns #FALSE if error is set
  */
-dbus_bool_t
+static dbus_bool_t
 _dbus_open_unix_socket (int              *fd,
                         DBusError        *error)
 {
@@ -826,8 +819,6 @@ _dbus_connect_unix_socket (const char     *path,
                       path, _dbus_strerror (errno));
 
       _dbus_close (fd, NULL);
-      fd = -1;
-
       return -1;
     }
 
@@ -836,8 +827,6 @@ _dbus_connect_unix_socket (const char     *path,
       _DBUS_ASSERT_ERROR_IS_SET (error);
 
       _dbus_close (fd, NULL);
-      fd = -1;
-
       return -1;
     }
 
@@ -1160,14 +1149,6 @@ _dbus_connect_tcp_socket_with_nonce (const char     *host,
   int fd = -1, res;
   struct addrinfo hints;
   struct addrinfo *ai, *tmp;
-
-  _DBUS_ASSERT_ERROR_IS_CLEAR (error);
-
-  if (!_dbus_open_tcp_socket (&fd, error))
-    {
-      _DBUS_ASSERT_ERROR_IS_SET(error);
-      return -1;
-    }
 
   _DBUS_ASSERT_ERROR_IS_CLEAR(error);
 
@@ -2362,6 +2343,29 @@ _dbus_atomic_dec (DBusAtomic *atomic)
   _DBUS_LOCK (atomic);
   res = atomic->value;
   atomic->value -= 1;
+  _DBUS_UNLOCK (atomic);
+  return res;
+#endif
+}
+
+/**
+ * Atomically get the value of an integer. It may change at any time
+ * thereafter, so this is mostly only useful for assertions.
+ *
+ * @param atomic pointer to the integer to get
+ * @returns the value at this moment
+ */
+dbus_int32_t
+_dbus_atomic_get (DBusAtomic *atomic)
+{
+#if DBUS_USE_SYNC
+  __sync_synchronize ();
+  return atomic->value;
+#else
+  dbus_int32_t res;
+
+  _DBUS_LOCK (atomic);
+  res = atomic->value;
   _DBUS_UNLOCK (atomic);
   return res;
 #endif
@@ -3641,12 +3645,18 @@ _dbus_get_standard_system_servicedirs (DBusList **dirs)
     }
 
   /*
-   * add configured datadir to defaults
-   * this may be the same as an xdg dir
-   * however the config parser should take
-   * care of duplicates
+   * Add configured datadir to defaults. This may be the same as one
+   * of the XDG directories. However, the config parser should take
+   * care of the duplicates.
+   *
+   * Also, append /lib as counterpart of /usr/share on the root
+   * directory (the root directory does not know /share), in order to
+   * facilitate early boot system bus activation where /usr might not
+   * be available.
    */
-  if (!_dbus_string_append (&servicedir_path, DBUS_DATADIR":"))
+  if (!_dbus_string_append (&servicedir_path,
+                            DBUS_DATADIR":"
+                            "/lib:"))
         goto oom;
 
   if (!_dbus_split_paths_and_append (&servicedir_path,

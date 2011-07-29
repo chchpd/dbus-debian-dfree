@@ -549,6 +549,10 @@ int _dbus_printf_string_upper_bound (const char *format,
       bufsize *= 2;
 
       p = malloc (bufsize);
+
+      if (p == NULL)
+        return -1;
+
       len = _vsnprintf (p, bufsize - 1, format, args);
       free (p);
     }
@@ -2639,6 +2643,10 @@ _dbus_daemon_is_session_bus_address_published (const char *scope)
   // see http://msdn.microsoft.com/en-us/library/ms684315%28VS.85%29.aspx
   hDBusDaemonMutex = CreateMutexA( NULL, FALSE, _dbus_string_get_const_data(&mutex_name) );
 
+  /* The client uses mutex ownership to detect a running server, so the server should do so too.
+     Fortunally the client deletes the mutex in the lock protected area, so checking presence 
+     will work too.  */
+
   _dbus_global_unlock( lock );
 
   _dbus_string_free( &mutex_name );
@@ -2683,6 +2691,14 @@ _dbus_daemon_publish_session_bus_address (const char* address, const char *scope
       hDBusDaemonMutex = CreateMutexA( NULL, FALSE, _dbus_string_get_const_data(&mutex_name) );
     }
   _dbus_string_free( &mutex_name );
+
+  // acquire the mutex
+  if (WaitForSingleObject( hDBusDaemonMutex, 10 ) != WAIT_OBJECT_0)
+    {
+      _dbus_global_unlock( lock );
+      CloseHandle( hDBusDaemonMutex );
+      return FALSE;
+    }
 
   if (!_dbus_get_shm_name(&shm_name,scope))
     {
@@ -3063,6 +3079,21 @@ _dbus_atomic_dec (DBusAtomic *atomic)
   // +/- 1 is needed here!
   // no volatile argument with mingw
   return InterlockedDecrement (&atomic->value) + 1;
+}
+
+/**
+ * Atomically get the value of an integer. It may change at any time
+ * thereafter, so this is mostly only useful for assertions.
+ *
+ * @param atomic pointer to the integer to get
+ * @returns the value at this moment
+ */
+dbus_int32_t
+_dbus_atomic_get (DBusAtomic *atomic)
+{
+  /* this is what GLib does, hopefully it's right... */
+  MemoryBarrier ();
+  return atomic->value;
 }
 
 /**

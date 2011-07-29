@@ -60,6 +60,9 @@
 /* Define to build independent test binaries (requires GLib) */
 #undef DBUS_ENABLE_MODULAR_TESTS
 
+/* Define to enable bus daemon usage statistics */
+#undef DBUS_ENABLE_STATS
+
 /* Build with caching of user data */
 #undef DBUS_ENABLE_USERDB_CACHE
 

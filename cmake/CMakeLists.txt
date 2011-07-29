@@ -38,7 +38,7 @@ if ($ENV{DBUSDIR})
 endif ($ENV{DBUSDIR})
 
 if (DBUS_INSTALL_DIR)
-	set(CMAKE_INSTALL_PREFIX "${DBUS_INSTALL_DIR}" CACHE PATH FORCE)
+	set(CMAKE_INSTALL_PREFIX "${DBUS_INSTALL_DIR}" CACHE PATH "install prefix" FORCE)
 else (DBUS_INSTALL_DIR)
 	set(DBUS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 endif (DBUS_INSTALL_DIR)
@@ -98,6 +98,10 @@ endif(NOT WIN32)
 #AC_ARG_ENABLE(asserts, AS_HELP_STRING([--enable-asserts],[include assertion checks]),enable_asserts=$enableval,enable_asserts=$USE_MAINTAINER_MODE)
 option (DBUS_DISABLE_ASSERTS "Disable assertion checking" OFF)
 
+option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
+
+option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
+
 # do config checks
 INCLUDE(ConfigureChecks.cmake)
 
@@ -108,7 +112,7 @@ SET(DBUS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
 include (MacroLibrary)
 
 if(VCS)
-	set(DBUS_VERBOSE_C_S 1 CACHE STRING FORCE)
+	set(DBUS_VERBOSE_C_S 1 CACHE STRING "verbose mode" FORCE)
 	set(DBUS_VERBOSE_C_S 1)
 endif(VCS)
 
@@ -126,8 +130,8 @@ if(WIN32)
 
 		# Use the highest warning level
 		if (WALL)
-			set(WALL 1 CACHE STRING FORCE)
-			set(CMAKE_CXX_WARNING_LEVEL 4 CACHE STRING FORCE)
+			set(WALL 1 CACHE STRING "all warnings"  FORCE)
+			set(CMAKE_CXX_WARNING_LEVEL 4 CACHE STRING "warning level" FORCE)
 
 			if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 				STRING(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -141,7 +145,7 @@ if(WIN32)
 				SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
 			endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
 		else (WALL)
-			set(CMAKE_CXX_WARNING_LEVEL 3 CACHE STRING FORCE)
+			set(CMAKE_CXX_WARNING_LEVEL 3 CACHE STRING "warning level" FORCE)
 		endif (WALL)
 
 		SET(MSVC_W_ERROR   " /we4028 /we4013 /we4133 /we4047 /we4031 /we4002 /we4003 /we4114")
@@ -285,7 +289,7 @@ STRING(TOUPPER ${CMAKE_SYSTEM_NAME} sysname)
 if("${sysname}" MATCHES ".*SOLARIS.*")
     option (HAVE_CONSOLE_OWNER_FILE "enable console owner file (solaris only)" ON)
     if(HAVE_CONSOLE_OWNER_FILE)
-        option (DBUS_CONSOLE_OWNER_FILE "Directory to check for console ownerhip" "/dev/console")
+        set (DBUS_CONSOLE_OWNER_FILE "/dev/console" CACHE STRING "Directory to check for console ownerhip")
     endif(HAVE_CONSOLE_OWNER_FILE)
 endif("${sysname}" MATCHES ".*SOLARIS.*")
 
@@ -345,8 +349,8 @@ if(CMAKE_COMPILER_IS_GNUCC AND NOT DBUS_ENABLE_ANSI)
     endif(UNAME_EXECUTABLE)
 endif(CMAKE_COMPILER_IS_GNUCC AND NOT DBUS_ENABLE_ANSI)
 
-option (DBUS_HAVE_ATOMIC_INT    "Some atomic integer implementation present" ${atomic_int})
-option (DBUS_USE_ATOMIC_INT_486 "Use atomic integer implementation for 486" ${atomic_int_486})
+set (DBUS_HAVE_ATOMIC_INT ${atomic_int} CACHE STRING "Some atomic integer implementation present")
+set (DBUS_USE_ATOMIC_INT_486 ${atomic_int_486} CACHE STRING "Use atomic integer implementation for 486")
 
 if(X11_FOUND)
   option (DBUS_BUILD_X11 "Build with X11 autolaunch support " ON)
@@ -439,16 +443,16 @@ set (DBUS_USER )
 
 
 if (WIN32)
-  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "system bus default address"  FORCE)
-  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "session bus default address" FORCE)
+  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "system bus default address")
+  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "session bus default address")
 
   set (DBUS_SYSTEM_CONFIG_FILE "etc/dbus-1/system.conf")
   set (DBUS_SESSION_CONFIG_FILE "etc/dbus-1/session.conf")
   # bus-test expects a non empty string
   set (DBUS_USER "Administrator")
 else (WIN32)
-  option (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "system bus default address" "unix:tmpdir=")
-  option (DBUS_SESSION_BUS_DEFAULT_ADDRESS "session bus default address" "unix:path=${DBUS_SESSION_SOCKET_DIR}")
+  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "unix:tmpdir=" CACHE STRING "system bus default address")
+  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "unix:path=${DBUS_SESSION_SOCKET_DIR}" CACHE STRING "session bus default address")
   set (sysconfdir "")
   set (configdir ${sysconfdir}/dbus-1 )
   set (DBUS_SYSTEM_CONFIG_FILE  ${configdir}/system.conf)
@@ -456,7 +460,7 @@ else (WIN32)
   set (DBUS_USER "root")
 endif (WIN32)
 
-set (DBUS_DAEMON_NAME "dbus-daemon" CACHE STRING "The name of the dbus daemon executable" FORCE)
+set (DBUS_DAEMON_NAME "dbus-daemon" CACHE STRING "The name of the dbus daemon executable")
 
 ########### create config.h ###############
 
@@ -469,7 +473,7 @@ endif(MINGW)
 
 # compiler definitions
 add_definitions(-DHAVE_CONFIG_H=1)
-add_definitions(${DBUS_BUS_CFLAGS} -DDBUS_API_SUBJECT_TO_CHANGE)
+add_definitions(${DBUS_BUS_CFLAGS})
 
 
 if (DBUS_BUILD_TESTS)
@@ -500,8 +504,12 @@ set (DBUS_INTERNAL_LIBRARY_DEFINITIONS "-DDBUS_STATIC_BUILD")
 set (DBUS_INTERNAL_CLIENT_DEFINITIONS "-DDBUS_STATIC_BUILD")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
+
+if (WIN32)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dbus-env.bat.cmake ${CMAKE_BINARY_DIR}/bin/dbus-env.bat )
 install_files(/bin FILES ${CMAKE_BINARY_DIR}/bin/dbus-env.bat)
+endif()
+
 add_definitions(-DHAVE_CONFIG_H=1)
 
 ########### subdirs ###############
@@ -557,6 +565,7 @@ message("        Building unit tests:      ${DBUS_BUILD_TESTS}                 "
 message("        Building verbose mode:    ${DBUS_ENABLE_VERBOSE_MODE}         ")
 message("        Building w/o assertions:  ${DBUS_DISABLE_ASSERTS}             ")
 message("        Building w/o checks:      ${DBUS_DISABLE_CHECKS}              ")
+message("        Building bus stats API:   ${DBUS_ENABLE_STATS}                ")
 message("        installing system libs:   ${DBUS_INSTALL_SYSTEM_LIBS}         ")
 #message("        Building SELinux support: ${have_selinux}                     ")
 #message("        Building dnotify support: ${have_dnotify}                     ")
