@@ -341,8 +341,14 @@ static dbus_bool_t        _dbus_connection_peek_for_reply_unlocked           (DB
 static DBusMessageFilter *
 _dbus_message_filter_ref (DBusMessageFilter *filter)
 {
-  _dbus_assert (filter->refcount.value > 0);
+#ifdef DBUS_DISABLE_ASSERT
   _dbus_atomic_inc (&filter->refcount);
+#else
+  dbus_int32_t old_value;
+
+  old_value = _dbus_atomic_inc (&filter->refcount);
+  _dbus_assert (old_value > 0);
+#endif
 
   return filter;
 }
@@ -350,9 +356,12 @@ _dbus_message_filter_ref (DBusMessageFilter *filter)
 static void
 _dbus_message_filter_unref (DBusMessageFilter *filter)
 {
-  _dbus_assert (filter->refcount.value > 0);
+  dbus_int32_t old_value;
 
-  if (_dbus_atomic_dec (&filter->refcount) == 1)
+  old_value = _dbus_atomic_dec (&filter->refcount);
+  _dbus_assert (old_value > 0);
+
+  if (old_value == 1)
     {
       if (filter->free_user_data_function)
         (* filter->free_user_data_function) (filter->user_data);
@@ -1309,8 +1318,9 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
   
   if (_dbus_modify_sigpipe)
     _dbus_disable_sigpipe ();
-  
-  connection->refcount.value = 1;
+
+  /* initialized to 0: use atomic op to avoid mixing atomic and non-atomic */
+  _dbus_atomic_inc (&connection->refcount);
   connection->transport = transport;
   connection->watches = watch_list;
   connection->timeouts = timeout_list;
@@ -2107,23 +2117,15 @@ _dbus_connection_send_and_unlock (DBusConnection *connection,
 void
 _dbus_connection_close_if_only_one_ref (DBusConnection *connection)
 {
-  dbus_int32_t tmp_refcount;
+  dbus_int32_t refcount;
 
   CONNECTION_LOCK (connection);
 
-  /* We increment and then decrement the refcount, because there is no
-   * _dbus_atomic_get (mirroring the fact that there's no InterlockedGet
-   * on Windows). */
-  _dbus_atomic_inc (&connection->refcount);
-  tmp_refcount = _dbus_atomic_dec (&connection->refcount);
+  refcount = _dbus_atomic_get (&connection->refcount);
+  /* The caller should have at least one ref */
+  _dbus_assert (refcount >= 1);
 
-  /* The caller should have one ref, and this function temporarily took
-   * one more, which is reflected in this count even though we already
-   * released it (relying on the caller's ref) due to _dbus_atomic_dec
-   * semantics */
-  _dbus_assert (tmp_refcount >= 2);
-
-  if (tmp_refcount == 2)
+  if (refcount == 1)
     _dbus_connection_close_possibly_shared_and_unlock (connection);
   else
     CONNECTION_UNLOCK (connection);
@@ -2654,9 +2656,9 @@ _dbus_connection_last_unref (DBusConnection *connection)
   DBusList *link;
 
   _dbus_verbose ("Finalizing connection %p\n", connection);
-  
-  _dbus_assert (connection->refcount.value == 0);
-  
+
+  _dbus_assert (_dbus_atomic_get (&connection->refcount) == 0);
+
   /* You have to disconnect the connection before unref:ing it. Otherwise
    * you won't get the disconnected message.
    */
@@ -5415,8 +5417,8 @@ dbus_connection_add_filter (DBusConnection            *connection,
   if (filter == NULL)
     return FALSE;
 
-  filter->refcount.value = 1;
-  
+  _dbus_atomic_inc (&filter->refcount);
+
   CONNECTION_LOCK (connection);
 
   if (!_dbus_list_append (&connection->filter_list,
@@ -5516,7 +5518,7 @@ dbus_connection_remove_filter (DBusConnection            *connection,
  * @param user_data data to pass to functions in the vtable
  * @param error address where an error can be returned
  * @returns #FALSE if an error (#DBUS_ERROR_NO_MEMORY or
- *    #DBUS_ERROR_ADDRESS_IN_USE) is reported
+ *    #DBUS_ERROR_OBJECT_PATH_IN_USE) is reported
  */
 dbus_bool_t
 dbus_connection_try_register_object_path (DBusConnection              *connection,
@@ -5562,7 +5564,8 @@ dbus_connection_try_register_object_path (DBusConnection              *connectio
  * @param path a '/' delimited string of path elements
  * @param vtable the virtual table
  * @param user_data data to pass to functions in the vtable
- * @returns #FALSE if not enough memory
+ * @returns #FALSE if an error (#DBUS_ERROR_NO_MEMORY or
+ *    #DBUS_ERROR_OBJECT_PATH_IN_USE) ocurred
  */
 dbus_bool_t
 dbus_connection_register_object_path (DBusConnection              *connection,
@@ -5593,7 +5596,7 @@ dbus_connection_register_object_path (DBusConnection              *connection,
 
   dbus_free_string_array (decomposed_path);
 
-  if (dbus_error_has_name (&error, DBUS_ERROR_ADDRESS_IN_USE))
+  if (dbus_error_has_name (&error, DBUS_ERROR_OBJECT_PATH_IN_USE))
     {
       _dbus_warn ("%s\n", error.message);
       dbus_error_free (&error);
@@ -5615,7 +5618,7 @@ dbus_connection_register_object_path (DBusConnection              *connection,
  * @param user_data data to pass to functions in the vtable
  * @param error address where an error can be returned
  * @returns #FALSE if an error (#DBUS_ERROR_NO_MEMORY or
- *    #DBUS_ERROR_ADDRESS_IN_USE) is reported
+ *    #DBUS_ERROR_OBJECT_PATH_IN_USE) is reported
  */
 dbus_bool_t
 dbus_connection_try_register_fallback (DBusConnection              *connection,
@@ -5663,7 +5666,8 @@ dbus_connection_try_register_fallback (DBusConnection              *connection,
  * @param path a '/' delimited string of path elements
  * @param vtable the virtual table
  * @param user_data data to pass to functions in the vtable
- * @returns #FALSE if not enough memory
+ * @returns #FALSE if an error (#DBUS_ERROR_NO_MEMORY or
+ *    #DBUS_ERROR_OBJECT_PATH_IN_USE) occured
  */
 dbus_bool_t
 dbus_connection_register_fallback (DBusConnection              *connection,
@@ -5694,7 +5698,7 @@ dbus_connection_register_fallback (DBusConnection              *connection,
 
   dbus_free_string_array (decomposed_path);
 
-  if (dbus_error_has_name (&error, DBUS_ERROR_ADDRESS_IN_USE))
+  if (dbus_error_has_name (&error, DBUS_ERROR_OBJECT_PATH_IN_USE))
     {
       _dbus_warn ("%s\n", error.message);
       dbus_error_free (&error);

@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [4])
-m4_define([dbus_micro_version], [12])
+m4_define([dbus_micro_version], [14])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -1231,6 +1231,9 @@ case $host_os in
     solaris*)
         # Solaris' C library apparently needs these runes to be threadsafe...
         CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT"
+        # ... and this opt-in to get file descriptor passing support
+        CFLAGS="$CFLAGS -D_XOPEN_SOURCE=500"
+        ;;
 esac
 
 ### Doxygen Documentation
@@ -1262,9 +1265,8 @@ fi
 AM_CONDITIONAL(DBUS_DOXYGEN_DOCS_ENABLED, test x$enable_doxygen_docs = xyes)
 AC_MSG_RESULT($enable_doxygen_docs)
 
-XSLTPROC=false
 AC_CHECK_PROGS([XSLTPROC], [xsltproc])
-AM_CONDITIONAL(DBUS_HAVE_XSLTPROC, test "$XSLTPROC" != false)
+AM_CONDITIONAL([DBUS_HAVE_XSLTPROC], [test "x$XSLTPROC" != "x"])
 
 ### XML Documentation
 

@@ -36,13 +36,18 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @DBUS_BUILD_TESTS_FALSE@TESTS = $(am__EXEEXT_5)
-@DBUS_BUILD_TESTS_TRUE@TESTS = shell-test$(EXEEXT) $(am__EXEEXT_5)
+@DBUS_BUILD_TESTS_TRUE@TESTS = shell-test$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	../bus/bus-test$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	../bus/bus-test-system$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	../dbus/dbus-test$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	$(am__append_1) $(am__EXEEXT_5)
+@DBUS_BUILD_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_1 = ../bus/bus-test-launch-helper$(EXEEXT)
 noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_3)
 testexec_PROGRAMS = $(am__EXEEXT_4)
-@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_1 = $(installable_tests)
 @DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_2 = $(installable_tests)
-@DBUS_ENABLE_INSTALLED_TESTS_TRUE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_3 = $(installable_tests)
-@DBUS_ENABLE_INSTALLED_TESTS_FALSE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_4 = $(installable_tests)
+@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_3 = $(installable_tests)
+@DBUS_ENABLE_INSTALLED_TESTS_TRUE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_4 = $(installable_tests)
+@DBUS_ENABLE_INSTALLED_TESTS_FALSE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__append_5 = $(installable_tests)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -66,12 +71,12 @@ libdbus_testutils_la_OBJECTS = $(am_libdbus_testutils_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
 am__v_lt_0 = --silent
-@DBUS_BUILD_TESTS_TRUE@am__EXEEXT_1 = test-service$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@am__EXEEXT_1 = shell-test$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	spawn-test$(EXEEXT) test-exit$(EXEEXT) \
 @DBUS_BUILD_TESTS_TRUE@	test-names$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	test-shell-service$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	shell-test$(EXEEXT) spawn-test$(EXEEXT) \
 @DBUS_BUILD_TESTS_TRUE@	test-segfault$(EXEEXT) \
-@DBUS_BUILD_TESTS_TRUE@	test-exit$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	test-service$(EXEEXT) \
+@DBUS_BUILD_TESTS_TRUE@	test-shell-service$(EXEEXT) \
 @DBUS_BUILD_TESTS_TRUE@	test-sleep-forever$(EXEEXT)
 am__EXEEXT_2 = test-corrupt$(EXEEXT) test-dbus-daemon$(EXEEXT) \
 	test-loopback$(EXEEXT) test-marshal$(EXEEXT) \
@@ -451,7 +456,17 @@ INCLUDES = -I$(top_srcdir) $(DBUS_TEST_CFLAGS)
 libdbus_testutils_la_SOURCES = test-utils.h test-utils.c
 noinst_LTLIBRARIES = libdbus-testutils.la
 @DBUS_BUILD_TESTS_FALSE@TEST_BINARIES = 
-@DBUS_BUILD_TESTS_TRUE@TEST_BINARIES = test-service test-names test-shell-service shell-test spawn-test test-segfault test-exit test-sleep-forever
+@DBUS_BUILD_TESTS_TRUE@TEST_BINARIES = \
+@DBUS_BUILD_TESTS_TRUE@	shell-test \
+@DBUS_BUILD_TESTS_TRUE@	spawn-test \
+@DBUS_BUILD_TESTS_TRUE@	test-exit \
+@DBUS_BUILD_TESTS_TRUE@	test-names \
+@DBUS_BUILD_TESTS_TRUE@	test-segfault \
+@DBUS_BUILD_TESTS_TRUE@	test-service \
+@DBUS_BUILD_TESTS_TRUE@	test-shell-service \
+@DBUS_BUILD_TESTS_TRUE@	test-sleep-forever \
+@DBUS_BUILD_TESTS_TRUE@	$(NULL)
+
 test_service_SOURCES = \
 	test-service.c
 
@@ -501,14 +516,18 @@ installable_tests = \
 	test-relay \
 	$(NULL)
 
-installcheck_tests = $(am__append_2)
+installcheck_tests = $(am__append_3)
 installcheck_environment = \
 	DBUS_TEST_DAEMON=$(DESTDIR)$(DBUS_DAEMONDIR)/dbus-daemon$(EXEEXT) \
 	DBUS_TEST_SYSCONFDIR=$(DESTDIR)$(sysconfdir)
 
 TESTS_ENVIRONMENT = \
+	DBUS_BLOCK_ON_ABORT=1 \
+	DBUS_FATAL_WARNINGS=1 \
 	DBUS_TEST_DAEMON=@abs_top_builddir@/bus/dbus-daemon$(EXEEXT) \
-	DBUS_TEST_DATA=@abs_top_builddir@/test/data
+	DBUS_TEST_DATA=@abs_top_builddir@/test/data \
+	DBUS_TEST_HOMEDIR=@abs_top_builddir@/dbus \
+	$(NULL)
 
 test_corrupt_SOURCES = corrupt.c
 test_corrupt_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
