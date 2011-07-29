@@ -35,6 +35,9 @@
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>     /* for write() and STDERR_FILENO */
+#endif
 #include "selinux.h"
 
 static BusContext *context;
@@ -43,8 +46,9 @@ static int reload_pipe[2];
 #define RELOAD_READ_END 0
 #define RELOAD_WRITE_END 1
 
-static void close_reload_pipe (void);
+static void close_reload_pipe (DBusWatch **);
 
+#ifdef DBUS_UNIX
 static void
 signal_handler (int sig)
 {
@@ -63,14 +67,30 @@ signal_handler (int sig)
         if ((reload_pipe[RELOAD_WRITE_END] > 0) &&
             !_dbus_write_socket (reload_pipe[RELOAD_WRITE_END], &str, 0, 1))
           {
-            _dbus_warn ("Unable to write to reload pipe.\n");
-            close_reload_pipe ();
+            /* If we receive SIGHUP often enough to fill the pipe buffer (4096
+             * times on old Linux, 65536 on modern Linux) before it can be
+             * drained, let's just warn and ignore. The configuration will be
+             * reloaded while draining the pipe buffer, which is what we
+             * wanted. It's harmless that it will be reloaded fewer times than
+             * we asked for, since the reload is delayed anyway, so new changes
+             * will be picked up.
+             *
+             * We use write() because _dbus_warn uses vfprintf, which isn't
+             * async-signal-safe.
+             *
+             * This is necessarily Unix-specific, but so are POSIX signals,
+             * so... */
+            static const char message[] =
+              "Unable to write to reload pipe - buffer full?\n";
+
+            write (STDERR_FILENO, message, strlen (message));
           }
       }
       break;
 #endif
     }
 }
+#endif /* DBUS_UNIX */
 
 static void
 usage (void)
@@ -178,7 +198,7 @@ handle_reload_watch (DBusWatch    *watch,
       _dbus_read_socket (reload_pipe[RELOAD_READ_END], &str, 1) != 1)
     {
       _dbus_warn ("Couldn't read from reload pipe.\n");
-      close_reload_pipe ();
+      close_reload_pipe (&watch);
       return TRUE;
     }
   _dbus_string_free (&str);
@@ -198,14 +218,6 @@ handle_reload_watch (DBusWatch    *watch,
       dbus_error_free (&error);
     }
   return TRUE;
-}
-
-static dbus_bool_t
-reload_watch_callback (DBusWatch    *watch,
-		       unsigned int  condition,
-		       void         *data)
-{
-  return dbus_watch_handle (watch, condition);
 }
 
 static void
@@ -237,8 +249,7 @@ setup_reload_pipe (DBusLoop *loop)
       exit (1);
     }
 
-  if (!_dbus_loop_add_watch (loop, watch, reload_watch_callback,
-			     NULL, NULL))
+  if (!_dbus_loop_add_watch (loop, watch))
     {
       _dbus_warn ("Unable to add reload watch to main loop: %s\n",
 		  error.message);
@@ -249,8 +260,13 @@ setup_reload_pipe (DBusLoop *loop)
 }
 
 static void
-close_reload_pipe (void)
+close_reload_pipe (DBusWatch **watch)
 {
+    _dbus_loop_remove_watch (bus_context_get_loop (context), *watch);
+    _dbus_watch_invalidate (*watch);
+    _dbus_watch_unref (*watch);
+    *watch = NULL;
+
     _dbus_close_socket (reload_pipe[RELOAD_READ_END], NULL);
     reload_pipe[RELOAD_READ_END] = -1;
 
@@ -509,12 +525,17 @@ main (int argc, char **argv)
 
   setup_reload_pipe (bus_context_get_loop (context));
 
+#ifdef DBUS_UNIX
+  /* POSIX signals are Unix-specific, and _dbus_set_signal_handler is
+   * unimplemented (and probably unimplementable) on Windows, so there's
+   * no point in trying to make the handler portable to non-Unix. */
 #ifdef SIGHUP
   _dbus_set_signal_handler (SIGHUP, signal_handler);
 #endif
 #ifdef DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX
   _dbus_set_signal_handler (SIGIO, signal_handler);
 #endif /* DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX */
+#endif /* DBUS_UNIX */
 
   _dbus_verbose ("We are on D-Bus...\n");
   _dbus_loop_run (bus_context_get_loop (context));

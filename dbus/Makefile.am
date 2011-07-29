@@ -1,12 +1,17 @@
 
 configdir=$(sysconfdir)/dbus-1
 
-INCLUDES = -I$(top_builddir) -I$(top_srcdir) \
-	$(DBUS_CLIENT_CFLAGS) \
+AM_CPPFLAGS = \
+	-I$(top_builddir) \
+	-I$(top_srcdir) \
 	-DDBUS_COMPILATION \
 	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
 	-DDBUS_SYSTEM_CONFIG_FILE=\""$(configdir)/system.conf"\" \
-	-DDBUS_SESSION_CONFIG_FILE=\""$(configdir)/session.conf"\"
+	-DDBUS_SESSION_CONFIG_FILE=\""$(configdir)/session.conf"\" \
+	$(NULL)
+
+# if assertions are enabled, improve backtraces
+AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 
 dbusincludedir=$(includedir)/dbus-1.0/dbus
 dbusarchincludedir=$(libdir)/dbus-1.0/include/dbus
@@ -27,7 +32,6 @@ dbus_res = versioninfo.o
 dbus_res_ldflag = -Wl,$(dbus_res)
 no_undefined = -no-undefined
 export_symbols =
-export_symvols_internal =
 
 libdbus_1_la_DEPENDENCIES = $(dbus_res)
 intllibs =
@@ -39,7 +43,6 @@ no_undefined =
 ## don't export symbols that start with "_" (we use this
 ## convention for internal symbols)
 export_symbols = -export-symbols-regex "^[^_].*"
-export_symbols_internal =
 
 intllibs = @LTLIBINTL@
 
@@ -188,9 +191,6 @@ DBUS_LIB_SOURCES=				\
 	dbus-watch.c				\
 	dbus-watch.h
 
-##	dbus-md5.c				\
-##	dbus-md5.h				\
-
 ### source code that goes in the installed client library
 ### AND is generic utility functionality used by the
 ### daemon or test programs (all symbols in here should
@@ -261,33 +261,35 @@ EXTRA_DIST=dbus-arch-deps.h.in
 ## and is only used for static linking within the dbus package.
 noinst_LTLIBRARIES=libdbus-internal.la
 
-libdbus_1_la_CPPFLAGS= -Ddbus_1_EXPORTS
-libdbus_1_la_LIBADD= $(DBUS_CLIENT_LIBS)
-libdbus_1_la_LDFLAGS= $(export_symbols) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@
+libdbus_1_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-Ddbus_1_EXPORTS \
+	$(NULL)
+libdbus_1_la_LIBADD= $(LIBDBUS_LIBS)
+libdbus_1_la_LDFLAGS = \
+	$(AM_LDFLAGS) \
+	$(export_symbols) \
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
+	-no-undefined \
+	$(NULL)
 
-libdbus_internal_la_CPPFLAGS = -DDBUS_STATIC_BUILD
-libdbus_internal_la_LIBADD=$(DBUS_CLIENT_LIBS)
-libdbus_internal_la_LDFLAGS=$(export_symbols_internal) @R_DYNAMIC_LDFLAG@
+libdbus_internal_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+libdbus_internal_la_LIBADD=$(LIBDBUS_LIBS)
 
-## note that TESTS has special meaning (stuff to use in make check)
-## so if adding tests not to be run in make check, don't add them to
-## TESTS
+noinst_PROGRAMS =
+
 if DBUS_BUILD_TESTS
-TESTS_ENVIRONMENT=DBUS_TEST_DATA=$(top_builddir)/test/data DBUS_TEST_HOMEDIR=$(top_builddir)/dbus
-TESTS=dbus-test
-else
-TESTS=
+# We can't actually run this til we've reached test/
+noinst_PROGRAMS += dbus-test
 endif
-
-## we use noinst_PROGRAMS not check_PROGRAMS so that we build
-## even when not doing "make check"
-noinst_PROGRAMS=$(TESTS)
 
 dbus_test_SOURCES=				\
 	dbus-test-main.c
 
-dbus_test_LDADD=libdbus-internal.la $(DBUS_TEST_LIBS)
-dbus_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
+dbus_test_LDADD = libdbus-internal.la
 
 ## mop up the gcov files
 clean-local:

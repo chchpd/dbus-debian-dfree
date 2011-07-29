@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [5])
-m4_define([dbus_micro_version], [4])
+m4_define([dbus_micro_version], [6])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=9
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=2
+LT_REVISION=3
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -890,6 +890,8 @@ if $dbus_use_libxml; then
    XML_LIBS=$LIBXML_LIBS
    XML_CFLAGS=$LIBXML_CFLAGS
 fi
+AC_SUBST([XML_CFLAGS])
+AC_SUBST([XML_LIBS])
 
 # Thread lib detection
 AC_CHECK_FUNC(pthread_cond_timedwait,[AC_CHECK_LIB(pthread,pthread_cond_timedwait,
@@ -919,6 +921,8 @@ else
 fi
 fi
 LIBS="$save_libs"
+
+AC_SUBST([THREAD_LIBS])
 
 # SELinux detection
 if test x$enable_selinux = xno ; then
@@ -1087,7 +1091,9 @@ if test x$have_libaudit = xyes ; then
     AC_DEFINE(HAVE_LIBAUDIT,1,[audit daemon SELinux support])
 fi
 
-# Check for ADT API
+AC_SUBST([SELINUX_LIBS])
+
+# Check for ADT API (Solaris Basic Security Mode auditing)
 AC_MSG_CHECKING(for ADT API)
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <bsm/adt.h>
@@ -1103,6 +1109,7 @@ then
 else
    AC_MSG_RESULT(no)
 fi
+AC_SUBST([ADT_LIBS])
 
 # Check for SCM_RIGHTS
 AC_MSG_CHECKING([for SCM_RIGHTS])
@@ -1124,26 +1131,11 @@ if test x$dbus_win = xyes ; then
   fi
 fi
 
+AC_SUBST([NETWORK_libs])
+
 #### Set up final flags
-DBUS_CLIENT_CFLAGS=
-DBUS_CLIENT_LIBS="$THREAD_LIBS $NETWORK_libs"
-AC_SUBST(DBUS_CLIENT_CFLAGS)
-AC_SUBST(DBUS_CLIENT_LIBS)
-
-DBUS_BUS_CFLAGS="$XML_CFLAGS"
-DBUS_BUS_LIBS="$XML_LIBS $SELINUX_LIBS $THREAD_LIBS $ADT_LIBS $NETWORK_libs"
-AC_SUBST(DBUS_BUS_CFLAGS)
-AC_SUBST(DBUS_BUS_LIBS)
-
-DBUS_LAUNCHER_CFLAGS="$XML_CFLAGS"
-DBUS_LAUNCHER_LIBS="$XML_LIBS $THREAD_LIBS $NETWORK_libs"
-AC_SUBST(DBUS_LAUNCHER_CFLAGS)
-AC_SUBST(DBUS_LAUNCHER_LIBS)
-
-DBUS_TEST_CFLAGS=
-DBUS_TEST_LIBS="$THREAD_LIBS $NETWORK_libs"
-AC_SUBST(DBUS_TEST_CFLAGS)
-AC_SUBST(DBUS_TEST_LIBS)
+LIBDBUS_LIBS="$THREAD_LIBS $NETWORK_libs"
+AC_SUBST([LIBDBUS_LIBS])
 
 ### X11 detection
 DBUS_X_LIBS=
@@ -1256,6 +1248,9 @@ case $host_os in
     solaris*)
         # Solaris' C library apparently needs these runes to be threadsafe...
         CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT"
+        # ... and this opt-in to get file descriptor passing support
+        CFLAGS="$CFLAGS -D_XOPEN_SOURCE=500"
+        ;;
 esac
 
 ### Doxygen Documentation
@@ -1287,9 +1282,8 @@ fi
 AM_CONDITIONAL(DBUS_DOXYGEN_DOCS_ENABLED, test x$enable_doxygen_docs = xyes)
 AC_MSG_RESULT($enable_doxygen_docs)
 
-XSLTPROC=false
 AC_CHECK_PROGS([XSLTPROC], [xsltproc])
-AM_CONDITIONAL(DBUS_HAVE_XSLTPROC, test "$XSLTPROC" != false)
+AM_CONDITIONAL([DBUS_HAVE_XSLTPROC], [test "x$XSLTPROC" != "x"])
 
 ### XML Documentation
 
@@ -1558,6 +1552,15 @@ AH_VERBATIM(_DARWIN_ENVIRON,
 #endif
 ])
 
+AC_ARG_ENABLE([stats],
+  [AS_HELP_STRING([--enable-stats],
+    [enable bus daemon usage statistics])],
+  [], [enable_stats=no])
+if test "x$enable_stats" = xyes; then
+  AC_DEFINE([DBUS_ENABLE_STATS], [1],
+    [Define to enable bus daemon usage statistics])
+fi
+
 AC_CONFIG_FILES([
 Doxyfile
 dbus/versioninfo.rc
@@ -1633,6 +1636,7 @@ echo "
         Building verbose mode:    ${enable_verbose_mode}
         Building assertions:      ${enable_asserts}
         Building checks:          ${enable_checks}
+        Building bus stats API:   ${enable_stats}
         Building SELinux support: ${have_selinux}
         Building inotify support: ${have_inotify}
         Building dnotify support: ${have_dnotify}

@@ -143,16 +143,6 @@ bus_pending_activation_entry_free (BusPendingActivationEntry *entry)
   dbus_free (entry);
 }
 
-static void
-handle_timeout_callback (DBusTimeout   *timeout,
-                         void          *data)
-{
-  BusPendingActivation *pending_activation = data;
-
-  while (!dbus_timeout_handle (pending_activation->timeout))
-    _dbus_wait_for_memory ();
-}
-
 static BusPendingActivation *
 bus_pending_activation_ref (BusPendingActivation *pending_activation)
 {
@@ -179,8 +169,7 @@ bus_pending_activation_unref (BusPendingActivation *pending_activation)
   if (pending_activation->timeout_added)
     {
       _dbus_loop_remove_timeout (bus_context_get_loop (pending_activation->activation->context),
-                                 pending_activation->timeout,
-                                 handle_timeout_callback, pending_activation);
+                                 pending_activation->timeout);
       pending_activation->timeout_added = FALSE;
     }
 
@@ -1334,21 +1323,15 @@ handle_servicehelper_exit_error (int        exit_code,
     }
 }
 
-static dbus_bool_t
-babysitter_watch_callback (DBusWatch     *watch,
-                           unsigned int   condition,
-                           void          *data)
+static void
+pending_activation_finished_cb (DBusBabysitter *babysitter,
+                                void           *data)
 {
   BusPendingActivation *pending_activation = data;
-  dbus_bool_t retval;
-  DBusBabysitter *babysitter;
   dbus_bool_t uses_servicehelper;
 
-  babysitter = pending_activation->babysitter;
-
+  _dbus_assert (babysitter == pending_activation->babysitter);
   _dbus_babysitter_ref (babysitter);
-
-  retval = dbus_watch_handle (watch, condition);
 
   /* There are two major cases here; are we the system bus or the session?  Here this
    * is distinguished by whether or not we use a setuid helper launcher.  With the launch helper,
@@ -1360,15 +1343,7 @@ babysitter_watch_callback (DBusWatch     *watch,
    */
   uses_servicehelper = bus_context_get_servicehelper (pending_activation->activation->context) != NULL;
 
-  /* FIXME this is broken in the same way that
-   * connection watches used to be; there should be
-   * a separate callback for status change, instead
-   * of doing "if we handled a watch status might
-   * have changed"
-   *
-   * Fixing this lets us move dbus_watch_handle
-   * calls into dbus-mainloop.c
-   */
+  /* strictly speaking this is redundant with the check in dbus-spawn now */
   if (_dbus_babysitter_get_child_exited (babysitter))
     {
       DBusError error;
@@ -1428,8 +1403,6 @@ babysitter_watch_callback (DBusWatch     *watch,
     }
 
   _dbus_babysitter_unref (babysitter);
-
-  return retval;
 }
 
 static dbus_bool_t
@@ -1438,9 +1411,9 @@ add_babysitter_watch (DBusWatch      *watch,
 {
   BusPendingActivation *pending_activation = data;
 
-  return _dbus_loop_add_watch (bus_context_get_loop (pending_activation->activation->context),
-                               watch, babysitter_watch_callback, pending_activation,
-                               NULL);
+  return _dbus_loop_add_watch (
+      bus_context_get_loop (pending_activation->activation->context),
+      watch);
 }
 
 static void
@@ -1450,7 +1423,7 @@ remove_babysitter_watch (DBusWatch      *watch,
   BusPendingActivation *pending_activation = data;
 
   _dbus_loop_remove_watch (bus_context_get_loop (pending_activation->activation->context),
-                           watch, babysitter_watch_callback, pending_activation);
+                           watch);
 }
 
 static dbus_bool_t
@@ -1860,10 +1833,7 @@ bus_activation_activate_service (BusActivation  *activation,
         }
 
       if (!_dbus_loop_add_timeout (bus_context_get_loop (activation->context),
-                                   pending_activation->timeout,
-                                   handle_timeout_callback,
-                                   pending_activation,
-                                   NULL))
+                                   pending_activation->timeout))
         {
           _dbus_verbose ("Failed to add timeout for pending activation\n");
 
@@ -2132,6 +2102,10 @@ bus_activation_activate_service (BusActivation  *activation,
   envp = NULL;
 
   _dbus_assert (pending_activation->babysitter != NULL);
+
+  _dbus_babysitter_set_result_function (pending_activation->babysitter,
+                                        pending_activation_finished_cb,
+                                        pending_activation);
 
   if (!_dbus_babysitter_set_watch_functions (pending_activation->babysitter,
                                              add_babysitter_watch,

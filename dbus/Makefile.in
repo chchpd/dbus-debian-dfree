@@ -37,8 +37,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @DBUS_WIN_FALSE@libdbus_1_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
-@DBUS_BUILD_TESTS_TRUE@TESTS = dbus-test$(EXEEXT)
 noinst_PROGRAMS = $(am__EXEEXT_1)
+
+# We can't actually run this til we've reached test/
+@DBUS_BUILD_TESTS_TRUE@am__append_1 = dbus-test
 subdir = dbus
 DIST_COMMON = $(dbusinclude_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/dbus-arch-deps.h.in \
@@ -297,18 +299,11 @@ am__objects_14 = libdbus_internal_la-dbus-auth-util.lo \
 am_libdbus_internal_la_OBJECTS = $(am__objects_8) $(am__objects_12) \
 	$(am__objects_14)
 libdbus_internal_la_OBJECTS = $(am_libdbus_internal_la_OBJECTS)
-libdbus_internal_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(libdbus_internal_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
 @DBUS_BUILD_TESTS_TRUE@am__EXEEXT_1 = dbus-test$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am_dbus_test_OBJECTS = dbus-test-main.$(OBJEXT)
 dbus_test_OBJECTS = $(am_dbus_test_OBJECTS)
-dbus_test_DEPENDENCIES = libdbus-internal.la $(am__DEPENDENCIES_1)
-dbus_test_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(dbus_test_LDFLAGS) $(LDFLAGS) -o $@
+dbus_test_DEPENDENCIES = libdbus-internal.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -342,10 +337,9 @@ DIST_SOURCES = $(am__libdbus_1_la_SOURCES_DIST) \
 HEADERS = $(dbusinclude_HEADERS) $(nodist_dbusarchinclude_HEADERS)
 ETAGS = etags
 CTAGS = ctags
-am__tty_colors = \
-red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ADT_LIBS = @ADT_LIBS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
@@ -366,10 +360,6 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_BINDIR = @DBUS_BINDIR@
-DBUS_BUS_CFLAGS = @DBUS_BUS_CFLAGS@
-DBUS_BUS_LIBS = @DBUS_BUS_LIBS@
-DBUS_CLIENT_CFLAGS = @DBUS_CLIENT_CFLAGS@
-DBUS_CLIENT_LIBS = @DBUS_CLIENT_LIBS@
 DBUS_CONSOLE_AUTH_DIR = @DBUS_CONSOLE_AUTH_DIR@
 DBUS_CONSOLE_OWNER_FILE = @DBUS_CONSOLE_OWNER_FILE@
 DBUS_DAEMONDIR = @DBUS_DAEMONDIR@
@@ -381,8 +371,6 @@ DBUS_INT16_TYPE = @DBUS_INT16_TYPE@
 DBUS_INT32_TYPE = @DBUS_INT32_TYPE@
 DBUS_INT64_CONSTANT = @DBUS_INT64_CONSTANT@
 DBUS_INT64_TYPE = @DBUS_INT64_TYPE@
-DBUS_LAUNCHER_CFLAGS = @DBUS_LAUNCHER_CFLAGS@
-DBUS_LAUNCHER_LIBS = @DBUS_LAUNCHER_LIBS@
 DBUS_LIBEXECDIR = @DBUS_LIBEXECDIR@
 DBUS_MAJOR_VERSION = @DBUS_MAJOR_VERSION@
 DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
@@ -394,8 +382,6 @@ DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
 DBUS_SYSTEM_SOCKET = @DBUS_SYSTEM_SOCKET@
-DBUS_TEST_CFLAGS = @DBUS_TEST_CFLAGS@
-DBUS_TEST_LIBS = @DBUS_TEST_LIBS@
 DBUS_UINT64_CONSTANT = @DBUS_UINT64_CONSTANT@
 DBUS_USER = @DBUS_USER@
 DBUS_VERSION = @DBUS_VERSION@
@@ -433,6 +419,7 @@ LAUNCHCTL = @LAUNCHCTL@
 LAUNCHD_AGENT_DIR = @LAUNCHD_AGENT_DIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBDBUS_LIBS = @LIBDBUS_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -449,6 +436,7 @@ MAKEINFO = @MAKEINFO@
 MAN2HTML = @MAN2HTML@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NETWORK_libs = @NETWORK_libs@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -468,6 +456,7 @@ RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
 SED = @SED@
+SELINUX_LIBS = @SELINUX_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -484,10 +473,13 @@ TEST_SLEEP_FOREVER_BINARY = @TEST_SLEEP_FOREVER_BINARY@
 TEST_SOCKET_DIR = @TEST_SOCKET_DIR@
 TEST_VALID_SERVICE_DIR = @TEST_VALID_SERVICE_DIR@
 TEST_VALID_SERVICE_SYSTEM_DIR = @TEST_VALID_SERVICE_SYSTEM_DIR@
+THREAD_LIBS = @THREAD_LIBS@
 VERSION = @VERSION@
 WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
+XML_CFLAGS = @XML_CFLAGS@
+XML_LIBS = @XML_LIBS@
 XSLTPROC = @XSLTPROC@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
@@ -548,13 +540,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 configdir = $(sysconfdir)/dbus-1
-INCLUDES = -I$(top_builddir) -I$(top_srcdir) \
-	$(DBUS_CLIENT_CFLAGS) \
+AM_CPPFLAGS = \
+	-I$(top_builddir) \
+	-I$(top_srcdir) \
 	-DDBUS_COMPILATION \
 	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
 	-DDBUS_SYSTEM_CONFIG_FILE=\""$(configdir)/system.conf"\" \
-	-DDBUS_SESSION_CONFIG_FILE=\""$(configdir)/session.conf"\"
+	-DDBUS_SESSION_CONFIG_FILE=\""$(configdir)/session.conf"\" \
+	$(NULL)
 
+
+# if assertions are enabled, improve backtraces
+AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 dbusincludedir = $(includedir)/dbus-1.0/dbus
 dbusarchincludedir = $(libdir)/dbus-1.0/include/dbus
 lib_LTLIBRARIES = libdbus-1.la
@@ -571,11 +568,9 @@ lib_LTLIBRARIES = libdbus-1.la
 @DBUS_WIN_TRUE@no_undefined = -no-undefined
 @DBUS_WIN_FALSE@export_symbols = -export-symbols-regex "^[^_].*"
 @DBUS_WIN_TRUE@export_symbols = 
-@DBUS_WIN_TRUE@export_symvols_internal = 
 @DBUS_WIN_TRUE@libdbus_1_la_DEPENDENCIES = $(dbus_res)
 @DBUS_WIN_FALSE@intllibs = @LTLIBINTL@
 @DBUS_WIN_TRUE@intllibs = 
-@DBUS_WIN_FALSE@export_symbols_internal = 
 @DBUS_WIN_FALSE@DBUS_LIB_arch_sources = \
 @DBUS_WIN_FALSE@	dbus-uuidgen.c				\
 @DBUS_WIN_FALSE@	dbus-uuidgen.h				\
@@ -776,18 +771,29 @@ libdbus_internal_la_SOURCES = \
 BUILT_SOURCES = $(nodist_dbusarchinclude_HEADERS)
 EXTRA_DIST = dbus-arch-deps.h.in
 noinst_LTLIBRARIES = libdbus-internal.la
-libdbus_1_la_CPPFLAGS = -Ddbus_1_EXPORTS
-libdbus_1_la_LIBADD = $(DBUS_CLIENT_LIBS)
-libdbus_1_la_LDFLAGS = $(export_symbols) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) -no-undefined @R_DYNAMIC_LDFLAG@
-libdbus_internal_la_CPPFLAGS = -DDBUS_STATIC_BUILD
-libdbus_internal_la_LIBADD = $(DBUS_CLIENT_LIBS)
-libdbus_internal_la_LDFLAGS = $(export_symbols_internal) @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@TESTS_ENVIRONMENT = DBUS_TEST_DATA=$(top_builddir)/test/data DBUS_TEST_HOMEDIR=$(top_builddir)/dbus
+libdbus_1_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-Ddbus_1_EXPORTS \
+	$(NULL)
+
+libdbus_1_la_LIBADD = $(LIBDBUS_LIBS)
+libdbus_1_la_LDFLAGS = \
+	$(AM_LDFLAGS) \
+	$(export_symbols) \
+	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE) \
+	-no-undefined \
+	$(NULL)
+
+libdbus_internal_la_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+
+libdbus_internal_la_LIBADD = $(LIBDBUS_LIBS)
 dbus_test_SOURCES = \
 	dbus-test-main.c
 
-dbus_test_LDADD = libdbus-internal.la $(DBUS_TEST_LIBS)
-dbus_test_LDFLAGS = @R_DYNAMIC_LDFLAG@
+dbus_test_LDADD = libdbus-internal.la
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -870,7 +876,7 @@ clean-noinstLTLIBRARIES:
 libdbus-1.la: $(libdbus_1_la_OBJECTS) $(libdbus_1_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libdbus_1_la_LINK) -rpath $(libdir) $(libdbus_1_la_OBJECTS) $(libdbus_1_la_LIBADD) $(LIBS)
 libdbus-internal.la: $(libdbus_internal_la_OBJECTS) $(libdbus_internal_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libdbus_internal_la_LINK)  $(libdbus_internal_la_OBJECTS) $(libdbus_internal_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK)  $(libdbus_internal_la_OBJECTS) $(libdbus_internal_la_LIBADD) $(LIBS)
 
 clean-noinstPROGRAMS:
 	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -882,7 +888,7 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 dbus-test$(EXEEXT): $(dbus_test_OBJECTS) $(dbus_test_DEPENDENCIES) 
 	@rm -f dbus-test$(EXEEXT)
-	$(AM_V_CCLD)$(dbus_test_LINK) $(dbus_test_OBJECTS) $(dbus_test_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(dbus_test_OBJECTS) $(dbus_test_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -2175,98 +2181,6 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
-check-TESTS: $(TESTS)
-	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
-	srcdir=$(srcdir); export srcdir; \
-	list=' $(TESTS) '; \
-	$(am__tty_colors); \
-	if test -n "$$list"; then \
-	  for tst in $$list; do \
-	    if test -f ./$$tst; then dir=./; \
-	    elif test -f $$tst; then dir=; \
-	    else dir="$(srcdir)/"; fi; \
-	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *[\ \	]$$tst[\ \	]*) \
-		xpass=`expr $$xpass + 1`; \
-		failed=`expr $$failed + 1`; \
-		col=$$red; res=XPASS; \
-	      ;; \
-	      *) \
-		col=$$grn; res=PASS; \
-	      ;; \
-	      esac; \
-	    elif test $$? -ne 77; then \
-	      all=`expr $$all + 1`; \
-	      case " $(XFAIL_TESTS) " in \
-	      *[\ \	]$$tst[\ \	]*) \
-		xfail=`expr $$xfail + 1`; \
-		col=$$lgn; res=XFAIL; \
-	      ;; \
-	      *) \
-		failed=`expr $$failed + 1`; \
-		col=$$red; res=FAIL; \
-	      ;; \
-	      esac; \
-	    else \
-	      skip=`expr $$skip + 1`; \
-	      col=$$blu; res=SKIP; \
-	    fi; \
-	    echo "$${col}$$res$${std}: $$tst"; \
-	  done; \
-	  if test "$$all" -eq 1; then \
-	    tests="test"; \
-	    All=""; \
-	  else \
-	    tests="tests"; \
-	    All="All "; \
-	  fi; \
-	  if test "$$failed" -eq 0; then \
-	    if test "$$xfail" -eq 0; then \
-	      banner="$$All$$all $$tests passed"; \
-	    else \
-	      if test "$$xfail" -eq 1; then failures=failure; else failures=failures; fi; \
-	      banner="$$All$$all $$tests behaved as expected ($$xfail expected $$failures)"; \
-	    fi; \
-	  else \
-	    if test "$$xpass" -eq 0; then \
-	      banner="$$failed of $$all $$tests failed"; \
-	    else \
-	      if test "$$xpass" -eq 1; then passes=pass; else passes=passes; fi; \
-	      banner="$$failed of $$all $$tests did not behave as expected ($$xpass unexpected $$passes)"; \
-	    fi; \
-	  fi; \
-	  dashes="$$banner"; \
-	  skipped=""; \
-	  if test "$$skip" -ne 0; then \
-	    if test "$$skip" -eq 1; then \
-	      skipped="($$skip test was not run)"; \
-	    else \
-	      skipped="($$skip tests were not run)"; \
-	    fi; \
-	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$skipped"; \
-	  fi; \
-	  report=""; \
-	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
-	    report="Please report to $(PACKAGE_BUGREPORT)"; \
-	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
-	      dashes="$$report"; \
-	  fi; \
-	  dashes=`echo "$$dashes" | sed s/./=/g`; \
-	  if test "$$failed" -eq 0; then \
-	    echo "$$grn$$dashes"; \
-	  else \
-	    echo "$$red$$dashes"; \
-	  fi; \
-	  echo "$$banner"; \
-	  test -z "$$skipped" || echo "$$skipped"; \
-	  test -z "$$report" || echo "$$report"; \
-	  echo "$$dashes$$std"; \
-	  test "$$failed" -eq 0; \
-	else :; fi
-
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -2298,7 +2212,6 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
@@ -2406,10 +2319,10 @@ ps-am:
 uninstall-am: uninstall-dbusincludeHEADERS uninstall-libLTLIBRARIES \
 	uninstall-nodist_dbusarchincludeHEADERS
 
-.MAKE: all check check-am install install-am install-strip
+.MAKE: all check install install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
-	clean-generic clean-libLTLIBRARIES clean-libtool clean-local \
+.PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
+	clean-libLTLIBRARIES clean-libtool clean-local \
 	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags distclean \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \

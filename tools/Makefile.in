@@ -35,9 +35,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@DBUS_UNIX_TRUE@am__append_1 = dbus-cleanup-sockets dbus-uuidgen
-bin_PROGRAMS = dbus-launch$(EXEEXT) dbus-send$(EXEEXT) \
-	dbus-monitor$(EXEEXT) $(am__EXEEXT_2)
+bin_PROGRAMS = dbus-launch$(EXEEXT) dbus-monitor$(EXEEXT) \
+	dbus-send$(EXEEXT) $(am__EXEEXT_1)
+@DBUS_UNIX_TRUE@am__append_1 = \
+@DBUS_UNIX_TRUE@	dbus-cleanup-sockets \
+@DBUS_UNIX_TRUE@	dbus-uuidgen \
+@DBUS_UNIX_TRUE@	$(NULL)
+
 subdir = tools
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -56,7 +60,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @DBUS_UNIX_TRUE@am__EXEEXT_1 = dbus-cleanup-sockets$(EXEEXT) \
 @DBUS_UNIX_TRUE@	dbus-uuidgen$(EXEEXT)
-am__EXEEXT_2 = $(am__EXEEXT_1)
 am__installdirs = "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(localstatelibdir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -73,33 +76,19 @@ am__dbus_launch_SOURCES_DIST = dbus-launch.c dbus-launch-x11.c \
 @DBUS_WIN_TRUE@am_dbus_launch_OBJECTS = dbus-launch-win.$(OBJEXT)
 dbus_launch_OBJECTS = $(am_dbus_launch_OBJECTS)
 am__DEPENDENCIES_1 =
-dbus_launch_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-dbus_launch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(dbus_launch_LDFLAGS) $(LDFLAGS) -o $@
+dbus_launch_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am_dbus_monitor_OBJECTS = dbus-monitor.$(OBJEXT) \
 	dbus-print-message.$(OBJEXT)
 dbus_monitor_OBJECTS = $(am_dbus_monitor_OBJECTS)
 dbus_monitor_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
 	$(am__DEPENDENCIES_1)
-dbus_monitor_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(dbus_monitor_LDFLAGS) $(LDFLAGS) -o $@
 am_dbus_send_OBJECTS = dbus-print-message.$(OBJEXT) \
 	dbus-send.$(OBJEXT)
 dbus_send_OBJECTS = $(am_dbus_send_OBJECTS)
-dbus_send_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
-	$(am__DEPENDENCIES_1)
-dbus_send_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(dbus_send_LDFLAGS) $(LDFLAGS) -o $@
+dbus_send_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la
 am_dbus_uuidgen_OBJECTS = dbus-uuidgen.$(OBJEXT)
 dbus_uuidgen_OBJECTS = $(am_dbus_uuidgen_OBJECTS)
-dbus_uuidgen_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
-	$(am__DEPENDENCIES_1)
-dbus_uuidgen_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(dbus_uuidgen_LDFLAGS) $(LDFLAGS) -o $@
+dbus_uuidgen_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -158,6 +147,7 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ADT_LIBS = @ADT_LIBS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
@@ -178,10 +168,6 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_BINDIR = @DBUS_BINDIR@
-DBUS_BUS_CFLAGS = @DBUS_BUS_CFLAGS@
-DBUS_BUS_LIBS = @DBUS_BUS_LIBS@
-DBUS_CLIENT_CFLAGS = @DBUS_CLIENT_CFLAGS@
-DBUS_CLIENT_LIBS = @DBUS_CLIENT_LIBS@
 DBUS_CONSOLE_AUTH_DIR = @DBUS_CONSOLE_AUTH_DIR@
 DBUS_CONSOLE_OWNER_FILE = @DBUS_CONSOLE_OWNER_FILE@
 DBUS_DAEMONDIR = @DBUS_DAEMONDIR@
@@ -193,8 +179,6 @@ DBUS_INT16_TYPE = @DBUS_INT16_TYPE@
 DBUS_INT32_TYPE = @DBUS_INT32_TYPE@
 DBUS_INT64_CONSTANT = @DBUS_INT64_CONSTANT@
 DBUS_INT64_TYPE = @DBUS_INT64_TYPE@
-DBUS_LAUNCHER_CFLAGS = @DBUS_LAUNCHER_CFLAGS@
-DBUS_LAUNCHER_LIBS = @DBUS_LAUNCHER_LIBS@
 DBUS_LIBEXECDIR = @DBUS_LIBEXECDIR@
 DBUS_MAJOR_VERSION = @DBUS_MAJOR_VERSION@
 DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
@@ -206,8 +190,6 @@ DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
 DBUS_SYSTEM_SOCKET = @DBUS_SYSTEM_SOCKET@
-DBUS_TEST_CFLAGS = @DBUS_TEST_CFLAGS@
-DBUS_TEST_LIBS = @DBUS_TEST_LIBS@
 DBUS_UINT64_CONSTANT = @DBUS_UINT64_CONSTANT@
 DBUS_USER = @DBUS_USER@
 DBUS_VERSION = @DBUS_VERSION@
@@ -245,6 +227,7 @@ LAUNCHCTL = @LAUNCHCTL@
 LAUNCHD_AGENT_DIR = @LAUNCHD_AGENT_DIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBDBUS_LIBS = @LIBDBUS_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -261,6 +244,7 @@ MAKEINFO = @MAKEINFO@
 MAN2HTML = @MAN2HTML@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NETWORK_libs = @NETWORK_libs@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -280,6 +264,7 @@ RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
 SED = @SED@
+SELINUX_LIBS = @SELINUX_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -296,10 +281,13 @@ TEST_SLEEP_FOREVER_BINARY = @TEST_SLEEP_FOREVER_BINARY@
 TEST_SOCKET_DIR = @TEST_SOCKET_DIR@
 TEST_VALID_SERVICE_DIR = @TEST_VALID_SERVICE_DIR@
 TEST_VALID_SERVICE_SYSTEM_DIR = @TEST_VALID_SERVICE_SYSTEM_DIR@
+THREAD_LIBS = @THREAD_LIBS@
 VERSION = @VERSION@
 WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
+XML_CFLAGS = @XML_CFLAGS@
+XML_LIBS = @XML_LIBS@
 XSLTPROC = @XSLTPROC@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
@@ -360,8 +348,16 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 configdir = $(sysconfdir)/dbus-1
-INCLUDES = -I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) $(DBUS_X_CFLAGS) -DDBUS_LOCALEDIR=\"@EXPANDED_DATADIR@/locale\" -DDBUS_COMPILATION -DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\"
-extra_bin_programs = $(am__append_1)
+AM_CPPFLAGS = \
+	-I$(top_srcdir) \
+	$(DBUS_X_CFLAGS) \
+	-DDBUS_COMPILATION \
+	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
+	$(NULL)
+
+
+# if assertions are enabled, improve backtraces
+AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 dbus_send_SOURCES = \
 	dbus-print-message.c			\
 	dbus-print-message.h			\
@@ -387,14 +383,23 @@ dbus_cleanup_sockets_SOURCES = \
 dbus_uuidgen_SOURCES = \
 	dbus-uuidgen.c
 
-dbus_send_LDADD = $(top_builddir)/dbus/libdbus-1.la $(DBUS_CLIENT_LIBS)
-dbus_send_LDFLAGS = @R_DYNAMIC_LDFLAG@
-dbus_monitor_LDADD = $(top_builddir)/dbus/libdbus-1.la $(DBUS_CLIENT_LIBS)
-dbus_monitor_LDFLAGS = @R_DYNAMIC_LDFLAG@
-dbus_uuidgen_LDADD = $(top_builddir)/dbus/libdbus-1.la $(DBUS_CLIENT_LIBS)
-dbus_uuidgen_LDFLAGS = @R_DYNAMIC_LDFLAG@
-dbus_launch_LDADD = $(DBUS_X_LIBS) $(DBUS_CLIENT_LIBS)
-dbus_launch_LDFLAGS = @R_DYNAMIC_LDFLAG@
+dbus_send_LDADD = \
+	$(top_builddir)/dbus/libdbus-1.la \
+	$(NULL)
+
+dbus_monitor_LDADD = \
+	$(top_builddir)/dbus/libdbus-1.la \
+	$(NETWORK_libs) \
+	$(NULL)
+
+dbus_uuidgen_LDADD = \
+	$(top_builddir)/dbus/libdbus-1.la \
+	$(NULL)
+
+dbus_launch_LDADD = \
+	$(DBUS_X_LIBS) \
+	$(NULL)
+
 EXTRA_DIST = run-with-tmp-session-bus.sh strtoll.c strtoull.c
 CLEANFILES = \
 	run-with-tmp-session-bus.conf
@@ -485,16 +490,16 @@ dbus-cleanup-sockets$(EXEEXT): $(dbus_cleanup_sockets_OBJECTS) $(dbus_cleanup_so
 	$(AM_V_CCLD)$(LINK) $(dbus_cleanup_sockets_OBJECTS) $(dbus_cleanup_sockets_LDADD) $(LIBS)
 dbus-launch$(EXEEXT): $(dbus_launch_OBJECTS) $(dbus_launch_DEPENDENCIES) 
 	@rm -f dbus-launch$(EXEEXT)
-	$(AM_V_CCLD)$(dbus_launch_LINK) $(dbus_launch_OBJECTS) $(dbus_launch_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(dbus_launch_OBJECTS) $(dbus_launch_LDADD) $(LIBS)
 dbus-monitor$(EXEEXT): $(dbus_monitor_OBJECTS) $(dbus_monitor_DEPENDENCIES) 
 	@rm -f dbus-monitor$(EXEEXT)
-	$(AM_V_CCLD)$(dbus_monitor_LINK) $(dbus_monitor_OBJECTS) $(dbus_monitor_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(dbus_monitor_OBJECTS) $(dbus_monitor_LDADD) $(LIBS)
 dbus-send$(EXEEXT): $(dbus_send_OBJECTS) $(dbus_send_DEPENDENCIES) 
 	@rm -f dbus-send$(EXEEXT)
-	$(AM_V_CCLD)$(dbus_send_LINK) $(dbus_send_OBJECTS) $(dbus_send_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(dbus_send_OBJECTS) $(dbus_send_LDADD) $(LIBS)
 dbus-uuidgen$(EXEEXT): $(dbus_uuidgen_OBJECTS) $(dbus_uuidgen_DEPENDENCIES) 
 	@rm -f dbus-uuidgen$(EXEEXT)
-	$(AM_V_CCLD)$(dbus_uuidgen_LINK) $(dbus_uuidgen_OBJECTS) $(dbus_uuidgen_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(dbus_uuidgen_OBJECTS) $(dbus_uuidgen_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

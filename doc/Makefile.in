@@ -34,10 +34,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@DBUS_XML_DOCS_ENABLED_TRUE@am__append_1 = $(HTML_FILES)
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@am__append_1 = dbus.devhelp
+@DBUS_HAVE_MAN2HTML_TRUE@am__append_2 = $(MAN_HTML_FILES)
 subdir = doc
-DIST_COMMON = $(dist_man1_MANS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/dbus-daemon.1.in TODO
+DIST_COMMON = $(dist_doc_DATA) $(dist_html_DATA) $(dist_man1_MANS) \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/dbus-daemon.1.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
 	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -82,12 +84,14 @@ am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
 man1dir = $(mandir)/man1
-am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(apidir)"
+am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)" \
+	"$(DESTDIR)$(htmldir)" "$(DESTDIR)$(htmldir)"
 NROFF = nroff
 MANS = $(dist_man1_MANS) $(man1_MANS)
-DATA = $(api_DATA)
+DATA = $(dist_doc_DATA) $(dist_html_DATA) $(html_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ADT_LIBS = @ADT_LIBS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
@@ -108,10 +112,6 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_BINDIR = @DBUS_BINDIR@
-DBUS_BUS_CFLAGS = @DBUS_BUS_CFLAGS@
-DBUS_BUS_LIBS = @DBUS_BUS_LIBS@
-DBUS_CLIENT_CFLAGS = @DBUS_CLIENT_CFLAGS@
-DBUS_CLIENT_LIBS = @DBUS_CLIENT_LIBS@
 DBUS_CONSOLE_AUTH_DIR = @DBUS_CONSOLE_AUTH_DIR@
 DBUS_CONSOLE_OWNER_FILE = @DBUS_CONSOLE_OWNER_FILE@
 DBUS_DAEMONDIR = @DBUS_DAEMONDIR@
@@ -123,8 +123,6 @@ DBUS_INT16_TYPE = @DBUS_INT16_TYPE@
 DBUS_INT32_TYPE = @DBUS_INT32_TYPE@
 DBUS_INT64_CONSTANT = @DBUS_INT64_CONSTANT@
 DBUS_INT64_TYPE = @DBUS_INT64_TYPE@
-DBUS_LAUNCHER_CFLAGS = @DBUS_LAUNCHER_CFLAGS@
-DBUS_LAUNCHER_LIBS = @DBUS_LAUNCHER_LIBS@
 DBUS_LIBEXECDIR = @DBUS_LIBEXECDIR@
 DBUS_MAJOR_VERSION = @DBUS_MAJOR_VERSION@
 DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
@@ -136,8 +134,6 @@ DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
 DBUS_SYSTEM_SOCKET = @DBUS_SYSTEM_SOCKET@
-DBUS_TEST_CFLAGS = @DBUS_TEST_CFLAGS@
-DBUS_TEST_LIBS = @DBUS_TEST_LIBS@
 DBUS_UINT64_CONSTANT = @DBUS_UINT64_CONSTANT@
 DBUS_USER = @DBUS_USER@
 DBUS_VERSION = @DBUS_VERSION@
@@ -175,6 +171,7 @@ LAUNCHCTL = @LAUNCHCTL@
 LAUNCHD_AGENT_DIR = @LAUNCHD_AGENT_DIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBDBUS_LIBS = @LIBDBUS_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -191,6 +188,7 @@ MAKEINFO = @MAKEINFO@
 MAN2HTML = @MAN2HTML@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NETWORK_libs = @NETWORK_libs@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -210,6 +208,7 @@ RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
 SED = @SED@
+SELINUX_LIBS = @SELINUX_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -226,10 +225,13 @@ TEST_SLEEP_FOREVER_BINARY = @TEST_SLEEP_FOREVER_BINARY@
 TEST_SOCKET_DIR = @TEST_SOCKET_DIR@
 TEST_VALID_SERVICE_DIR = @TEST_VALID_SERVICE_DIR@
 TEST_VALID_SERVICE_SYSTEM_DIR = @TEST_VALID_SERVICE_SYSTEM_DIR@
+THREAD_LIBS = @THREAD_LIBS@
 VERSION = @VERSION@
 WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
+XML_CFLAGS = @XML_CFLAGS@
+XML_LIBS = @XML_LIBS@
 XSLTPROC = @XSLTPROC@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
@@ -319,27 +321,36 @@ DTDS = \
 	busconfig.dtd \
 	introspect.dtd
 
-STATIC_DOCS = \
+dist_doc_DATA = \
 	diagram.png \
 	diagram.svg \
+	system-activation.txt
+
+STATIC_DOCS = \
 	dbus-faq.xml \
 	dbus-specification.xml \
 	dbus-test-plan.xml \
 	dbus-tutorial.xml \
 	dcop-howto.txt \
 	introspect.xsl \
-	system-activation.txt \
 	$(DTDS)
 
-EXTRA_DIST = file-boilerplate.c doxygen_to_devhelp.xsl $(STATIC_DOCS) \
-	$(MAN_IN_FILES) $(am__append_1)
-HTML_FILES = \
+EXTRA_DIST = \
+	file-boilerplate.c \
+	doxygen_to_devhelp.xsl \
+	$(STATIC_DOCS) \
+	$(MAN_IN_FILES)
+
+html_DATA = $(am__append_1) $(am__append_2)
+
+# we distribute these in the tarball so users don't necessarily need xmlto
+dist_html_DATA = $(XMLTO_OUTPUT)
+XMLTO_OUTPUT = \
 	dbus-faq.html				\
 	dbus-specification.html			\
 	dbus-test-plan.html			\
 	dbus-tutorial.html
 
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@api_DATA = dbus.devhelp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@BONUS_FILES = \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(top_srcdir)/README \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(top_srcdir)/HACKING \
@@ -427,26 +438,66 @@ uninstall-man1:
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man1dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man1dir)" && rm -f $$files; }
-install-apiDATA: $(api_DATA)
+install-dist_docDATA: $(dist_doc_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(apidir)" || $(MKDIR_P) "$(DESTDIR)$(apidir)"
-	@list='$(api_DATA)'; test -n "$(apidir)" || list=; \
+	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(apidir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(apidir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
 	done
 
-uninstall-apiDATA:
+uninstall-dist_docDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(api_DATA)'; test -n "$(apidir)" || list=; \
+	@list='$(dist_doc_DATA)'; test -n "$(docdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	test -n "$$files" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(apidir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(apidir)" && rm -f $$files
+	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(docdir)" && rm -f $$files
+install-dist_htmlDATA: $(dist_html_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(MKDIR_P) "$(DESTDIR)$(htmldir)"
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	done
+
+uninstall-dist_htmlDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(dist_html_DATA)'; test -n "$(htmldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(htmldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(htmldir)" && rm -f $$files
+install-htmlDATA: $(html_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(MKDIR_P) "$(DESTDIR)$(htmldir)"
+	@list='$(html_DATA)'; test -n "$(htmldir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(htmldir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(htmldir)" || exit $$?; \
+	done
+
+uninstall-htmlDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(html_DATA)'; test -n "$(htmldir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(htmldir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(htmldir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -499,10 +550,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@@DBUS_HAVE_MAN2HTML_FALSE@@DBUS_XML_DOCS_ENABLED_FALSE@all-local:
+@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@all-local:
 all-am: Makefile $(MANS) $(DATA) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(apidir)"; do \
+	for dir in "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)" "$(DESTDIR)$(htmldir)" "$(DESTDIR)$(htmldir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -552,7 +603,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-apiDATA install-data-local install-man
+install-data-am: install-data-local install-dist_docDATA \
+	install-dist_htmlDATA install-htmlDATA install-man
 
 install-dvi: install-dvi-am
 
@@ -597,7 +649,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-apiDATA uninstall-local uninstall-man
+uninstall-am: uninstall-dist_docDATA uninstall-dist_htmlDATA \
+	uninstall-htmlDATA uninstall-local uninstall-man
 
 uninstall-man: uninstall-man1
 
@@ -606,19 +659,19 @@ uninstall-man: uninstall-man1
 .PHONY: all all-am all-local check check-am clean clean-generic \
 	clean-libtool clean-local distclean distclean-generic \
 	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-apiDATA install-data \
-	install-data-am install-data-local install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-man1 \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic \
-	maintainer-clean-local mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
-	uninstall-apiDATA uninstall-local uninstall-man uninstall-man1
+	install install-am install-data install-data-am \
+	install-data-local install-dist_docDATA install-dist_htmlDATA \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-htmlDATA install-info \
+	install-info-am install-man install-man1 install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic maintainer-clean-local mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-dist_docDATA \
+	uninstall-dist_htmlDATA uninstall-htmlDATA uninstall-local \
+	uninstall-man uninstall-man1
 
-
-@DBUS_XML_DOCS_ENABLED_TRUE@all-local:: $(HTML_FILES)
 
 @DBUS_XML_DOCS_ENABLED_TRUE@dbus-specification.html: dbus-specification.xml
 @DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
@@ -651,19 +704,22 @@ uninstall-man: uninstall-man1
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.html
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.png
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.css
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(htmldir)/*.html
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.txt
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.png
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.svg
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(apidir) || \
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@		rmdir $(DESTDIR)$(apidir)
-
-@DBUS_HAVE_MAN2HTML_TRUE@all-local:: $(MAN_HTML_FILES)
 
 @DBUS_HAVE_MAN2HTML_TRUE@%.1.html: %.1
 @DBUS_HAVE_MAN2HTML_TRUE@	$(AM_V_GEN)( $(MAN2HTML) $< > $@.tmp && mv $@.tmp $@ )
 
-@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(HTML_FILES) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(dist_doc_DATA) $(dist_html_DATA) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)rm -rf $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)$(MKDIR_P) $@/api
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(STATIC_DOCS) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(HTML_FILES) $@
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(dist_doc_DATA) $@
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(dist_html_DATA) $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_HTML_FILES) $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(BONUS_FILES) $@
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp -r api/html $@/api
@@ -683,13 +739,14 @@ uninstall-man: uninstall-man1
 @DBUS_CAN_UPLOAD_DOCS_FALSE@	@false
 
 clean-local:
+	rm -f $(html_DATA)
 	rm -rf api
 	rm -rf dbus-docs
 	rm -f *.1.html
 	rm -f doxygen.stamp
 
 maintainer-clean-local:
-	rm -f $(HTML_FILES)
+	rm -f $(XMLTO_OUTPUT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
