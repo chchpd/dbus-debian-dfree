@@ -1,10 +1,10 @@
-dbus (1.4.14-1) UNRELEASED; urgency=low
+dbus (1.4.14-1) unstable; urgency=low
 
   * New upstream release
     - no longer needs workarounds to build or install the documentation
   * Remove --disable-gc-sections, unnecessary since 1.4.12
 
- -- Simon McVittie <smcv@debian.org>  Fri, 29 Jul 2011 14:57:51 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 29 Jul 2011 16:50:56 +0100
 
 dbus (1.4.12-5) unstable; urgency=low
 
