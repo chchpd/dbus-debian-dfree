@@ -1,3 +1,17 @@
+dbus (1.5.4-4) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 29 Jul 2011 16:53:31 +0100
+
+dbus (1.4.14-1) unstable; urgency=low
+
+  * New upstream release
+    - no longer needs workarounds to build or install the documentation
+  * Remove --disable-gc-sections, unnecessary since 1.4.12
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 29 Jul 2011 16:50:56 +0100
+
 dbus (1.5.4-3) experimental; urgency=low
 
   * Merge from unstable
