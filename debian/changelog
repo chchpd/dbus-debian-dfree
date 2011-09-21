@@ -1,4 +1,4 @@
-dbus (1.4.16-1) UNRELEASED; urgency=low
+dbus (1.4.16-1) unstable; urgency=low
 
   * New upstream release
   * Do not symlink dcop-howto.txt.gz - no longer installed (this is D-Bus,
@@ -6,7 +6,7 @@ dbus (1.4.16-1) UNRELEASED; urgency=low
   * Set the build-dependencies to be enough to run all tests, but don't
     run the tests yet
 
- -- Simon McVittie <smcv@debian.org>  Fri, 12 Aug 2011 11:55:24 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 21 Sep 2011 15:32:10 +0100
 
 dbus (1.4.14-1) unstable; urgency=low
 
