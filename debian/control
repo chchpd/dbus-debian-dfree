@@ -7,7 +7,12 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
            Michael Biebl <biebl@debian.org>,
            Loic Minier <lool@dooz.org>,
            Simon McVittie <smcv@debian.org>
-# libdbus-glib-1-dev and libglib2.0-dev can be omitted for bootstrapping,
+# The following packages can be omitted for bootstrapping:
+#   libdbus-glib-1-dev (circular dependency)
+#   libglib2.0-dev
+#   python
+#   python-dbus (circular dependency)
+#   python-gobject
 # but if you have them in Build-Depends, more tests can be run
 Build-Depends: automake (>= 1:1.10),
                autotools-dev,
@@ -21,6 +26,9 @@ Build-Depends: automake (>= 1:1.10),
                libglib2.0-dev,
                libselinux1-dev [linux-any],
                libx11-dev,
+               python (>= 2.6),
+               python-dbus,
+               python-gobject,
                xmlto,
                xsltproc
 Standards-Version: 3.9.2
