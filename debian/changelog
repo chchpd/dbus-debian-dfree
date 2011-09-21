@@ -1,5 +1,6 @@
-dbus (1.4.14-2) UNRELEASED; urgency=low
+dbus (1.4.16-1) UNRELEASED; urgency=low
 
+  * New upstream release
   * Do not symlink dcop-howto.txt.gz - no longer installed (this is D-Bus,
     not DCOP)
   * Set the build-dependencies to be enough to run all tests, but don't
