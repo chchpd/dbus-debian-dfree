@@ -1,3 +1,10 @@
+dbus (1.5.8-1) experimental; urgency=low
+
+  * Merge from unstable
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 21 Sep 2011 18:32:46 +0100
+
 dbus (1.4.16-1) unstable; urgency=low
 
   * New upstream release
@@ -8,7 +15,7 @@ dbus (1.4.16-1) unstable; urgency=low
 
  -- Simon McVittie <smcv@debian.org>  Wed, 21 Sep 2011 15:32:10 +0100
 
-dbus (1.5.6-1) unstable; urgency=low
+dbus (1.5.6-1) experimental; urgency=low
 
   * Merge from unstable
   * New upstream release
