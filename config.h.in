@@ -153,6 +153,10 @@
 /* Have the ddfd member of DIR */
 #undef HAVE_DDFD
 
+/* Define to 1 if you have the declaration of `LOG_PERROR', and to 0 if you
+   don't. */
+#undef HAVE_DECL_LOG_PERROR
+
 /* Define to 1 if you have the declaration of `MSG_NOSIGNAL', and to 0 if you
    don't. */
 #undef HAVE_DECL_MSG_NOSIGNAL
@@ -273,6 +277,9 @@
 
 /* Define to 1 if you have the `strtoull' function. */
 #undef HAVE_STRTOULL
+
+/* Define to 1 if you have the <syslog.h> header file. */
+#undef HAVE_SYSLOG_H
 
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H

@@ -1,3 +1,52 @@
+D-Bus 1.4.16 (2011-09-21)
+==
+
+The "this answerphone fails to answer the phone" release.
+
+• If full test coverage is requested via --enable-tests, strictly require
+  Python, pygobject and dbus-python, which are required by some tests; if not,
+  and Python is missing, skip those tests rather than failing
+  (fd.o #37847, Simon McVittie)
+
+• When using cmake, provide the same version-info API in the installed headers
+  as for autotools (DBUS_VERSION, etc.) (fd.o #40905, Ralf Habacker)
+
+• Add a regression test for fd.o #38005 (fd.o #39836, Simon McVittie)
+
+• Make "NOCONFIGURE=1 ./autogen.sh" not run configure (Colin Walters)
+
+• Add _DBUS_STATIC_ASSERT and use it to check invariants (fd.o #39636,
+  Simon McVittie)
+
+• Fix duplicates in authors list (Ralf Habacker)
+
+• Fix broken links from dbus-tutorial.html if $(htmldir) != $(docdir)
+  (fd.o #39879, Chris Mayo)
+
+• Fix a small memory leak, and a failure to report errors, when updating
+  a service file entry for activation (fd.o #39230, Simon McVittie)
+
+• Unix-specific:
+  · Clean up (non-abstract) Unix sockets on bus daemon exit (fd.o #38656;
+    Brian Cameron, Simon McVittie)
+  · On systems that use libcap-ng but not systemd, drop supplemental groups
+    when switching to the daemon user (Red Hat #726953, Steve Grubb)
+  · Make the cmake build work again on GNU platforms (fd.o #29228,
+    Simon McVittie)
+  · Fix compilation on non-C99 systems that have inttypes.h but not stdint.h,
+    like Solaris (fd.o #40313, Dagobert Michelsen)
+  · Define CMSG_ALIGN, CMSG_LEN, CMSG_SPACE on Solaris < 10
+    (fd.o #40235, Simon McVittie)
+  · Cope with Unixes that don't have LOG_PERROR, like Solaris 10
+    (fd.o #39987, Simon McVittie)
+  · Cope with platforms whose vsnprintf violates both POSIX and C99, like
+    Tru64, IRIX and HP-UX (fd.o #11668, Simon McVittie)
+
+• Windows-specific:
+  · Fix compilation on MSVC, which doesn't understand "inline" with its
+    C99 meaning (fd.o #40000; Ralf Habacker, Simon McVittie)
+  · Fix misuse of GPid in test/dbus-daemon.c (fd.o #40003, Simon McVittie)
+
 D-Bus 1.4.14 (2011-07-29)
 ==
 
