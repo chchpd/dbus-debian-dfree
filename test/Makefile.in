@@ -67,7 +67,7 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libdbus_testutils_la_DEPENDENCIES =  \
 	$(top_builddir)/dbus/libdbus-internal.la
-am_libdbus_testutils_la_OBJECTS = test-utils.lo
+am_libdbus_testutils_la_OBJECTS = libdbus_testutils_la-test-utils.lo
 libdbus_testutils_la_OBJECTS = $(am_libdbus_testutils_la_OBJECTS)
 AM_V_lt = $(am__v_lt_$(V))
 am__v_lt_ = $(am__v_lt_$(AM_DEFAULT_VERBOSITY))
@@ -81,7 +81,8 @@ am__v_lt_0 = --silent
 @DBUS_BUILD_TESTS_TRUE@	test-sleep-forever$(EXEEXT)
 am__EXEEXT_2 = test-corrupt$(EXEEXT) test-dbus-daemon$(EXEEXT) \
 	test-dbus-daemon-eavesdrop$(EXEEXT) test-loopback$(EXEEXT) \
-	test-marshal$(EXEEXT) test-relay$(EXEEXT)
+	test-marshal$(EXEEXT) test-refs$(EXEEXT) test-relay$(EXEEXT) \
+	test-syslog$(EXEEXT)
 @DBUS_ENABLE_INSTALLED_TESTS_FALSE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__EXEEXT_3 = $(am__EXEEXT_2)
 @DBUS_ENABLE_INSTALLED_TESTS_TRUE@@DBUS_ENABLE_MODULAR_TESTS_TRUE@am__EXEEXT_4 = $(am__EXEEXT_2)
 am__installdirs = "$(DESTDIR)$(testexecdir)"
@@ -126,6 +127,9 @@ test_marshal_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
 test_names_SOURCES = test-names.c
 test_names_OBJECTS = test_names-test-names.$(OBJEXT)
 test_names_DEPENDENCIES = libdbus-testutils.la
+am_test_refs_OBJECTS = test_refs-refs.$(OBJEXT)
+test_refs_OBJECTS = $(am_test_refs_OBJECTS)
+test_refs_DEPENDENCIES = libdbus-testutils.la $(am__DEPENDENCIES_1)
 am_test_relay_OBJECTS = relay.$(OBJEXT)
 test_relay_OBJECTS = $(am_test_relay_OBJECTS)
 test_relay_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
@@ -143,6 +147,9 @@ test_shell_service_DEPENDENCIES = libdbus-testutils.la
 test_sleep_forever_SOURCES = test-sleep-forever.c
 test_sleep_forever_OBJECTS = test-sleep-forever.$(OBJEXT)
 test_sleep_forever_LDADD = $(LDADD)
+am_test_syslog_OBJECTS = test_syslog-syslog.$(OBJEXT)
+test_syslog_OBJECTS = $(am_test_syslog_OBJECTS)
+test_syslog_DEPENDENCIES = libdbus-testutils.la $(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -173,15 +180,17 @@ SOURCES = $(libdbus_testutils_la_SOURCES) shell-test.c spawn-test.c \
 	$(test_corrupt_SOURCES) $(test_dbus_daemon_SOURCES) \
 	$(test_dbus_daemon_eavesdrop_SOURCES) test-exit.c \
 	$(test_loopback_SOURCES) $(test_marshal_SOURCES) test-names.c \
-	$(test_relay_SOURCES) test-segfault.c test-service.c \
-	test-shell-service.c test-sleep-forever.c
+	$(test_refs_SOURCES) $(test_relay_SOURCES) test-segfault.c \
+	test-service.c test-shell-service.c test-sleep-forever.c \
+	$(test_syslog_SOURCES)
 DIST_SOURCES = $(libdbus_testutils_la_SOURCES) shell-test.c \
 	spawn-test.c $(test_corrupt_SOURCES) \
 	$(test_dbus_daemon_SOURCES) \
 	$(test_dbus_daemon_eavesdrop_SOURCES) test-exit.c \
 	$(test_loopback_SOURCES) $(test_marshal_SOURCES) test-names.c \
-	$(test_relay_SOURCES) test-segfault.c test-service.c \
-	test-shell-service.c test-sleep-forever.c
+	$(test_refs_SOURCES) $(test_relay_SOURCES) test-segfault.c \
+	test-service.c test-shell-service.c test-sleep-forever.c \
+	$(test_syslog_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-dvi-recursive install-exec-recursive \
@@ -339,6 +348,11 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PYTHON = @PYTHON@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
@@ -414,9 +428,13 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -437,6 +455,14 @@ AM_CPPFLAGS = \
 
 # improve backtraces from test stuff
 AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
+static_cppflags = \
+	$(AM_CPPFLAGS) \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+
+libdbus_testutils_la_CPPFLAGS = \
+	$(static_cppflags)
+
 libdbus_testutils_la_SOURCES = \
 	test-utils.c \
 	test-utils.h \
@@ -459,11 +485,6 @@ noinst_LTLIBRARIES = libdbus-testutils.la
 @DBUS_BUILD_TESTS_TRUE@	test-sleep-forever \
 @DBUS_BUILD_TESTS_TRUE@	$(NULL)
 
-static_cppflags = \
-	$(AM_CPPFLAGS) \
-	-DDBUS_STATIC_BUILD \
-	$(NULL)
-
 test_service_CPPFLAGS = $(static_cppflags)
 test_service_LDADD = libdbus-testutils.la
 test_names_CPPFLAGS = $(static_cppflags)
@@ -474,6 +495,12 @@ shell_test_CPPFLAGS = $(static_cppflags)
 shell_test_LDADD = libdbus-testutils.la
 spawn_test_CPPFLAGS = $(static_cppflags)
 spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+test_refs_SOURCES = internals/refs.c
+test_refs_CPPFLAGS = $(static_cppflags)
+test_refs_LDADD = libdbus-testutils.la $(GLIB_LIBS)
+test_syslog_SOURCES = internals/syslog.c
+test_syslog_CPPFLAGS = $(static_cppflags)
+test_syslog_LDADD = libdbus-testutils.la $(GLIB_LIBS)
 EXTRA_DIST = dbus-test-runner
 testexecdir = $(libdir)/dbus-1.0/test
 installable_tests = \
@@ -482,7 +509,9 @@ installable_tests = \
 	test-dbus-daemon-eavesdrop \
 	test-loopback \
 	test-marshal \
+	test-refs \
 	test-relay \
+	test-syslog \
 	$(NULL)
 
 installcheck_tests = $(am__append_3)
@@ -678,6 +707,9 @@ test-marshal$(EXEEXT): $(test_marshal_OBJECTS) $(test_marshal_DEPENDENCIES)
 test-names$(EXEEXT): $(test_names_OBJECTS) $(test_names_DEPENDENCIES) 
 	@rm -f test-names$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_names_OBJECTS) $(test_names_LDADD) $(LIBS)
+test-refs$(EXEEXT): $(test_refs_OBJECTS) $(test_refs_DEPENDENCIES) 
+	@rm -f test-refs$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_refs_OBJECTS) $(test_refs_LDADD) $(LIBS)
 test-relay$(EXEEXT): $(test_relay_OBJECTS) $(test_relay_DEPENDENCIES) 
 	@rm -f test-relay$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_relay_OBJECTS) $(test_relay_LDADD) $(LIBS)
@@ -693,6 +725,9 @@ test-shell-service$(EXEEXT): $(test_shell_service_OBJECTS) $(test_shell_service_
 test-sleep-forever$(EXEEXT): $(test_sleep_forever_OBJECTS) $(test_sleep_forever_DEPENDENCIES) 
 	@rm -f test-sleep-forever$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_sleep_forever_OBJECTS) $(test_sleep_forever_LDADD) $(LIBS)
+test-syslog$(EXEEXT): $(test_syslog_OBJECTS) $(test_syslog_DEPENDENCIES) 
+	@rm -f test-syslog$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_syslog_OBJECTS) $(test_syslog_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -702,6 +737,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/corrupt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbus-daemon.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_testutils_la-test-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loopback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/marshal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relay.Po@am__quote@
@@ -710,11 +746,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-exit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-segfault.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-sleep-forever.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dbus_daemon_eavesdrop-dbus-daemon-eavesdrop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_names-test-names.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_refs-refs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_service-test-service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_shell_service-test-shell-service.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_syslog-syslog.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -739,6 +776,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
+
+libdbus_testutils_la-test-utils.lo: test-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_testutils_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdbus_testutils_la-test-utils.lo -MD -MP -MF $(DEPDIR)/libdbus_testutils_la-test-utils.Tpo -c -o libdbus_testutils_la-test-utils.lo `test -f 'test-utils.c' || echo '$(srcdir)/'`test-utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libdbus_testutils_la-test-utils.Tpo $(DEPDIR)/libdbus_testutils_la-test-utils.Plo
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-utils.c' object='libdbus_testutils_la-test-utils.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_testutils_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdbus_testutils_la-test-utils.lo `test -f 'test-utils.c' || echo '$(srcdir)/'`test-utils.c
 
 shell_test-shell-test.o: shell-test.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(shell_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT shell_test-shell-test.o -MD -MP -MF $(DEPDIR)/shell_test-shell-test.Tpo -c -o shell_test-shell-test.o `test -f 'shell-test.c' || echo '$(srcdir)/'`shell-test.c
@@ -804,6 +849,22 @@ test_names-test-names.obj: test-names.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_names_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_names-test-names.obj `if test -f 'test-names.c'; then $(CYGPATH_W) 'test-names.c'; else $(CYGPATH_W) '$(srcdir)/test-names.c'; fi`
 
+test_refs-refs.o: internals/refs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_refs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_refs-refs.o -MD -MP -MF $(DEPDIR)/test_refs-refs.Tpo -c -o test_refs-refs.o `test -f 'internals/refs.c' || echo '$(srcdir)/'`internals/refs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_refs-refs.Tpo $(DEPDIR)/test_refs-refs.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='internals/refs.c' object='test_refs-refs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_refs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_refs-refs.o `test -f 'internals/refs.c' || echo '$(srcdir)/'`internals/refs.c
+
+test_refs-refs.obj: internals/refs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_refs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_refs-refs.obj -MD -MP -MF $(DEPDIR)/test_refs-refs.Tpo -c -o test_refs-refs.obj `if test -f 'internals/refs.c'; then $(CYGPATH_W) 'internals/refs.c'; else $(CYGPATH_W) '$(srcdir)/internals/refs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_refs-refs.Tpo $(DEPDIR)/test_refs-refs.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='internals/refs.c' object='test_refs-refs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_refs_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_refs-refs.obj `if test -f 'internals/refs.c'; then $(CYGPATH_W) 'internals/refs.c'; else $(CYGPATH_W) '$(srcdir)/internals/refs.c'; fi`
+
 test_service-test-service.o: test-service.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_service_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_service-test-service.o -MD -MP -MF $(DEPDIR)/test_service-test-service.Tpo -c -o test_service-test-service.o `test -f 'test-service.c' || echo '$(srcdir)/'`test-service.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_service-test-service.Tpo $(DEPDIR)/test_service-test-service.Po
@@ -835,6 +896,22 @@ test_shell_service-test-shell-service.obj: test-shell-service.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test-shell-service.c' object='test_shell_service-test-shell-service.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_service_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_shell_service-test-shell-service.obj `if test -f 'test-shell-service.c'; then $(CYGPATH_W) 'test-shell-service.c'; else $(CYGPATH_W) '$(srcdir)/test-shell-service.c'; fi`
+
+test_syslog-syslog.o: internals/syslog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_syslog_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_syslog-syslog.o -MD -MP -MF $(DEPDIR)/test_syslog-syslog.Tpo -c -o test_syslog-syslog.o `test -f 'internals/syslog.c' || echo '$(srcdir)/'`internals/syslog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_syslog-syslog.Tpo $(DEPDIR)/test_syslog-syslog.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='internals/syslog.c' object='test_syslog-syslog.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_syslog_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_syslog-syslog.o `test -f 'internals/syslog.c' || echo '$(srcdir)/'`internals/syslog.c
+
+test_syslog-syslog.obj: internals/syslog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_syslog_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_syslog-syslog.obj -MD -MP -MF $(DEPDIR)/test_syslog-syslog.Tpo -c -o test_syslog-syslog.obj `if test -f 'internals/syslog.c'; then $(CYGPATH_W) 'internals/syslog.c'; else $(CYGPATH_W) '$(srcdir)/internals/syslog.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_syslog-syslog.Tpo $(DEPDIR)/test_syslog-syslog.Po
+@am__fastdepCC_FALSE@	$(AM_V_CC) @AM_BACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='internals/syslog.c' object='test_syslog-syslog.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_syslog_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_syslog-syslog.obj `if test -f 'internals/syslog.c'; then $(CYGPATH_W) 'internals/syslog.c'; else $(CYGPATH_W) '$(srcdir)/internals/syslog.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1323,7 +1400,9 @@ clean-local:
 			REVERSEDIRS="$$D $$REVERSEDIRS" ;		\
 		done ;							\
 		for D in $$REVERSEDIRS; do				\
-			rmdir $(top_builddir)/test/$$D || exit 1 ;	\
+			rmdir $(top_builddir)/test/$$D || 		\
+				test ! -d $(top_builddir)/test/$$D ||	\
+				exit 1 ;	\
 		done ;							\
 	fi
 

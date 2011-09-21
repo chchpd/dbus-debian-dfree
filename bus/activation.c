@@ -257,6 +257,7 @@ update_desktop_file_entry (BusActivation       *activation,
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
+  retval = FALSE;
   name = NULL;
   exec = NULL;
   user = NULL;
@@ -416,8 +417,11 @@ update_desktop_file_entry (BusActivation       *activation,
 
       if (_dbus_hash_table_lookup_string (activation->entries, name))
         {
-          _dbus_verbose ("The new service name \"%s\" of service file \"%s\" already in cache, ignoring\n",
+          _dbus_verbose ("The new service name \"%s\" of service file \"%s\" is already in cache, ignoring\n",
                          name, _dbus_string_get_const_data (&file_path));
+          dbus_set_error (error, DBUS_ERROR_FAILED,
+                          "The new service name \"%s\" of service file \"%s\" is already in cache, ignoring\n",
+                          name, _dbus_string_get_const_data (&file_path));
           goto out;
         }
 
@@ -446,8 +450,7 @@ update_desktop_file_entry (BusActivation       *activation,
            * the entries hash table */
           _dbus_hash_table_remove_string (entry->s_dir->entries,
                                           entry->filename);
-          bus_activation_entry_unref (entry);
-          return FALSE;
+          goto out;
         }
     }
 
@@ -465,7 +468,7 @@ out:
   if (entry)
     bus_activation_entry_unref (entry);
 
-  return FALSE;
+  return retval;
 }
 
 static dbus_bool_t
@@ -881,8 +884,6 @@ bus_activation_new (BusContext        *context,
                     DBusError         *error)
 {
   BusActivation *activation;
-  DBusList      *link;
-  char          *dir;
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
@@ -1671,7 +1672,6 @@ bus_activation_activate_service (BusActivation  *activation,
   char **envp = NULL;
   int argc;
   dbus_bool_t retval;
-  DBusHashIter iter;
   dbus_bool_t was_pending_activation;
   DBusString command;
 
@@ -2538,14 +2538,18 @@ bus_activation_service_reload_test (const DBusString *test_data_dir)
     _dbus_assert_not_reached ("could not initiate service reload test");
 
   if (!do_service_reload_test (&directory, FALSE))
-    ; /* Do nothing? */
+    {
+      /* Do nothing? */
+    }
 
   /* Do OOM tests */
   if (!init_service_reload_test (&directory))
     _dbus_assert_not_reached ("could not initiate service reload test");
 
   if (!do_service_reload_test (&directory, TRUE))
-    ; /* Do nothing? */
+    {
+      /* Do nothing? */
+    }
 
   /* Cleanup test directory */
   if (!cleanup_service_reload_test (&directory))
