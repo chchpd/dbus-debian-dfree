@@ -13,6 +13,13 @@ AM_CPPFLAGS = \
 # improve backtraces from test stuff
 AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 
+static_cppflags = \
+	$(AM_CPPFLAGS) \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+
+libdbus_testutils_la_CPPFLAGS = \
+	$(static_cppflags)
 libdbus_testutils_la_SOURCES = \
 	test-utils.c \
 	test-utils.h \
@@ -65,11 +72,6 @@ endif !DBUS_BUILD_TESTS
 
 noinst_PROGRAMS= $(TEST_BINARIES)
 
-static_cppflags = \
-	$(AM_CPPFLAGS) \
-	-DDBUS_STATIC_BUILD \
-	$(NULL)
-
 test_service_CPPFLAGS = $(static_cppflags)
 test_service_LDADD = libdbus-testutils.la
 test_names_CPPFLAGS = $(static_cppflags)
@@ -83,6 +85,14 @@ shell_test_LDADD = libdbus-testutils.la
 spawn_test_CPPFLAGS = $(static_cppflags)
 spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 
+test_refs_SOURCES = internals/refs.c
+test_refs_CPPFLAGS = $(static_cppflags)
+test_refs_LDADD = libdbus-testutils.la $(GLIB_LIBS)
+
+test_syslog_SOURCES = internals/syslog.c
+test_syslog_CPPFLAGS = $(static_cppflags)
+test_syslog_LDADD = libdbus-testutils.la $(GLIB_LIBS)
+
 EXTRA_DIST = dbus-test-runner
 
 testexecdir = $(libdir)/dbus-1.0/test
@@ -95,7 +105,9 @@ installable_tests = \
 	test-dbus-daemon-eavesdrop \
 	test-loopback \
 	test-marshal \
+	test-refs \
 	test-relay \
+	test-syslog \
 	$(NULL)
 
 installcheck_tests =
@@ -251,6 +263,8 @@ clean-local:
 			REVERSEDIRS="$$D $$REVERSEDIRS" ;		\
 		done ;							\
 		for D in $$REVERSEDIRS; do				\
-			rmdir $(top_builddir)/test/$$D || exit 1 ;	\
+			rmdir $(top_builddir)/test/$$D || 		\
+				test ! -d $(top_builddir)/test/$$D ||	\
+				exit 1 ;	\
 		done ;							\
 	fi

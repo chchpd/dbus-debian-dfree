@@ -204,6 +204,11 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PYTHON = @PYTHON@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
@@ -279,9 +284,13 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -321,11 +330,9 @@ DTDS = \
 	busconfig.dtd \
 	introspect.dtd
 
-dist_doc_DATA = \
-	diagram.png \
-	diagram.svg \
-	system-activation.txt
+dist_doc_DATA = system-activation.txt
 
+# uploaded and distributed, but not installed
 STATIC_DOCS = \
 	dbus-faq.xml \
 	dbus-specification.xml \
@@ -344,7 +351,15 @@ EXTRA_DIST = \
 html_DATA = $(am__append_1) $(am__append_2)
 
 # we distribute these in the tarball so users don't necessarily need xmlto
-dist_html_DATA = $(XMLTO_OUTPUT)
+dist_html_DATA = $(STATIC_HTML) $(XMLTO_OUTPUT)
+
+# diagram.png/diagram.svg aren't really HTML, but must go in the same
+# directory as the HTML to avoid broken links
+STATIC_HTML = \
+	diagram.png \
+	diagram.svg \
+	$(NULL)
+
 XMLTO_OUTPUT = \
 	dbus-faq.html				\
 	dbus-specification.html			\
@@ -706,8 +721,8 @@ uninstall-man: uninstall-man1
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(apidir)/*.css
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(htmldir)/*.html
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.txt
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.png
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(docdir)/*.svg
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(htmldir)/*.png
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rm -f $(DESTDIR)$(htmldir)/*.svg
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(apidir) || \
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@		rmdir $(DESTDIR)$(apidir)
 
@@ -715,23 +730,25 @@ uninstall-man: uninstall-man1
 @DBUS_HAVE_MAN2HTML_TRUE@	$(AM_V_GEN)( $(MAN2HTML) $< > $@.tmp && mv $@.tmp $@ )
 
 @DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(dist_doc_DATA) $(dist_html_DATA) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)rm -rf $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)$(MKDIR_P) $@/api
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(STATIC_DOCS) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(dist_doc_DATA) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(dist_html_DATA) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_HTML_FILES) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(BONUS_FILES) $@
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp -r api/html $@/api
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)rm -rf $@ $@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)$(MKDIR_P) $@.tmp/api
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(STATIC_DOCS) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(dist_doc_DATA) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(STATIC_HTML) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(XMLTO_OUTPUT) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_HTML_FILES) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(BONUS_FILES) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp -r api/html @abs_builddir@/$@.tmp/api
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)mv $@.tmp $@
 
 @DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs.tar.gz: dbus-docs
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)tar czf $@ $<
 
 @DBUS_CAN_UPLOAD_DOCS_TRUE@maintainer-upload-docs: dbus-docs.tar.gz dbus-docs
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	scp dbus-docs.tar.gz $(DOC_SERVER):$(DOC_WWW_DIR)
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	scp dbus-docs.tar.gz $(DOC_SERVER):$(DOC_WWW_DIR)/
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	rsync -rpvzP --chmod=Dg+s,ug+rwX,o=rX \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@		dbus-docs/ $(DOC_SERVER):$(DOC_WWW_DIR)/doc/
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	scp -p $(DTDS) $(SPECIFICATION_SERVER):$(SPECIFICATION_PATH)
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	cd $(srcdir) && scp -p $(DTDS) $(SPECIFICATION_SERVER):$(SPECIFICATION_PATH)/
 @DBUS_CAN_UPLOAD_DOCS_FALSE@maintainer-upload-docs:
 @DBUS_CAN_UPLOAD_DOCS_FALSE@	@echo "Can't upload documentation! Re-run configure with"
 @DBUS_CAN_UPLOAD_DOCS_FALSE@	@echo "  --enable-doxygen-docs --enable-xml-docs"
@@ -741,7 +758,7 @@ uninstall-man: uninstall-man1
 clean-local:
 	rm -f $(html_DATA)
 	rm -rf api
-	rm -rf dbus-docs
+	rm -rf dbus-docs dbus-docs.tmp
 	rm -f *.1.html
 	rm -f doxygen.stamp
 

@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [5])
-m4_define([dbus_micro_version], [6])
+m4_define([dbus_micro_version], [8])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=9
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=3
+LT_REVISION=4
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -163,7 +163,14 @@ AC_ARG_ENABLE([modular-tests],
 AC_ARG_ENABLE([tests],
   AS_HELP_STRING([--enable-tests],
     [enable/disable all tests, overriding embedded-tests/modular-tests]),
-  [enable_embedded_tests=$enableval; enable_modular_tests=$enableval],
+  [
+  if test "x$enableval" = xyes; then
+    AC_MSG_NOTICE([Full test coverage was requested with --enable-tests=yes])
+    AC_MSG_NOTICE([This has many dependencies (GLib, dbus-glib, Python)])
+  fi
+  enable_embedded_tests=$enableval
+  enable_modular_tests=$enableval
+  ],
   [])
 
 # DBUS_ENABLE_EMBEDDED_TESTS controls unit tests built in to .c files
@@ -187,7 +194,8 @@ if test "x$enable_modular_tests" != xno; then
   PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22, gio-2.0 >= 2.22],
     [],
     [if test "x$enable_modular_tests" = xyes; then
-      AC_MSG_ERROR([GLib is required by the modular tests])
+      AC_MSG_NOTICE([Full test coverage (--enable-modular-tests=yes or --enable-tests=yes) requires GLib])
+      AC_MSG_ERROR([$GLIB_ERRORS])
     else # assumed to be "auto"
       enable_modular_tests=no
     fi])
@@ -195,7 +203,8 @@ if test "x$enable_modular_tests" != xno; then
   PKG_CHECK_MODULES([DBUS_GLIB], [dbus-glib-1],
     [],
     [if test "x$enable_modular_tests" = xyes; then
-      AC_MSG_ERROR([dbus-glib is required by the modular tests (for now)])
+      AC_MSG_NOTICE([Full test coverage (--enable-modular-tests=yes or --enable-tests=yes) requires dbus-glib])
+      AC_MSG_ERROR([$DBUS_GLIB_ERRORS])
     else # assumed to be "auto"
       enable_modular_tests=no
     fi])
@@ -218,12 +227,29 @@ AC_ARG_ENABLE([installed-tests],
 AM_CONDITIONAL([DBUS_ENABLE_INSTALLED_TESTS],
   [test "x$enable_installed_tests" = xyes])
 
+if test "x$enable_tests" = xyes; then
+  # full test coverage is required, Python is a hard dependency
+  AC_MSG_NOTICE([Full test coverage (--enable-tests=yes) requires Python, dbus-python, pygobject])
+  AM_PATH_PYTHON([2.6])
+  AC_MSG_CHECKING([for Python modules for full test coverage])
+  if "$PYTHON" -c "import dbus, gobject, dbus.mainloop.glib"; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+    AC_MSG_ERROR([cannot import dbus, gobject, dbus.mainloop.glib Python modules])
+  fi
+else
+  # --enable-tests not given: do not abort if Python is missing
+  AM_PATH_PYTHON([2.6], [], [:])
+fi
+
 if test x$enable_verbose_mode = xyes; then
     AC_DEFINE(DBUS_ENABLE_VERBOSE_MODE,1,[Support a verbose mode])
 fi
 
 if test x$enable_asserts = xno; then
     AC_DEFINE(DBUS_DISABLE_ASSERT,1,[Disable assertion checking])
+    DISABLE_UNUSED_WARNINGS="unused-label"
     R_DYNAMIC_LDFLAG=""
 else
     # -rdynamic is needed for glibc's backtrace_symbols to work.
@@ -241,6 +267,7 @@ AC_SUBST(R_DYNAMIC_LDFLAG)
 if test x$enable_checks = xno; then
     AC_DEFINE(DBUS_DISABLE_CHECKS,1,[Disable public API sanity checking])
     AC_DEFINE(G_DISABLE_CHECKS,1,[Disable GLib public API sanity checking])
+    DISABLE_UNUSED_WARNINGS="unused-label"
 fi
 
 if test x$enable_userdb_cache = xyes; then
@@ -544,6 +571,11 @@ AC_SEARCH_LIBS(socket,[socket network])
 AC_CHECK_FUNC(gethostbyname,,[AC_CHECK_LIB(nsl,gethostbyname)])
 
 AC_CHECK_FUNCS(vsnprintf vasprintf nanosleep usleep setenv clearenv unsetenv socketpair getgrouplist fpathconf setrlimit poll setlocale localeconv strtoll strtoull)
+
+AC_CHECK_HEADERS([syslog.h])
+if test "x$ac_cv_header_syslog_h" = "xyes"; then
+  AC_CHECK_DECLS([LOG_PERROR], [], [], [[#include <syslog.h>]])
+fi
 
 #### Check for broken poll; taken from Glib's configure
 
@@ -1203,8 +1235,9 @@ TP_COMPILER_WARNINGS([WARNING_CFLAGS],
   dnl Override with --enable-Werror or --disable-Werror
   [test x$dbus_win != xyes -a x$dbus_cygwin != xyes -a x$USE_MAINTAINER_MODE = xyes],
 
-  dnl enable these warnings if possible:
+  dnl Enable these warnings if possible:
   [all \
+   extra \
    char-subscripts \
    missing-declarations \
    missing-prototypes \
@@ -1216,12 +1249,25 @@ TP_COMPILER_WARNINGS([WARNING_CFLAGS],
    declaration-after-statement \
   ],
 
-  dnl disable these warnings if possible, make them non-fatal if possible,
-  dnl and don't enable -Werror unless we succeeded:
-  dnl (unused is by design, sign-compare and pointer-sign are fd.o #17433)
-  [unused \
+  dnl Disable these warnings if possible, make them non-fatal if possible,
+  dnl and don't enable -Werror unless we succeeded.
+  dnl
+  dnl Intentional:
+  dnl - $DISABLE_UNUSED_WARNINGS disables unused-label warnings if not
+  dnl   checking or not asserting
+  dnl - missing field initializers being 0 is a C feature, not a bug
+  dnl - unused-parameter is to make writing callbacks less annoying
+  dnl
+  dnl To be fixed one day:
+  dnl - sign-compare and pointer-sign are workarounds for fd.o #17433
+  dnl - type-limits is probably a bug too, but having the rest of -Wextra
+  dnl   is better than nothing
+  [$DISABLE_UNUSED_WARNINGS \
+   missing-field-initializers \
+   unused-parameter \
    sign-compare \
    pointer-sign \
+   type-limits \
   ])
 
 if test "x$GCC" = "xyes"; then
@@ -1367,7 +1413,12 @@ AM_CONDITIONAL(DBUS_INIT_SCRIPTS_CYGWIN, test x$with_init_scripts = xcygwin)
 ##### systemd unit files
 AC_ARG_WITH([systemdsystemunitdir],
 AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
-        [], [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+    [],
+    [
+    PKG_CHECK_EXISTS([systemd],
+      [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)],
+      [with_systemdsystemunitdir=no])
+    ])
 if test "x$with_systemdsystemunitdir" != xno; then
    AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
 fi

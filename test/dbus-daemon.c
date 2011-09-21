@@ -34,6 +34,7 @@
 #include <string.h>
 
 #ifdef DBUS_WIN
+# include <io.h>
 # include <windows.h>
 #else
 # include <signal.h>
@@ -46,7 +47,7 @@ typedef struct {
     DBusError e;
     GError *ge;
 
-    gint daemon_pid;
+    GPid daemon_pid;
 
     DBusConnection *left_conn;
 
@@ -68,7 +69,7 @@ _assert_no_error (const DBusError *e,
 static gchar *
 spawn_dbus_daemon (gchar *binary,
     gchar *configuration,
-    gint *daemon_pid)
+    GPid *daemon_pid)
 {
   GError *error = NULL;
   GString *address;
@@ -150,8 +151,6 @@ echo_filter (DBusConnection *connection,
     void *user_data)
 {
   DBusMessage *reply;
-  DBusError error = DBUS_ERROR_INIT;
-  int *sleep_ms = user_data;
 
   if (dbus_message_get_type (message) != DBUS_MESSAGE_TYPE_METHOD_CALL)
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;

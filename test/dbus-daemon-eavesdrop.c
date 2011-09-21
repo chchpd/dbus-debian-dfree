@@ -35,6 +35,7 @@
 #include <string.h>
 
 #ifdef DBUS_WIN
+# include <io.h>
 # include <windows.h>
 #else
 # include <signal.h>
@@ -73,7 +74,7 @@ typedef struct {
     DBusError e;
     GError *ge;
 
-    gint daemon_pid;
+    GPid daemon_pid;
 
     /* eavedrop keyword tests */
     DBusConnection *sender;
@@ -102,7 +103,7 @@ _assert_no_error (const DBusError *e,
 static gchar *
 spawn_dbus_daemon (gchar *binary,
     gchar *configuration,
-    gint *daemon_pid)
+    GPid *daemon_pid)
 {
   GError *error = NULL;
   GString *address;
@@ -183,7 +184,6 @@ connect_to_bus (const gchar *address)
 static DBusHandlerResult
 sender_send_unicast_to_sender (Fixture *f)
 {
-  DBusError error = DBUS_ERROR_INIT;
   DBusMessage *signal;
 
   signal = dbus_message_new_signal (SENDER_PATH, SENDER_IFACE,
@@ -206,7 +206,6 @@ sender_send_unicast_to_sender (Fixture *f)
 static DBusHandlerResult
 sender_send_unicast_to_receiver (Fixture *f)
 {
-  DBusError error = DBUS_ERROR_INIT;
   DBusMessage *signal;
 
   signal = dbus_message_new_signal (SENDER_PATH, SENDER_IFACE, SENDER_SIGNAL_NAME);
@@ -226,7 +225,6 @@ sender_send_unicast_to_receiver (Fixture *f)
 static DBusHandlerResult
 sender_send_broadcast (Fixture *f)
 {
-  DBusError error = DBUS_ERROR_INIT;
   DBusMessage *signal;
 
   signal = dbus_message_new_signal (SENDER_PATH, SENDER_IFACE, SENDER_SIGNAL_NAME);
@@ -251,7 +249,6 @@ sender_send_broadcast (Fixture *f)
 static DBusHandlerResult
 sender_send_stopper (Fixture *f)
 {
-  DBusError error = DBUS_ERROR_INIT;
   DBusMessage *signal;
 
   signal = dbus_message_new_signal (SENDER_PATH, SENDER_IFACE, SENDER_STOPPER_NAME);
