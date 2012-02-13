@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [4])
-m4_define([dbus_micro_version], [16])
+m4_define([dbus_micro_version], [18])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -1232,9 +1232,13 @@ TP_COMPILER_WARNINGS([WARNING_CFLAGS],
   dnl disable these warnings if possible, make them non-fatal if possible,
   dnl and don't enable -Werror unless we succeeded:
   dnl (unused is by design, sign-compare and pointer-sign are fd.o #17433)
+  dnl
+  dnl Because this is a stable branch, we're also not going to fix any
+  dnl uses of deprecated functions.
   [unused \
    sign-compare \
    pointer-sign \
+   deprecated-declarations \
   ])
 
 if test "x$GCC" = "xyes"; then

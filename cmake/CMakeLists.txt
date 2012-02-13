@@ -13,11 +13,6 @@ set (DBUS_VERSION ${DBUS_MAJOR_VERSION}.${DBUS_MINOR_VERSION}.${DBUS_MICRO_VERSI
 
 set (DBUS_VERSION_STRING "${DBUS_VERSION}")
 
-if (NOT DBUS_BUILD_TIMESTAMP)
-    message(STATUS "FIXME set DBUS_BUILD_TIMESTAMP to current date or fix current time stamp generation for having actual build date in version file info")
-    set (DBUS_BUILD_TIMESTAMP 20091231)
-endif (NOT DBUS_BUILD_TIMESTAMP)
-
 # we need to be up to date
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4 FATAL_ERROR)
 if(COMMAND cmake_policy)
@@ -26,6 +21,9 @@ endif(COMMAND cmake_policy)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+
+include(Macros)
+TIMESTAMP(DBUS_BUILD_TIMESTAMP)
 
 ########### basic vars ###############
 
@@ -38,7 +36,7 @@ if ($ENV{DBUSDIR})
 endif ($ENV{DBUSDIR})
 
 if (DBUS_INSTALL_DIR)
-	set(CMAKE_INSTALL_PREFIX "${DBUS_INSTALL_DIR}" CACHE TYPE PATH FORCE)
+	set(CMAKE_INSTALL_PREFIX "${DBUS_INSTALL_DIR}" CACHE PATH "install prefix" FORCE)
 else (DBUS_INSTALL_DIR)
 	set(DBUS_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 endif (DBUS_INSTALL_DIR)
@@ -87,9 +85,8 @@ if (WIN32)
     include(Win32Macros)
     addExplorerWrapper(${CMAKE_PROJECT_NAME})
 endif (WIN32)
-find_package(LibXml2)
-find_package(LibExpat)
-find_package(X11)
+
+option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
 
 if(NOT WIN32)
 	OPTION(DBUS_ENABLE_ABSTRACT_SOCKETS "enable support for abstract sockets" ON)
@@ -99,6 +96,13 @@ endif(NOT WIN32)
 OPTION(DBUS_DISABLE_ASSERTS "Disable assertion checking" OFF)
 
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
+
+if (DBUS_USE_EXPAT)
+    find_package(LibExpat)
+else ()
+    find_package(LibXml2)
+endif ()
+find_package(X11)
 
 # analogous to AC_USE_SYSTEM_EXTENSIONS in configure.ac
 add_definitions(-D_POSIX_C_SOURCE=199309L -D_GNU_SOURCE)
@@ -113,8 +117,7 @@ SET(DBUS_SOURCE_DIR ${CMAKE_SOURCE_DIR}/..)
 include (MacroLibrary)
 
 if(VCS)
-	set(DBUS_VERBOSE_C_S 1 CACHE TYPE STRING FORCE)
-	set(DBUS_VERBOSE_C_S 1)
+	set(DBUS_VERBOSE_C_S 1 CACHE STRING "verbose mode" FORCE)
 endif(VCS)
 
 if(WIN32)
@@ -131,8 +134,8 @@ if(WIN32)
 
 		# Use the highest warning level
 		if (WALL)
-			set(WALL 1 CACHE TYPE STRING FORCE)
-			set(CMAKE_CXX_WARNING_LEVEL 4 CACHE TYPE STRING FORCE)
+			set(WALL 1 CACHE STRING "all warnings"  FORCE)
+			set(CMAKE_CXX_WARNING_LEVEL 4 CACHE STRING "warning level" FORCE)
 
 			if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
 				STRING(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
@@ -146,7 +149,7 @@ if(WIN32)
 				SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
 			endif(CMAKE_C_FLAGS MATCHES "/W[0-4]")
 		else (WALL)
-			set(CMAKE_CXX_WARNING_LEVEL 3 CACHE TYPE STRING FORCE)
+			set(CMAKE_CXX_WARNING_LEVEL 3 CACHE STRING "warning level" FORCE)
 		endif (WALL)
 
 		SET(MSVC_W_ERROR   " /we4028 /we4013 /we4133 /we4047 /we4031 /we4002 /we4003 /we4114")
@@ -290,7 +293,7 @@ STRING(TOUPPER ${CMAKE_SYSTEM_NAME} sysname)
 if("${sysname}" MATCHES ".*SOLARIS.*")
     OPTION(HAVE_CONSOLE_OWNER_FILE "enable console owner file (solaris only)" ON)
     if(HAVE_CONSOLE_OWNER_FILE)
-        SET(DBUS_CONSOLE_OWNER_FILE "/dev/console" CACHE STRING "Directory to check for console ownerhip")
+        set (DBUS_CONSOLE_OWNER_FILE "/dev/console" CACHE STRING "Directory to check for console ownerhip")
     endif(HAVE_CONSOLE_OWNER_FILE)
 endif("${sysname}" MATCHES ".*SOLARIS.*")
 
@@ -298,12 +301,6 @@ endif("${sysname}" MATCHES ".*SOLARIS.*")
 if(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
     message(FATAL "Neither expat nor libxml2 found!")
 endif(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
-
-if(LIBEXPAT_FOUND)
-    OPTION(DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
-else(LIBEXPAT_FOUND)
-    OPTION(DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" OFF)
-endif(LIBEXPAT_FOUND)
 
 if(DBUS_USE_EXPAT)
     SET(XML_LIB "Expat")
@@ -350,8 +347,8 @@ if(CMAKE_COMPILER_IS_GNUCC AND NOT DBUS_ENABLE_ANSI)
     endif(UNAME_EXECUTABLE)
 endif(CMAKE_COMPILER_IS_GNUCC AND NOT DBUS_ENABLE_ANSI)
 
-OPTION(DBUS_HAVE_ATOMIC_INT    "Some atomic integer implementation present" ${atomic_int})
-OPTION(DBUS_USE_ATOMIC_INT_486 "Use atomic integer implementation for 486" ${atomic_int_486})
+set (DBUS_HAVE_ATOMIC_INT ${atomic_int} CACHE STRING "Some atomic integer implementation present")
+set (DBUS_USE_ATOMIC_INT_486 ${atomic_int_486} CACHE STRING "Use atomic integer implementation for 486")
 
 if(X11_FOUND)
   OPTION(DBUS_BUILD_X11 "Build with X11 autolaunch support " ON)
@@ -505,8 +502,12 @@ set (DBUS_INTERNAL_LIBRARY_DEFINITIONS "-DDBUS_STATIC_BUILD")
 set (DBUS_INTERNAL_CLIENT_DEFINITIONS "-DDBUS_STATIC_BUILD")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
+
+if (WIN32)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dbus-env.bat.cmake ${CMAKE_BINARY_DIR}/bin/dbus-env.bat )
 install_files(/bin FILES ${CMAKE_BINARY_DIR}/bin/dbus-env.bat)
+endif()
+
 add_definitions(-DHAVE_CONFIG_H=1)
 
 ########### subdirs ###############
@@ -617,3 +618,8 @@ endif(DBUS_DISABLE_CHECKS)
 MESSAGE(" ")
 
 INCLUDE(modules/CPackInstallConfig.cmake)
+
+add_custom_target(help-options
+    cmake -LH 
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
