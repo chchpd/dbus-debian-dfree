@@ -1,5 +1,5 @@
 Source: dbus
-Section: devel
+Section: admin
 Priority: optional
 Maintainer: Utopia Maintenance Team <pkg-utopia-maintainers@lists.alioth.debian.org>
 Uploaders: Sjoerd Simons <sjoerd@debian.org>,

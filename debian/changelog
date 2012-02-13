@@ -1,6 +1,8 @@
 dbus (1.4.18-1) UNRELEASED; urgency=low
 
   * New upstream release
+  * Change dbus and src:dbus from Section: devel to Section: admin
+    (Closes: #659357)
 
  -- Simon McVittie <smcv@debian.org>  Mon, 13 Feb 2012 17:08:02 +0000
 
