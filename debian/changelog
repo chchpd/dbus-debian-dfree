@@ -1,3 +1,9 @@
+dbus (1.5.10-1) UNRELEASED; urgency=low
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 21 Feb 2012 17:41:59 +0000
+
 dbus (1.5.8-1) experimental; urgency=low
 
   * Merge from unstable
