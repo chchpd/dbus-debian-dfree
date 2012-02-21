@@ -40,6 +40,10 @@
 
 #include <string.h>
 
+#define _DBUS_TYPE_IS_STRINGLIKE(type) \
+  (type == DBUS_TYPE_STRING || type == DBUS_TYPE_SIGNATURE || \
+   type == DBUS_TYPE_OBJECT_PATH)
+
 static void dbus_message_finalize (DBusMessage *message);
 
 /**
@@ -51,6 +55,51 @@ static void dbus_message_finalize (DBusMessage *message);
  *
  * @{
  */
+
+#ifdef DBUS_BUILD_TESTS
+static dbus_bool_t
+_dbus_enable_message_cache (void)
+{
+  static int enabled = -1;
+
+  if (enabled < 0)
+    {
+      const char *s = _dbus_getenv ("DBUS_MESSAGE_CACHE");
+
+      enabled = TRUE;
+
+      if (s && *s)
+        {
+          if (*s == '0')
+            enabled = FALSE;
+          else if (*s == '1')
+            enabled = TRUE;
+          else
+            _dbus_warn ("DBUS_MESSAGE_CACHE should be 0 or 1 if set, not '%s'",
+                s);
+        }
+    }
+
+  return enabled;
+}
+#else
+    /* constant expression, should be optimized away */
+#   define _dbus_enable_message_cache() (TRUE)
+#endif
+
+#ifndef _dbus_message_trace_ref
+void
+_dbus_message_trace_ref (DBusMessage *message,
+                         int          old_refcount,
+                         int          new_refcount,
+                         const char  *why)
+{
+  static int enabled = -1;
+
+  _dbus_trace_ref ("DBusMessage", message, old_refcount, new_refcount, why,
+      "DBUS_MESSAGE_TRACE", &enabled);
+}
+#endif
 
 /* Not thread locked, but strictly const/read-only so should be OK
  */
@@ -632,6 +681,9 @@ dbus_message_cache_or_finalize (DBusMessage *message)
 
   _dbus_assert (message_cache_count >= 0);
 
+  if (!_dbus_enable_message_cache ())
+    goto out;
+
   if ((_dbus_string_get_length (&message->header.data) +
        _dbus_string_get_length (&message->body)) >
       MAX_MESSAGE_SIZE_TO_CACHE)
@@ -839,9 +891,7 @@ _dbus_message_iter_get_args_valist (DBusMessageIter *iter,
               _dbus_type_reader_read_fixed_multi (&array,
                                                   (void *) ptr, n_elements_p);
             }
-          else if (spec_element_type == DBUS_TYPE_STRING ||
-                   spec_element_type == DBUS_TYPE_SIGNATURE ||
-                   spec_element_type == DBUS_TYPE_OBJECT_PATH)
+          else if (_DBUS_TYPE_IS_STRINGLIKE (spec_element_type))
             {
               char ***str_array_p;
               int n_elements;
@@ -1101,6 +1151,8 @@ dbus_message_new_empty_header (void)
     }
 
   _dbus_atomic_inc (&message->refcount);
+
+  _dbus_message_trace_ref (message, 0, 1, "new_empty_header");
 
   message->locked = FALSE;
 #ifndef DBUS_DISABLE_CHECKS
@@ -1508,6 +1560,7 @@ dbus_message_copy (const DBusMessage *message)
 
 #endif
 
+  _dbus_message_trace_ref (retval, 0, 1, "copy");
   return retval;
 
  failed_copy:
@@ -1535,20 +1588,15 @@ dbus_message_copy (const DBusMessage *message)
 DBusMessage *
 dbus_message_ref (DBusMessage *message)
 {
-#ifndef DBUS_DISABLE_ASSERT
   dbus_int32_t old_refcount;
-#endif
 
   _dbus_return_val_if_fail (message != NULL, NULL);
   _dbus_return_val_if_fail (message->generation == _dbus_current_generation, NULL);
   _dbus_return_val_if_fail (!message->in_cache, NULL);
 
-#ifdef DBUS_DISABLE_ASSERT
-  _dbus_atomic_inc (&message->refcount);
-#else
   old_refcount = _dbus_atomic_inc (&message->refcount);
   _dbus_assert (old_refcount >= 1);
-#endif
+  _dbus_message_trace_ref (message, old_refcount, old_refcount + 1, "ref");
 
   return message;
 }
@@ -1572,6 +1620,8 @@ dbus_message_unref (DBusMessage *message)
   old_refcount = _dbus_atomic_dec (&message->refcount);
 
   _dbus_assert (old_refcount >= 1);
+
+  _dbus_message_trace_ref (message, old_refcount, old_refcount - 1, "unref");
 
   if (old_refcount == 1)
     {
@@ -1751,9 +1801,7 @@ dbus_message_append_args_valist (DBusMessage *message,
                 goto failed;
               }
             }
-          else if (element_type == DBUS_TYPE_STRING ||
-                   element_type == DBUS_TYPE_SIGNATURE ||
-                   element_type == DBUS_TYPE_OBJECT_PATH)
+          else if (_DBUS_TYPE_IS_STRINGLIKE (element_type))
             {
               const char ***value_p;
               const char **value;

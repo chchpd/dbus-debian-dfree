@@ -118,6 +118,14 @@ static void _dbus_verbose(const char * x,...) {;}
 #  define _dbus_is_verbose() FALSE 
 #endif /* !DBUS_ENABLE_VERBOSE_MODE */
 
+void _dbus_trace_ref (const char *obj_name,
+                      void       *obj,
+                      int         old_refcount,
+                      int         new_refcount,
+                      const char *why,
+                      const char *env_var,
+                      int        *enabled);
+
 const char* _dbus_strerror (int error_number);
 
 #ifdef DBUS_DISABLE_ASSERT
@@ -259,8 +267,6 @@ void _dbus_verbose_bytes_of_string (const DBusString    *str,
                                     int                  start,
                                     int                  len);
 
-const char* _dbus_header_field_to_string (int header_field);
-
 extern const char *_dbus_no_memory_message;
 #define _DBUS_SET_OOM(error) dbus_set_error_const ((error), DBUS_ERROR_NO_MEMORY, _dbus_no_memory_message)
 
@@ -298,10 +304,10 @@ extern int _dbus_current_generation;
 
 /* Thread initializers */
 #define _DBUS_LOCK_NAME(name)           _dbus_lock_##name
-#define _DBUS_DECLARE_GLOBAL_LOCK(name) extern DBusMutex  *_dbus_lock_##name
-#define _DBUS_DEFINE_GLOBAL_LOCK(name)  DBusMutex         *_dbus_lock_##name  
-#define _DBUS_LOCK(name)                _dbus_mutex_lock   (_dbus_lock_##name)
-#define _DBUS_UNLOCK(name)              _dbus_mutex_unlock (_dbus_lock_##name)
+#define _DBUS_DECLARE_GLOBAL_LOCK(name) extern DBusRMutex *_dbus_lock_##name
+#define _DBUS_DEFINE_GLOBAL_LOCK(name)  DBusRMutex        *_dbus_lock_##name
+#define _DBUS_LOCK(name)                _dbus_rmutex_lock   (_dbus_lock_##name)
+#define _DBUS_UNLOCK(name)              _dbus_rmutex_unlock (_dbus_lock_##name)
 
 /* 1-5 */
 _DBUS_DECLARE_GLOBAL_LOCK (list);

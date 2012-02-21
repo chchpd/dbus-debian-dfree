@@ -799,11 +799,6 @@ failed:
  * Creates a full-duplex pipe (as in socketpair()).
  * Sets both ends of the pipe nonblocking.
  *
- * @todo libdbus only uses this for the debug-pipe server, so in
- * principle it could be in dbus-sysdeps-util.c, except that
- * dbus-sysdeps-util.c isn't in libdbus when tests are enabled and the
- * debug-pipe server is used.
- * 
  * @param fd1 return location for one end
  * @param fd2 return location for the other end
  * @param blocking #TRUE if pipe should be blocking
@@ -2852,10 +2847,39 @@ _dbus_get_autolaunch_address (const char *scope, DBusString *address,
 
   if (!SearchPathA(NULL, daemon_name, NULL, sizeof(dbus_exe_path), dbus_exe_path, &lpFile))
     {
-      printf ("please add the path to %s to your PATH environment variable\n", daemon_name);
-      printf ("or start the daemon manually\n\n");
-      goto out;
+      // Look in directory containing dbus shared library
+      HMODULE hmod;
+      char dbus_module_path[MAX_PATH];
+      DWORD rc;
+
+      _dbus_verbose( "did not found dbus daemon executable on default search path, "
+            "trying path where dbus shared library is located");
+
+      hmod = _dbus_win_get_dll_hmodule();
+      rc = GetModuleFileNameA(hmod, dbus_module_path, sizeof(dbus_module_path));
+      if (rc <= 0)
+        {
+          dbus_set_error_const (error, DBUS_ERROR_FAILED, "could not retrieve dbus shared library file name");
+          retval = FALSE;
+          goto out;
+        }
+      else
+        {
+          char *ext_idx = strrchr(dbus_module_path, '\\');
+          if (ext_idx)
+          *ext_idx = '\0';
+          if (!SearchPathA(dbus_module_path, daemon_name, NULL, sizeof(dbus_exe_path), dbus_exe_path, &lpFile))
+            {
+              dbus_set_error_const (error, DBUS_ERROR_FAILED, "could not find dbus-daemon executable");
+              retval = FALSE;
+              printf ("please add the path to %s to your PATH environment variable\n", daemon_name);
+              printf ("or start the daemon manually\n\n");
+              goto out;
+            }
+          _dbus_verbose( "found dbus daemon executable at %s",dbus_module_path);
+        }
     }
+
 
   // Create process
   ZeroMemory( &si, sizeof(si) );

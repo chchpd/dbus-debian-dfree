@@ -7,7 +7,7 @@
   <articleinfo>
     <title>D-Bus Specification</title>
     <releaseinfo>Version 0.19</releaseinfo>
-    <date>UNRELEASED</date>
+    <date>2012-02-21</date>
     <authorgroup>
       <author>
 	<firstname>Havoc</firstname>
@@ -76,6 +76,15 @@
        <date><ulink url='http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml'>commit log</ulink></date>
        <authorinitials></authorinitials>
        <revremark></revremark>
+     </revision>
+     <revision>
+       <revnumber>0.19</revnumber>
+       <date>20 February 2012</date>
+       <authorinitials>smcv/lp</authorinitials>
+       <revremark>formally define unique connection names and well-known
+        bus names; document best practices for interface, bus, member and
+        error names, and object paths; document the search path for session
+        and system services on Unix; document the systemd transport</revremark>
      </revision>
      <revision>
        <revnumber>0.18</revnumber>
@@ -782,9 +791,29 @@
           </itemizedlist>
         </para>
 
+        <para>
+          Object paths are often namespaced by starting with a reversed
+          domain name and containing an interface version number, in the
+          same way as
+          <link linkend="message-protocol-names-interface">interface
+            names</link> and
+          <link linkend="message-protocol-names-bus">well-known
+            bus names</link>.
+          This makes it possible to implement more than one service, or
+          more than one version of a service, in the same process,
+          even if the services share a connection but cannot otherwise
+          co-operate (for instance, if they are implemented by different
+          plugins).
+        </para>
+
+        <para>
+          For instance, if the owner of <literal>example.com</literal> is
+          developing a D-Bus API for a music player, they might use the
+          hierarchy of object paths that start with
+          <literal>/com/example/MusicPlayer1</literal> for its objects.
+        </para>
       </sect3>
 
-      
       <sect3 id="message-protocol-marshaling-signature">
         <title>Valid Signatures</title>
         <para>
@@ -1228,21 +1257,48 @@
 	    <listitem><para>Interface names must not exceed the maximum name length.</para></listitem>
           </itemizedlist>
         </para>
+
+        <para>
+          Interface names should start with the reversed DNS domain name of
+          the author of the interface (in lower-case), like interface names
+          in Java. It is conventional for the rest of the interface name
+          to consist of words run together, with initial capital letters
+          on all words ("CamelCase"). Several levels of hierarchy can be used.
+          It is also a good idea to include the major version of the interface
+          in the name, and increment it if incompatible changes are made;
+          this way, a single object can implement several versions of an
+          interface in parallel, if necessary.
+        </para>
+
+        <para>
+          For instance, if the owner of <literal>example.com</literal> is
+          developing a D-Bus API for a music player, they might define
+          interfaces called <literal>com.example.MusicPlayer1</literal>,
+          <literal>com.example.MusicPlayer1.Track</literal> and
+          <literal>com.example.MusicPlayer1.Seekable</literal>.
+        </para>
+
+        <para>
+          D-Bus does not distinguish between the concepts that would be
+          called classes and interfaces in Java: either can be identified on
+          D-Bus by an interface name.
+        </para>
       </sect3>
       <sect3 id="message-protocol-names-bus">
         <title>Bus names</title>
         <para>
           Connections have one or more bus names associated with them.
-          A connection has exactly one bus name that is a unique connection
-          name. The unique connection name remains with the connection for
-          its entire lifetime.
+          A connection has exactly one bus name that is a <firstterm>unique
+            connection name</firstterm>. The unique connection name remains
+          with the connection for its entire lifetime.
           A bus name is of type <literal>STRING</literal>,
           meaning that it must be valid UTF-8. However, there are also
           some additional restrictions that apply to bus names 
           specifically:
           <itemizedlist>
             <listitem><para>Bus names that start with a colon (':')
-                character are unique connection names.
+                character are unique connection names. Other bus names
+                are called <firstterm>well-known bus names</firstterm>.
                 </para>
             </listitem>
             <listitem><para>Bus names are composed of 1 or more elements separated by
@@ -1269,6 +1325,31 @@
           Note that the hyphen ('-') character is allowed in bus names but
           not in interface names.
         </para>
+
+        <para>
+          Like <link linkend="message-protocol-names-interface">interface
+            names</link>, well-known bus names should start with the
+          reversed DNS domain name of the author of the interface (in
+          lower-case), and it is conventional for the rest of the well-known
+          bus name to consist of words run together, with initial
+          capital letters. As with interface names, including a version
+          number in well-known bus names is a good idea; it's possible to
+          have the well-known bus name for more than one version
+          simultaneously if backwards compatibility is required.
+        </para>
+
+        <para>
+          If a well-known bus name implies the presence of a "main" interface,
+          that "main" interface is often given the same name as
+          the well-known bus name, and situated at the corresponding object
+          path. For instance, if the owner of <literal>example.com</literal>
+          is developing a D-Bus API for a music player, they might define
+          that any application that takes the well-known name
+          <literal>com.example.MusicPlayer1</literal> should have an object
+          at the object path <literal>/com/example/MusicPlayer1</literal>
+          which implements the interface
+          <literal>com.example.MusicPlayer1</literal>.
+        </para>
       </sect3>
       <sect3 id="message-protocol-names-member">
         <title>Member names</title>
@@ -1283,11 +1364,30 @@
 	    <listitem><para>Must be at least 1 byte in length.</para></listitem>
           </itemizedlist>
         </para>
+
+        <para>
+          It is conventional for member names on D-Bus to consist of
+          capitalized words with no punctuation ("camel-case").
+          Method names should usually be verbs, such as
+          <literal>GetItems</literal>, and signal names should usually be
+          a description of an event, such as <literal>ItemsChanged</literal>.
+        </para>
       </sect3>
       <sect3 id="message-protocol-names-error">
         <title>Error names</title>
         <para>
           Error names have the same restrictions as interface names.
+        </para>
+
+        <para>
+          Error names have the same naming conventions as interface
+          names, and often contain <literal>.Error.</literal>; for instance,
+          the owner of <literal>example.com</literal> might define the
+          errors <literal>com.example.MusicPlayer.Error.FileNotFound</literal>
+          and <literal>com.example.MusicPlayer.Error.OutOfMemory</literal>.
+          The errors defined by D-Bus itself, such as
+          <literal>org.freedesktop.DBus.Error.Failed</literal>, follow a
+          similar pattern.
         </para>
       </sect3>
     </sect2>
@@ -2567,7 +2667,7 @@
       [FIXME we need to specify in detail each transport and its possible arguments]
     
       Current transports include: unix domain sockets (including 
-      abstract namespace on linux), launchd, TCP/IP, and a debug/testing transport
+      abstract namespace on linux), launchd, systemd, TCP/IP, and a debug/testing transport
       using in-process pipes. Future possible transports include one that
       tunnels over X11 protocol.
     </para>
@@ -2630,7 +2730,7 @@
     <sect2 id="transports-launchd">
       <title>launchd</title>
       <para>
-        launchd is a open-source server management system that replaces init, inetd
+        launchd is an open-source server management system that replaces init, inetd
         and cron on Apple Mac OS X versions 10.4 and above. It provides a common session
         bus address for each user and deprecates the X11-enabled D-Bus launcher on OSX.
       </para>
@@ -2673,6 +2773,27 @@
         </tgroup>
        </informaltable>
       </sect3>
+    </sect2>
+    <sect2 id="transports-systemd">
+      <title>systemd</title>
+      <para>
+        systemd is an open-source server management system that
+        replaces init and inetd on newer Linux systems. It supports
+        socket activation. The D-Bus systemd transport is used to acquire
+        socket activation file descriptors from systemd and use them
+        as D-Bus transport when the current process is spawned by
+        socket activation from it.
+      </para>
+      <para>
+        The systemd transport accepts only one or more Unix domain or
+        TCP streams sockets passed in via socket activation.
+      </para>
+      <para>
+        The systemd transport is not available on non-Linux operating systems.
+      </para>
+      <para>
+        The systemd transport defines no parameter keys.
+      </para>
     </sect2>
     <sect2 id="transports-tcp-sockets">
       <title>TCP Sockets</title>
@@ -2892,22 +3013,6 @@
      </sect3>
     </sect2>
    </sect1>
-   <sect1 id="naming-conventions">
-    <title>Naming Conventions</title>
-    
-    <para>
-      D-Bus namespaces are all lowercase and correspond to reversed domain
-      names, as with Java. e.g. "org.freedesktop"
-    </para>
-    <para>
-      Interface, signal, method, and property names are "WindowsStyleCaps", note
-      that the first letter is capitalized, unlike Java.
-    </para>
-    <para>
-      Object paths are normally all lowercase with underscores used rather than
-      hyphens.
-    </para>
-  </sect1>
 
   <sect1 id="uuids">
     <title>UUIDs</title>
@@ -3035,6 +3140,22 @@
               org.freedesktop.DBus.Properties.GetAll (in STRING interface_name,
                                                       out DICT&lt;STRING,VARIANT&gt; props);
         </programlisting>
+      </para>
+      <para>
+        It is conventional to give D-Bus properties names consisting of
+        capitalized words without punctuation ("CamelCase"), like
+        <link linkend="message-protocol-names-member">member names</link>.
+        For instance, the GObject property
+        <literal>connection-status</literal> or the Qt property
+        <literal>connectionStatus</literal> could be represented on D-Bus
+        as <literal>ConnectionStatus</literal>.
+      </para>
+      <para>
+        Strictly speaking, D-Bus property names are not required to follow
+        the same naming restrictions as member names, but D-Bus property
+        names that would not be valid member names (in particular,
+        GObject-style dash-separated property names) can cause interoperability
+        problems and should be avoided.
       </para>
       <para>
         The available properties and whether they are writable can be determined
@@ -4500,9 +4621,25 @@
         <sect4>
           <title></title>
           <para>
-            [FIXME specify location of .service files, probably using
-            DESKTOP_DIRS etc. from basedir specification, though login session
-            bus is not really desktop-specific]
+            On Unix systems, the session bus should search for .service files
+            in <literal>$XDG_DATA_DIRS/dbus-1/services</literal> as defined
+            by the
+            <ulink url="http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html">XDG Base Directory Specification</ulink>.
+            Implementations may also search additional locations, which
+            should be searched with lower priority than anything in
+            XDG_DATA_HOME, XDG_DATA_DIRS or their respective defaults;
+            for example, the reference implementation also
+            looks in <literal>${datadir}/dbus-1/services</literal> as
+            set at compile time.
+          </para>
+          <para>
+            As described in the XDG Base Directory Specification, software
+            packages should install their session .service files to their
+            configured <literal>${datadir}/dbus-1/services</literal>,
+            where <literal>${datadir}</literal> is as defined by the GNU
+            coding standards. System administrators or users can arrange
+            for these service files to be read by setting XDG_DATA_DIRS or by
+            symlinking them into the default locations.
           </para>
         </sect4>
       </sect3>
@@ -4529,7 +4666,32 @@
           </footnote>
         </para>
         <para>
-          [FIXME specify location of system bus .service files]
+          On Unix systems, the system bus should default to searching
+          for .service files in
+          <literal>/usr/local/share/dbus-1/system-services</literal>,
+          <literal>/usr/share/dbus-1/system-services</literal> and
+          <literal>/lib/dbus-1/system-services</literal>, with that order
+          of precedence. It may also search other implementation-specific
+          locations, but should not vary these locations based on environment
+          variables.
+          <footnote>
+            <para>
+              The system bus is security-sensitive and is typically executed
+              by an init system with a clean environment. Its launch helper
+              process is particularly security-sensitive, and specifically
+              clears its own environment.
+            </para>
+          </footnote>
+        </para>
+        <para>
+          Software packages should install their system .service
+          files to their configured
+          <literal>${datadir}/dbus-1/system-services</literal>,
+          where <literal>${datadir}</literal> is as defined by the GNU
+          coding standards. System administrators can arrange
+          for these service files to be read by editing the system bus'
+          configuration file or by symlinking them into the default
+          locations.
         </para>
       </sect3>
     </sect2>
@@ -5216,6 +5378,11 @@
               can be thought of as "well-known names" and are 
               used to find applications that offer specific functionality.
         </para>
+
+        <para>
+          See <xref linkend="message-protocol-names-bus"/> for details of
+          the syntax and naming conventions for bus names.
+        </para>
       </glossdef>
     </glossentry>
       
@@ -5254,10 +5421,14 @@
 
     <glossentry id="namespace"><glossterm>Namespace</glossterm>
       <glossdef>
-	<para>
-          Used to prevent collisions when defining new interfaces or bus
-	  names. The convention used is the same one Java uses for defining
-	  classes: a reversed domain name.
+        <para>
+          Used to prevent collisions when defining new interfaces, bus names
+          etc. The convention used is the same one Java uses for defining
+          classes: a reversed domain name.
+          See <xref linkend="message-protocol-names-bus"/>,
+          <xref linkend="message-protocol-names-interface"/>,
+          <xref linkend="message-protocol-names-error"/>,
+          <xref linkend="message-protocol-marshaling-object-path"/>.
         </para>
       </glossdef>
     </glossentry>

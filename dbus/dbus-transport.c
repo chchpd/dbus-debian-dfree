@@ -31,8 +31,7 @@
 #include "dbus-address.h"
 #include "dbus-credentials.h"
 #include "dbus-mainloop.h"
-#include "dbus-message-private.h"
-#include "dbus-marshal-header.h"
+#include "dbus-message.h"
 #ifdef DBUS_BUILD_TESTS
 #include "dbus-server-debug-pipe.h"
 #endif

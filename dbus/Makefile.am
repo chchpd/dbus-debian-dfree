@@ -4,6 +4,8 @@ configdir=$(sysconfdir)/dbus-1
 AM_CPPFLAGS = \
 	-I$(top_builddir) \
 	-I$(top_srcdir) \
+	$(SYSTEMD_CFLAGS) \
+	$(VALGRIND_CFLAGS) \
 	-DDBUS_COMPILATION \
 	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
 	-DDBUS_SYSTEM_CONFIG_FILE=\""$(configdir)/system.conf"\" \
@@ -111,6 +113,10 @@ DBUS_UTIL_arch_sources = 			\
 	dbus-spawn.c
 endif
 
+if HAVE_LINUX_EPOLL
+DBUS_UTIL_arch_sources += dbus-socket-set-epoll.c
+endif
+
 dbusinclude_HEADERS=				\
 	dbus.h					\
 	dbus-address.h				\
@@ -139,8 +145,6 @@ DBUS_LIB_SOURCES=				\
 	dbus-address.c				\
 	dbus-auth.c				\
 	dbus-auth.h				\
-	dbus-auth-script.c			\
-	dbus-auth-script.h			\
 	dbus-bus.c				\
 	dbus-connection.c			\
 	dbus-connection-internal.h		\
@@ -218,7 +222,8 @@ DBUS_SHARED_SOURCES=				\
 	dbus-string-private.h			\
 	$(DBUS_SHARED_arch_sources)		\
 	dbus-sysdeps.c				\
-	dbus-sysdeps.h
+	dbus-sysdeps.h				\
+	dbus-valgrind-internal.h
 
 ### source code that is generic utility functionality used
 ### by the bus daemon or test apps, but is NOT included
@@ -226,6 +231,8 @@ DBUS_SHARED_SOURCES=				\
 ### should be underscore-prefixed but don't really need
 ### to be unless they move to DBUS_SHARED_SOURCES later)
 DBUS_UTIL_SOURCES=				\
+	dbus-auth-script.c			\
+	dbus-auth-script.h			\
 	dbus-auth-util.c			\
 	dbus-credentials-util.c			\
 	dbus-mainloop.c				\
@@ -239,6 +246,9 @@ DBUS_UTIL_SOURCES=				\
 	dbus-shell.c				\
 	dbus-shell.h				\
 	$(DBUS_UTIL_arch_sources)		\
+	dbus-socket-set.h			\
+	dbus-socket-set.c			\
+	dbus-socket-set-poll.c			\
 	dbus-spawn.h				\
 	dbus-string-util.c			\
 	dbus-sysdeps-util.c			\
@@ -277,7 +287,7 @@ libdbus_internal_la_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DDBUS_STATIC_BUILD \
 	$(NULL)
-libdbus_internal_la_LIBADD=$(LIBDBUS_LIBS)
+libdbus_internal_la_LIBADD=$(LIBDBUS_LIBS) $(SYSTEMD_LIBS)
 
 noinst_PROGRAMS =
 
