@@ -4,20 +4,15 @@
 # Copyright © 2006 Sjoerd Simons <sjoerd@debian.org>
 # Copyright © 2011 Michael Biebl <biebl@debian.org>
 
+include /usr/share/dpkg/default.mk
+
 %:
 	dh $@ --builddirectory=build --with autoreconf --parallel
 
 libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
 libdbus_soname := $(patsubst libdbus-1-%,libdbus-1.so.%,$(libdbusN))
 
-DEB_HOST_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-cflags := $(shell dpkg-buildflags --get CFLAGS)
-ldflags := $(shell dpkg-buildflags --get LDFLAGS)
-ldflags += -Wl,--as-needed
-
-include /usr/share/hardening-includes/hardening.make
-cflags += $(HARDENING_CFLAGS)
-ldflags += $(HARDENING_LDFLAGS)
+LDFLAGS += -Wl,--as-needed
 
 common_configure_flags := \
 		--disable-silent-rules \
@@ -25,7 +20,7 @@ common_configure_flags := \
 		--enable-installed-tests \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
 		--with-systemdsystemunitdir=/lib/systemd/system \
-		CFLAGS="$(cflags)" LDFLAGS="$(ldflags)"
+		$(NULL)
 
 override_dh_auto_configure:
 	dh_auto_configure \
@@ -33,7 +28,8 @@ override_dh_auto_configure:
 		$(common_configure_flags) \
 		--enable-xml-docs \
 		--enable-doxygen-docs \
-		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH)
+		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		$(NULL)
 	dh_auto_configure \
 		--builddirectory=build-debug \
 		-- \
@@ -44,7 +40,9 @@ override_dh_auto_configure:
 		--enable-checks \
 		--enable-tests \
 		--enable-verbose-mode \
-		--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build
+		--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
+		--libdir='$${prefix}/lib' \
+		$(NULL)
 
 override_dh_auto_build:
 	dh_auto_build
