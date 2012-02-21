@@ -2,6 +2,7 @@ dbus (1.5.10-1) UNRELEASED; urgency=low
 
   * New upstream release
   * Merge from unstable
+  * Build with systemd console-user-checking support
 
  -- Simon McVittie <smcv@debian.org>  Tue, 21 Feb 2012 17:41:59 +0000
 
