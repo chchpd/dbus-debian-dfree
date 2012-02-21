@@ -57,7 +57,7 @@
 /* Use launchd autolaunch */
 #undef DBUS_ENABLE_LAUNCHD
 
-/* Define to build independent test binaries (requires GLib) */
+/* Define to build independent test binaries */
 #undef DBUS_ENABLE_MODULAR_TESTS
 
 /* Define to enable bus daemon usage statistics */
@@ -72,8 +72,14 @@
 /* Define to enable X11 auto-launch */
 #undef DBUS_ENABLE_X11_AUTOLAUNCH
 
+/* Extension for executables, typically empty or .exe */
+#undef DBUS_EXEEXT
+
 /* Defined if gcov is enabled to force a rebuild due to config.h changing */
 #undef DBUS_GCOV_ENABLED
+
+/* Define to use epoll(4) on Linux */
+#undef DBUS_HAVE_LINUX_EPOLL
 
 /* Define to printf modifier for 64 bit integer type */
 #undef DBUS_INT64_PRINTF_MODIFIER
@@ -92,6 +98,9 @@
 
 /* The name of the socket the system bus listens on by default */
 #undef DBUS_SYSTEM_SOCKET
+
+/* Full path to the daemon in the builddir */
+#undef DBUS_TEST_EXEC
 
 /* Full path to the launch helper test program in the builddir */
 #undef DBUS_TEST_LAUNCH_HELPER_BINARY
@@ -119,6 +128,9 @@
 
 /* Defined if we run on a W32 CE API based system */
 #undef DBUS_WINCE
+
+/* Define if GLib, GObject, GIO are available */
+#undef DBUS_WITH_GLIB
 
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
@@ -284,6 +296,9 @@
 /* Define to 1 if you have the <syslog.h> header file. */
 #undef HAVE_SYSLOG_H
 
+/* Have systemd */
+#undef HAVE_SYSTEMD
+
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H
 
@@ -384,36 +399,8 @@
 /* Full path to the daemon in the builddir */
 #undef TEST_BUS_BINARY
 
-/* Full path to test file test/test-exit in builddir */
-#undef TEST_EXIT_BINARY
-
-/* Full path to test file test/data/invalid-service-files in builddir */
-#undef TEST_INVALID_SERVICE_DIR
-
-/* Full path to test file test/data/invalid-service-files-system in builddir
-   */
-#undef TEST_INVALID_SERVICE_SYSTEM_DIR
-
-/* Full path to test file test/name-test/test-privserver in builddir */
-#undef TEST_PRIVSERVER_BINARY
-
-/* Full path to test file test/test-segfault in builddir */
-#undef TEST_SEGFAULT_BINARY
-
-/* Full path to test file test/test-service in builddir */
-#undef TEST_SERVICE_BINARY
-
-/* Full path to test file test/test-shell-service in builddir */
-#undef TEST_SHELL_SERVICE_BINARY
-
-/* Full path to test file test/test-sleep-forever in builddir */
-#undef TEST_SLEEP_FOREVER_BINARY
-
-/* Full path to test file test/data/valid-service-files in builddir */
-#undef TEST_VALID_SERVICE_DIR
-
-/* Full path to test file test/data/valid-service-files-system in builddir */
-#undef TEST_VALID_SERVICE_SYSTEM_DIR
+/* Listening address for regression tests */
+#undef TEST_LISTEN
 
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
@@ -439,6 +426,9 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define to add Valgrind instrumentation */
+#undef WITH_VALGRIND
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

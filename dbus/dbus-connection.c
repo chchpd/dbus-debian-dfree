@@ -66,18 +66,18 @@
 
 #define CONNECTION_LOCK(connection)   do {                                      \
     if (TRACE_LOCKS) { _dbus_verbose ("LOCK\n"); }   \
-    _dbus_mutex_lock ((connection)->mutex);                                      \
+    _dbus_rmutex_lock ((connection)->mutex);                                    \
     TOOK_LOCK_CHECK (connection);                                               \
   } while (0)
 
 #define CONNECTION_UNLOCK(connection) _dbus_connection_unlock (connection)
 
 #define SLOTS_LOCK(connection) do {                     \
-    _dbus_mutex_lock ((connection)->slot_mutex);        \
+    _dbus_rmutex_lock ((connection)->slot_mutex);       \
   } while (0)
 
 #define SLOTS_UNLOCK(connection) do {                   \
-    _dbus_mutex_unlock ((connection)->slot_mutex);      \
+    _dbus_rmutex_unlock ((connection)->slot_mutex);     \
   } while (0)
 
 #define DISPATCH_STATUS_NAME(s)                                            \
@@ -203,6 +203,27 @@
  * @{
  */
 
+#ifdef DBUS_ENABLE_VERBOSE_MODE
+static void
+_dbus_connection_trace_ref (DBusConnection *connection,
+    int old_refcount,
+    int new_refcount,
+    const char *why)
+{
+  static int enabled = -1;
+
+  _dbus_trace_ref ("DBusConnection", connection, old_refcount, new_refcount,
+      why, "DBUS_CONNECTION_TRACE", &enabled);
+}
+#else
+#define _dbus_connection_trace_ref(c,o,n,w) \
+  do \
+  {\
+    (void) (o); \
+    (void) (n); \
+  } while (0)
+#endif
+
 /**
  * Internal struct representing a message filter function 
  */
@@ -243,11 +264,11 @@ struct DBusConnection
 {
   DBusAtomic refcount; /**< Reference count. */
 
-  DBusMutex *mutex; /**< Lock on the entire DBusConnection */
+  DBusRMutex *mutex; /**< Lock on the entire DBusConnection */
 
-  DBusMutex *dispatch_mutex;     /**< Protects dispatch_acquired */
+  DBusCMutex *dispatch_mutex;     /**< Protects dispatch_acquired */
   DBusCondVar *dispatch_cond;    /**< Notify when dispatch_acquired is available */
-  DBusMutex *io_path_mutex;      /**< Protects io_path_acquired */
+  DBusCMutex *io_path_mutex;      /**< Protects io_path_acquired */
   DBusCondVar *io_path_cond;     /**< Notify when io_path_acquired is available */
   
   DBusList *outgoing_messages; /**< Queue of messages we need to send, send the end of the list first. */
@@ -269,7 +290,7 @@ struct DBusConnection
   
   DBusList *filter_list;        /**< List of filters. */
 
-  DBusMutex *slot_mutex;        /**< Lock on slot_list so overall connection lock need not be taken */
+  DBusRMutex *slot_mutex;        /**< Lock on slot_list so overall connection lock need not be taken */
   DBusDataSlotList slot_list;   /**< Data stored by allocated integer ID */
 
   DBusHashTable *pending_replies;  /**< Hash of message serials to #DBusPendingCall. */  
@@ -398,7 +419,7 @@ _dbus_connection_unlock (DBusConnection *connection)
   connection->expired_messages = NULL;
 
   RELEASING_LOCK_CHECK (connection);
-  _dbus_mutex_unlock (connection->mutex);
+  _dbus_rmutex_unlock (connection->mutex);
 
   for (iter = _dbus_list_pop_first_link (&expired_messages);
       iter != NULL;
@@ -426,32 +447,6 @@ _dbus_connection_wakeup_mainloop (DBusConnection *connection)
 }
 
 #ifdef DBUS_BUILD_TESTS
-/* For now this function isn't used */
-/**
- * Adds a message to the incoming message queue, returning #FALSE
- * if there's insufficient memory to queue the message.
- * Does not take over refcount of the message.
- *
- * @param connection the connection.
- * @param message the message to queue.
- * @returns #TRUE on success.
- */
-dbus_bool_t
-_dbus_connection_queue_received_message (DBusConnection *connection,
-                                         DBusMessage    *message)
-{
-  DBusList *link;
-
-  link = _dbus_list_alloc_link (message);
-  if (link == NULL)
-    return FALSE;
-
-  dbus_message_ref (message);
-  _dbus_connection_queue_received_message_link (connection, link);
-
-  return TRUE;
-}
-
 /**
  * Gets the locks so we can examine them
  *
@@ -472,9 +467,9 @@ _dbus_connection_test_get_locks (DBusConnection *connection,
                                  DBusCondVar   **dispatch_cond_loc,
                                  DBusCondVar   **io_path_cond_loc)
 {
-  *mutex_loc = connection->mutex;
-  *dispatch_mutex_loc = connection->dispatch_mutex;
-  *io_path_mutex_loc = connection->io_path_mutex; 
+  *mutex_loc = (DBusMutex *) connection->mutex;
+  *dispatch_mutex_loc = (DBusMutex *) connection->dispatch_mutex;
+  *io_path_mutex_loc = (DBusMutex *) connection->io_path_mutex;
   *dispatch_cond_loc = connection->dispatch_cond;
   *io_path_cond_loc = connection->io_path_cond;
 }
@@ -539,7 +534,11 @@ _dbus_connection_queue_received_message_link (DBusConnection  *connection,
                  dbus_message_get_signature (message),
                  dbus_message_get_reply_serial (message),
                  connection,
-                 connection->n_incoming);}
+                 connection->n_incoming);
+
+  _dbus_message_trace_ref (message, -1, -1,
+      "_dbus_conection_queue_received_message_link");
+}
 
 /**
  * Adds a link + message to the incoming message queue.
@@ -560,7 +559,10 @@ _dbus_connection_queue_synthesized_message_link (DBusConnection *connection,
   connection->n_incoming += 1;
 
   _dbus_connection_wakeup_mainloop (connection);
-  
+
+  _dbus_message_trace_ref (link->data, -1, -1,
+      "_dbus_connection_queue_synthesized_message_link");
+
   _dbus_verbose ("Synthesized message %p added to incoming queue %p, %d incoming\n",
                  link->data, connection, connection->n_incoming);
 }
@@ -1077,7 +1079,7 @@ _dbus_connection_acquire_io_path (DBusConnection *connection,
   CONNECTION_UNLOCK (connection);
   
   _dbus_verbose ("locking io_path_mutex\n");
-  _dbus_mutex_lock (connection->io_path_mutex);
+  _dbus_cmutex_lock (connection->io_path_mutex);
 
   _dbus_verbose ("start connection->io_path_acquired = %d timeout = %d\n",
                  connection->io_path_acquired, timeout_milliseconds);
@@ -1126,7 +1128,7 @@ _dbus_connection_acquire_io_path (DBusConnection *connection,
                  connection->io_path_acquired, we_acquired);
 
   _dbus_verbose ("unlocking io_path_mutex\n");
-  _dbus_mutex_unlock (connection->io_path_mutex);
+  _dbus_cmutex_unlock (connection->io_path_mutex);
 
   CONNECTION_LOCK (connection);
   
@@ -1150,7 +1152,7 @@ _dbus_connection_release_io_path (DBusConnection *connection)
   HAVE_LOCK_CHECK (connection);
   
   _dbus_verbose ("locking io_path_mutex\n");
-  _dbus_mutex_lock (connection->io_path_mutex);
+  _dbus_cmutex_lock (connection->io_path_mutex);
   
   _dbus_assert (connection->io_path_acquired);
 
@@ -1161,7 +1163,7 @@ _dbus_connection_release_io_path (DBusConnection *connection)
   _dbus_condvar_wake_one (connection->io_path_cond);
 
   _dbus_verbose ("unlocking io_path_mutex\n");
-  _dbus_mutex_unlock (connection->io_path_mutex);
+  _dbus_cmutex_unlock (connection->io_path_mutex);
 }
 
 /**
@@ -1290,15 +1292,15 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
   if (connection == NULL)
     goto error;
 
-  _dbus_mutex_new_at_location (&connection->mutex);
+  _dbus_rmutex_new_at_location (&connection->mutex);
   if (connection->mutex == NULL)
     goto error;
 
-  _dbus_mutex_new_at_location (&connection->io_path_mutex);
+  _dbus_cmutex_new_at_location (&connection->io_path_mutex);
   if (connection->io_path_mutex == NULL)
     goto error;
 
-  _dbus_mutex_new_at_location (&connection->dispatch_mutex);
+  _dbus_cmutex_new_at_location (&connection->dispatch_mutex);
   if (connection->dispatch_mutex == NULL)
     goto error;
   
@@ -1310,7 +1312,7 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
   if (connection->io_path_cond == NULL)
     goto error;
 
-  _dbus_mutex_new_at_location (&connection->slot_mutex);
+  _dbus_rmutex_new_at_location (&connection->slot_mutex);
   if (connection->slot_mutex == NULL)
     goto error;
 
@@ -1374,7 +1376,8 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
   _dbus_transport_ref (transport);
 
   CONNECTION_UNLOCK (connection);
-  
+
+  _dbus_connection_trace_ref (connection, 0, 1, "new_for_transport");
   return connection;
   
  error:
@@ -1388,10 +1391,10 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
     {
       _dbus_condvar_free_at_location (&connection->io_path_cond);
       _dbus_condvar_free_at_location (&connection->dispatch_cond);
-      _dbus_mutex_free_at_location (&connection->mutex);
-      _dbus_mutex_free_at_location (&connection->io_path_mutex);
-      _dbus_mutex_free_at_location (&connection->dispatch_mutex);
-      _dbus_mutex_free_at_location (&connection->slot_mutex);
+      _dbus_rmutex_free_at_location (&connection->mutex);
+      _dbus_cmutex_free_at_location (&connection->io_path_mutex);
+      _dbus_cmutex_free_at_location (&connection->dispatch_mutex);
+      _dbus_rmutex_free_at_location (&connection->slot_mutex);
       dbus_free (connection);
     }
   if (pending_replies)
@@ -1421,13 +1424,17 @@ _dbus_connection_new_for_transport (DBusTransport *transport)
  */
 DBusConnection *
 _dbus_connection_ref_unlocked (DBusConnection *connection)
-{  
+{
+  dbus_int32_t old_refcount;
+
   _dbus_assert (connection != NULL);
   _dbus_assert (connection->generation == _dbus_current_generation);
 
   HAVE_LOCK_CHECK (connection);
 
-  _dbus_atomic_inc (&connection->refcount);
+  old_refcount = _dbus_atomic_inc (&connection->refcount);
+  _dbus_connection_trace_ref (connection, old_refcount, old_refcount + 1,
+      "ref_unlocked");
 
   return connection;
 }
@@ -1441,15 +1448,18 @@ _dbus_connection_ref_unlocked (DBusConnection *connection)
 void
 _dbus_connection_unref_unlocked (DBusConnection *connection)
 {
-  dbus_bool_t last_unref;
+  dbus_int32_t old_refcount;
 
   HAVE_LOCK_CHECK (connection);
-  
+
   _dbus_assert (connection != NULL);
 
-  last_unref = (_dbus_atomic_dec (&connection->refcount) == 1);
+  old_refcount = _dbus_atomic_dec (&connection->refcount);
 
-  if (last_unref)
+  _dbus_connection_trace_ref (connection, old_refcount, old_refcount - 1,
+      "unref_unlocked");
+
+  if (old_refcount == 1)
     _dbus_connection_last_unref (connection);
 }
 
@@ -2626,10 +2636,13 @@ dbus_connection_open_private (const char     *address,
 DBusConnection *
 dbus_connection_ref (DBusConnection *connection)
 {
+  dbus_int32_t old_refcount;
+
   _dbus_return_val_if_fail (connection != NULL, NULL);
   _dbus_return_val_if_fail (connection->generation == _dbus_current_generation, NULL);
-
-  _dbus_atomic_inc (&connection->refcount);
+  old_refcount = _dbus_atomic_inc (&connection->refcount);
+  _dbus_connection_trace_ref (connection, old_refcount, old_refcount + 1,
+      "ref");
 
   return connection;
 }
@@ -2726,12 +2739,12 @@ _dbus_connection_last_unref (DBusConnection *connection)
   _dbus_condvar_free_at_location (&connection->dispatch_cond);
   _dbus_condvar_free_at_location (&connection->io_path_cond);
 
-  _dbus_mutex_free_at_location (&connection->io_path_mutex);
-  _dbus_mutex_free_at_location (&connection->dispatch_mutex);
+  _dbus_cmutex_free_at_location (&connection->io_path_mutex);
+  _dbus_cmutex_free_at_location (&connection->dispatch_mutex);
 
-  _dbus_mutex_free_at_location (&connection->slot_mutex);
+  _dbus_rmutex_free_at_location (&connection->slot_mutex);
 
-  _dbus_mutex_free_at_location (&connection->mutex);
+  _dbus_rmutex_free_at_location (&connection->mutex);
   
   dbus_free (connection);
 }
@@ -2758,14 +2771,17 @@ _dbus_connection_last_unref (DBusConnection *connection)
 void
 dbus_connection_unref (DBusConnection *connection)
 {
-  dbus_bool_t last_unref;
+  dbus_int32_t old_refcount;
 
   _dbus_return_if_fail (connection != NULL);
   _dbus_return_if_fail (connection->generation == _dbus_current_generation);
 
-  last_unref = (_dbus_atomic_dec (&connection->refcount) == 1);
+  old_refcount = _dbus_atomic_dec (&connection->refcount);
 
-  if (last_unref)
+  _dbus_connection_trace_ref (connection, old_refcount, old_refcount - 1,
+      "unref");
+
+  if (old_refcount == 1)
     {
 #ifndef DBUS_DISABLE_CHECKS
       if (_dbus_transport_get_is_connected (connection->transport))
@@ -3821,6 +3837,8 @@ dbus_connection_borrow_message (DBusConnection *connection)
 
   CONNECTION_UNLOCK (connection);
 
+  _dbus_message_trace_ref (message, -1, -1, "dbus_connection_borrow_message");
+
   /* We don't update dispatch status until it's returned or stolen */
   
   return message;
@@ -3855,6 +3873,8 @@ dbus_connection_return_message (DBusConnection *connection,
 
   status = _dbus_connection_get_dispatch_status_unlocked (connection);
   _dbus_connection_update_dispatch_status_and_unlock (connection, status);
+
+  _dbus_message_trace_ref (message, -1, -1, "dbus_connection_return_message");
 }
 
 /**
@@ -3897,6 +3917,8 @@ dbus_connection_steal_borrowed_message (DBusConnection *connection,
 
   status = _dbus_connection_get_dispatch_status_unlocked (connection);
   _dbus_connection_update_dispatch_status_and_unlock (connection, status);
+  _dbus_message_trace_ref (message, -1, -1,
+      "dbus_connection_steal_borrowed_message");
 }
 
 /* See dbus_connection_pop_message, but requires the caller to own
@@ -3930,6 +3952,9 @@ _dbus_connection_pop_message_link_unlocked (DBusConnection *connection)
                      "no member",
                      dbus_message_get_signature (link->data),
                      connection, connection->n_incoming);
+
+      _dbus_message_trace_ref (link->data, -1, -1,
+          "_dbus_connection_pop_message_link_unlocked");
 
       check_disconnected_message_arrived_unlocked (connection, link->data);
       
@@ -3992,6 +4017,9 @@ _dbus_connection_putback_message_link_unlocked (DBusConnection *connection,
                  "no member",
                  dbus_message_get_signature (message_link->data),
                  connection, connection->n_incoming);
+
+  _dbus_message_trace_ref (message_link->data, -1, -1,
+      "_dbus_connection_putback_message_link_unlocked");
 }
 
 /**
@@ -4060,7 +4088,7 @@ _dbus_connection_acquire_dispatch (DBusConnection *connection)
   CONNECTION_UNLOCK (connection);
   
   _dbus_verbose ("locking dispatch_mutex\n");
-  _dbus_mutex_lock (connection->dispatch_mutex);
+  _dbus_cmutex_lock (connection->dispatch_mutex);
 
   while (connection->dispatch_acquired)
     {
@@ -4074,7 +4102,7 @@ _dbus_connection_acquire_dispatch (DBusConnection *connection)
   connection->dispatch_acquired = TRUE;
 
   _dbus_verbose ("unlocking dispatch_mutex\n");
-  _dbus_mutex_unlock (connection->dispatch_mutex);
+  _dbus_cmutex_unlock (connection->dispatch_mutex);
   
   CONNECTION_LOCK (connection);
   _dbus_connection_unref_unlocked (connection);
@@ -4093,7 +4121,7 @@ _dbus_connection_release_dispatch (DBusConnection *connection)
   HAVE_LOCK_CHECK (connection);
   
   _dbus_verbose ("locking dispatch_mutex\n");
-  _dbus_mutex_lock (connection->dispatch_mutex);
+  _dbus_cmutex_lock (connection->dispatch_mutex);
   
   _dbus_assert (connection->dispatch_acquired);
 
@@ -4101,7 +4129,7 @@ _dbus_connection_release_dispatch (DBusConnection *connection)
   _dbus_condvar_wake_one (connection->dispatch_cond);
 
   _dbus_verbose ("unlocking dispatch_mutex\n");
-  _dbus_mutex_unlock (connection->dispatch_mutex);
+  _dbus_cmutex_unlock (connection->dispatch_mutex);
 }
 
 static void

@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [5])
-m4_define([dbus_micro_version], [8])
+m4_define([dbus_micro_version], [10])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=9
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=4
+LT_REVISION=5
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -68,6 +68,7 @@ AM_PROG_LIBTOOL
 AC_PROG_MKDIR_P
 COMPILER_COVERAGE
 COMPILER_OPTIMISATIONS
+PKG_PROG_PKG_CONFIG
 
 # Initialize libtool
 LT_INIT([win32-dll])
@@ -137,6 +138,7 @@ AC_ARG_ENABLE(kqueue, AS_HELP_STRING([--enable-kqueue],[build with kqueue suppor
 AC_ARG_ENABLE(console-owner-file, AS_HELP_STRING([--enable-console-owner-file],[enable console owner file]),enable_console_owner_file=$enableval,enable_console_owner_file=auto)
 AC_ARG_ENABLE(userdb-cache, AS_HELP_STRING([--enable-userdb-cache],[build with userdb-cache support]),enable_userdb_cache=$enableval,enable_userdb_cache=yes)
 AC_ARG_ENABLE(launchd, AS_HELP_STRING([--enable-launchd],[build with launchd auto-launch support]),enable_launchd=$enableval,enable_launchd=auto)
+AC_ARG_ENABLE(systemd, AS_HELP_STRING([--enable-systemd],[build with systemd at_console support]),enable_systemd=$enableval,enable_systemd=auto)
 
 AC_ARG_WITH(xml, AS_HELP_STRING([--with-xml=[libxml/expat]],[XML library to use (libxml may be named libxml2 on some systems)]))
 AC_ARG_WITH(init-scripts, AS_HELP_STRING([--with-init-scripts=[redhat]],[Style of init scripts to install]))
@@ -149,6 +151,7 @@ AC_ARG_WITH(console-owner-file, AS_HELP_STRING([--with-console-owner-file=[filen
 AC_ARG_WITH(launchd-agent-dir, AS_HELP_STRING([--with-launchd-agent-dir=[dirname]],[directory to put the launchd agent (default: /Library/LaunchAgents)]))
 AC_ARG_WITH(dbus_user, AS_HELP_STRING([--with-dbus-user=<user>],[User for running the DBUS daemon (messagebus)]))
 AC_ARG_WITH(dbus_daemondir, AS_HELP_STRING([--with-dbus-daemondir=[dirname]],[Directory for installing the DBUS daemon]))
+AC_ARG_WITH(dbus_session_bus_default_address, AS_HELP_STRING([--with-dbus-session-bus-default-address=[nonce-tcp:/autolaunch:/tcp:host:port]],[Transport Type to be used (default: nonce-tcp:)]),with_dbus_session_bus_default_address=$withval,with_dbus_session_bus_default_address=nonce-tcp:)
 
 AC_ARG_ENABLE([embedded-tests],
   AS_HELP_STRING([--enable-embedded-tests],
@@ -190,14 +193,17 @@ fi
 # These use GTest, from GLib, because life's too short. They're enabled by
 # default (unless you don't have GLib), because they don't bloat the library
 # or binaries.
+
+with_glib=yes
+
 if test "x$enable_modular_tests" != xno; then
-  PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22, gio-2.0 >= 2.22],
+  PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.24, gio-2.0 >= 2.24],
     [],
     [if test "x$enable_modular_tests" = xyes; then
       AC_MSG_NOTICE([Full test coverage (--enable-modular-tests=yes or --enable-tests=yes) requires GLib])
       AC_MSG_ERROR([$GLIB_ERRORS])
     else # assumed to be "auto"
-      enable_modular_tests=no
+      with_glib=no
     fi])
   # If dbus-gmain.[ch] returned to libdbus then we wouldn't need this
   PKG_CHECK_MODULES([DBUS_GLIB], [dbus-glib-1],
@@ -206,19 +212,21 @@ if test "x$enable_modular_tests" != xno; then
       AC_MSG_NOTICE([Full test coverage (--enable-modular-tests=yes or --enable-tests=yes) requires dbus-glib])
       AC_MSG_ERROR([$DBUS_GLIB_ERRORS])
     else # assumed to be "auto"
-      enable_modular_tests=no
+      with_glib=no
     fi])
-  if test "x$enable_modular_tests" != xno; then
-    # dependencies checked, switch from auto to yes
-    enable_modular_tests=yes
-  fi
 fi
-if test "x$enable_modular_tests" = xyes; then
+if test "x$enable_modular_tests" != xno; then
   AC_DEFINE([DBUS_ENABLE_MODULAR_TESTS], [1],
-    [Define to build independent test binaries (requires GLib)])
+    [Define to build independent test binaries])
 fi
 AM_CONDITIONAL([DBUS_ENABLE_MODULAR_TESTS],
-  [test "x$enable_modular_tests" = xyes])
+  [test "x$enable_modular_tests" != xno])
+
+if test "x$with_glib" != xno; then
+  AC_DEFINE([DBUS_WITH_GLIB], [1],
+    [Define if GLib, GObject, GIO are available])
+fi
+AM_CONDITIONAL([DBUS_WITH_GLIB], [test "x$with_glib" != xno])
 
 AC_ARG_ENABLE([installed-tests],
   AS_HELP_STRING([--enable-installed-tests],
@@ -1035,6 +1043,36 @@ fi
 
 AM_CONDITIONAL(DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX, test x$have_dnotify = xyes)
 
+# For simplicity, we require the userland API for epoll_create1 at
+# compile-time (glibc 2.9), but we'll run on kernels that turn out
+# not to have it at runtime.
+AC_ARG_ENABLE([epoll],
+              [AS_HELP_STRING([--enable-epoll],[use epoll(4) on Linux])],
+              [enable_epoll=$enableval], [enable_epoll=auto])
+if test x$enable_epoll = xno; then
+    have_linux_epoll=no
+else
+    AC_MSG_CHECKING([for Linux epoll(4)])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [
+        #ifndef __linux__
+        #error This is not Linux
+        #endif
+        #include <sys/epoll.h>
+        ],
+        [epoll_create1 (EPOLL_CLOEXEC);])],
+        [have_linux_epoll=yes],
+        [have_linux_epoll=no])
+    AC_MSG_RESULT([$have_linux_epoll])
+fi
+if test x$enable_epoll,$have_linux_epoll = xyes,no; then
+    AC_MSG_ERROR([epoll support explicitly enabled but not available])
+fi
+if test x$have_linux_epoll = xyes; then
+  AC_DEFINE([DBUS_HAVE_LINUX_EPOLL], 1, [Define to use epoll(4) on Linux])
+fi
+AM_CONDITIONAL([HAVE_LINUX_EPOLL], [test x$have_linux_epoll = xyes])
+
 # kqueue checks
 if test x$enable_kqueue = xno ; then
     have_kqueue=no
@@ -1103,6 +1141,24 @@ fi
 
 AM_CONDITIONAL(HAVE_CONSOLE_OWNER_FILE, test x$have_console_owner_file = xyes)
 
+dnl systemd detection
+if test x$enable_systemd = xno ; then
+    have_systemd=no;
+else
+    PKG_CHECK_MODULES(SYSTEMD,
+        [libsystemd-login >= 32, libsystemd-daemon >= 32],
+        have_systemd=yes,
+        have_systemd=no)
+fi
+
+if test x$have_systemd = xyes; then
+    AC_DEFINE(HAVE_SYSTEMD,1,[Have systemd])
+fi
+
+if test x$enable_systemd = xyes -a x$have_systemd != xyes ; then
+    AC_MSG_ERROR([Explicitly requested systemd support, but systemd not found])
+fi
+
 # libaudit detection
 if test x$enable_libaudit = xno ; then
     have_libaudit=no;
@@ -1164,6 +1220,17 @@ if test x$dbus_win = xyes ; then
 fi
 
 AC_SUBST([NETWORK_libs])
+
+AC_ARG_WITH([valgrind],
+  [AS_HELP_STRING([--with-valgrind],
+     [Add instrumentation to help valgrind to understand our allocator])],
+  [],
+  [with_valgrind=no])
+
+if test x$with_valgrind != xno; then
+  PKG_CHECK_MODULES([VALGRIND], [valgrind >= 3.6])
+  AC_DEFINE([WITH_VALGRIND], [1], [Define to add Valgrind instrumentation])
+fi
 
 #### Set up final flags
 LIBDBUS_LIBS="$THREAD_LIBS $NETWORK_libs"
@@ -1519,31 +1586,19 @@ DBUS_PWD=`pwd`
 # Useful in a cross-compilation environment, where the tests are run on the host system.
 AC_ARG_WITH(dbus-test-dir, AS_HELP_STRING([--with-dbus-test-dir=[dirname]],[path where the tests tools are available]),
 			   DBUS_PWD=$withval)
-AC_DEFUN([TEST_PATH], [
-TEST_$1=${DBUS_PWD}/test/$2
-AC_DEFINE_UNQUOTED(TEST_$1, "$TEST_$1",
-                   [Full path to test file test/$2 in builddir])
-AC_SUBST(TEST_$1)
-])
-AC_DEFUN([TEST_PROG], [
-TEST_$1=${DBUS_PWD}/test/$2
-AC_DEFINE_UNQUOTED(TEST_$1, "$TEST_$1$EXEEXT",
-                   [Full path to test file test/$2 in builddir])
-AC_SUBST(TEST_$1)
-])
 
-TEST_PATH(VALID_SERVICE_DIR, data/valid-service-files)
-TEST_PATH(INVALID_SERVICE_DIR, data/invalid-service-files)
-TEST_PATH(VALID_SERVICE_SYSTEM_DIR, data/valid-service-files-system)
-TEST_PATH(INVALID_SERVICE_SYSTEM_DIR, data/invalid-service-files-system)
-TEST_PROG(SERVICE_BINARY, test-service)
-TEST_PROG(SHELL_SERVICE_BINARY, test-shell-service)
-TEST_PROG(EXIT_BINARY, test-exit)
-TEST_PROG(SEGFAULT_BINARY, test-segfault)
-TEST_PROG(SLEEP_FOREVER_BINARY, test-sleep-forever)
-TEST_PROG(PRIVSERVER_BINARY, name-test/test-privserver)
+DBUS_TEST_EXEC="$DBUS_PWD/test"
+DBUS_TEST_DATA="$DBUS_PWD/test/data"
 
-AC_DEFINE_UNQUOTED(TEST_BUS_BINARY, "$DBUS_PWD/bus/dbus-daemon$EXEEXT",
+AC_SUBST([DBUS_TEST_DATA])
+AC_SUBST([DBUS_TEST_EXEC])
+
+AC_DEFINE_UNQUOTED([DBUS_TEST_EXEC], ["$DBUS_TEST_EXEC"],
+                   [Full path to the daemon in the builddir])
+AC_DEFINE_UNQUOTED([DBUS_EXEEXT], ["$EXEEXT"],
+                   [Extension for executables, typically empty or .exe])
+
+AC_DEFINE_UNQUOTED(TEST_BUS_BINARY, ["$DBUS_PWD/bus/dbus-daemon$EXEEXT"],
                    [Full path to the daemon in the builddir])
 AC_SUBST(TEST_BUS_BINARY)
 
@@ -1574,6 +1629,15 @@ fi
 AC_SUBST(TEST_SOCKET_DIR)
 AC_DEFINE_UNQUOTED(DBUS_TEST_SOCKET_DIR, "$TEST_SOCKET_DIR", [Where to put test sockets])
 
+if test "x$dbus_unix" = xyes; then
+  TEST_LISTEN="unix:tmpdir=$TEST_SOCKET_DIR"
+else
+  TEST_LISTEN="tcp:host=localhost"
+fi
+AC_SUBST([TEST_LISTEN])
+AC_DEFINE_UNQUOTED([TEST_LISTEN], ["$TEST_LISTEN"],
+  [Listening address for regression tests])
+
 if ! test -z "$with_session_socket_dir" ; then
    DBUS_SESSION_SOCKET_DIR="$with_session_socket_dir"
 else
@@ -1583,7 +1647,7 @@ AC_DEFINE_UNQUOTED(DBUS_SESSION_SOCKET_DIR, "$DBUS_SESSION_SOCKET_DIR", [Where p
 AC_SUBST(DBUS_SESSION_SOCKET_DIR)
 
 if test x$dbus_win = xyes; then
-        DBUS_SESSION_BUS_DEFAULT_ADDRESS="nonce-tcp:"
+        DBUS_SESSION_BUS_DEFAULT_ADDRESS="$with_dbus_session_bus_default_address"
 elif test x$have_launchd = xyes; then
         DBUS_SESSION_BUS_DEFAULT_ADDRESS="launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET"
 else
@@ -1684,6 +1748,7 @@ echo "
         gcc coverage profiling:   ${enable_compiler_coverage}
         Building embedded tests:  ${enable_embedded_tests}
         Building modular tests:   ${enable_modular_tests}
+            - with GLib:          ${with_glib}
         Building verbose mode:    ${enable_verbose_mode}
         Building assertions:      ${enable_asserts}
         Building checks:          ${enable_checks}
@@ -1692,6 +1757,7 @@ echo "
         Building inotify support: ${have_inotify}
         Building dnotify support: ${have_dnotify}
         Building kqueue support:  ${have_kqueue}
+        Building systemd support: ${have_systemd}
         Building X11 code:        ${enable_x11}
         Building Doxygen docs:    ${enable_doxygen_docs}
         Building XML docs:        ${enable_xml_docs}

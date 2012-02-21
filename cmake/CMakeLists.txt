@@ -1,23 +1,5 @@
 project(dbus)
 
-#########################################################################
-# detect version
-#########################################################################
-file (READ ../configure.ac configure_ac)
-string (REGEX REPLACE ".*dbus_major_version], .([0-9]+).*" "\\1" DBUS_MAJOR_VERSION ${configure_ac})
-string (REGEX REPLACE ".*dbus_minor_version], .([0-9]+).*" "\\1" DBUS_MINOR_VERSION ${configure_ac})
-string (REGEX REPLACE ".*dbus_micro_version], .([0-9]+).*" "\\1" DBUS_MICRO_VERSION ${configure_ac})
-# used by file version info
-set (DBUS_PATCH_VERSION "0")
-set (DBUS_VERSION ${DBUS_MAJOR_VERSION}.${DBUS_MINOR_VERSION}.${DBUS_MICRO_VERSION})
-
-set (DBUS_VERSION_STRING "${DBUS_VERSION}")
-
-if (NOT DBUS_BUILD_TIMESTAMP)
-    message(STATUS "FIXME set DBUS_BUILD_TIMESTAMP to current date or fix current time stamp generation for having actual build date in version file info")
-    set (DBUS_BUILD_TIMESTAMP 20091231)
-endif (NOT DBUS_BUILD_TIMESTAMP)
-
 # we need to be up to date
 CMAKE_MINIMUM_REQUIRED(VERSION 2.4.4 FATAL_ERROR)
 if(COMMAND cmake_policy)
@@ -26,6 +8,15 @@ endif(COMMAND cmake_policy)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+
+# detect version
+include(MacrosAutotools)
+autoversion(../configure.ac dbus)
+# used by file version info
+set (DBUS_PATCH_VERSION "0")
+
+include(Macros)
+TIMESTAMP(DBUS_BUILD_TIMESTAMP)
 
 ########### basic vars ###############
 
@@ -87,9 +78,8 @@ if (WIN32)
     include(Win32Macros)
     addExplorerWrapper(${CMAKE_PROJECT_NAME})
 endif (WIN32)
-find_package(LibXml2)
-find_package(LibExpat)
-find_package(X11)
+
+option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
 
 if(NOT WIN32)
 	option (DBUS_ENABLE_ABSTRACT_SOCKETS "enable support for abstract sockets" ON)
@@ -101,6 +91,13 @@ option (DBUS_DISABLE_ASSERTS "Disable assertion checking" OFF)
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
+
+if (DBUS_USE_EXPAT)
+    find_package(LibExpat)
+else ()
+    find_package(LibXml2)
+endif ()
+find_package(X11)
 
 # analogous to AC_USE_SYSTEM_EXTENSIONS in configure.ac
 add_definitions(-D_POSIX_C_SOURCE=199309L -D_GNU_SOURCE)
@@ -116,7 +113,6 @@ include (MacroLibrary)
 
 if(VCS)
 	set(DBUS_VERBOSE_C_S 1 CACHE STRING "verbose mode" FORCE)
-	set(DBUS_VERBOSE_C_S 1)
 endif(VCS)
 
 if(WIN32)
@@ -301,12 +297,6 @@ if(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
     message(FATAL "Neither expat nor libxml2 found!")
 endif(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
 
-if(LIBEXPAT_FOUND)
-    option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
-else(LIBEXPAT_FOUND)
-    option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" OFF)
-endif(LIBEXPAT_FOUND)
-
 if(DBUS_USE_EXPAT)
     SET(XML_LIB "Expat")
     SET(XML_LIBRARY     ${LIBEXPAT_LIBRARIES})
@@ -361,19 +351,21 @@ endif(X11_FOUND)
 
 # test binary names
 if (WIN32)
-	set (EXT ".exe")
+	# Automake calls this EXEEXT, and CMake doesn't have a standard name
+	# for it; follow Automake's naming convention so we can share .in files
+	set (EXEEXT ".exe")
 endif(WIN32)
 
 if (MSVC_IDE)
     if(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(IDE_BIN Debug/ )
+		set(IDE_BIN /Debug )
 		message(STATUS)
 		message(STATUS "Visual Studio: test programs will only work with 'Debug' configuration!")
 		message(STATUS "To run tests with 'Release' configuration use -DCMAKE_BUILD_TYPE=Release")
 		message(STATUS "Add '..\\..\\test\\data' to the command line option of the test programs")
 		message(STATUS)
     else(CMAKE_BUILD_TYPE MATCHES Debug)
-		set(IDE_BIN Release/)
+		set(IDE_BIN /Release)
 		message(STATUS)
 		message(STATUS "Visual Studio: test programs will only work with 'Release' configuration!")
 		message(STATUS "To run tests with 'Debug' configuration use -DCMAKE_BUILD_TYPE=Debug")
@@ -383,13 +375,6 @@ if (MSVC_IDE)
 	set (TEST_PATH_FORCE FORCE)
 	FILE(REMOVE ${CMAKE_BINARY_DIR}/data/dbus-1/services)
 endif (MSVC_IDE)
-
-set(TEST_SERVICE_DIR          ${CMAKE_BINARY_DIR}/test/data/valid-service-files     CACHE STRING "Full path to test file test/data/valid-service-files in builddir" )
-set(TEST_SERVICE_BINARY       ${CMAKE_BINARY_DIR}/bin/${IDE_BIN}test-service${EXT}       CACHE STRING "Full path to test file test/test-service in builddir" ${TEST_PATH_FORCE})
-set(TEST_SHELL_SERVICE_BINARY ${CMAKE_BINARY_DIR}/bin/${IDE_BIN}test-shell-service${EXT} CACHE STRING "Full path to test file test/test-shell-service in builddir" ${TEST_PATH_FORCE})
-set(TEST_EXIT_BINARY          ${CMAKE_BINARY_DIR}/bin/${IDE_BIN}test-exit${EXT}          CACHE STRING "Full path to test file test/test-exit in builddir" ${TEST_PATH_FORCE})
-set(TEST_SEGFAULT_BINARY      ${CMAKE_BINARY_DIR}/bin/${IDE_BIN}test-segfault${EXT}      CACHE STRING "Full path to test file test/test-segfault in builddir" ${TEST_PATH_FORCE})
-set(TEST_SLEEP_FOREVER_BINARY ${CMAKE_BINARY_DIR}/bin/${IDE_BIN}test-sleep-forever${EXT} CACHE STRING "Full path to test file test/test-sleep-forever in builddir" ${TEST_PATH_FORCE})
 
 #### Find socket directories
  if (NOT $ENV{TMPDIR} STREQUAL "")
@@ -481,19 +466,15 @@ add_definitions(${DBUS_BUS_CFLAGS})
 
 if (DBUS_BUILD_TESTS)
     # set variables used for the .in files (substituted by configure_file) in test/data:
-    set(TEST_VALID_SERVICE_DIR ${CMAKE_BINARY_DIR}/test/data/valid-service-files)
-    set(TEST_VALID_SERVICE_SYSTEM_DIR ${CMAKE_BINARY_DIR}/test/data/valid-service-files-system)
-    set(TEST_INVALID_SERVICE_SYSTEM_DIR ${CMAKE_BINARY_DIR}/test/data/invalid-service-files-system)
+    set(DBUS_TEST_EXEC ${EXECUTABLE_OUTPUT_PATH}${IDE_BIN})
+    set(DBUS_TEST_DATA ${CMAKE_BINARY_DIR}/test/data)
     set(TEST_SOCKET_DIR ${DBUS_SESSION_SOCKET_DIR} )
     set(TEST_LAUNCH_HELPER_BINARY ${EXECUTABLE_OUTPUT_PATH}/dbus-daemon-launch-helper-test)
-    set(TEST_PRIVSERVER_BINARY ${EXECUTABLE_OUTPUT_PATH}/test-privserver)
     if (UNIX)
-        set (TEST_LISTEN "debug-pipe:name=test-server</listen><listen>unix:tmpdir=${TEST_SOCKET_DIR}")
-        set (TEST_CONNECTION "debug-pipe:name=test-server")
+        set (TEST_LISTEN "unix:tmpdir=${TEST_SOCKET_DIR}")
     endif (UNIX)
     if (WIN32)
-        set (TEST_LISTEN "tcp:host=localhost,port=12436")
-        set (TEST_CONNECTION "${TEST_LISTEN}")
+        set (TEST_LISTEN "tcp:host=localhost")
     endif (WIN32)
 endif  (DBUS_BUILD_TESTS)
 

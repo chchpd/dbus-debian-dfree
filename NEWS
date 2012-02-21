@@ -1,3 +1,97 @@
+D-Bus 1.5.10 (2012-02-21)
+==
+
+The "fire in Delerium" release.
+
+On Unix platforms, PTHREAD_MUTEX_RECURSIVE (as specified in POSIX 2008 Base
+and SUSv2) is now required.
+
+• D-Bus Specification 0.19:
+  · Formally define unique connection names and well-known bus names,
+    and document best practices for interface, bus, member and error names,
+    and object paths (fd.o #37095, Simon McVittie)
+  · Document the search path for session and system services on Unix, and
+    where they should be installed by build systems (fd.o #21620, fd.o #35306;
+    Simon McVittie)
+  · Document the systemd transport (fd.o #35232, Lennart Poettering)
+
+• Make dbus_threads_init() use the same built-in threading implementation
+  as dbus_threads_init_default(); the user-specified primitives that it
+  takes as a parameter are now ignored (fd.o #43744, Simon McVittie)
+
+• Allow all configured auth mechanisms, not just one (fd.o #45106,
+  Pavel Strashkin)
+
+• Improve cmake build system (Ralf Habacker):
+  · simplify XML parser dependencies (fd.o #41027)
+  · generate build timestamp (fd.o #41029)
+  · only create batch files on Windows
+  · fix option and cache syntax
+  · add help-options target
+  · share dbus-arch-deps.h.in with autotools rather than having our
+    own version (fd.o #41033)
+
+• Build tests successfully with older GLib, as found in e.g. Debian 6
+  (fd.o #41219, Simon McVittie)
+
+• Avoid use of deprecated GThread API (fd.o #44413, Martin Pitt)
+
+• Build documentation correctly if man2html doesn't support filenames on
+  its command-line (fd.o #43875, Jack Nagel)
+
+• Improve test coverage. To get even more coverage, run the tests with
+  DBUS_TEST_SLOW=1 (fd.o #38285, #42811; Simon McVittie)
+
+• Reduce the size of the shared library by moving functionality only used
+  by dbus-daemon, tests etc. into their internal library and deleting
+  unused code (fd.o #34976, #39759; Simon McVittie)
+
+• Add dbus-daemon --nopidfile option, overriding the configuration, for
+  setups where the default configuration must include <pidfile/> to avoid
+  breaking traditional init, but the pid file is in fact unnecessary; use
+  it under systemd to improve startup time a bit (fd.o #45520,
+  Lennart Poettering)
+
+• Optionally (if configured --with-valgrind) add instrumentation to debug
+  libdbus and associated tools more meaningfully under Valgrind
+  (fd.o #37286, Simon McVittie)
+
+• Improve the dbus-send(1) man page (fd.o #14005, Simon McVittie)
+
+• Make dbus-protocol.h compatible with C++11 (fd.o #46147, Marc Mutz)
+
+• If tests are enabled and DBUS_MALLOC_CANNOT_FAIL is set in the environment,
+  abort on failure to malloc() (like GLib does), to turn runaway memory leaks
+  into a debuggable core-dump if a resource limit is applied (fd.o #41048,
+  Simon McVittie)
+
+• Don't crash if realloc() returns NULL in a debug build (fd.o #41048,
+  Simon McVittie)
+
+• Unix-specific:
+  · Replace our broken reimplementation of recursive mutexes, which has
+    been broken since 2006, with an ordinary pthreads recursive mutex
+    (fd.o #43744; Sigmund Augdal, Simon McVittie)
+  · Use epoll(7) for a more efficient main loop in Linux; equivalent patches
+    welcomed for other OSs' equivalents like kqueue, /dev/poll, or Solaris
+    event ports (fd.o #33337; Simon McVittie, Ralf Habacker)
+  · When running under systemd, use it instead of ConsoleKit to check
+    whether to apply at_console policies (fd.o #39609, Lennart Poettering)
+  · Avoid a highly unlikely fd leak (fd.o #29881, Simon McVittie)
+  · Don't close invalid fd -1 if getaddrinfo fails (fd.o #37258, eXeC001er)
+  · Don't touch ~/.dbus and ~/.dbus-keyrings when running 'make installcheck'
+    (fd.o #41218, Simon McVittie)
+  · Stop pretending we respect XDG_DATA_DIRS for system services: the launch
+    helper doesn't obey environment variables to avoid privilege escalation
+    attacks, so make the system bus follow the same rules
+    (fd.o #21620, Simon McVittie)
+
+• Windows-specific:
+  · Find the dbus-daemon executable next to the shared library (fd.o #41558;
+    Jesper Dam, Ralf Habacker)
+  · Remove the faulty implementation of _dbus_condvar_wake_all (fd.o #44609,
+    Simon McVittie)
+
 D-Bus 1.5.8 (2011-09-21)
 ==
 

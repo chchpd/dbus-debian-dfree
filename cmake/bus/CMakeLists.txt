@@ -11,9 +11,8 @@ set (config_DATA
 )
 
 # config files for installation 
-FOREACH(file ${config_DATA})
-	CONFIGURE_FILE( "${CMAKE_CURRENT_SOURCE_DIR}/${file}.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${file}" IMMEDIATE @ONLY)
-ENDFOREACH(file)
+CONFIGURE_FILE( "${BUS_DIR}/session.conf.in" "${CMAKE_CURRENT_BINARY_DIR}/session.conf" IMMEDIATE @ONLY)
+CONFIGURE_FILE( "system.conf.cmake" "${CMAKE_CURRENT_BINARY_DIR}/system.conf" IMMEDIATE @ONLY)
 
 # copy services for local daemon start to local service dir data/dbus-1/services
 SET (SERVICE_FILES test/data/valid-service-files)
@@ -90,6 +89,7 @@ set_target_properties(dbus-daemon PROPERTIES COMPILE_FLAGS ${DBUS_INTERNAL_CLIEN
 
 install_targets(/bin dbus-daemon)
 install_files(/etc/dbus-1 FILES ${config_DATA})
+install(DIRECTORY .  DESTINATION etc/dbus-1/session.d  FILES_MATCHING PATTERN "*.conf")
 
 if (DBUS_SERVICE)
 	set (dbus_service_SOURCES 

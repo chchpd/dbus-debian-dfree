@@ -63,9 +63,9 @@ run_test (const char             *test_name,
       printf ("%s: running %s tests\n", "dbus-test", test_name);
       if (!test ())
 	die (test_name);
-    }
 
-  check_memleaks ();
+      check_memleaks ();
+    }
 }
 
 static void
@@ -79,9 +79,9 @@ run_data_test (const char             *test_name,
       printf ("%s: running %s tests\n", "dbus-test", test_name);
       if (!test (test_data_dir))
 	die (test_name);
-    }
 
-  check_memleaks ();
+      check_memleaks ();
+    }
 }
 
 #endif /* DBUS_BUILD_TESTS */
@@ -128,15 +128,7 @@ dbus_internal_do_not_use_run_tests (const char *test_data_dir, const char *speci
   
   run_test ("marshalling", specific_test, _dbus_marshal_test);
 
-#if 0
-  printf ("%s: running recursive marshalling tests\n", "dbus-test");
-  if (!_dbus_marshal_recursive_test ())
-    die ("recursive marshal");
-
-  check_memleaks ();
-#else
-  printf ("SKIP: recursive marshal tests disabled\n");
-#endif
+  run_test ("marshal-recursive", specific_test, _dbus_marshal_recursive_test);
 
   run_test ("byteswap", specific_test, _dbus_marshal_byteswap_test);
   

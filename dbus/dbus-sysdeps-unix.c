@@ -1209,7 +1209,6 @@ _dbus_connect_tcp_socket_with_nonce (const char     *host,
                       _dbus_error_from_errno (errno),
                       "Failed to lookup host/port: \"%s:%s\": %s (%d)",
                       host, port, gai_strerror(res), res);
-      _dbus_close (fd, NULL);
       return -1;
     }
 
@@ -1324,13 +1323,14 @@ _dbus_listen_tcp_socket (const char     *host,
   hints.ai_flags = AI_ADDRCONFIG | AI_PASSIVE;
 
  redo_lookup_with_port:
+  ai = NULL;
   if ((res = getaddrinfo(host, port, &hints, &ai)) != 0 || !ai)
     {
       dbus_set_error (error,
                       _dbus_error_from_errno (errno),
                       "Failed to lookup host/port: \"%s:%s\": %s (%d)",
                       host ? host : "*", port, gai_strerror(res), res);
-      return -1;
+      goto failed;
     }
 
   tmp = ai;
@@ -2403,17 +2403,6 @@ _dbus_atomic_get (DBusAtomic *atomic)
 #endif
 }
 
-#ifdef DBUS_BUILD_TESTS
-/** Gets our GID
- * @returns process GID
- */
-dbus_gid_t
-_dbus_getgid (void)
-{
-  return getgid ();
-}
-#endif
-
 /**
  * Wrapper for poll().
  *
@@ -2929,11 +2918,6 @@ _dbus_print_backtrace (void)
  * Sets both ends of the pipe nonblocking.
  *
  * Marks both file descriptors as close-on-exec
- *
- * @todo libdbus only uses this for the debug-pipe server, so in
- * principle it could be in dbus-sysdeps-util.c, except that
- * dbus-sysdeps-util.c isn't in libdbus when tests are enabled and the
- * debug-pipe server is used.
  *
  * @param fd1 return location for one end
  * @param fd2 return location for the other end
@@ -3696,54 +3680,27 @@ _dbus_get_standard_session_servicedirs (DBusList **dirs)
 dbus_bool_t
 _dbus_get_standard_system_servicedirs (DBusList **dirs)
 {
-  const char *xdg_data_dirs;
-  DBusString servicedir_path;
-
-  if (!_dbus_string_init (&servicedir_path))
-    return FALSE;
-
-  xdg_data_dirs = _dbus_getenv ("XDG_DATA_DIRS");
-
-  if (xdg_data_dirs != NULL)
-    {
-      if (!_dbus_string_append (&servicedir_path, xdg_data_dirs))
-        goto oom;
-
-      if (!_dbus_string_append (&servicedir_path, ":"))
-        goto oom;
-    }
-  else
-    {
-      if (!_dbus_string_append (&servicedir_path, "/usr/local/share:/usr/share:"))
-        goto oom;
-    }
-
   /*
-   * Add configured datadir to defaults. This may be the same as one
-   * of the XDG directories. However, the config parser should take
-   * care of the duplicates.
+   * DBUS_DATADIR may be the same as one of the standard directories. However,
+   * the config parser should take care of the duplicates.
    *
    * Also, append /lib as counterpart of /usr/share on the root
    * directory (the root directory does not know /share), in order to
    * facilitate early boot system bus activation where /usr might not
    * be available.
    */
-  if (!_dbus_string_append (&servicedir_path,
-                            DBUS_DATADIR":"
-                            "/lib:"))
-        goto oom;
+  static const char standard_search_path[] =
+    "/usr/local/share:"
+    "/usr/share:"
+    DBUS_DATADIR ":"
+    "/lib";
+  DBusString servicedir_path;
 
-  if (!_dbus_split_paths_and_append (&servicedir_path,
-                                     DBUS_UNIX_STANDARD_SYSTEM_SERVICEDIR,
-                                     dirs))
-    goto oom;
+  _dbus_string_init_const (&servicedir_path, standard_search_path);
 
-  _dbus_string_free (&servicedir_path);
-  return TRUE;
-
- oom:
-  _dbus_string_free (&servicedir_path);
-  return FALSE;
+  return _dbus_split_paths_and_append (&servicedir_path,
+                                       DBUS_UNIX_STANDARD_SYSTEM_SERVICEDIR,
+                                       dirs);
 }
 
 /**

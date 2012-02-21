@@ -126,6 +126,18 @@ remove_server_watch (DBusWatch  *watch,
   _dbus_loop_remove_watch (context->loop, watch);
 }
 
+static void
+toggle_server_watch (DBusWatch  *watch,
+                     void       *data)
+{
+  DBusServer *server = data;
+  BusContext *context;
+
+  context = server_get_context (server);
+
+  _dbus_loop_toggle_watch (context->loop, watch);
+}
+
 static dbus_bool_t
 add_server_timeout (DBusTimeout *timeout,
                     void        *data)
@@ -228,7 +240,7 @@ setup_server (BusContext *context,
   if (!dbus_server_set_watch_functions (server,
                                         add_server_watch,
                                         remove_server_watch,
-                                        NULL,
+                                        toggle_server_watch,
                                         server,
                                         NULL))
     {
@@ -257,7 +269,7 @@ static dbus_bool_t
 process_config_first_time_only (BusContext       *context,
 				BusConfigParser  *parser,
                                 const DBusString *address,
-                                dbus_bool_t      systemd_activation,
+                                BusContextFlags   flags,
 				DBusError        *error)
 {
   DBusString log_prefix;
@@ -273,17 +285,24 @@ process_config_first_time_only (BusContext       *context,
 
   retval = FALSE;
   auth_mechanisms = NULL;
+  pidfile = NULL;
 
   _dbus_init_system_log ();
 
-  context->systemd_activation = systemd_activation;
+  if (flags & BUS_CONTEXT_FLAG_SYSTEMD_ACTIVATION)
+    context->systemd_activation = TRUE;
+  else
+    context->systemd_activation = FALSE;
 
   /* Check for an existing pid file. Of course this is a race;
    * we'd have to use fcntl() locks on the pid file to
    * avoid that. But we want to check for the pid file
    * before overwriting any existing sockets, etc.
    */
-  pidfile = bus_config_parser_get_pidfile (parser);
+
+  if (flags & BUS_CONTEXT_FLAG_WRITE_PID_FILE)
+    pidfile = bus_config_parser_get_pidfile (parser);
+
   if (pidfile != NULL)
     {
       DBusString u;
@@ -392,6 +411,7 @@ process_config_first_time_only (BusContext       *context,
           if (auth_mechanisms[i] == NULL)
             goto oom;
           link = _dbus_list_get_next_link (auth_mechanisms_list, link);
+          i += 1;
         }
     }
   else
@@ -680,15 +700,17 @@ process_config_postinit (BusContext      *context,
 
 BusContext*
 bus_context_new (const DBusString *config_file,
-                 ForceForkSetting  force_fork,
+                 BusContextFlags   flags,
                  DBusPipe         *print_addr_pipe,
                  DBusPipe         *print_pid_pipe,
                  const DBusString *address,
-                 dbus_bool_t      systemd_activation,
                  DBusError        *error)
 {
   BusContext *context;
   BusConfigParser *parser;
+
+  _dbus_assert ((flags & BUS_CONTEXT_FLAG_FORK_NEVER) == 0 ||
+                (flags & BUS_CONTEXT_FLAG_FORK_ALWAYS) == 0);
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
@@ -738,7 +760,7 @@ bus_context_new (const DBusString *config_file,
       goto failed;
     }
 
-  if (!process_config_first_time_only (context, parser, address, systemd_activation, error))
+  if (!process_config_first_time_only (context, parser, address, flags, error))
     {
       _DBUS_ASSERT_ERROR_IS_SET (error);
       goto failed;
@@ -833,7 +855,8 @@ bus_context_new (const DBusString *config_file,
     if (context->pidfile)
       _dbus_string_init_const (&u, context->pidfile);
 
-    if ((force_fork != FORK_NEVER && context->fork) || force_fork == FORK_ALWAYS)
+    if (((flags & BUS_CONTEXT_FLAG_FORK_NEVER) == 0 && context->fork) ||
+        (flags & BUS_CONTEXT_FLAG_FORK_ALWAYS))
       {
         _dbus_verbose ("Forking and becoming daemon\n");
 
