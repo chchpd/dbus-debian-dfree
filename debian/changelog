@@ -7,6 +7,8 @@ dbus (1.5.12-1) UNRELEASED; urgency=low
   * Remove lintian override for #629648, hopefully the ftpmasters are using
     lintian 2.5.1 by now
   * Add lintian overrides for the empty directories we (intentionally) ship
+  * Don't run dh_makeshlibs on dbus-1-dbg, nothing should be linking to its
+    extra-debug-enabled build of the library
 
  -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 14:57:35 +0100
 

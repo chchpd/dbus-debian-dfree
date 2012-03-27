@@ -85,7 +85,7 @@ override_dh_strip:
 	dh_strip --dbg-package=dbus-1-dbg
 
 override_dh_makeshlibs:
-	dh_makeshlibs -V
+	dh_makeshlibs -V -Ndbus-1-dbg
 
 override_dh_autoreconf:
 	cp INSTALL INSTALL.orig
