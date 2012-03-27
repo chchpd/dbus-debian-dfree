@@ -1,3 +1,28 @@
+D-Bus 1.5.12 (2012-03-27)
+==
+
+The “Big Book of Science” release.
+
+• Add public API to validate various string types:
+  dbus_validate_path(), dbus_validate_interface(), dbus_validate_member(),
+  dbus_validate_error_name(), dbus_validate_bus_name(), dbus_validate_utf8()
+  (fd.o #39549, Simon McVittie)
+
+• Turn DBusBasicValue into public API so bindings don't need to invent their
+  own "union of everything" type (fd.o #11191, Simon McVittie)
+
+• Enumerate data files included in the build rather than using find(1)
+  (fd.o #33840, Simon McVittie)
+
+• Add support for policy rules like <allow own_prefix="com.example.Service"/>
+  in dbus-daemon (fd.o #46273, Alban Crequy)
+
+• Windows-specific:
+  · make dbus-daemon.exe --print-address (and --print-pid) work again
+    on Win32, but not on WinCE (fd.o #46049, Simon McVittie)
+  · fix duplicate case value when compiling against mingw-w64
+    (fd.o #47321, Andoni Morales Alastruey)
+
 D-Bus 1.5.10 (2012-02-21)
 ==
 

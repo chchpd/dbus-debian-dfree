@@ -16,7 +16,7 @@
         and system services on Unix; document the systemd transport</td></tr><tr><td align="left">Revision 0.18</td><td align="left">29 July 2011</td><td align="left">smcv</td></tr><tr><td align="left" colspan="3">define eavesdropping, unicast, broadcast; add eavesdrop
          match keyword; promote type system to a top-level section</td></tr><tr><td align="left">Revision 0.17</td><td align="left">1 June 2011</td><td align="left">smcv/davidz</td></tr><tr><td align="left" colspan="3">define ObjectManager; reserve extra pseudo-type-codes used
          by GVariant</td></tr><tr><td align="left">Revision 0.16</td><td align="left">11 April 2011</td><td align="left"></td></tr><tr><td align="left" colspan="3">add path_namespace, arg0namespace; argNpath matches object
-        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#type-system">Type System</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-systemd">systemd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5885776">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
+        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#type-system">Type System</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-systemd">systemd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-exec">Executed Subprocesses on Unix</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5940272">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
       D-Bus is a system for low-latency, low-overhead, easy to use
       interprocess communication (IPC). In more detail:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
@@ -1006,14 +1006,14 @@
         commands may be introduced both before, and after
         authentication, i.e. both before and after the OK command.
       </p></div><div class="sect2" title="Authentication examples"><div class="titlepage"><div><div><h3 class="title"><a name="auth-examples"></a>Authentication examples</h3></div></div></div><p>
-        </p><div class="figure"><a name="idp5176016"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5216608"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5177840"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5218432"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -1022,14 +1022,14 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5179744"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5220336"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
             C: FOOBAR
             S: ERROR
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5181632"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5222224"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -1038,7 +1038,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5183648"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5224240"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -1051,7 +1051,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5185824"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5226416"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -1064,7 +1064,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5187888"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5228480"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -1073,7 +1073,7 @@
             S: AGREE_UNIX_FD
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5189888"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5230480"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -1351,7 +1351,7 @@
                 fails, the lock fails. Servers should retry for a reasonable
                 period of time, then they may choose to delete an existing lock
                 to keep users from having to manually delete a stale
-                lock. <sup>[<a name="idp5275920" href="#ftn.idp5275920" class="footnote">1</a>]</sup>
+                lock. <sup>[<a name="idp5316512" href="#ftn.idp5316512" class="footnote">1</a>]</sup>
               </p></li><li class="listitem"><p>
                 Once the lockfile has been created, the server loads the cookie
                 file. It should then delete any cookies that are old (the
@@ -1430,7 +1430,7 @@
       [FIXME we need to specify in detail each transport and its possible arguments]
     
       Current transports include: unix domain sockets (including 
-      abstract namespace on linux), launchd, systemd, TCP/IP, and a debug/testing transport
+      abstract namespace on linux), launchd, systemd, TCP/IP, an executed subprocess and a debug/testing transport
       using in-process pipes. Future possible transports include one that
       tunnels over X11 protocol.
     </p><div class="sect2" title="Unix Domain Sockets"><div class="titlepage"><div><div><h3 class="title"><a name="transports-unix-domain-sockets"></a>Unix Domain Sockets</h3></div></div></div><p>
@@ -1445,7 +1445,7 @@
 	length path name.  Names which were shorter than the fixed length
 	would be padded by Nul bytes.
       </p><p>
-        Unix domain sockets are not available on windows. 
+        Unix domain sockets are not available on Windows.
       </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-unix-domain-sockets-addresses"></a>Server Address Format</h4></div></div></div><p> 
           Unix domain socket addresses are identified by the "unix:" prefix 
           and support the following key/value pairs:
@@ -1488,7 +1488,7 @@
         Using tcp transport without any additional secure authentification mechanismus 
         over a network is unsecure. 
       </p><p>  
-        Windows notes: Because of the tcp stack on windows does not provide sending 
+        Windows notes: Because of the tcp stack on Windows does not provide sending
         credentials over a tcp connection, the EXTERNAL authentification 
         mechanismus does not work. 
       </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-tcp-sockets-addresses"></a>Server Address Format</h4></div></div></div><p> 
@@ -1528,7 +1528,30 @@
         </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>host</td><td>(string)</td><td>dns name or ip address</td></tr><tr><td>port</td><td>(number)</td><td>The tcp port the server will open. A zero value let the server 
             choose a free port provided from the underlaying operating system. 
             libdbus is able to retrieve the real used port from the server.  
-           </td></tr><tr><td>family</td><td>(string)</td><td>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</td></tr><tr><td>noncefile</td><td>(path)</td><td>file location containing the secret</td></tr></tbody></table></div></div></div></div><div class="sect1" title="Meta Transports"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="meta-transports"></a>Meta Transports</h2></div></div></div><p>
+           </td></tr><tr><td>family</td><td>(string)</td><td>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</td></tr><tr><td>noncefile</td><td>(path)</td><td>file location containing the secret</td></tr></tbody></table></div></div></div><div class="sect2" title="Executed Subprocesses on Unix"><div class="titlepage"><div><div><h3 class="title"><a name="transports-exec"></a>Executed Subprocesses on Unix</h3></div></div></div><p>
+        This transport forks off a process and connects its standard
+        input and standard output with an anonymous Unix domain
+        socket. This socket is then used for communication by the
+        transport. This transport may be used to use out-of-process
+        forwarder programs as basis for the D-Bus protocol.
+      </p><p>
+        The forked process will inherit the standard error output and
+        process group from the parent process.
+      </p><p>
+        Executed subprocesses are not available on Windows.
+      </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-exec-addresses"></a>Server Address Format</h4></div></div></div><p>
+          Executed subprocess addresses are identified by the "unixexec:" prefix
+          and support the following key/value pairs:
+        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>path</td><td>(path)</td><td>Path of the binary to execute, either an absolute
+            path or a binary name that is searched for in the default
+            search path of the OS. This corresponds to the first
+            argument of execlp(). This key is mandatory.</td></tr><tr><td>argv0</td><td>(string)</td><td>The program name to use when executing the
+            binary. If omitted the same value as specified for path=
+            will be used. This corresponds to the second argument of
+            execlp().</td></tr><tr><td>argv1, argv2, ...</td><td>(string)</td><td>Arguments to pass to the binary. This corresponds
+            to the third and later arguments of execlp(). If a
+            specific argvX is not specified no further argvY for Y &gt; X
+            are taken into account.</td></tr></tbody></table></div></div></div></div><div class="sect1" title="Meta Transports"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="meta-transports"></a>Meta Transports</h2></div></div></div><p>
       Meta transports are a kind of transport with special enhancements or
       behavior. Currently available meta transports include: autolaunch
     </p><div class="sect2" title="Autolaunch"><div class="titlepage"><div><div><h3 class="title"><a name="meta-transports-autolaunch"></a>Autolaunch</h3></div></div></div><p>The autolaunch transport provides a way for dbus clients to autodetect
@@ -2377,7 +2400,7 @@
 
         </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>General syntax</p></li><li class="listitem"><p>Comment format</p></li></ul></div><p>
 
-        </p><div class="figure"><a name="idp5652496"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5707424"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
             # Sample service description file
             [D-BUS Service]
             Names=org.freedesktop.ConfigurationDatabase;org.gnome.GConf;
@@ -2547,7 +2570,7 @@
             allowing another process to set the selection between the
             verification and the setting (e.g., by using XGrabServer /
             XungrabServer).
-          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5705696"></a></h5></div></div></div><p>
+          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5760192"></a></h5></div></div></div><p>
             On Unix systems, the session bus should search for .service files
             in <code class="literal">$XDG_DATA_DIRS/dbus-1/services</code> as defined
             by the
@@ -2577,7 +2600,7 @@
           variable. If that variable is not set, applications should try 
           to connect to the well-known address
           <code class="literal">unix:path=/var/run/dbus/system_bus_socket</code>.
-          <sup>[<a name="idp5714944" href="#ftn.idp5714944" class="footnote">2</a>]</sup>
+          <sup>[<a name="idp5769440" href="#ftn.idp5769440" class="footnote">2</a>]</sup>
         </p><p>
           On Unix systems, the system bus should default to searching
           for .service files in
@@ -2587,7 +2610,7 @@
           of precedence. It may also search other implementation-specific
           locations, but should not vary these locations based on environment
           variables.
-          <sup>[<a name="idp5719152" href="#ftn.idp5719152" class="footnote">3</a>]</sup>
+          <sup>[<a name="idp5773648" href="#ftn.idp5773648" class="footnote">3</a>]</sup>
         </p><p>
           Software packages should install their system .service
           files to their configured
@@ -2779,7 +2802,7 @@
         There is also a per-machine ID, described in <a class="xref" href="#standard-interfaces-peer" title="org.freedesktop.DBus.Peer">the section called &#8220;<code class="literal">org.freedesktop.DBus.Peer</code>&#8221;</a> and returned
         by org.freedesktop.DBus.Peer.GetMachineId().
         For a desktop session bus, the bus ID can be used as a way to uniquely identify a user's session.
-        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5885776"></a>Glossary</h2></div></div></div><p>
+        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5940272"></a>Glossary</h2></div></div></div><p>
       This glossary defines some of the terms used in this specification.
     </p><dl><dt><a name="term-bus-name"></a>Bus Name</dt><dd><p>
           The message bus maintains an association between names and
@@ -2860,14 +2883,14 @@
           message bus. This name will never change owner, and will be unique
           (never reused during the lifetime of the message bus).
           It will begin with a ':' character.
-        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp5275920" href="#idp5275920" class="para">1</a>] </sup>Lockfiles are used instead of real file
+        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp5316512" href="#idp5316512" class="para">1</a>] </sup>Lockfiles are used instead of real file
                 locking <code class="literal">fcntl()</code> because real locking
                 implementations are still flaky on network
-                filesystems.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp5714944" href="#idp5714944" class="para">2</a>] </sup>
+                filesystems.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp5769440" href="#idp5769440" class="para">2</a>] </sup>
               The D-Bus reference implementation actually honors the 
               <code class="literal">$(localstatedir)</code> configure option 
               for this address, on both client and server side.
-            </p></div><div class="footnote"><p><sup>[<a id="ftn.idp5719152" href="#idp5719152" class="para">3</a>] </sup>
+            </p></div><div class="footnote"><p><sup>[<a id="ftn.idp5773648" href="#idp5773648" class="para">3</a>] </sup>
               The system bus is security-sensitive and is typically executed
               by an init system with a clean environment. Its launch helper
               process is particularly security-sensitive, and specifically
