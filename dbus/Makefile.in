@@ -107,7 +107,7 @@ am__libdbus_1_la_SOURCES_DIST = dbus-address.c dbus-auth.c dbus-auth.h \
 	dbus-server-socket.c dbus-server-socket.h dbus-uuidgen.c \
 	dbus-uuidgen.h dbus-server-unix.c dbus-server-unix.h \
 	dbus-server-win.c dbus-server-win.h dbus-sha.c dbus-sha.h \
-	dbus-signature.c dbus-timeout.c dbus-timeout.h \
+	dbus-signature.c dbus-syntax.c dbus-timeout.c dbus-timeout.h \
 	dbus-threads-internal.h dbus-threads.c dbus-transport.c \
 	dbus-transport.h dbus-transport-protected.h \
 	dbus-transport-socket.c dbus-transport-socket.h dbus-watch.c \
@@ -145,8 +145,8 @@ am__objects_2 = libdbus_1_la-dbus-address.lo libdbus_1_la-dbus-auth.lo \
 	libdbus_1_la-dbus-server-debug-pipe.lo \
 	libdbus_1_la-dbus-server-socket.lo $(am__objects_1) \
 	libdbus_1_la-dbus-sha.lo libdbus_1_la-dbus-signature.lo \
-	libdbus_1_la-dbus-timeout.lo libdbus_1_la-dbus-threads.lo \
-	libdbus_1_la-dbus-transport.lo \
+	libdbus_1_la-dbus-syntax.lo libdbus_1_la-dbus-timeout.lo \
+	libdbus_1_la-dbus-threads.lo libdbus_1_la-dbus-transport.lo \
 	libdbus_1_la-dbus-transport-socket.lo \
 	libdbus_1_la-dbus-watch.lo
 @DBUS_ENABLE_LAUNCHD_TRUE@@DBUS_WIN_FALSE@am__objects_3 = libdbus_1_la-dbus-server-launchd.lo
@@ -199,7 +199,7 @@ am__libdbus_internal_la_SOURCES_DIST = dbus-address.c dbus-auth.c \
 	dbus-server-socket.c dbus-server-socket.h dbus-uuidgen.c \
 	dbus-uuidgen.h dbus-server-unix.c dbus-server-unix.h \
 	dbus-server-win.c dbus-server-win.h dbus-sha.c dbus-sha.h \
-	dbus-signature.c dbus-timeout.c dbus-timeout.h \
+	dbus-signature.c dbus-syntax.c dbus-timeout.c dbus-timeout.h \
 	dbus-threads-internal.h dbus-threads.c dbus-transport.c \
 	dbus-transport.h dbus-transport-protected.h \
 	dbus-transport-socket.c dbus-transport-socket.h dbus-watch.c \
@@ -254,6 +254,7 @@ am__objects_8 = libdbus_internal_la-dbus-address.lo \
 	libdbus_internal_la-dbus-server-socket.lo $(am__objects_7) \
 	libdbus_internal_la-dbus-sha.lo \
 	libdbus_internal_la-dbus-signature.lo \
+	libdbus_internal_la-dbus-syntax.lo \
 	libdbus_internal_la-dbus-timeout.lo \
 	libdbus_internal_la-dbus-threads.lo \
 	libdbus_internal_la-dbus-transport.lo \
@@ -657,6 +658,7 @@ dbusinclude_HEADERS = \
 	dbus-server.h				\
 	dbus-shared.h				\
 	dbus-signature.h			\
+	dbus-syntax.h				\
 	dbus-threads.h				\
 	dbus-types.h
 
@@ -708,6 +710,7 @@ DBUS_LIB_SOURCES = \
 	dbus-sha.c				\
 	dbus-sha.h				\
 	dbus-signature.c			\
+	dbus-syntax.c				\
 	dbus-timeout.c				\
 	dbus-timeout.h				\
 	dbus-threads-internal.h			\
@@ -959,6 +962,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-sha.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-signature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-string.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-syntax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-sysdeps-pthread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-sysdeps-thread-win.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_1_la-dbus-sysdeps-unix.Plo@am__quote@
@@ -1030,6 +1034,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-spawn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-string-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-string.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-syntax.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-sysdeps-pthread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-sysdeps-thread-win.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_internal_la-dbus-sysdeps-unix.Plo@am__quote@
@@ -1247,6 +1252,13 @@ libdbus_1_la-dbus-signature.lo: dbus-signature.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dbus-signature.c' object='libdbus_1_la-dbus-signature.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_1_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdbus_1_la-dbus-signature.lo `test -f 'dbus-signature.c' || echo '$(srcdir)/'`dbus-signature.c
+
+libdbus_1_la-dbus-syntax.lo: dbus-syntax.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_1_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdbus_1_la-dbus-syntax.lo -MD -MP -MF $(DEPDIR)/libdbus_1_la-dbus-syntax.Tpo -c -o libdbus_1_la-dbus-syntax.lo `test -f 'dbus-syntax.c' || echo '$(srcdir)/'`dbus-syntax.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libdbus_1_la-dbus-syntax.Tpo $(DEPDIR)/libdbus_1_la-dbus-syntax.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dbus-syntax.c' object='libdbus_1_la-dbus-syntax.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_1_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdbus_1_la-dbus-syntax.lo `test -f 'dbus-syntax.c' || echo '$(srcdir)/'`dbus-syntax.c
 
 libdbus_1_la-dbus-timeout.lo: dbus-timeout.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_1_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdbus_1_la-dbus-timeout.lo -MD -MP -MF $(DEPDIR)/libdbus_1_la-dbus-timeout.Tpo -c -o libdbus_1_la-dbus-timeout.lo `test -f 'dbus-timeout.c' || echo '$(srcdir)/'`dbus-timeout.c
@@ -1632,6 +1644,13 @@ libdbus_internal_la-dbus-signature.lo: dbus-signature.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dbus-signature.c' object='libdbus_internal_la-dbus-signature.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_internal_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdbus_internal_la-dbus-signature.lo `test -f 'dbus-signature.c' || echo '$(srcdir)/'`dbus-signature.c
+
+libdbus_internal_la-dbus-syntax.lo: dbus-syntax.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_internal_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdbus_internal_la-dbus-syntax.lo -MD -MP -MF $(DEPDIR)/libdbus_internal_la-dbus-syntax.Tpo -c -o libdbus_internal_la-dbus-syntax.lo `test -f 'dbus-syntax.c' || echo '$(srcdir)/'`dbus-syntax.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libdbus_internal_la-dbus-syntax.Tpo $(DEPDIR)/libdbus_internal_la-dbus-syntax.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='dbus-syntax.c' object='libdbus_internal_la-dbus-syntax.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_internal_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libdbus_internal_la-dbus-syntax.lo `test -f 'dbus-syntax.c' || echo '$(srcdir)/'`dbus-syntax.c
 
 libdbus_internal_la-dbus-timeout.lo: dbus-timeout.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libdbus_internal_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libdbus_internal_la-dbus-timeout.lo -MD -MP -MF $(DEPDIR)/libdbus_internal_la-dbus-timeout.Tpo -c -o libdbus_internal_la-dbus-timeout.lo `test -f 'dbus-timeout.c' || echo '$(srcdir)/'`dbus-timeout.c
