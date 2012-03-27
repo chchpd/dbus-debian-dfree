@@ -9,6 +9,7 @@ dbus (1.5.12-1) UNRELEASED; urgency=low
   * Add lintian overrides for the empty directories we (intentionally) ship
   * Don't run dh_makeshlibs on dbus-1-dbg, nothing should be linking to its
     extra-debug-enabled build of the library
+  * Register D-Bus documentation in doc-base
 
  -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 14:57:35 +0100
 
