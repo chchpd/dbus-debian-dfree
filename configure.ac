@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [4])
-m4_define([dbus_micro_version], [18])
+m4_define([dbus_micro_version], [20])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -36,7 +36,7 @@ LT_CURRENT=8
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=8
+LT_REVISION=9
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -191,7 +191,7 @@ fi
 # default (unless you don't have GLib), because they don't bloat the library
 # or binaries.
 if test "x$enable_modular_tests" != xno; then
-  PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.22, gio-2.0 >= 2.22],
+  PKG_CHECK_MODULES([GLIB], [glib-2.0 >= 2.24, gio-2.0 >= 2.24],
     [],
     [if test "x$enable_modular_tests" = xyes; then
       AC_MSG_NOTICE([Full test coverage (--enable-modular-tests=yes or --enable-tests=yes) requires GLib])
