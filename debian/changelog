@@ -1,4 +1,4 @@
-dbus (1.5.12-1) UNRELEASED; urgency=low
+dbus (1.5.12-1) unstable; urgency=low
 
   * Merge from unstable
   * New upstream release
@@ -11,7 +11,7 @@ dbus (1.5.12-1) UNRELEASED; urgency=low
     extra-debug-enabled build of the library
   * Register D-Bus documentation in doc-base
 
- -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 14:57:35 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 18:36:38 +0100
 
 dbus (1.4.20-1) unstable; urgency=low
 
