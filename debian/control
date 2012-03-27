@@ -36,7 +36,7 @@ Build-Depends: automake (>= 1:1.10),
                python-gobject,
                xmlto,
                xsltproc
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Vcs-Git: git://anonscm.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
