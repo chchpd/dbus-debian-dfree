@@ -4,6 +4,8 @@ dbus (1.5.12-1) UNRELEASED; urgency=low
   * New upstream release
     - adds new API
   * Standards-Version: 3.9.3 (no changes)
+  * Remove lintian override for #629648, hopefully the ftpmasters are using
+    lintian 2.5.1 by now
 
  -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 14:57:35 +0100
 
