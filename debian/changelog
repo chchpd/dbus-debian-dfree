@@ -1,3 +1,16 @@
+dbus (1.5.10-2) UNRELEASED; urgency=low
+
+  * Merge from unstable
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 14:57:35 +0100
+
+dbus (1.4.20-1) unstable; urgency=low
+
+  * New upstream release
+    - fixes FTBFS with GLib 2.32 (Closes: #665665)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Mar 2012 13:33:33 +0100
+
 dbus (1.5.10-1) experimental; urgency=low
 
   * New upstream release
