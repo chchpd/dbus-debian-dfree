@@ -1,3 +1,10 @@
+dbus (1.6.0) UNRELEASED; urgency=low
+
+  * Merge from "experimental" (1.5.12 was accidentally uploaded to unstable)
+  * New upstream stable release
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 05 Jun 2012 13:31:46 +0100
+
 dbus (1.5.12-1) unstable; urgency=low
 
   * Merge from unstable
