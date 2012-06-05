@@ -1,10 +1,10 @@
-dbus (1.6.0-1) UNRELEASED; urgency=low
+dbus (1.6.0-1) unstable; urgency=low
 
   * Merge from "experimental" (1.5.12 was accidentally uploaded to unstable)
   * New upstream stable release
   * debian/watch: only match stable (0.even.x) releases
 
- -- Simon McVittie <smcv@debian.org>  Tue, 05 Jun 2012 13:31:46 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 05 Jun 2012 14:23:46 +0100
 
 dbus (1.5.12-1) unstable; urgency=low
 
