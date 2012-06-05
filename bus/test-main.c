@@ -28,7 +28,7 @@
 #include <dbus/dbus-string.h>
 #include <dbus/dbus-sysdeps.h>
 #include <dbus/dbus-internals.h>
-#include <dbus/dbus-message-private.h>
+#include <dbus/dbus-message-internal.h>
 #include "selinux.h"
 
 #ifdef DBUS_BUILD_TESTS
@@ -127,15 +127,6 @@ main (int argc, char **argv)
       printf ("%s: Running config file parser test\n", argv[0]);
       if (!bus_config_parser_test (&test_data_dir))
         die ("parser");
-      test_post_hook ();
-    }
-
-  if (only == NULL || strcmp (only, "policy") == 0)
-    {
-      test_pre_hook ();
-      printf ("%s: Running policy test\n", argv[0]);
-      if (!bus_policy_test (&test_data_dir))
-        die ("policy");
       test_post_hook ();
     }
 

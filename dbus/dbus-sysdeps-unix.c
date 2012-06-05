@@ -164,13 +164,6 @@ _dbus_open_socket (int              *fd_p,
     }
 }
 
-dbus_bool_t
-_dbus_open_tcp_socket (int              *fd,
-                       DBusError        *error)
-{
-  return _dbus_open_socket(fd, AF_INET, SOCK_STREAM, 0, error);
-}
-
 /**
  * Opens a UNIX domain socket (as in the socket() call).
  * Does not bind the socket.
@@ -181,7 +174,7 @@ _dbus_open_tcp_socket (int              *fd,
  * @param error return location for an error
  * @returns #FALSE if error is set
  */
-dbus_bool_t
+static dbus_bool_t
 _dbus_open_unix_socket (int              *fd,
                         DBusError        *error)
 {
@@ -870,6 +863,96 @@ _dbus_connect_unix_socket (const char     *path,
     }
 
   return fd;
+}
+
+/**
+ * Creates a UNIX domain socket and connects it to the specified
+ * process to execute.
+ *
+ * This will set FD_CLOEXEC for the socket returned.
+ *
+ * @param path the path to the executable
+ * @param argv the argument list for the process to execute.
+ * argv[0] typically is identical to the path of the executable
+ * @param error return location for error code
+ * @returns connection file descriptor or -1 on error
+ */
+int
+_dbus_connect_exec (const char     *path,
+                    char *const    argv[],
+                    DBusError      *error)
+{
+  int fds[2];
+  pid_t pid;
+
+  _DBUS_ASSERT_ERROR_IS_CLEAR (error);
+
+  _dbus_verbose ("connecting to process %s\n", path);
+
+  if (socketpair (AF_UNIX, SOCK_STREAM
+#ifdef SOCK_CLOEXEC
+                  |SOCK_CLOEXEC
+#endif
+                  , 0, fds) < 0)
+    {
+      dbus_set_error (error,
+                      _dbus_error_from_errno (errno),
+                      "Failed to create socket pair: %s",
+                      _dbus_strerror (errno));
+      return -1;
+    }
+
+  _dbus_fd_set_close_on_exec (fds[0]);
+  _dbus_fd_set_close_on_exec (fds[1]);
+
+  pid = fork ();
+  if (pid < 0)
+    {
+      dbus_set_error (error,
+                      _dbus_error_from_errno (errno),
+                      "Failed to fork() to call %s: %s",
+                      path, _dbus_strerror (errno));
+      close (fds[0]);
+      close (fds[1]);
+      return -1;
+    }
+
+  if (pid == 0)
+    {
+      /* child */
+      close (fds[0]);
+
+      dup2 (fds[1], STDIN_FILENO);
+      dup2 (fds[1], STDOUT_FILENO);
+
+      if (fds[1] != STDIN_FILENO &&
+          fds[1] != STDOUT_FILENO)
+        close (fds[1]);
+
+      /* Inherit STDERR and the controlling terminal from the
+         parent */
+
+      _dbus_close_all ();
+
+      execvp (path, argv);
+
+      fprintf (stderr, "Failed to execute process %s: %s\n", path, _dbus_strerror (errno));
+
+      _exit(1);
+    }
+
+  /* parent */
+  close (fds[1]);
+
+  if (!_dbus_set_fd_nonblocking (fds[0], error))
+    {
+      _DBUS_ASSERT_ERROR_IS_SET (error);
+
+      close (fds[0]);
+      return -1;
+    }
+
+  return fds[0];
 }
 
 /**
@@ -2410,17 +2493,6 @@ _dbus_atomic_get (DBusAtomic *atomic)
 #endif
 }
 
-#ifdef DBUS_BUILD_TESTS
-/** Gets our GID
- * @returns process GID
- */
-dbus_gid_t
-_dbus_getgid (void)
-{
-  return getgid ();
-}
-#endif
-
 /**
  * Wrapper for poll().
  *
@@ -2532,8 +2604,6 @@ void
 _dbus_get_current_time (long *tv_sec,
                         long *tv_usec)
 {
-  struct timeval t;
-
 #ifdef HAVE_MONOTONIC_CLOCK
   struct timespec ts;
   clock_gettime (CLOCK_MONOTONIC, &ts);
@@ -2543,6 +2613,8 @@ _dbus_get_current_time (long *tv_sec,
   if (tv_usec)
     *tv_usec = ts.tv_nsec / 1000;
 #else
+  struct timeval t;
+
   gettimeofday (&t, NULL);
 
   if (tv_sec)
@@ -2937,11 +3009,6 @@ _dbus_print_backtrace (void)
  *
  * Marks both file descriptors as close-on-exec
  *
- * @todo libdbus only uses this for the debug-pipe server, so in
- * principle it could be in dbus-sysdeps-util.c, except that
- * dbus-sysdeps-util.c isn't in libdbus when tests are enabled and the
- * debug-pipe server is used.
- *
  * @param fd1 return location for one end
  * @param fd2 return location for the other end
  * @param blocking #TRUE if pipe should be blocking
@@ -3147,7 +3214,6 @@ _read_subprocess_line_argv (const char *progpath,
   int ret;
   int status;
   int orig_len;
-  int i;
 
   dbus_bool_t retval;
   sigset_t new_set, old_set;
@@ -3200,7 +3266,6 @@ _read_subprocess_line_argv (const char *progpath,
   if (pid == 0)
     {
       /* child process */
-      int maxfds;
       int fd;
 
       fd = open ("/dev/null", O_RDWR);
@@ -3224,15 +3289,7 @@ _read_subprocess_line_argv (const char *progpath,
       if (dup2 (errors_pipe[WRITE_END], 2) == -1)
         _exit (1);
 
-      maxfds = sysconf (_SC_OPEN_MAX);
-      /* Pick something reasonable if for some reason sysconf
-       * says unlimited.
-       */
-      if (maxfds < 0)
-        maxfds = 1024;
-      /* close all inherited fds */
-      for (i = 3; i < maxfds; i++)
-        close (i);
+      _dbus_close_all ();
 
       sigprocmask (SIG_SETMASK, &old_set, NULL);
 
@@ -3506,10 +3563,10 @@ _dbus_lookup_launchd_socket (DBusString *socket_path,
 #endif
 }
 
+#ifdef DBUS_ENABLE_LAUNCHD
 static dbus_bool_t
 _dbus_lookup_session_address_launchd (DBusString *address, DBusError  *error)
 {
-#ifdef DBUS_ENABLE_LAUNCHD
   dbus_bool_t valid_socket;
   DBusString socket_path;
 
@@ -3551,12 +3608,8 @@ _dbus_lookup_session_address_launchd (DBusString *address, DBusError  *error)
 
   _dbus_string_free(&socket_path);
   return TRUE;
-#else
-  dbus_set_error(error, DBUS_ERROR_NOT_SUPPORTED,
-                "can't lookup session address from launchd; launchd support not compiled in");
-  return FALSE;
-#endif
 }
+#endif
 
 /**
  * Determines the address of the session bus by querying a
@@ -3707,54 +3760,27 @@ _dbus_get_standard_session_servicedirs (DBusList **dirs)
 dbus_bool_t
 _dbus_get_standard_system_servicedirs (DBusList **dirs)
 {
-  const char *xdg_data_dirs;
-  DBusString servicedir_path;
-
-  if (!_dbus_string_init (&servicedir_path))
-    return FALSE;
-
-  xdg_data_dirs = _dbus_getenv ("XDG_DATA_DIRS");
-
-  if (xdg_data_dirs != NULL)
-    {
-      if (!_dbus_string_append (&servicedir_path, xdg_data_dirs))
-        goto oom;
-
-      if (!_dbus_string_append (&servicedir_path, ":"))
-        goto oom;
-    }
-  else
-    {
-      if (!_dbus_string_append (&servicedir_path, "/usr/local/share:/usr/share:"))
-        goto oom;
-    }
-
   /*
-   * Add configured datadir to defaults. This may be the same as one
-   * of the XDG directories. However, the config parser should take
-   * care of the duplicates.
+   * DBUS_DATADIR may be the same as one of the standard directories. However,
+   * the config parser should take care of the duplicates.
    *
    * Also, append /lib as counterpart of /usr/share on the root
    * directory (the root directory does not know /share), in order to
    * facilitate early boot system bus activation where /usr might not
    * be available.
    */
-  if (!_dbus_string_append (&servicedir_path,
-                            DBUS_DATADIR":"
-                            "/lib:"))
-        goto oom;
+  static const char standard_search_path[] =
+    "/usr/local/share:"
+    "/usr/share:"
+    DBUS_DATADIR ":"
+    "/lib";
+  DBusString servicedir_path;
 
-  if (!_dbus_split_paths_and_append (&servicedir_path,
-                                     DBUS_UNIX_STANDARD_SYSTEM_SERVICEDIR,
-                                     dirs))
-    goto oom;
+  _dbus_string_init_const (&servicedir_path, standard_search_path);
 
-  _dbus_string_free (&servicedir_path);
-  return TRUE;
-
- oom:
-  _dbus_string_free (&servicedir_path);
-  return FALSE;
+  return _dbus_split_paths_and_append (&servicedir_path,
+                                       DBUS_UNIX_STANDARD_SYSTEM_SERVICEDIR,
+                                       dirs);
 }
 
 /**
@@ -3972,6 +3998,71 @@ const char *
 _dbus_replace_install_prefix (const char *configure_time_path)
 {
   return configure_time_path;
+}
+
+/**
+ * Closes all file descriptors except the first three (i.e. stdin,
+ * stdout, stderr).
+ */
+void
+_dbus_close_all (void)
+{
+  int maxfds, i;
+
+#ifdef __linux__
+  DIR *d;
+
+  /* On Linux we can optimize this a bit if /proc is available. If it
+     isn't available, fall back to the brute force way. */
+
+  d = opendir ("/proc/self/fd");
+  if (d)
+    {
+      for (;;)
+        {
+          struct dirent buf, *de;
+          int k, fd;
+          long l;
+          char *e = NULL;
+
+          k = readdir_r (d, &buf, &de);
+          if (k != 0 || !de)
+            break;
+
+          if (de->d_name[0] == '.')
+            continue;
+
+          errno = 0;
+          l = strtol (de->d_name, &e, 10);
+          if (errno != 0 || e == NULL || *e != '\0')
+            continue;
+
+          fd = (int) l;
+          if (fd < 3)
+            continue;
+
+          if (fd == dirfd (d))
+            continue;
+
+          close (fd);
+        }
+
+      closedir (d);
+      return;
+    }
+#endif
+
+  maxfds = sysconf (_SC_OPEN_MAX);
+
+  /* Pick something reasonable if for some reason sysconf says
+   * unlimited.
+   */
+  if (maxfds < 0)
+    maxfds = 1024;
+
+  /* close all inherited fds */
+  for (i = 3; i < maxfds; i++)
+    close (i);
 }
 
 /* tests in dbus-sysdeps-util.c */

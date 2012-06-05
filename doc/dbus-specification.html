@@ -6,7 +6,17 @@
             <code class="email">&lt;<a class="email" href="mailto:alexl@redhat.com">alexl@redhat.com</a>&gt;</code><br>
           </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">Sven</span> <span class="surname">Herzberg</span></h3><div class="affiliation"><span class="orgname">Imendio AB<br></span><div class="address"><p><br>
             <code class="email">&lt;<a class="email" href="mailto:sven@imendio.com">sven@imendio.com</a>&gt;</code><br>
-          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.15</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#naming-conventions">Naming Conventions</a></span></dt><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5756384">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
+          </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">Simon</span> <span class="surname">McVittie</span></h3><div class="affiliation"><span class="orgname">Collabora Ltd.<br></span><div class="address"><p><br>
+            <code class="email">&lt;<a class="email" href="mailto:simon.mcvittie@collabora.co.uk">simon.mcvittie@collabora.co.uk</a>&gt;</code><br>
+          </p></div></div></div><div class="author"><h3 class="author"><span class="firstname">David</span> <span class="surname">Zeuthen</span></h3><div class="affiliation"><span class="orgname">Red Hat, Inc.<br></span><div class="address"><p><br>
+            <code class="email">&lt;<a class="email" href="mailto:davidz@redhat.com">davidz@redhat.com</a>&gt;</code><br>
+          </p></div></div></div></div></div><div><p class="releaseinfo">Version 0.19</p></div><div><div class="revhistory"><table border="1" width="100%" summary="Revision history"><tr><th align="left" valign="top" colspan="3"><b>Revision History</b></th></tr><tr><td align="left">Revision current</td><td align="left"><a class="ulink" href="http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml" target="_top">commit log</a></td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.19</td><td align="left">20 February 2012</td><td align="left">smcv/lp</td></tr><tr><td align="left" colspan="3">formally define unique connection names and well-known
+        bus names; document best practices for interface, bus, member and
+        error names, and object paths; document the search path for session
+        and system services on Unix; document the systemd transport</td></tr><tr><td align="left">Revision 0.18</td><td align="left">29 July 2011</td><td align="left">smcv</td></tr><tr><td align="left" colspan="3">define eavesdropping, unicast, broadcast; add eavesdrop
+         match keyword; promote type system to a top-level section</td></tr><tr><td align="left">Revision 0.17</td><td align="left">1 June 2011</td><td align="left">smcv/davidz</td></tr><tr><td align="left" colspan="3">define ObjectManager; reserve extra pseudo-type-codes used
+         by GVariant</td></tr><tr><td align="left">Revision 0.16</td><td align="left">11 April 2011</td><td align="left"></td></tr><tr><td align="left" colspan="3">add path_namespace, arg0namespace; argNpath matches object
+        paths</td></tr><tr><td align="left">Revision 0.15</td><td align="left">3 November 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.14</td><td align="left">12 May 2010</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.13</td><td align="left">23 Dezember 2009</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.12</td><td align="left">7 November, 2006</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.11</td><td align="left">6 February 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.10</td><td align="left">28 January 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.9</td><td align="left">7 Januar 2005</td><td align="left"></td></tr><tr><td align="left" colspan="3"></td></tr><tr><td align="left">Revision 0.8</td><td align="left">06 September 2003</td><td align="left"></td></tr><tr><td align="left" colspan="3">First released document.</td></tr></table></div></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="sect1"><a href="#introduction">Introduction</a></span></dt><dd><dl><dt><span class="sect2"><a href="#stability">Protocol and Specification Stability</a></span></dt></dl></dd><dt><span class="sect1"><a href="#type-system">Type System</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-signatures">Type Signatures</a></span></dt><dt><span class="sect2"><a href="#message-protocol-marshaling">Marshaling (Wire Format)</a></span></dt></dl></dd><dt><span class="sect1"><a href="#message-protocol">Message Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-protocol-messages">Message Format</a></span></dt><dt><span class="sect2"><a href="#message-protocol-names">Valid Names</a></span></dt><dt><span class="sect2"><a href="#message-protocol-types">Message Types</a></span></dt><dt><span class="sect2"><a href="#message-protocol-handling-invalid">Invalid Protocol and Spec Extensions</a></span></dt></dl></dd><dt><span class="sect1"><a href="#auth-protocol">Authentication Protocol</a></span></dt><dd><dl><dt><span class="sect2"><a href="#auth-protocol-overview">Protocol Overview</a></span></dt><dt><span class="sect2"><a href="#auth-nul-byte">Special credentials-passing nul byte</a></span></dt><dt><span class="sect2"><a href="#auth-command-auth">AUTH command</a></span></dt><dt><span class="sect2"><a href="#auth-command-cancel">CANCEL Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-data">DATA Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-begin">BEGIN Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-rejected">REJECTED Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-ok">OK Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-error">ERROR Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-negotiate-unix-fd">NEGOTIATE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-agree-unix-fd">AGREE_UNIX_FD Command</a></span></dt><dt><span class="sect2"><a href="#auth-command-future">Future Extensions</a></span></dt><dt><span class="sect2"><a href="#auth-examples">Authentication examples</a></span></dt><dt><span class="sect2"><a href="#auth-states">Authentication state diagrams</a></span></dt><dt><span class="sect2"><a href="#auth-mechanisms">Authentication mechanisms</a></span></dt></dl></dd><dt><span class="sect1"><a href="#addresses">Server Addresses</a></span></dt><dt><span class="sect1"><a href="#transports">Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#transports-unix-domain-sockets">Unix Domain Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-launchd">launchd</a></span></dt><dt><span class="sect2"><a href="#transports-systemd">systemd</a></span></dt><dt><span class="sect2"><a href="#transports-tcp-sockets">TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-nonce-tcp-sockets">Nonce-secured TCP Sockets</a></span></dt><dt><span class="sect2"><a href="#transports-exec">Executed Subprocesses on Unix</a></span></dt></dl></dd><dt><span class="sect1"><a href="#meta-transports">Meta Transports</a></span></dt><dd><dl><dt><span class="sect2"><a href="#meta-transports-autolaunch">Autolaunch</a></span></dt></dl></dd><dt><span class="sect1"><a href="#uuids">UUIDs</a></span></dt><dt><span class="sect1"><a href="#standard-interfaces">Standard Interfaces</a></span></dt><dd><dl><dt><span class="sect2"><a href="#standard-interfaces-peer"><code class="literal">org.freedesktop.DBus.Peer</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-introspectable"><code class="literal">org.freedesktop.DBus.Introspectable</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-properties"><code class="literal">org.freedesktop.DBus.Properties</code></a></span></dt><dt><span class="sect2"><a href="#standard-interfaces-objectmanager"><code class="literal">org.freedesktop.DBus.ObjectManager</code></a></span></dt></dl></dd><dt><span class="sect1"><a href="#introspection-format">Introspection Data Format</a></span></dt><dt><span class="sect1"><a href="#message-bus">Message Bus Specification</a></span></dt><dd><dl><dt><span class="sect2"><a href="#message-bus-overview">Message Bus Overview</a></span></dt><dt><span class="sect2"><a href="#message-bus-names">Message Bus Names</a></span></dt><dt><span class="sect2"><a href="#message-bus-routing">Message Bus Message Routing</a></span></dt><dt><span class="sect2"><a href="#message-bus-starting-services">Message Bus Starting Services</a></span></dt><dt><span class="sect2"><a href="#message-bus-types">Well-known Message Bus Instances</a></span></dt><dt><span class="sect2"><a href="#message-bus-messages">Message Bus Messages</a></span></dt></dl></dd><dt><span class="glossary"><a href="#idp5940272">Glossary</a></span></dt></dl></div><div class="sect1" title="Introduction"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introduction"></a>Introduction</h2></div></div></div><p>
       D-Bus is a system for low-latency, low-overhead, easy to use
       interprocess communication (IPC). In more detail:
       </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>
@@ -85,20 +95,10 @@
       </p><p>
         Nonetheless, this document should be a useful starting point and is 
         to our knowledge accurate, though incomplete.
-      </p></div></div><div class="sect1" title="Message Protocol"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="message-protocol"></a>Message Protocol</h2></div></div></div><p>
-      A <em class="firstterm">message</em> consists of a
-      <em class="firstterm">header</em> and a <em class="firstterm">body</em>. If you
-      think of a message as a package, the header is the address, and the body
-      contains the package contents. The message delivery system uses the header
-      information to figure out where to send the message and how to interpret
-      it; the recipient interprets the body of the message.
-    </p><p>
-      The body of the message is made up of zero or more
-      <em class="firstterm">arguments</em>, which are typed values, such as an
-      integer or a byte array.
-    </p><p>
-      Both header and body use the same type system and format for 
-      serializing data. Each type of value has a wire format. 
+      </p></div></div><div class="sect1" title="Type System"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="type-system"></a>Type System</h2></div></div></div><p>
+      D-Bus has a type system, in which values of various types can be
+      serialized into a sequence of bytes referred to as the
+      <em class="firstterm">wire format</em> in a standard way.
       Converting a value from some other representation into the wire
       format is called <em class="firstterm">marshaling</em> and converting
       it back from the wire format is <em class="firstterm">unmarshaling</em>.
@@ -221,7 +221,25 @@
         map, hash table, or dict object.
       </p><p>
         The following table summarizes the D-Bus types.
-        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Conventional Name</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">INVALID</code></td><td>0 (ASCII NUL)</td><td>Not a valid type code, used to terminate signatures</td></tr><tr><td><code class="literal">BYTE</code></td><td>121 (ASCII 'y')</td><td>8-bit unsigned integer</td></tr><tr><td><code class="literal">BOOLEAN</code></td><td>98 (ASCII 'b')</td><td>Boolean value, 0 is <code class="literal">FALSE</code> and 1 is <code class="literal">TRUE</code>. Everything else is invalid.</td></tr><tr><td><code class="literal">INT16</code></td><td>110 (ASCII 'n')</td><td>16-bit signed integer</td></tr><tr><td><code class="literal">UINT16</code></td><td>113 (ASCII 'q')</td><td>16-bit unsigned integer</td></tr><tr><td><code class="literal">INT32</code></td><td>105 (ASCII 'i')</td><td>32-bit signed integer</td></tr><tr><td><code class="literal">UINT32</code></td><td>117 (ASCII 'u')</td><td>32-bit unsigned integer</td></tr><tr><td><code class="literal">INT64</code></td><td>120 (ASCII 'x')</td><td>64-bit signed integer</td></tr><tr><td><code class="literal">UINT64</code></td><td>116 (ASCII 't')</td><td>64-bit unsigned integer</td></tr><tr><td><code class="literal">DOUBLE</code></td><td>100 (ASCII 'd')</td><td>IEEE 754 double</td></tr><tr><td><code class="literal">STRING</code></td><td>115 (ASCII 's')</td><td>UTF-8 string (<span class="emphasis"><em>must</em></span> be valid UTF-8). Must be nul terminated and contain no other nul bytes.</td></tr><tr><td><code class="literal">OBJECT_PATH</code></td><td>111 (ASCII 'o')</td><td>Name of an object instance</td></tr><tr><td><code class="literal">SIGNATURE</code></td><td>103 (ASCII 'g')</td><td>A type signature</td></tr><tr><td><code class="literal">ARRAY</code></td><td>97 (ASCII 'a')</td><td>Array</td></tr><tr><td><code class="literal">STRUCT</code></td><td>114 (ASCII 'r'), 40 (ASCII '('), 41 (ASCII ')')</td><td>Struct</td></tr><tr><td><code class="literal">VARIANT</code></td><td>118 (ASCII 'v') </td><td>Variant type (the type of the value is part of the value itself)</td></tr><tr><td><code class="literal">DICT_ENTRY</code></td><td>101 (ASCII 'e'), 123 (ASCII '{'), 125 (ASCII '}') </td><td>Entry in a dict or map (array of key-value pairs)</td></tr><tr><td><code class="literal">UNIX_FD</code></td><td>104 (ASCII 'h')</td><td>Unix file descriptor</td></tr></tbody></table></div><p>
+        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Conventional Name</th><th>Code</th><th>Description</th></tr></thead><tbody><tr><td><code class="literal">INVALID</code></td><td>0 (ASCII NUL)</td><td>Not a valid type code, used to terminate signatures</td></tr><tr><td><code class="literal">BYTE</code></td><td>121 (ASCII 'y')</td><td>8-bit unsigned integer</td></tr><tr><td><code class="literal">BOOLEAN</code></td><td>98 (ASCII 'b')</td><td>Boolean value, 0 is <code class="literal">FALSE</code> and 1 is <code class="literal">TRUE</code>. Everything else is invalid.</td></tr><tr><td><code class="literal">INT16</code></td><td>110 (ASCII 'n')</td><td>16-bit signed integer</td></tr><tr><td><code class="literal">UINT16</code></td><td>113 (ASCII 'q')</td><td>16-bit unsigned integer</td></tr><tr><td><code class="literal">INT32</code></td><td>105 (ASCII 'i')</td><td>32-bit signed integer</td></tr><tr><td><code class="literal">UINT32</code></td><td>117 (ASCII 'u')</td><td>32-bit unsigned integer</td></tr><tr><td><code class="literal">INT64</code></td><td>120 (ASCII 'x')</td><td>64-bit signed integer</td></tr><tr><td><code class="literal">UINT64</code></td><td>116 (ASCII 't')</td><td>64-bit unsigned integer</td></tr><tr><td><code class="literal">DOUBLE</code></td><td>100 (ASCII 'd')</td><td>IEEE 754 double</td></tr><tr><td><code class="literal">STRING</code></td><td>115 (ASCII 's')</td><td>UTF-8 string (<span class="emphasis"><em>must</em></span> be valid UTF-8). Must be nul terminated and contain no other nul bytes.</td></tr><tr><td><code class="literal">OBJECT_PATH</code></td><td>111 (ASCII 'o')</td><td>Name of an object instance</td></tr><tr><td><code class="literal">SIGNATURE</code></td><td>103 (ASCII 'g')</td><td>A type signature</td></tr><tr><td><code class="literal">ARRAY</code></td><td>97 (ASCII 'a')</td><td>Array</td></tr><tr><td><code class="literal">STRUCT</code></td><td>114 (ASCII 'r'), 40 (ASCII '('), 41 (ASCII ')')</td><td>Struct; type code 114 'r' is reserved for use in
+                  bindings and implementations to represent the general
+                  concept of a struct, and must not appear in signatures
+                  used on D-Bus.</td></tr><tr><td><code class="literal">VARIANT</code></td><td>118 (ASCII 'v') </td><td>Variant type (the type of the value is part of the value itself)</td></tr><tr><td><code class="literal">DICT_ENTRY</code></td><td>101 (ASCII 'e'), 123 (ASCII '{'), 125 (ASCII '}') </td><td>Entry in a dict or map (array of key-value pairs).
+                  Type code 101 'e' is reserved for use in bindings and
+                  implementations to represent the general concept of a
+                  dict or dict-entry, and must not appear in signatures
+                  used on D-Bus.</td></tr><tr><td><code class="literal">UNIX_FD</code></td><td>104 (ASCII 'h')</td><td>Unix file descriptor</td></tr><tr><td>(reserved)</td><td>109 (ASCII 'm')</td><td>Reserved for <a class="ulink" href="https://bugs.freedesktop.org/show_bug.cgi?id=27857" target="_top">a
+                  'maybe' type compatible with the one in GVariant</a>,
+                  and must not appear in signatures used on D-Bus until
+                  specified here</td></tr><tr><td>(reserved)</td><td>42 (ASCII '*')</td><td>Reserved for use in bindings/implementations to
+                  represent any <em class="firstterm">single complete type</em>,
+                  and must not appear in signatures used on D-Bus.</td></tr><tr><td>(reserved)</td><td>63 (ASCII '?')</td><td>Reserved for use in bindings/implementations to
+                  represent any <em class="firstterm">basic type</em>, and must
+                  not appear in signatures used on D-Bus.</td></tr><tr><td>(reserved)</td><td>64 (ASCII '@'), 38 (ASCII '&amp;'),
+                  94 (ASCII '^')</td><td>Reserved for internal use by bindings/implementations,
+                  and must not appear in signatures used on D-Bus.
+                  GVariant uses these type-codes to encode calling
+                  conventions.</td></tr></tbody></table></div><p>
       </p></div><div class="sect2" title="Marshaling (Wire Format)"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-marshaling"></a>Marshaling (Wire Format)</h3></div></div></div><p>
         Given a type signature, a block of bytes can be converted into typed
         values. This section describes the format of the block of bytes.  Byte
@@ -324,6 +342,24 @@
                 A trailing '/' character is not allowed unless the 
                 path is the root path (a single '/' character).
               </p></li></ul></div><p>
+        </p><p>
+          Object paths are often namespaced by starting with a reversed
+          domain name and containing an interface version number, in the
+          same way as
+          <a class="link" href="#message-protocol-names-interface" title="Interface names">interface
+            names</a> and
+          <a class="link" href="#message-protocol-names-bus" title="Bus names">well-known
+            bus names</a>.
+          This makes it possible to implement more than one service, or
+          more than one version of a service, in the same process,
+          even if the services share a connection but cannot otherwise
+          co-operate (for instance, if they are implemented by different
+          plugins).
+        </p><p>
+          For instance, if the owner of <code class="literal">example.com</code> is
+          developing a D-Bus API for a music player, they might use the
+          hierarchy of object paths that start with
+          <code class="literal">/com/example/MusicPlayer1</code> for its objects.
         </p></div><div class="sect3" title="Valid Signatures"><div class="titlepage"><div><div><h4 class="title"><a name="message-protocol-marshaling-signature"></a>Valid Signatures</h4></div></div></div><p>
           An implementation must not send or accept invalid signatures.
           Valid signatures will conform to the following rules:
@@ -349,7 +385,21 @@
               </p></li><li class="listitem"><p>
                 Signatures must be nul-terminated.
               </p></li></ul></div><p>
-        </p></div></div><div class="sect2" title="Message Format"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-messages"></a>Message Format</h3></div></div></div><p>
+        </p></div></div></div><div class="sect1" title="Message Protocol"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="message-protocol"></a>Message Protocol</h2></div></div></div><p>
+      A <em class="firstterm">message</em> consists of a
+      <em class="firstterm">header</em> and a <em class="firstterm">body</em>. If you
+      think of a message as a package, the header is the address, and the body
+      contains the package contents. The message delivery system uses the header
+      information to figure out where to send the message and how to interpret
+      it; the recipient interprets the body of the message.
+    </p><p>
+      The body of the message is made up of zero or more
+      <em class="firstterm">arguments</em>, which are typed values, such as an
+      integer or a byte array.
+    </p><p>
+      Both header and body use the D-Bus <a class="link" href="#type-system" title="Type System">type
+        system</a> and format for serializing data.
+    </p><div class="sect2" title="Message Format"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-messages"></a>Message Format</h3></div></div></div><p>
         A message consists of a header and a body. The header is a block of
         values with a fixed signature and meaning.  The body is a separate block
         of values, with a signature specified in the header.
@@ -487,17 +537,38 @@
                 </p></li><li class="listitem"><p>Interface names must contain at least one '.' (period)
               character (and thus at least two elements).
               </p></li><li class="listitem"><p>Interface names must not begin with a '.' (period) character.</p></li><li class="listitem"><p>Interface names must not exceed the maximum name length.</p></li></ul></div><p>
+        </p><p>
+          Interface names should start with the reversed DNS domain name of
+          the author of the interface (in lower-case), like interface names
+          in Java. It is conventional for the rest of the interface name
+          to consist of words run together, with initial capital letters
+          on all words ("CamelCase"). Several levels of hierarchy can be used.
+          It is also a good idea to include the major version of the interface
+          in the name, and increment it if incompatible changes are made;
+          this way, a single object can implement several versions of an
+          interface in parallel, if necessary.
+        </p><p>
+          For instance, if the owner of <code class="literal">example.com</code> is
+          developing a D-Bus API for a music player, they might define
+          interfaces called <code class="literal">com.example.MusicPlayer1</code>,
+          <code class="literal">com.example.MusicPlayer1.Track</code> and
+          <code class="literal">com.example.MusicPlayer1.Seekable</code>.
+        </p><p>
+          D-Bus does not distinguish between the concepts that would be
+          called classes and interfaces in Java: either can be identified on
+          D-Bus by an interface name.
         </p></div><div class="sect3" title="Bus names"><div class="titlepage"><div><div><h4 class="title"><a name="message-protocol-names-bus"></a>Bus names</h4></div></div></div><p>
           Connections have one or more bus names associated with them.
-          A connection has exactly one bus name that is a unique connection
-          name. The unique connection name remains with the connection for
-          its entire lifetime.
+          A connection has exactly one bus name that is a <em class="firstterm">unique
+            connection name</em>. The unique connection name remains
+          with the connection for its entire lifetime.
           A bus name is of type <code class="literal">STRING</code>,
           meaning that it must be valid UTF-8. However, there are also
           some additional restrictions that apply to bus names 
           specifically:
           </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Bus names that start with a colon (':')
-                character are unique connection names.
+                character are unique connection names. Other bus names
+                are called <em class="firstterm">well-known bus names</em>.
                 </p></li><li class="listitem"><p>Bus names are composed of 1 or more elements separated by
                 a period ('.') character. All elements must contain at least 
                 one character.
@@ -511,13 +582,49 @@
         </p><p>
           Note that the hyphen ('-') character is allowed in bus names but
           not in interface names.
+        </p><p>
+          Like <a class="link" href="#message-protocol-names-interface" title="Interface names">interface
+            names</a>, well-known bus names should start with the
+          reversed DNS domain name of the author of the interface (in
+          lower-case), and it is conventional for the rest of the well-known
+          bus name to consist of words run together, with initial
+          capital letters. As with interface names, including a version
+          number in well-known bus names is a good idea; it's possible to
+          have the well-known bus name for more than one version
+          simultaneously if backwards compatibility is required.
+        </p><p>
+          If a well-known bus name implies the presence of a "main" interface,
+          that "main" interface is often given the same name as
+          the well-known bus name, and situated at the corresponding object
+          path. For instance, if the owner of <code class="literal">example.com</code>
+          is developing a D-Bus API for a music player, they might define
+          that any application that takes the well-known name
+          <code class="literal">com.example.MusicPlayer1</code> should have an object
+          at the object path <code class="literal">/com/example/MusicPlayer1</code>
+          which implements the interface
+          <code class="literal">com.example.MusicPlayer1</code>.
         </p></div><div class="sect3" title="Member names"><div class="titlepage"><div><div><h4 class="title"><a name="message-protocol-names-member"></a>Member names</h4></div></div></div><p>
           Member (i.e. method or signal) names:
           </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>Must only contain the ASCII characters
                 "[A-Z][a-z][0-9]_" and may not begin with a
                 digit.</p></li><li class="listitem"><p>Must not contain the '.' (period) character.</p></li><li class="listitem"><p>Must not exceed the maximum name length.</p></li><li class="listitem"><p>Must be at least 1 byte in length.</p></li></ul></div><p>
+        </p><p>
+          It is conventional for member names on D-Bus to consist of
+          capitalized words with no punctuation ("camel-case").
+          Method names should usually be verbs, such as
+          <code class="literal">GetItems</code>, and signal names should usually be
+          a description of an event, such as <code class="literal">ItemsChanged</code>.
         </p></div><div class="sect3" title="Error names"><div class="titlepage"><div><div><h4 class="title"><a name="message-protocol-names-error"></a>Error names</h4></div></div></div><p>
           Error names have the same restrictions as interface names.
+        </p><p>
+          Error names have the same naming conventions as interface
+          names, and often contain <code class="literal">.Error.</code>; for instance,
+          the owner of <code class="literal">example.com</code> might define the
+          errors <code class="literal">com.example.MusicPlayer.Error.FileNotFound</code>
+          and <code class="literal">com.example.MusicPlayer.Error.OutOfMemory</code>.
+          The errors defined by D-Bus itself, such as
+          <code class="literal">org.freedesktop.DBus.Error.Failed</code>, follow a
+          similar pattern.
         </p></div></div><div class="sect2" title="Message Types"><div class="titlepage"><div><div><h3 class="title"><a name="message-protocol-types"></a>Message Types</h3></div></div></div><p>
         Each of the message types (<code class="literal">METHOD_CALL</code>, <code class="literal">METHOD_RETURN</code>, <code class="literal">ERROR</code>, and
         <code class="literal">SIGNAL</code>) has its own expected usage conventions and header fields.
@@ -899,14 +1006,14 @@
         commands may be introduced both before, and after
         authentication, i.e. both before and after the OK command.
       </p></div><div class="sect2" title="Authentication examples"><div class="titlepage"><div><div><h3 class="title"><a name="auth-examples"></a>Authentication examples</h3></div></div></div><p>
-        </p><div class="figure"><a name="idp5128640"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5216608"></a><p class="title"><b>Figure 1. Example of successful magic cookie authentication</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5130464"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5218432"></a><p class="title"><b>Figure 2. Example of finding out mechanisms then picking one</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -915,14 +1022,14 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5132368"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5220336"></a><p class="title"><b>Figure 3. Example of client sends unknown command then falls back to regular auth</b></p><div class="figure-contents"><pre class="programlisting">
             C: FOOBAR
             S: ERROR
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5134256"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5222224"></a><p class="title"><b>Figure 4. Example of server doesn't support initial auth mechanism</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -931,7 +1038,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5136272"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5224240"></a><p class="title"><b>Figure 5. Example of wrong password or the like followed by successful retry</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -944,7 +1051,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5138448"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5226416"></a><p class="title"><b>Figure 6. Example of skey cancelled and restarted</b></p><div class="figure-contents"><pre class="programlisting">
             C: AUTH MAGIC_COOKIE 3736343435313230333039
             S: REJECTED KERBEROS_V4 SKEY
             C: AUTH SKEY 7ab83f32ee
@@ -957,7 +1064,7 @@
             S: OK 1234deadbeef
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5140512"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5228480"></a><p class="title"><b>Figure 7. Example of successful magic cookie authentication with successful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -966,7 +1073,7 @@
             S: AGREE_UNIX_FD
             C: BEGIN
           </pre></div></div><p><br class="figure-break">
-        </p><div class="figure"><a name="idp5142512"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5230480"></a><p class="title"><b>Figure 8. Example of successful magic cookie authentication with unsuccessful negotiation of Unix FD passing</b></p><div class="figure-contents"><pre class="programlisting">
             (MAGIC_COOKIE is a made up mechanism)
 
             C: AUTH MAGIC_COOKIE 3138363935333137393635383634
@@ -1244,7 +1351,7 @@
                 fails, the lock fails. Servers should retry for a reasonable
                 period of time, then they may choose to delete an existing lock
                 to keep users from having to manually delete a stale
-                lock. <sup>[<a name="idp5227968" href="#ftn.idp5227968" class="footnote">1</a>]</sup>
+                lock. <sup>[<a name="idp5316512" href="#ftn.idp5316512" class="footnote">1</a>]</sup>
               </p></li><li class="listitem"><p>
                 Once the lockfile has been created, the server loads the cookie
                 file. It should then delete any cookies that are old (the
@@ -1323,7 +1430,7 @@
       [FIXME we need to specify in detail each transport and its possible arguments]
     
       Current transports include: unix domain sockets (including 
-      abstract namespace on linux), launchd, TCP/IP, and a debug/testing transport
+      abstract namespace on linux), launchd, systemd, TCP/IP, an executed subprocess and a debug/testing transport
       using in-process pipes. Future possible transports include one that
       tunnels over X11 protocol.
     </p><div class="sect2" title="Unix Domain Sockets"><div class="titlepage"><div><div><h3 class="title"><a name="transports-unix-domain-sockets"></a>Unix Domain Sockets</h3></div></div></div><p>
@@ -1338,12 +1445,12 @@
 	length path name.  Names which were shorter than the fixed length
 	would be padded by Nul bytes.
       </p><p>
-        Unix domain sockets are not available on windows. 
+        Unix domain sockets are not available on Windows.
       </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-unix-domain-sockets-addresses"></a>Server Address Format</h4></div></div></div><p> 
           Unix domain socket addresses are identified by the "unix:" prefix 
           and support the following key/value pairs:
         </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>path</td><td>(path)</td><td>path of the unix domain socket. If set, the "tmpdir" and "abstract" key must not be set.</td></tr><tr><td>tmpdir</td><td>(path)</td><td>temporary directory in which a socket file with a random file name starting with 'dbus-' will be created by the server. This key can only be used in server addresses, not in client addresses. If set, the "path" and "abstract" key must not be set.</td></tr><tr><td>abstract</td><td>(string)</td><td>unique string (path) in the abstract namespace. If set, the "path" or "tempdir" key must not be set.</td></tr></tbody></table></div></div></div><div class="sect2" title="launchd"><div class="titlepage"><div><div><h3 class="title"><a name="transports-launchd"></a>launchd</h3></div></div></div><p>
-        launchd is a open-source server management system that replaces init, inetd
+        launchd is an open-source server management system that replaces init, inetd
         and cron on Apple Mac OS X versions 10.4 and above. It provides a common session
         bus address for each user and deprecates the X11-enabled D-Bus launcher on OSX.
       </p><p>
@@ -1360,14 +1467,28 @@
       </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-launchd-addresses"></a>Server Address Format</h4></div></div></div><p>
           launchd addresses are identified by the "launchd:" prefix
           and support the following key/value pairs:
-        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>env</td><td>(environment variable)</td><td>path of the unix domain socket for the launchd created dbus-daemon.</td></tr></tbody></table></div></div></div><div class="sect2" title="TCP Sockets"><div class="titlepage"><div><div><h3 class="title"><a name="transports-tcp-sockets"></a>TCP Sockets</h3></div></div></div><p>
+        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>env</td><td>(environment variable)</td><td>path of the unix domain socket for the launchd created dbus-daemon.</td></tr></tbody></table></div></div></div><div class="sect2" title="systemd"><div class="titlepage"><div><div><h3 class="title"><a name="transports-systemd"></a>systemd</h3></div></div></div><p>
+        systemd is an open-source server management system that
+        replaces init and inetd on newer Linux systems. It supports
+        socket activation. The D-Bus systemd transport is used to acquire
+        socket activation file descriptors from systemd and use them
+        as D-Bus transport when the current process is spawned by
+        socket activation from it.
+      </p><p>
+        The systemd transport accepts only one or more Unix domain or
+        TCP streams sockets passed in via socket activation.
+      </p><p>
+        The systemd transport is not available on non-Linux operating systems.
+      </p><p>
+        The systemd transport defines no parameter keys.
+      </p></div><div class="sect2" title="TCP Sockets"><div class="titlepage"><div><div><h3 class="title"><a name="transports-tcp-sockets"></a>TCP Sockets</h3></div></div></div><p>
         The tcp transport provides TCP/IP based connections between clients
         located on the same or different hosts. 
       </p><p>
         Using tcp transport without any additional secure authentification mechanismus 
         over a network is unsecure. 
       </p><p>  
-        Windows notes: Because of the tcp stack on windows does not provide sending 
+        Windows notes: Because of the tcp stack on Windows does not provide sending
         credentials over a tcp connection, the EXTERNAL authentification 
         mechanismus does not work. 
       </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-tcp-sockets-addresses"></a>Server Address Format</h4></div></div></div><p> 
@@ -1407,7 +1528,30 @@
         </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>host</td><td>(string)</td><td>dns name or ip address</td></tr><tr><td>port</td><td>(number)</td><td>The tcp port the server will open. A zero value let the server 
             choose a free port provided from the underlaying operating system. 
             libdbus is able to retrieve the real used port from the server.  
-           </td></tr><tr><td>family</td><td>(string)</td><td>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</td></tr><tr><td>noncefile</td><td>(path)</td><td>file location containing the secret</td></tr></tbody></table></div></div></div></div><div class="sect1" title="Meta Transports"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="meta-transports"></a>Meta Transports</h2></div></div></div><p>
+           </td></tr><tr><td>family</td><td>(string)</td><td>If set, provide the type of socket family either "ipv4" or "ipv6". If unset, the family is unspecified.</td></tr><tr><td>noncefile</td><td>(path)</td><td>file location containing the secret</td></tr></tbody></table></div></div></div><div class="sect2" title="Executed Subprocesses on Unix"><div class="titlepage"><div><div><h3 class="title"><a name="transports-exec"></a>Executed Subprocesses on Unix</h3></div></div></div><p>
+        This transport forks off a process and connects its standard
+        input and standard output with an anonymous Unix domain
+        socket. This socket is then used for communication by the
+        transport. This transport may be used to use out-of-process
+        forwarder programs as basis for the D-Bus protocol.
+      </p><p>
+        The forked process will inherit the standard error output and
+        process group from the parent process.
+      </p><p>
+        Executed subprocesses are not available on Windows.
+      </p><div class="sect3" title="Server Address Format"><div class="titlepage"><div><div><h4 class="title"><a name="transports-exec-addresses"></a>Server Address Format</h4></div></div></div><p>
+          Executed subprocess addresses are identified by the "unixexec:" prefix
+          and support the following key/value pairs:
+        </p><div class="informaltable"><table border="1"><colgroup><col><col><col></colgroup><thead><tr><th>Name</th><th>Values</th><th>Description</th></tr></thead><tbody><tr><td>path</td><td>(path)</td><td>Path of the binary to execute, either an absolute
+            path or a binary name that is searched for in the default
+            search path of the OS. This corresponds to the first
+            argument of execlp(). This key is mandatory.</td></tr><tr><td>argv0</td><td>(string)</td><td>The program name to use when executing the
+            binary. If omitted the same value as specified for path=
+            will be used. This corresponds to the second argument of
+            execlp().</td></tr><tr><td>argv1, argv2, ...</td><td>(string)</td><td>Arguments to pass to the binary. This corresponds
+            to the third and later arguments of execlp(). If a
+            specific argvX is not specified no further argvY for Y &gt; X
+            are taken into account.</td></tr></tbody></table></div></div></div></div><div class="sect1" title="Meta Transports"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="meta-transports"></a>Meta Transports</h2></div></div></div><p>
       Meta transports are a kind of transport with special enhancements or
       behavior. Currently available meta transports include: autolaunch
     </p><div class="sect2" title="Autolaunch"><div class="titlepage"><div><div><h3 class="title"><a name="meta-transports-autolaunch"></a>Autolaunch</h3></div></div></div><p>The autolaunch transport provides a way for dbus clients to autodetect
@@ -1447,16 +1591,7 @@
         Disclaimer: The recent implementation is in an early state and may not
         work in all cirumstances and/or may have security issues. Because of this
         the implementation is not documentated yet.
-      </p></div></div></div><div class="sect1" title="Naming Conventions"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="naming-conventions"></a>Naming Conventions</h2></div></div></div><p>
-      D-Bus namespaces are all lowercase and correspond to reversed domain
-      names, as with Java. e.g. "org.freedesktop"
-    </p><p>
-      Interface, signal, method, and property names are "WindowsStyleCaps", note
-      that the first letter is capitalized, unlike Java.
-    </p><p>
-      Object paths are normally all lowercase with underscores used rather than
-      hyphens.
-    </p></div><div class="sect1" title="UUIDs"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="uuids"></a>UUIDs</h2></div></div></div><p>
+      </p></div></div></div><div class="sect1" title="UUIDs"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="uuids"></a>UUIDs</h2></div></div></div><p>
       A working D-Bus implementation uses universally-unique IDs in two places.
       First, each server address has a UUID identifying the address, 
       as described in <a class="xref" href="#addresses" title="Server Addresses">the section called &#8220;Server Addresses&#8221;</a>. Second, each operating
@@ -1551,6 +1686,20 @@
                                                       out DICT&lt;STRING,VARIANT&gt; props);
         </pre><p>
       </p><p>
+        It is conventional to give D-Bus properties names consisting of
+        capitalized words without punctuation ("CamelCase"), like
+        <a class="link" href="#message-protocol-names-member" title="Member names">member names</a>.
+        For instance, the GObject property
+        <code class="literal">connection-status</code> or the Qt property
+        <code class="literal">connectionStatus</code> could be represented on D-Bus
+        as <code class="literal">ConnectionStatus</code>.
+      </p><p>
+        Strictly speaking, D-Bus property names are not required to follow
+        the same naming restrictions as member names, but D-Bus property
+        names that would not be valid member names (in particular,
+        GObject-style dash-separated property names) can cause interoperability
+        problems and should be avoided.
+      </p><p>
         The available properties and whether they are writable can be determined
         by calling <code class="literal">org.freedesktop.DBus.Introspectable.Introspect</code>,
         see <a class="xref" href="#standard-interfaces-introspectable" title="org.freedesktop.DBus.Introspectable">the section called &#8220;<code class="literal">org.freedesktop.DBus.Introspectable</code>&#8221;</a>.
@@ -1588,6 +1737,94 @@
         <code class="literal">true</code> is sufficient meaning that the
         annotation does not need to be used). See <a class="xref" href="#introspection-format" title="Introspection Data Format">the section called &#8220;Introspection Data Format&#8221;</a> for details on this
         annotation.
+      </p></div><div class="sect2" title="org.freedesktop.DBus.ObjectManager"><div class="titlepage"><div><div><h3 class="title"><a name="standard-interfaces-objectmanager"></a><code class="literal">org.freedesktop.DBus.ObjectManager</code></h3></div></div></div><p>
+        An API can optionally make use of this interface for one or
+        more sub-trees of objects. The root of each sub-tree implements
+        this interface so other applications can get all objects,
+        interfaces and properties in a single method call.  It is
+        appropriate to use this interface if users of the tree of
+        objects are expected to be interested in all interfaces of all
+        objects in the tree; a more granular API should be used if
+        users of the objects are expected to be interested in a small
+        subset of the objects, a small subset of their interfaces, or
+        both.
+      </p><p>
+        The method that applications can use to get all objects and
+        properties is <code class="literal">GetManagedObjects</code>:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.ObjectManager.GetManagedObjects (out DICT&lt;OBJPATH,DICT&lt;STRING,DICT&lt;STRING,VARIANT&gt;&gt;&gt; objpath_interfaces_and_properties);
+        </pre><p>
+      </p><p>
+        The return value of this method is a dict whose keys are
+        object paths. All returned object paths are children of the
+        object path implementing this interface, i.e. their object
+        paths start with the ObjectManager's object path plus '/'.
+      </p><p>
+        Each value is a dict whose keys are interfaces names.  Each
+        value in this inner dict is the same dict that would be
+        returned by the <a class="link" href="#standard-interfaces-properties" title="org.freedesktop.DBus.Properties">org.freedesktop.DBus.Properties.GetAll()</a>
+        method for that combination of object path and interface. If
+        an interface has no properties, the empty dict is returned.
+      </p><p>
+        Changes are emitted using the following two signals:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.ObjectManager.InterfacesAdded (OBJPATH object_path,
+                                                              DICT&lt;STRING,DICT&lt;STRING,VARIANT&gt;&gt; interfaces_and_properties);
+          org.freedesktop.DBus.ObjectManager.InterfacesRemoved (OBJPATH object_path,
+                                                                ARRAY&lt;STRING&gt; interfaces);
+        </pre><p>
+      </p><p>
+        The <code class="literal">InterfacesAdded</code> signal is emitted when
+        either a new object is added or when an existing object gains
+        one or more interfaces. The
+        <code class="literal">InterfacesRemoved</code> signal is emitted
+        whenever an object is removed or it loses one or more
+        interfaces. The second parameter of the
+        <code class="literal">InterfacesAdded</code> signal contains a dict with
+        the interfaces and properties (if any) that have been added to
+        the given object path. Similarly, the second parameter of the
+        <code class="literal">InterfacesRemoved</code> signal contains an array
+        of the interfaces that were removed. Note that changes on
+        properties on existing interfaces are not reported using this
+        interface - an application should also monitor the existing <a class="link" href="#standard-interfaces-properties" title="org.freedesktop.DBus.Properties">PropertiesChanged</a>
+        signal on each object.
+      </p><p>
+        Applications SHOULD NOT export objects that are children of an
+        object (directly or otherwise) implementing this interface but
+        which are not returned in the reply from the
+        <code class="literal">GetManagedObjects()</code> method of this
+        interface on the given object.
+      </p><p>
+        The intent of the <code class="literal">ObjectManager</code> interface
+        is to make it easy to write a robust client
+        implementation. The trivial client implementation only needs
+        to make two method calls:
+      </p><p>
+        </p><pre class="programlisting">
+          org.freedesktop.DBus.AddMatch (bus_proxy,
+                                         "type='signal',name='org.example.App',path_namespace='/org/example/App'");
+          objects = org.freedesktop.DBus.ObjectManager.GetManagedObjects (app_proxy);
+        </pre><p>
+      </p><p>
+        on the message bus and the remote application's
+        <code class="literal">ObjectManager</code>, respectively. Whenever a new
+        remote object is created (or an existing object gains a new
+        interface), the <code class="literal">InterfacesAdded</code> signal is
+        emitted, and since this signal contains all properties for the
+        interfaces, no calls to the
+        <code class="literal">org.freedesktop.Properties</code> interface on the
+        remote object are needed. Additionally, since the initial
+        <code class="literal">AddMatch()</code> rule already includes signal
+        messages from the newly created child object, no new
+        <code class="literal">AddMatch()</code> call is needed.
+      </p><p>
+        <span class="emphasis"><em>
+          The <code class="literal">org.freedesktop.DBus.ObjectManager</code>
+          interface was added in version 0.17 of the D-Bus
+          specification.
+        </em></span>
       </p></div></div><div class="sect1" title="Introspection Data Format"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="introspection-format"></a>Introspection Data Format</h2></div></div></div><p>
       As described in <a class="xref" href="#standard-interfaces-introspectable" title="org.freedesktop.DBus.Introspectable">the section called &#8220;<code class="literal">org.freedesktop.DBus.Introspectable</code>&#8221;</a>, 
       objects may be introspected at runtime, returning an XML string 
@@ -1714,32 +1951,10 @@
         and the second will be queued as a possible owner of that name. When 
         the first exits, the second will take over.
       </p><p>
-        Messages may have a <code class="literal">DESTINATION</code> field (see <a class="xref" href="#message-protocol-header-fields" title="Header Fields">the section called &#8220;Header Fields&#8221;</a>).  If the
-        <code class="literal">DESTINATION</code> field is present, it specifies a message
-        recipient by name. Method calls and replies normally specify this field.
-        The message bus must send messages (of any type) with the
-        <code class="literal">DESTINATION</code> field set to the specified recipient,
-        regardless of whether the recipient has set up a match rule matching
-        the message.
-      </p><p>
-        Signals normally do not specify a destination; they are sent to all
-        applications with <em class="firstterm">message matching rules</em> that
-        match the message.
-      </p><p>
-        When the message bus receives a method call, if the
-        <code class="literal">DESTINATION</code> field is absent, the call is taken to be
-        a standard one-to-one message and interpreted by the message bus
-        itself. For example, sending an
-        <code class="literal">org.freedesktop.DBus.Peer.Ping</code> message with no
-        <code class="literal">DESTINATION</code> will cause the message bus itself to
-        reply to the ping immediately; the message bus will not make this
-        message visible to other applications.
-      </p><p>
-        Continuing the <code class="literal">org.freedesktop.DBus.Peer.Ping</code> example, if
-        the ping message were sent with a <code class="literal">DESTINATION</code> name of
-        <code class="literal">com.yoyodyne.Screensaver</code>, then the ping would be
-        forwarded, and the Yoyodyne Corporation screensaver application would be
-        expected to reply to the ping.
+        Applications may send <em class="firstterm">unicast messages</em> to
+        a specific recipient or to the message bus itself, or
+        <em class="firstterm">broadcast messages</em> to all interested recipients.
+        See <a class="xref" href="#message-bus-routing" title="Message Bus Message Routing">the section called &#8220;Message Bus Message Routing&#8221;</a> for details.
       </p></div><div class="sect2" title="Message Bus Names"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-names"></a>Message Bus Names</h3></div></div></div><p>
         Each connection has at least one name, assigned at connection time and
         returned in response to the
@@ -1928,16 +2143,94 @@
           currently queued for a bus name (see
           <a class="xref" href="#term-queued-owner" title="Queued Name Owner">Queued Name Owner</a>).
         </p></div></div><div class="sect2" title="Message Bus Message Routing"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-routing"></a>Message Bus Message Routing</h3></div></div></div><p>
-        FIXME 
-      </p><div class="sect3" title="Match Rules"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-match-rules"></a>Match Rules</h4></div></div></div><p>
-	  An important part of the message bus routing protocol is match  
-	  rules. Match rules describe what messages can be sent to a client
-          based on the contents of the message.  When a message is routed
-          through the bus it is compared to clients' match rules.  If any
-          of the rules match, the message is dispatched to the client.
-          If none of the rules match the message never leaves the bus.  This
-          is an effective way to control traffic over the bus and to make sure
-          only relevant message need to be processed by the client.
+        Messages may have a <code class="literal">DESTINATION</code> field (see <a class="xref" href="#message-protocol-header-fields" title="Header Fields">the section called &#8220;Header Fields&#8221;</a>), resulting in a
+        <em class="firstterm">unicast message</em>.  If the
+        <code class="literal">DESTINATION</code> field is present, it specifies a message
+        recipient by name. Method calls and replies normally specify this field.
+        The message bus must send messages (of any type) with the
+        <code class="literal">DESTINATION</code> field set to the specified recipient,
+        regardless of whether the recipient has set up a match rule matching
+        the message.
+      </p><p>
+        When the message bus receives a signal, if the
+        <code class="literal">DESTINATION</code> field is absent, it is considered to
+        be a <em class="firstterm">broadcast signal</em>, and is sent to all
+        applications with <em class="firstterm">message matching rules</em> that
+        match the message. Most signal messages are broadcasts.
+      </p><p>
+        Unicast signal messages (those with a <code class="literal">DESTINATION</code>
+        field) are not commonly used, but they are treated like any unicast
+        message: they are delivered to the specified receipient,
+        regardless of its match rules.  One use for unicast signals is to
+        avoid a race condition in which a signal is emitted before the intended
+        recipient can call <a class="xref" href="#bus-messages-add-match" title="org.freedesktop.DBus.AddMatch">the section called &#8220;<code class="literal">org.freedesktop.DBus.AddMatch</code>&#8221;</a> to
+        receive that signal: if the signal is sent directly to that recipient
+        using a unicast message, it does not need to add a match rule at all,
+        and there is no race condition.  Another use for unicast signals,
+        on message buses whose security policy prevents eavesdropping, is to
+        send sensitive information which should only be visible to one
+        recipient.
+      </p><p>
+        When the message bus receives a method call, if the
+        <code class="literal">DESTINATION</code> field is absent, the call is taken to be
+        a standard one-to-one message and interpreted by the message bus
+        itself. For example, sending an
+        <code class="literal">org.freedesktop.DBus.Peer.Ping</code> message with no
+        <code class="literal">DESTINATION</code> will cause the message bus itself to
+        reply to the ping immediately; the message bus will not make this
+        message visible to other applications.
+      </p><p>
+        Continuing the <code class="literal">org.freedesktop.DBus.Peer.Ping</code> example, if
+        the ping message were sent with a <code class="literal">DESTINATION</code> name of
+        <code class="literal">com.yoyodyne.Screensaver</code>, then the ping would be
+        forwarded, and the Yoyodyne Corporation screensaver application would be
+        expected to reply to the ping.
+      </p><p>
+        Message bus implementations may impose a security policy which
+        prevents certain messages from being sent or received.
+        When a message cannot be sent or received due to a security
+        policy, the message bus should send an error reply, unless the
+        original message had the <code class="literal">NO_REPLY</code> flag.
+      </p><div class="sect3" title="Eavesdropping"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-eavesdropping"></a>Eavesdropping</h4></div></div></div><p>
+          Receiving a unicast message whose <code class="literal">DESTINATION</code>
+          indicates a different recipient is called
+          <em class="firstterm">eavesdropping</em>. On a message bus which acts as
+          a security boundary (like the standard system bus), the security
+          policy should usually prevent eavesdropping, since unicast messages
+          are normally kept private and may contain security-sensitive
+          information.
+        </p><p>
+          Eavesdropping is mainly useful for debugging tools, such as
+          the <code class="literal">dbus-monitor</code> tool in the reference
+          implementation of D-Bus. Tools which eavesdrop on the message bus
+          should be careful to avoid sending a reply or error in response to
+          messages intended for a different client.
+        </p><p>
+          Clients may attempt to eavesdrop by adding match rules
+          (see <a class="xref" href="#message-bus-routing-match-rules" title="Match Rules">the section called &#8220;Match Rules&#8221;</a>) containing
+          the <code class="literal">eavesdrop='true'</code> match. If the message bus'
+          security policy does not allow eavesdropping, the match rule can
+          still be added, but will not have any practical effect. For
+          compatibility with older message bus implementations, if adding such
+          a match rule results in an error reply, the client may fall back to
+          adding the same rule with the <code class="literal">eavesdrop</code> match
+          omitted.
+        </p></div><div class="sect3" title="Match Rules"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-routing-match-rules"></a>Match Rules</h4></div></div></div><p>
+	  An important part of the message bus routing protocol is match
+          rules. Match rules describe the messages that should be sent to a
+          client, based on the contents of the message.  Broadcast signals
+          are only sent to clients which have a suitable match rule: this
+          avoids waking up client processes to deal with signals that are
+          not relevant to that client.
+        </p><p>
+          Messages that list a client as their <code class="literal">DESTINATION</code>
+          do not need to match the client's match rules, and are sent to that
+          client regardless. As a result, match rules are mainly used to
+          receive a subset of broadcast signals.
+        </p><p>
+          Match rules can also be used for eavesdropping
+          (see <a class="xref" href="#message-bus-routing-eavesdropping" title="Eavesdropping">the section called &#8220;Eavesdropping&#8221;</a>),
+          if the security policy of the message bus allows it.
         </p><p>
           Match rules are added using the AddMatch bus method 
           (see <a class="xref" href="#bus-messages-add-match" title="org.freedesktop.DBus.AddMatch">the section called &#8220;<code class="literal">org.freedesktop.DBus.AddMatch</code>&#8221;</a>).  Rules are
@@ -1959,21 +2252,118 @@
                   If a message omits the interface header, it must not match any rule 
                   that specifies this key.</td></tr><tr><td><code class="literal">member</code></td><td>Any valid method or signal name</td><td>Matches messages which have the give method or signal name. An example of
                   a member match is member='NameOwnerChanged'</td></tr><tr><td><code class="literal">path</code></td><td>An object path (see <a class="xref" href="#message-protocol-marshaling-object-path" title="Valid Object Paths">the section called &#8220;Valid Object Paths&#8221;</a>)</td><td>Matches messages which are sent from or to the given object. An example of a
-                  path match is path='/org/freedesktop/Hal/Manager'</td></tr><tr><td><code class="literal">destination</code></td><td>A unique name (see <a class="xref" href="#term-unique-name" title="Unique Connection Name">Unique Connection Name</a>)</td><td>Matches messages which are being sent to the given unique name. An
+                  path match is path='/org/freedesktop/Hal/Manager'</td></tr><tr><td><code class="literal">path_namespace</code></td><td>An object path</td><td>
+                    <p>
+                      Matches messages which are sent from or to an
+                      object for which the object path is either the
+                      given value, or that value followed by one or
+                      more path components.
+                    </p>
+
+                    <p>
+                      For example,
+                      <code class="literal">path_namespace='/com/example/foo'</code>
+                      would match signals sent by
+                      <code class="literal">/com/example/foo</code>
+                      or by
+                      <code class="literal">/com/example/foo/bar</code>,
+                      but not by
+                      <code class="literal">/com/example/foobar</code>.
+                    </p>
+
+                    <p>
+                      Using both <code class="literal">path</code> and
+                      <code class="literal">path_namespace</code> in the same match
+                      rule is not allowed.
+                    </p>
+
+                    <p>
+                      <span class="emphasis"><em>
+                        This match key was added in version 0.16 of the
+                        D-Bus specification and implemented by the bus
+                        daemon in dbus 1.5.0 and later.
+                      </em></span>
+                    </p>
+                </td></tr><tr><td><code class="literal">destination</code></td><td>A unique name (see <a class="xref" href="#term-unique-name" title="Unique Connection Name">Unique Connection Name</a>)</td><td>Matches messages which are being sent to the given unique name. An
                   example of a destination match is destination=':1.0'</td></tr><tr><td><code class="literal">arg[0, 1, 2, 3, ...]</code></td><td>Any string</td><td>Arg matches are special and are used for further restricting the 
-                  match based on the arguments in the body of a message.  As of this time
-                  only string arguments can be matched.  An example of an argument match 
+                  match based on the arguments in the body of a message. Only arguments of type
+                  STRING can be matched in this way. An example of an argument match 
                   would be arg3='Foo'. Only argument indexes from 0 to 63 should be 
-                  accepted.</td></tr><tr><td><code class="literal">arg[0, 1, 2, 3, ...]path</code></td><td>Any string</td><td>Argument path matches provide a specialised form of wildcard
-                  matching for path-like namespaces. As with normal argument matches,
-                  if the argument is exactly equal to the string given in the match
-                  rule then the rule is satisfied. Additionally, there is also a
-                  match when either the string given in the match rule or the
-                  appropriate message argument ends with '/' and is a prefix of the
-                  other. An example argument path match is arg0path='/aa/bb/'. This
-                  would match messages with first arguments of '/', '/aa/',
-                  '/aa/bb/', '/aa/bb/cc/' and '/aa/bb/cc'. It would not match
-                  messages with first arguments of '/aa/b', '/aa' or even '/aa/bb'.</td></tr></tbody></table></div><p>
+                  accepted.</td></tr><tr><td><code class="literal">arg[0, 1, 2, 3, ...]path</code></td><td>Any string</td><td>
+                    <p>Argument path matches provide a specialised form of wildcard matching for
+                      path-like namespaces. They can match arguments whose type is either STRING or
+                      OBJECT_PATH. As with normal argument matches,
+                      if the argument is exactly equal to the string given in the match
+                      rule then the rule is satisfied. Additionally, there is also a
+                      match when either the string given in the match rule or the
+                      appropriate message argument ends with '/' and is a prefix of the
+                      other. An example argument path match is arg0path='/aa/bb/'. This
+                      would match messages with first arguments of '/', '/aa/',
+                      '/aa/bb/', '/aa/bb/cc/' and '/aa/bb/cc'. It would not match
+                      messages with first arguments of '/aa/b', '/aa' or even '/aa/bb'.</p>
+
+                    <p>This is intended for monitoring &#8220;directories&#8221; in file system-like
+                      hierarchies, as used in the <em class="citetitle">dconf</em> configuration
+                      system. An application interested in all nodes in a particular hierarchy would
+                      monitor <code class="literal">arg0path='/ca/example/foo/'</code>. Then the service could
+                      emit a signal with zeroth argument <code class="literal">"/ca/example/foo/bar"</code> to
+                      represent a modification to the &#8220;bar&#8221; property, or a signal with zeroth
+                      argument <code class="literal">"/ca/example/"</code> to represent atomic modification of
+                      many properties within that directory, and the interested application would be
+                      notified in both cases.</p>
+                    <p>
+                      <span class="emphasis"><em>
+                        This match key was added in version 0.12 of the
+                        D-Bus specification, implemented for STRING
+                        arguments by the bus daemon in dbus 1.2.0 and later,
+                        and implemented for OBJECT_PATH arguments in dbus 1.5.0
+                        and later.
+                      </em></span>
+                    </p>
+                  </td></tr><tr><td><code class="literal">arg0namespace</code></td><td>Like a bus name, except that the string is not
+                    required to contain a '.' (period)</td><td>
+                    <p>Match messages whose first argument is of type STRING, and is a bus name
+                      or interface name within the specified namespace. This is primarily intended
+                      for watching name owner changes for a group of related bus names, rather than
+                      for a single name or all name changes.</p>
+
+                    <p>Because every valid interface name is also a valid
+                      bus name, this can also be used for messages whose
+                      first argument is an interface name.</p>
+
+                    <p>For example, the match rule
+                      <code class="literal">member='NameOwnerChanged',arg0namespace='com.example.backend'</code>
+                      matches name owner changes for bus names such as
+                      <code class="literal">com.example.backend.foo</code>,
+                      <code class="literal">com.example.backend.foo.bar</code>, and
+                      <code class="literal">com.example.backend</code> itself.</p>
+
+                    <p>See also <a class="xref" href="#bus-messages-name-owner-changed" title="org.freedesktop.DBus.NameOwnerChanged">the section called &#8220;<code class="literal">org.freedesktop.DBus.NameOwnerChanged</code>&#8221;</a>.</p>
+                    <p>
+                      <span class="emphasis"><em>
+                        This match key was added in version 0.16 of the
+                        D-Bus specification and implemented by the bus
+                        daemon in dbus 1.5.0 and later.
+                      </em></span>
+                    </p>
+                  </td></tr><tr><td><code class="literal">eavesdrop</code></td><td><code class="literal">'true'</code>, <code class="literal">'false'</code></td><td>Since D-Bus 1.5.6, match rules do not
+                    match messages which have a <code class="literal">DESTINATION</code>
+                    field unless the match rule specifically
+                    requests this
+                    (see <a class="xref" href="#message-bus-routing-eavesdropping" title="Eavesdropping">the section called &#8220;Eavesdropping&#8221;</a>)
+                    by specifying <code class="literal">eavesdrop='true'</code>
+                    in the match rule.  <code class="literal">eavesdrop='false'</code>
+                    restores the default behaviour. Messages are
+                    delivered to their <code class="literal">DESTINATION</code>
+                    regardless of match rules, so this match does not
+                    affect normal delivery of unicast messages.
+                    If the message bus has a security policy which forbids
+                    eavesdropping, this match may still be used without error,
+                    but will not have any practical effect.
+                    In older versions of D-Bus, this match was not allowed
+                    in match rules, and all match rules behaved as if
+                    <code class="literal">eavesdrop='true'</code> had been used.
+                  </td></tr></tbody></table></div><p>
         </p></div></div><div class="sect2" title="Message Bus Starting Services"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-starting-services"></a>Message Bus Starting Services</h3></div></div></div><p>
         The message bus can start applications on behalf of other applications.
         In CORBA terms, this would be called <em class="firstterm">activation</em>.
@@ -2010,7 +2400,7 @@
 
         </p><div class="itemizedlist"><ul class="itemizedlist" type="disc"><li class="listitem"><p>General syntax</p></li><li class="listitem"><p>Comment format</p></li></ul></div><p>
 
-        </p><div class="figure"><a name="idp5532992"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
+        </p><div class="figure"><a name="idp5707424"></a><p class="title"><b>Figure 9. Example service description file</b></p><div class="figure-contents"><pre class="programlisting">
             # Sample service description file
             [D-BUS Service]
             Names=org.freedesktop.ConfigurationDatabase;org.gnome.GConf;
@@ -2180,10 +2570,25 @@
             allowing another process to set the selection between the
             verification and the setting (e.g., by using XGrabServer /
             XungrabServer).
-          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5585760"></a></h5></div></div></div><p>
-            [FIXME specify location of .service files, probably using
-            DESKTOP_DIRS etc. from basedir specification, though login session
-            bus is not really desktop-specific]
+          </p></div><div class="sect4"><div class="titlepage"><div><div><h5 class="title"><a name="idp5760192"></a></h5></div></div></div><p>
+            On Unix systems, the session bus should search for .service files
+            in <code class="literal">$XDG_DATA_DIRS/dbus-1/services</code> as defined
+            by the
+            <a class="ulink" href="http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html" target="_top">XDG Base Directory Specification</a>.
+            Implementations may also search additional locations, which
+            should be searched with lower priority than anything in
+            XDG_DATA_HOME, XDG_DATA_DIRS or their respective defaults;
+            for example, the reference implementation also
+            looks in <code class="literal">${datadir}/dbus-1/services</code> as
+            set at compile time.
+          </p><p>
+            As described in the XDG Base Directory Specification, software
+            packages should install their session .service files to their
+            configured <code class="literal">${datadir}/dbus-1/services</code>,
+            where <code class="literal">${datadir}</code> is as defined by the GNU
+            coding standards. System administrators or users can arrange
+            for these service files to be read by setting XDG_DATA_DIRS or by
+            symlinking them into the default locations.
           </p></div></div><div class="sect3" title="System message bus"><div class="titlepage"><div><div><h4 class="title"><a name="message-bus-types-system"></a>System message bus</h4></div></div></div><p>
           A computer may have a <em class="firstterm">system message bus</em>,
           accessible to all applications on the system. This message bus may be
@@ -2195,9 +2600,26 @@
           variable. If that variable is not set, applications should try 
           to connect to the well-known address
           <code class="literal">unix:path=/var/run/dbus/system_bus_socket</code>.
-          <sup>[<a name="idp5590784" href="#ftn.idp5590784" class="footnote">2</a>]</sup>
+          <sup>[<a name="idp5769440" href="#ftn.idp5769440" class="footnote">2</a>]</sup>
         </p><p>
-          [FIXME specify location of system bus .service files]
+          On Unix systems, the system bus should default to searching
+          for .service files in
+          <code class="literal">/usr/local/share/dbus-1/system-services</code>,
+          <code class="literal">/usr/share/dbus-1/system-services</code> and
+          <code class="literal">/lib/dbus-1/system-services</code>, with that order
+          of precedence. It may also search other implementation-specific
+          locations, but should not vary these locations based on environment
+          variables.
+          <sup>[<a name="idp5773648" href="#ftn.idp5773648" class="footnote">3</a>]</sup>
+        </p><p>
+          Software packages should install their system .service
+          files to their configured
+          <code class="literal">${datadir}/dbus-1/system-services</code>,
+          where <code class="literal">${datadir}</code> is as defined by the GNU
+          coding standards. System administrators can arrange
+          for these service files to be read by editing the system bus'
+          configuration file or by symlinking them into the default
+          locations.
         </p></div></div><div class="sect2" title="Message Bus Messages"><div class="titlepage"><div><div><h3 class="title"><a name="message-bus-messages"></a>Message Bus Messages</h3></div></div></div><p>
         The special message bus name <code class="literal">org.freedesktop.DBus</code>
         responds to a number of additional messages.
@@ -2380,7 +2802,7 @@
         There is also a per-machine ID, described in <a class="xref" href="#standard-interfaces-peer" title="org.freedesktop.DBus.Peer">the section called &#8220;<code class="literal">org.freedesktop.DBus.Peer</code>&#8221;</a> and returned
         by org.freedesktop.DBus.Peer.GetMachineId().
         For a desktop session bus, the bus ID can be used as a way to uniquely identify a user's session.
-        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5756384"></a>Glossary</h2></div></div></div><p>
+        </p></div></div></div><div class="glossary" title="Glossary"><div class="titlepage"><div><div><h2 class="title"><a name="idp5940272"></a>Glossary</h2></div></div></div><p>
       This glossary defines some of the terms used in this specification.
     </p><dl><dt><a name="term-bus-name"></a>Bus Name</dt><dd><p>
           The message bus maintains an association between names and
@@ -2396,6 +2818,9 @@
             see <a class="xref" href="#term-unique-name" title="Unique Connection Name">Unique Connection Name</a>. Other names 
               can be thought of as "well-known names" and are 
               used to find applications that offer specific functionality.
+        </p><p>
+          See <a class="xref" href="#message-protocol-names-bus" title="Bus names">the section called &#8220;Bus names&#8221;</a> for details of
+          the syntax and naming conventions for bus names.
         </p></dd><dt><a name="term-message"></a>Message</dt><dd><p>
           A message is the atomic unit of communication via the D-Bus
           protocol. It consists of a <em class="firstterm">header</em> and a
@@ -2412,9 +2837,13 @@
             also be used to refer to some of the other names
             in D-Bus, such as interface names.
         </p></dd><dt><a name="namespace"></a>Namespace</dt><dd><p>
-          Used to prevent collisions when defining new interfaces or bus
-	  names. The convention used is the same one Java uses for defining
-	  classes: a reversed domain name.
+          Used to prevent collisions when defining new interfaces, bus names
+          etc. The convention used is the same one Java uses for defining
+          classes: a reversed domain name.
+          See <a class="xref" href="#message-protocol-names-bus" title="Bus names">the section called &#8220;Bus names&#8221;</a>,
+          <a class="xref" href="#message-protocol-names-interface" title="Interface names">the section called &#8220;Interface names&#8221;</a>,
+          <a class="xref" href="#message-protocol-names-error" title="Error names">the section called &#8220;Error names&#8221;</a>,
+          <a class="xref" href="#message-protocol-marshaling-object-path" title="Valid Object Paths">the section called &#8220;Valid Object Paths&#8221;</a>.
         </p></dd><dt><a name="term-object"></a>Object</dt><dd><p>
           Each application contains <em class="firstterm">objects</em>, which have
           <em class="firstterm">interfaces</em> and
@@ -2454,11 +2883,16 @@
           message bus. This name will never change owner, and will be unique
           (never reused during the lifetime of the message bus).
           It will begin with a ':' character.
-        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp5227968" href="#idp5227968" class="para">1</a>] </sup>Lockfiles are used instead of real file
+        </p></dd></dl></div><div class="footnotes"><br><hr width="100" align="left"><div class="footnote"><p><sup>[<a id="ftn.idp5316512" href="#idp5316512" class="para">1</a>] </sup>Lockfiles are used instead of real file
                 locking <code class="literal">fcntl()</code> because real locking
                 implementations are still flaky on network
-                filesystems.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp5590784" href="#idp5590784" class="para">2</a>] </sup>
+                filesystems.</p></div><div class="footnote"><p><sup>[<a id="ftn.idp5769440" href="#idp5769440" class="para">2</a>] </sup>
               The D-Bus reference implementation actually honors the 
               <code class="literal">$(localstatedir)</code> configure option 
               for this address, on both client and server side.
+            </p></div><div class="footnote"><p><sup>[<a id="ftn.idp5773648" href="#idp5773648" class="para">3</a>] </sup>
+              The system bus is security-sensitive and is typically executed
+              by an init system with a clean environment. Its launch helper
+              process is particularly security-sensitive, and specifically
+              clears its own environment.
             </p></div></div></div></body></html>

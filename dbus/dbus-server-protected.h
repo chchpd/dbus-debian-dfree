@@ -57,7 +57,7 @@ struct DBusServer
 {
   DBusAtomic refcount;                        /**< Reference count. */
   const DBusServerVTable *vtable;             /**< Virtual methods for this instance. */
-  DBusMutex *mutex;                           /**< Lock on the server object */
+  DBusRMutex *mutex;                          /**< Lock on the server object */
 
   DBusGUID guid;                              /**< Globally unique ID of server */
 
@@ -126,6 +126,20 @@ DBusServerListenResult _dbus_server_listen_platform_specific (DBusAddressEntry  
                                                               DBusServer       **server_p,
                                                               DBusError         *error);
 
+#ifdef DBUS_ENABLE_VERBOSE_MODE
+void _dbus_server_trace_ref (DBusServer *server,
+    int old_refcount,
+    int new_refcount,
+    const char *why);
+#else
+#define _dbus_server_trace_ref(s,o,n,w) \
+  do \
+  {\
+    (void) (o); \
+    (void) (n); \
+  } while (0)
+#endif
+
 #ifdef DBUS_DISABLE_CHECKS
 #define TOOK_LOCK_CHECK(server)
 #define RELEASING_LOCK_CHECK(server)
@@ -147,14 +161,14 @@ DBusServerListenResult _dbus_server_listen_platform_specific (DBusAddressEntry  
 
 #define SERVER_LOCK(server)   do {                                              \
     if (TRACE_LOCKS) { _dbus_verbose ("LOCK\n"); }   \
-    _dbus_mutex_lock ((server)->mutex);                                          \
+    _dbus_rmutex_lock ((server)->mutex);                                        \
     TOOK_LOCK_CHECK (server);                                                   \
   } while (0)
 
 #define SERVER_UNLOCK(server) do {                                                      \
     if (TRACE_LOCKS) { _dbus_verbose ("UNLOCK\n");  }        \
     RELEASING_LOCK_CHECK (server);                                                      \
-    _dbus_mutex_unlock ((server)->mutex);                                                \
+    _dbus_rmutex_unlock ((server)->mutex);                                              \
   } while (0)
 
 DBUS_END_DECLS

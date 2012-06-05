@@ -61,92 +61,39 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
-am__test_autolaunch_SOURCES_DIST = test-autolaunch.c
-@DBUS_BUILD_TESTS_TRUE@am_test_autolaunch_OBJECTS = test_autolaunch-test-autolaunch.$(OBJEXT)
-test_autolaunch_OBJECTS = $(am_test_autolaunch_OBJECTS)
-am__DEPENDENCIES_1 =
-@DBUS_BUILD_TESTS_TRUE@test_autolaunch_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
+test_autolaunch_SOURCES = test-autolaunch.c
+test_autolaunch_OBJECTS = test-autolaunch.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_autolaunch_DEPENDENCIES =  \
+@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
-test_autolaunch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(test_autolaunch_CFLAGS) $(CFLAGS) $(test_autolaunch_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am__test_ids_SOURCES_DIST = test-ids.c
-@DBUS_BUILD_TESTS_TRUE@am_test_ids_OBJECTS = test-ids.$(OBJEXT)
-test_ids_OBJECTS = $(am_test_ids_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_ids_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_ids_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(test_ids_LDFLAGS) $(LDFLAGS) -o $@
-am__test_pending_call_dispatch_SOURCES_DIST =  \
-	test-pending-call-dispatch.c
-@DBUS_BUILD_TESTS_TRUE@am_test_pending_call_dispatch_OBJECTS =  \
-@DBUS_BUILD_TESTS_TRUE@	test-pending-call-dispatch.$(OBJEXT)
+test_ids_SOURCES = test-ids.c
+test_ids_OBJECTS = test-ids.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_ids_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
+test_pending_call_dispatch_SOURCES = test-pending-call-dispatch.c
 test_pending_call_dispatch_OBJECTS =  \
-	$(am_test_pending_call_dispatch_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_pending_call_dispatch_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(test_pending_call_dispatch_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am__test_pending_call_timeout_SOURCES_DIST =  \
-	test-pending-call-timeout.c
-@DBUS_BUILD_TESTS_TRUE@am_test_pending_call_timeout_OBJECTS =  \
-@DBUS_BUILD_TESTS_TRUE@	test-pending-call-timeout.$(OBJEXT)
+	test-pending-call-dispatch.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
+test_pending_call_timeout_SOURCES = test-pending-call-timeout.c
 test_pending_call_timeout_OBJECTS =  \
-	$(am_test_pending_call_timeout_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_pending_call_timeout_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(test_pending_call_timeout_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am__test_privserver_SOURCES_DIST = test-privserver.c
-@DBUS_BUILD_TESTS_TRUE@am_test_privserver_OBJECTS = test_privserver-test-privserver.$(OBJEXT)
-test_privserver_OBJECTS = $(am_test_privserver_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_privserver_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_privserver_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(test_privserver_CFLAGS) $(CFLAGS) $(test_privserver_LDFLAGS) \
-	$(LDFLAGS) -o $@
-am__test_privserver_client_SOURCES_DIST = test-privserver-client.c
-@DBUS_BUILD_TESTS_TRUE@am_test_privserver_client_OBJECTS = test_privserver_client-test-privserver-client.$(OBJEXT)
-test_privserver_client_OBJECTS = $(am_test_privserver_client_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_privserver_client_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_privserver_client_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(test_privserver_client_CFLAGS) $(CFLAGS) \
-	$(test_privserver_client_LDFLAGS) $(LDFLAGS) -o $@
-am__test_shutdown_SOURCES_DIST = test-shutdown.c
-@DBUS_BUILD_TESTS_TRUE@am_test_shutdown_OBJECTS =  \
-@DBUS_BUILD_TESTS_TRUE@	test_shutdown-test-shutdown.$(OBJEXT)
-test_shutdown_OBJECTS = $(am_test_shutdown_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_shutdown_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_shutdown_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(test_shutdown_CFLAGS) \
-	$(CFLAGS) $(test_shutdown_LDFLAGS) $(LDFLAGS) -o $@
-am__test_threads_init_SOURCES_DIST = test-threads-init.c
-@DBUS_BUILD_TESTS_TRUE@am_test_threads_init_OBJECTS =  \
-@DBUS_BUILD_TESTS_TRUE@	test-threads-init.$(OBJEXT)
-test_threads_init_OBJECTS = $(am_test_threads_init_OBJECTS)
-@DBUS_BUILD_TESTS_TRUE@test_threads_init_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-@DBUS_BUILD_TESTS_TRUE@	$(am__DEPENDENCIES_1)
-test_threads_init_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(AM_CFLAGS) $(CFLAGS) $(test_threads_init_LDFLAGS) $(LDFLAGS) \
-	-o $@
+	test-pending-call-timeout.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
+test_privserver_SOURCES = test-privserver.c
+test_privserver_OBJECTS = test-privserver.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_privserver_DEPENDENCIES =  \
+@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la
+test_privserver_client_SOURCES = test-privserver-client.c
+test_privserver_client_OBJECTS = test-privserver-client.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_privserver_client_DEPENDENCIES =  \
+@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la
+test_shutdown_SOURCES = test-shutdown.c
+test_shutdown_OBJECTS = test-shutdown.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_shutdown_DEPENDENCIES =  \
+@DBUS_BUILD_TESTS_TRUE@	../libdbus-testutils.la
+test_threads_init_SOURCES = test-threads-init.c
+test_threads_init_OBJECTS = test-threads-init.$(OBJEXT)
+@DBUS_BUILD_TESTS_TRUE@test_threads_init_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -173,25 +120,20 @@ am__v_CCLD_0 = @echo "  CCLD  " $@;
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
 am__v_GEN_0 = @echo "  GEN   " $@;
-SOURCES = $(test_autolaunch_SOURCES) $(test_ids_SOURCES) \
-	$(test_pending_call_dispatch_SOURCES) \
-	$(test_pending_call_timeout_SOURCES) \
-	$(test_privserver_SOURCES) $(test_privserver_client_SOURCES) \
-	$(test_shutdown_SOURCES) $(test_threads_init_SOURCES)
-DIST_SOURCES = $(am__test_autolaunch_SOURCES_DIST) \
-	$(am__test_ids_SOURCES_DIST) \
-	$(am__test_pending_call_dispatch_SOURCES_DIST) \
-	$(am__test_pending_call_timeout_SOURCES_DIST) \
-	$(am__test_privserver_SOURCES_DIST) \
-	$(am__test_privserver_client_SOURCES_DIST) \
-	$(am__test_shutdown_SOURCES_DIST) \
-	$(am__test_threads_init_SOURCES_DIST)
+SOURCES = test-autolaunch.c test-ids.c test-pending-call-dispatch.c \
+	test-pending-call-timeout.c test-privserver.c \
+	test-privserver-client.c test-shutdown.c test-threads-init.c
+DIST_SOURCES = test-autolaunch.c test-ids.c \
+	test-pending-call-dispatch.c test-pending-call-timeout.c \
+	test-privserver.c test-privserver-client.c test-shutdown.c \
+	test-threads-init.c
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
 red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
+ADT_LIBS = @ADT_LIBS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
@@ -212,10 +154,6 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DBUS_BINDIR = @DBUS_BINDIR@
-DBUS_BUS_CFLAGS = @DBUS_BUS_CFLAGS@
-DBUS_BUS_LIBS = @DBUS_BUS_LIBS@
-DBUS_CLIENT_CFLAGS = @DBUS_CLIENT_CFLAGS@
-DBUS_CLIENT_LIBS = @DBUS_CLIENT_LIBS@
 DBUS_CONSOLE_AUTH_DIR = @DBUS_CONSOLE_AUTH_DIR@
 DBUS_CONSOLE_OWNER_FILE = @DBUS_CONSOLE_OWNER_FILE@
 DBUS_DAEMONDIR = @DBUS_DAEMONDIR@
@@ -227,8 +165,6 @@ DBUS_INT16_TYPE = @DBUS_INT16_TYPE@
 DBUS_INT32_TYPE = @DBUS_INT32_TYPE@
 DBUS_INT64_CONSTANT = @DBUS_INT64_CONSTANT@
 DBUS_INT64_TYPE = @DBUS_INT64_TYPE@
-DBUS_LAUNCHER_CFLAGS = @DBUS_LAUNCHER_CFLAGS@
-DBUS_LAUNCHER_LIBS = @DBUS_LAUNCHER_LIBS@
 DBUS_LIBEXECDIR = @DBUS_LIBEXECDIR@
 DBUS_MAJOR_VERSION = @DBUS_MAJOR_VERSION@
 DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
@@ -240,8 +176,8 @@ DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
 DBUS_SYSTEM_SOCKET = @DBUS_SYSTEM_SOCKET@
-DBUS_TEST_CFLAGS = @DBUS_TEST_CFLAGS@
-DBUS_TEST_LIBS = @DBUS_TEST_LIBS@
+DBUS_TEST_DATA = @DBUS_TEST_DATA@
+DBUS_TEST_EXEC = @DBUS_TEST_EXEC@
 DBUS_UINT64_CONSTANT = @DBUS_UINT64_CONSTANT@
 DBUS_USER = @DBUS_USER@
 DBUS_VERSION = @DBUS_VERSION@
@@ -279,6 +215,7 @@ LAUNCHCTL = @LAUNCHCTL@
 LAUNCHD_AGENT_DIR = @LAUNCHD_AGENT_DIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBDBUS_LIBS = @LIBDBUS_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -295,6 +232,7 @@ MAKEINFO = @MAKEINFO@
 MAN2HTML = @MAN2HTML@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+NETWORK_libs = @NETWORK_libs@
 NM = @NM@
 NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
@@ -319,26 +257,25 @@ RANLIB = @RANLIB@
 RC = @RC@
 R_DYNAMIC_LDFLAG = @R_DYNAMIC_LDFLAG@
 SED = @SED@
+SELINUX_LIBS = @SELINUX_LIBS@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+SYSTEMD_CFLAGS = @SYSTEMD_CFLAGS@
+SYSTEMD_LIBS = @SYSTEMD_LIBS@
 TEST_BUS_BINARY = @TEST_BUS_BINARY@
-TEST_EXIT_BINARY = @TEST_EXIT_BINARY@
-TEST_INVALID_SERVICE_DIR = @TEST_INVALID_SERVICE_DIR@
-TEST_INVALID_SERVICE_SYSTEM_DIR = @TEST_INVALID_SERVICE_SYSTEM_DIR@
 TEST_LAUNCH_HELPER_BINARY = @TEST_LAUNCH_HELPER_BINARY@
-TEST_PRIVSERVER_BINARY = @TEST_PRIVSERVER_BINARY@
-TEST_SEGFAULT_BINARY = @TEST_SEGFAULT_BINARY@
-TEST_SERVICE_BINARY = @TEST_SERVICE_BINARY@
-TEST_SHELL_SERVICE_BINARY = @TEST_SHELL_SERVICE_BINARY@
-TEST_SLEEP_FOREVER_BINARY = @TEST_SLEEP_FOREVER_BINARY@
+TEST_LISTEN = @TEST_LISTEN@
 TEST_SOCKET_DIR = @TEST_SOCKET_DIR@
-TEST_VALID_SERVICE_DIR = @TEST_VALID_SERVICE_DIR@
-TEST_VALID_SERVICE_SYSTEM_DIR = @TEST_VALID_SERVICE_SYSTEM_DIR@
+THREAD_LIBS = @THREAD_LIBS@
+VALGRIND_CFLAGS = @VALGRIND_CFLAGS@
+VALGRIND_LIBS = @VALGRIND_LIBS@
 VERSION = @VERSION@
 WINDRES = @WINDRES@
 XMKMF = @XMKMF@
 XMLTO = @XMLTO@
+XML_CFLAGS = @XML_CFLAGS@
+XML_LIBS = @XML_LIBS@
 XSLTPROC = @XSLTPROC@
 X_CFLAGS = @X_CFLAGS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
@@ -402,54 +339,27 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-INCLUDES = -I$(top_srcdir) $(DBUS_CLIENT_CFLAGS) $(DBUS_GLIB_CFLAGS) $(DBUS_TEST_CFLAGS) -DDBUS_COMPILATION
+
+# Everything in this directory is statically-linked to libdbus-internal
+AM_CPPFLAGS = \
+	-I$(top_srcdir) \
+	-DDBUS_COMPILATION \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+
+
+# if assertions are enabled, improve backtraces
+AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 @DBUS_BUILD_TESTS_TRUE@TESTS_ENVIRONMENT = DBUS_TOP_BUILDDIR=@abs_top_builddir@ DBUS_TOP_SRCDIR=@abs_top_srcdir@ PYTHON=@PYTHON@
 EXTRA_DIST = run-test.sh run-test-systemserver.sh test-wait-for-echo.py test-activation-forking.py
-@DBUS_BUILD_TESTS_TRUE@AM_CPPFLAGS = -DDBUS_STATIC_BUILD
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-pending-call-dispatch.c
-
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-pending-call-timeout.c
-
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_threads_init_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-threads-init.c
-
-@DBUS_BUILD_TESTS_TRUE@test_threads_init_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_threads_init_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_ids_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-ids.c
-
-@DBUS_BUILD_TESTS_TRUE@test_ids_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_ids_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_shutdown_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-shutdown.c
-
-@DBUS_BUILD_TESTS_TRUE@test_shutdown_CFLAGS = 
-@DBUS_BUILD_TESTS_TRUE@test_shutdown_LDADD = $(top_builddir)/dbus/libdbus-internal.la ../libdbus-testutils.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_shutdown_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_privserver_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-privserver.c
-
-@DBUS_BUILD_TESTS_TRUE@test_privserver_CFLAGS = 
-@DBUS_BUILD_TESTS_TRUE@test_privserver_LDADD = $(top_builddir)/dbus/libdbus-internal.la ../libdbus-testutils.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_privserver_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_privserver_client_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-privserver-client.c
-
-@DBUS_BUILD_TESTS_TRUE@test_privserver_client_CFLAGS = 
-@DBUS_BUILD_TESTS_TRUE@test_privserver_client_LDADD = $(top_builddir)/dbus/libdbus-internal.la ../libdbus-testutils.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_privserver_client_LDFLAGS = @R_DYNAMIC_LDFLAG@
-@DBUS_BUILD_TESTS_TRUE@test_autolaunch_SOURCES = \
-@DBUS_BUILD_TESTS_TRUE@	test-autolaunch.c
-
-@DBUS_BUILD_TESTS_TRUE@test_autolaunch_CFLAGS = 
-@DBUS_BUILD_TESTS_TRUE@test_autolaunch_LDADD = $(top_builddir)/dbus/libdbus-internal.la ../libdbus-testutils.la $(DBUS_TEST_LIBS)
-@DBUS_BUILD_TESTS_TRUE@test_autolaunch_LDFLAGS = @R_DYNAMIC_LDFLAG@
+@DBUS_BUILD_TESTS_TRUE@test_pending_call_dispatch_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+@DBUS_BUILD_TESTS_TRUE@test_pending_call_timeout_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+@DBUS_BUILD_TESTS_TRUE@test_threads_init_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+@DBUS_BUILD_TESTS_TRUE@test_ids_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+@DBUS_BUILD_TESTS_TRUE@test_shutdown_LDADD = ../libdbus-testutils.la
+@DBUS_BUILD_TESTS_TRUE@test_privserver_LDADD = ../libdbus-testutils.la
+@DBUS_BUILD_TESTS_TRUE@test_privserver_client_LDADD = ../libdbus-testutils.la
+@DBUS_BUILD_TESTS_TRUE@test_autolaunch_LDADD = ../libdbus-testutils.la
 all: all-am
 
 .SUFFIXES:
@@ -495,28 +405,28 @@ clean-noinstPROGRAMS:
 	rm -f $$list
 test-autolaunch$(EXEEXT): $(test_autolaunch_OBJECTS) $(test_autolaunch_DEPENDENCIES) $(EXTRA_test_autolaunch_DEPENDENCIES) 
 	@rm -f test-autolaunch$(EXEEXT)
-	$(AM_V_CCLD)$(test_autolaunch_LINK) $(test_autolaunch_OBJECTS) $(test_autolaunch_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_autolaunch_OBJECTS) $(test_autolaunch_LDADD) $(LIBS)
 test-ids$(EXEEXT): $(test_ids_OBJECTS) $(test_ids_DEPENDENCIES) $(EXTRA_test_ids_DEPENDENCIES) 
 	@rm -f test-ids$(EXEEXT)
-	$(AM_V_CCLD)$(test_ids_LINK) $(test_ids_OBJECTS) $(test_ids_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_ids_OBJECTS) $(test_ids_LDADD) $(LIBS)
 test-pending-call-dispatch$(EXEEXT): $(test_pending_call_dispatch_OBJECTS) $(test_pending_call_dispatch_DEPENDENCIES) $(EXTRA_test_pending_call_dispatch_DEPENDENCIES) 
 	@rm -f test-pending-call-dispatch$(EXEEXT)
-	$(AM_V_CCLD)$(test_pending_call_dispatch_LINK) $(test_pending_call_dispatch_OBJECTS) $(test_pending_call_dispatch_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_pending_call_dispatch_OBJECTS) $(test_pending_call_dispatch_LDADD) $(LIBS)
 test-pending-call-timeout$(EXEEXT): $(test_pending_call_timeout_OBJECTS) $(test_pending_call_timeout_DEPENDENCIES) $(EXTRA_test_pending_call_timeout_DEPENDENCIES) 
 	@rm -f test-pending-call-timeout$(EXEEXT)
-	$(AM_V_CCLD)$(test_pending_call_timeout_LINK) $(test_pending_call_timeout_OBJECTS) $(test_pending_call_timeout_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_pending_call_timeout_OBJECTS) $(test_pending_call_timeout_LDADD) $(LIBS)
 test-privserver$(EXEEXT): $(test_privserver_OBJECTS) $(test_privserver_DEPENDENCIES) $(EXTRA_test_privserver_DEPENDENCIES) 
 	@rm -f test-privserver$(EXEEXT)
-	$(AM_V_CCLD)$(test_privserver_LINK) $(test_privserver_OBJECTS) $(test_privserver_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_privserver_OBJECTS) $(test_privserver_LDADD) $(LIBS)
 test-privserver-client$(EXEEXT): $(test_privserver_client_OBJECTS) $(test_privserver_client_DEPENDENCIES) $(EXTRA_test_privserver_client_DEPENDENCIES) 
 	@rm -f test-privserver-client$(EXEEXT)
-	$(AM_V_CCLD)$(test_privserver_client_LINK) $(test_privserver_client_OBJECTS) $(test_privserver_client_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_privserver_client_OBJECTS) $(test_privserver_client_LDADD) $(LIBS)
 test-shutdown$(EXEEXT): $(test_shutdown_OBJECTS) $(test_shutdown_DEPENDENCIES) $(EXTRA_test_shutdown_DEPENDENCIES) 
 	@rm -f test-shutdown$(EXEEXT)
-	$(AM_V_CCLD)$(test_shutdown_LINK) $(test_shutdown_OBJECTS) $(test_shutdown_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_shutdown_OBJECTS) $(test_shutdown_LDADD) $(LIBS)
 test-threads-init$(EXEEXT): $(test_threads_init_OBJECTS) $(test_threads_init_DEPENDENCIES) $(EXTRA_test_threads_init_DEPENDENCIES) 
 	@rm -f test-threads-init$(EXEEXT)
-	$(AM_V_CCLD)$(test_threads_init_LINK) $(test_threads_init_OBJECTS) $(test_threads_init_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(test_threads_init_OBJECTS) $(test_threads_init_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -524,14 +434,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-autolaunch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-ids.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-pending-call-dispatch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-pending-call-timeout.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-privserver-client.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-privserver.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-shutdown.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-threads-init.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_autolaunch-test-autolaunch.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_privserver-test-privserver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_privserver_client-test-privserver-client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_shutdown-test-shutdown.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -553,62 +463,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-test_autolaunch-test-autolaunch.o: test-autolaunch.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_autolaunch_CFLAGS) $(CFLAGS) -MT test_autolaunch-test-autolaunch.o -MD -MP -MF $(DEPDIR)/test_autolaunch-test-autolaunch.Tpo -c -o test_autolaunch-test-autolaunch.o `test -f 'test-autolaunch.c' || echo '$(srcdir)/'`test-autolaunch.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_autolaunch-test-autolaunch.Tpo $(DEPDIR)/test_autolaunch-test-autolaunch.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-autolaunch.c' object='test_autolaunch-test-autolaunch.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_autolaunch_CFLAGS) $(CFLAGS) -c -o test_autolaunch-test-autolaunch.o `test -f 'test-autolaunch.c' || echo '$(srcdir)/'`test-autolaunch.c
-
-test_autolaunch-test-autolaunch.obj: test-autolaunch.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_autolaunch_CFLAGS) $(CFLAGS) -MT test_autolaunch-test-autolaunch.obj -MD -MP -MF $(DEPDIR)/test_autolaunch-test-autolaunch.Tpo -c -o test_autolaunch-test-autolaunch.obj `if test -f 'test-autolaunch.c'; then $(CYGPATH_W) 'test-autolaunch.c'; else $(CYGPATH_W) '$(srcdir)/test-autolaunch.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_autolaunch-test-autolaunch.Tpo $(DEPDIR)/test_autolaunch-test-autolaunch.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-autolaunch.c' object='test_autolaunch-test-autolaunch.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_autolaunch_CFLAGS) $(CFLAGS) -c -o test_autolaunch-test-autolaunch.obj `if test -f 'test-autolaunch.c'; then $(CYGPATH_W) 'test-autolaunch.c'; else $(CYGPATH_W) '$(srcdir)/test-autolaunch.c'; fi`
-
-test_privserver-test-privserver.o: test-privserver.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_CFLAGS) $(CFLAGS) -MT test_privserver-test-privserver.o -MD -MP -MF $(DEPDIR)/test_privserver-test-privserver.Tpo -c -o test_privserver-test-privserver.o `test -f 'test-privserver.c' || echo '$(srcdir)/'`test-privserver.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_privserver-test-privserver.Tpo $(DEPDIR)/test_privserver-test-privserver.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-privserver.c' object='test_privserver-test-privserver.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_CFLAGS) $(CFLAGS) -c -o test_privserver-test-privserver.o `test -f 'test-privserver.c' || echo '$(srcdir)/'`test-privserver.c
-
-test_privserver-test-privserver.obj: test-privserver.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_CFLAGS) $(CFLAGS) -MT test_privserver-test-privserver.obj -MD -MP -MF $(DEPDIR)/test_privserver-test-privserver.Tpo -c -o test_privserver-test-privserver.obj `if test -f 'test-privserver.c'; then $(CYGPATH_W) 'test-privserver.c'; else $(CYGPATH_W) '$(srcdir)/test-privserver.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_privserver-test-privserver.Tpo $(DEPDIR)/test_privserver-test-privserver.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-privserver.c' object='test_privserver-test-privserver.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_CFLAGS) $(CFLAGS) -c -o test_privserver-test-privserver.obj `if test -f 'test-privserver.c'; then $(CYGPATH_W) 'test-privserver.c'; else $(CYGPATH_W) '$(srcdir)/test-privserver.c'; fi`
-
-test_privserver_client-test-privserver-client.o: test-privserver-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_client_CFLAGS) $(CFLAGS) -MT test_privserver_client-test-privserver-client.o -MD -MP -MF $(DEPDIR)/test_privserver_client-test-privserver-client.Tpo -c -o test_privserver_client-test-privserver-client.o `test -f 'test-privserver-client.c' || echo '$(srcdir)/'`test-privserver-client.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_privserver_client-test-privserver-client.Tpo $(DEPDIR)/test_privserver_client-test-privserver-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-privserver-client.c' object='test_privserver_client-test-privserver-client.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_client_CFLAGS) $(CFLAGS) -c -o test_privserver_client-test-privserver-client.o `test -f 'test-privserver-client.c' || echo '$(srcdir)/'`test-privserver-client.c
-
-test_privserver_client-test-privserver-client.obj: test-privserver-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_client_CFLAGS) $(CFLAGS) -MT test_privserver_client-test-privserver-client.obj -MD -MP -MF $(DEPDIR)/test_privserver_client-test-privserver-client.Tpo -c -o test_privserver_client-test-privserver-client.obj `if test -f 'test-privserver-client.c'; then $(CYGPATH_W) 'test-privserver-client.c'; else $(CYGPATH_W) '$(srcdir)/test-privserver-client.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_privserver_client-test-privserver-client.Tpo $(DEPDIR)/test_privserver_client-test-privserver-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-privserver-client.c' object='test_privserver_client-test-privserver-client.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_privserver_client_CFLAGS) $(CFLAGS) -c -o test_privserver_client-test-privserver-client.obj `if test -f 'test-privserver-client.c'; then $(CYGPATH_W) 'test-privserver-client.c'; else $(CYGPATH_W) '$(srcdir)/test-privserver-client.c'; fi`
-
-test_shutdown-test-shutdown.o: test-shutdown.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_shutdown_CFLAGS) $(CFLAGS) -MT test_shutdown-test-shutdown.o -MD -MP -MF $(DEPDIR)/test_shutdown-test-shutdown.Tpo -c -o test_shutdown-test-shutdown.o `test -f 'test-shutdown.c' || echo '$(srcdir)/'`test-shutdown.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_shutdown-test-shutdown.Tpo $(DEPDIR)/test_shutdown-test-shutdown.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-shutdown.c' object='test_shutdown-test-shutdown.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_shutdown_CFLAGS) $(CFLAGS) -c -o test_shutdown-test-shutdown.o `test -f 'test-shutdown.c' || echo '$(srcdir)/'`test-shutdown.c
-
-test_shutdown-test-shutdown.obj: test-shutdown.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_shutdown_CFLAGS) $(CFLAGS) -MT test_shutdown-test-shutdown.obj -MD -MP -MF $(DEPDIR)/test_shutdown-test-shutdown.Tpo -c -o test_shutdown-test-shutdown.obj `if test -f 'test-shutdown.c'; then $(CYGPATH_W) 'test-shutdown.c'; else $(CYGPATH_W) '$(srcdir)/test-shutdown.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_shutdown-test-shutdown.Tpo $(DEPDIR)/test_shutdown-test-shutdown.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-shutdown.c' object='test_shutdown-test-shutdown.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_shutdown_CFLAGS) $(CFLAGS) -c -o test_shutdown-test-shutdown.obj `if test -f 'test-shutdown.c'; then $(CYGPATH_W) 'test-shutdown.c'; else $(CYGPATH_W) '$(srcdir)/test-shutdown.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

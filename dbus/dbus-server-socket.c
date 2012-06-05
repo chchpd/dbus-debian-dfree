@@ -89,10 +89,8 @@ handle_new_client_fd_and_unlock (DBusServer *server,
   DBusConnection *connection;
   DBusTransport *transport;
   DBusNewConnectionFunction new_connection_function;
-  DBusServerSocket* socket_server;
   void *new_connection_data;
 
-  socket_server = (DBusServerSocket*)server;
   _dbus_verbose ("Creating new client connection with fd %d\n", client_fd);
 
   HAVE_LOCK_CHECK (server);
@@ -236,6 +234,7 @@ socket_disconnect (DBusServer *server)
         {
           _dbus_server_remove_watch (server,
                                      socket_server->watch[i]);
+          _dbus_watch_invalidate (socket_server->watch[i]);
           _dbus_watch_unref (socket_server->watch[i]);
           socket_server->watch[i] = NULL;
         }
@@ -344,6 +343,7 @@ _dbus_server_new_for_socket (int              *fds,
 
   SERVER_UNLOCK (server);
 
+  _dbus_server_trace_ref (&socket_server->base, 0, 1, "new_for_socket");
   return (DBusServer*) socket_server;
 
  failed_2:

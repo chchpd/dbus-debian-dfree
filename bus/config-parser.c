@@ -1154,6 +1154,7 @@ append_rule_from_element (BusConfigParser   *parser,
   const char *send_requested_reply;
   const char *receive_requested_reply;
   const char *own;
+  const char *own_prefix;
   const char *user;
   const char *group;
 
@@ -1179,6 +1180,7 @@ append_rule_from_element (BusConfigParser   *parser,
                           "send_requested_reply", &send_requested_reply,
                           "receive_requested_reply", &receive_requested_reply,
                           "own", &own,
+                          "own_prefix", &own_prefix,
                           "user", &user,
                           "group", &group,
                           "log", &log,
@@ -1190,7 +1192,7 @@ append_rule_from_element (BusConfigParser   *parser,
         receive_interface || receive_member || receive_error || receive_sender ||
         receive_type || receive_path || eavesdrop ||
         send_requested_reply || receive_requested_reply ||
-        own || user || group))
+        own || own_prefix || user || group))
     {
       dbus_set_error (error, DBUS_ERROR_FAILED,
                       "Element <%s> must have one or more attributes",
@@ -1218,7 +1220,7 @@ append_rule_from_element (BusConfigParser   *parser,
    *   base send_ can combine with send_destination, send_path, send_type, send_requested_reply
    *   base receive_ with receive_sender, receive_path, receive_type, receive_requested_reply, eavesdrop
    *
-   *   user, group, own must occur alone
+   *   user, group, own, own_prefix must occur alone
    *
    * Pretty sure the below stuff is broken, FIXME think about it more.
    */
@@ -1229,7 +1231,7 @@ append_rule_from_element (BusConfigParser   *parser,
                           receive_error ||
                           receive_sender ||
                           receive_requested_reply ||
-                          own ||
+                          own || own_prefix ||
                           user ||
                           group)) ||
 
@@ -1239,7 +1241,7 @@ append_rule_from_element (BusConfigParser   *parser,
                        receive_error ||
                        receive_sender ||
                        receive_requested_reply ||
-                       own ||
+                       own || own_prefix ||
                        user ||
                        group)) ||
 
@@ -1248,7 +1250,7 @@ append_rule_from_element (BusConfigParser   *parser,
                       receive_error ||
                       receive_sender ||
                       receive_requested_reply ||
-                      own ||
+                      own || own_prefix ||
                       user ||
                       group)) ||
 
@@ -1257,7 +1259,7 @@ append_rule_from_element (BusConfigParser   *parser,
                             receive_error ||
                             receive_sender ||
                             receive_requested_reply ||
-                            own ||
+                            own || own_prefix ||
                             user ||
                             group)) ||
 
@@ -1266,7 +1268,7 @@ append_rule_from_element (BusConfigParser   *parser,
                      receive_error ||
                      receive_sender ||
                      receive_requested_reply ||
-                     own ||
+                     own || own_prefix ||
                      user ||
                      group)) ||
 
@@ -1275,7 +1277,7 @@ append_rule_from_element (BusConfigParser   *parser,
                      receive_error ||
                      receive_sender ||
                      receive_requested_reply ||
-                     own ||
+                     own || own_prefix ||
                      user ||
                      group)) ||
 
@@ -1284,33 +1286,35 @@ append_rule_from_element (BusConfigParser   *parser,
                                 receive_error ||
                                 receive_sender ||
                                 receive_requested_reply ||
-                                own ||
+                                own || own_prefix ||
                                 user ||
                                 group)) ||
 
       (receive_interface && (receive_error ||
-                             own ||
+                             own || own_prefix ||
                              user ||
                              group)) ||
 
       (receive_member && (receive_error ||
-                          own ||
+                          own || own_prefix ||
                           user ||
                           group)) ||
 
-      (receive_error && (own ||
+      (receive_error && (own || own_prefix ||
                          user ||
                          group)) ||
 
-      (eavesdrop && (own ||
+      (eavesdrop && (own || own_prefix ||
                      user ||
                      group)) ||
 
-      (receive_requested_reply && (own ||
+      (receive_requested_reply && (own || own_prefix ||
                                    user ||
                                    group)) ||
 
-      (own && (user || group)) ||
+      (own && (own_prefix || user || group)) ||
+
+      (own_prefix && (own || user || group)) ||
 
       (user && group))
     {
@@ -1488,18 +1492,29 @@ append_rule_from_element (BusConfigParser   *parser,
       if (receive_sender && rule->d.receive.origin == NULL)
         goto nomem;
     }
-  else if (own)
+  else if (own || own_prefix)
     {
       rule = bus_policy_rule_new (BUS_POLICY_RULE_OWN, allow); 
       if (rule == NULL)
         goto nomem;
 
-      if (IS_WILDCARD (own))
-        own = NULL;
+      if (own)
+        {
+          if (IS_WILDCARD (own))
+            own = NULL;
       
-      rule->d.own.service_name = _dbus_strdup (own);
-      if (own && rule->d.own.service_name == NULL)
-        goto nomem;
+          rule->d.own.prefix = 0;
+          rule->d.own.service_name = _dbus_strdup (own);
+          if (own && rule->d.own.service_name == NULL)
+            goto nomem;
+        }
+      else
+        {
+          rule->d.own.prefix = 1;
+          rule->d.own.service_name = _dbus_strdup (own_prefix);
+          if (rule->d.own.service_name == NULL)
+            goto nomem;
+        }
     }
   else if (user)
     {      
@@ -2731,9 +2746,60 @@ typedef enum
 } Validity;
 
 static dbus_bool_t
+do_check_own_rules (BusPolicy  *policy)
+{
+  const struct {
+    char *name;
+    dbus_bool_t allowed;
+  } checks[] = {
+    {"org.freedesktop", FALSE},
+    {"org.freedesktop.ManySystem", FALSE},
+    {"org.freedesktop.ManySystems", TRUE},
+    {"org.freedesktop.ManySystems.foo", TRUE},
+    {"org.freedesktop.ManySystems.foo.bar", TRUE},
+    {"org.freedesktop.ManySystems2", FALSE},
+    {"org.freedesktop.ManySystems2.foo", FALSE},
+    {"org.freedesktop.ManySystems2.foo.bar", FALSE},
+    {NULL, FALSE}
+  };
+  int i = 0;
+
+  while (checks[i].name)
+    {
+      DBusString service_name;
+      dbus_bool_t ret;
+
+      if (!_dbus_string_init (&service_name))
+        _dbus_assert_not_reached ("couldn't init string");
+      if (!_dbus_string_append (&service_name, checks[i].name))
+        _dbus_assert_not_reached ("couldn't append string");
+
+      ret = bus_policy_check_can_own (policy, &service_name);
+      printf ("        Check name %s: %s\n", checks[i].name,
+              ret ? "allowed" : "not allowed");
+      if (checks[i].allowed && !ret)
+        {
+          _dbus_warn ("Cannot own %s\n", checks[i].name);
+          return FALSE;
+        }
+      if (!checks[i].allowed && ret)
+        {
+          _dbus_warn ("Can own %s\n", checks[i].name);
+          return FALSE;
+        }
+      _dbus_string_free (&service_name);
+
+      i++;
+    }
+
+  return TRUE;
+}
+
+static dbus_bool_t
 do_load (const DBusString *full_path,
          Validity          validity,
-         dbus_bool_t       oom_possible)
+         dbus_bool_t       oom_possible,
+         dbus_bool_t       check_own_rules)
 {
   BusConfigParser *parser;
   DBusError error;
@@ -2770,6 +2836,11 @@ do_load (const DBusString *full_path,
     {
       _DBUS_ASSERT_ERROR_IS_CLEAR (&error);
 
+      if (check_own_rules && do_check_own_rules (parser->policy) == FALSE)
+        {
+          return FALSE;
+        }
+
       bus_config_parser_unref (parser);
 
       if (validity == INVALID)
@@ -2786,6 +2857,7 @@ typedef struct
 {
   const DBusString *full_path;
   Validity          validity;
+  dbus_bool_t       check_own_rules;
 } LoaderOomData;
 
 static dbus_bool_t
@@ -2793,7 +2865,7 @@ check_loader_oom_func (void *data)
 {
   LoaderOomData *d = data;
 
-  return do_load (d->full_path, d->validity, TRUE);
+  return do_load (d->full_path, d->validity, TRUE, d->check_own_rules);
 }
 
 static dbus_bool_t
@@ -2876,6 +2948,8 @@ process_test_valid_subdir (const DBusString *test_base_dir,
 
       d.full_path = &full_path;
       d.validity = validity;
+      d.check_own_rules = _dbus_string_ends_with_c_str (&full_path,
+          "check-own-rules.conf");
 
       /* FIXME hackaround for an expat problem, see
        * https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=124747
@@ -3271,11 +3345,12 @@ test_default_session_servicedirs (void)
   DBusList *dirs;
   DBusList *link;
   DBusString progs;
-  const char *common_progs;
   int i;
 
 #ifdef DBUS_WIN
+  const char *common_progs;
   char buffer[1024];
+
   if (_dbus_get_install_root(buffer, sizeof(buffer)))
     {
       strcat(buffer,DBUS_DATADIR);
@@ -3289,8 +3364,9 @@ test_default_session_servicedirs (void)
   if (!_dbus_string_init (&progs))
     _dbus_assert_not_reached ("OOM allocating progs");
 
-  common_progs = _dbus_getenv ("CommonProgramFiles");
 #ifndef DBUS_UNIX
+  common_progs = _dbus_getenv ("CommonProgramFiles");
+
   if (common_progs) 
     {
       if (!_dbus_string_append (&progs, common_progs)) 
@@ -3391,8 +3467,8 @@ test_default_session_servicedirs (void)
 static const char *test_system_service_dir_matches[] = 
         {
 #ifdef DBUS_UNIX
-         "/testusr/testlocal/testshare/dbus-1/system-services",
-         "/testusr/testshare/dbus-1/system-services",
+         "/usr/local/share/dbus-1/system-services",
+         "/usr/share/dbus-1/system-services",
 #endif
          DBUS_DATADIR"/dbus-1/system-services",
 #ifdef DBUS_UNIX
@@ -3411,7 +3487,9 @@ test_default_system_servicedirs (void)
   DBusList *dirs;
   DBusList *link;
   DBusString progs;
+#ifndef DBUS_UNIX
   const char *common_progs;
+#endif
   int i;
 
   /* On Unix we don't actually use this variable, but it's easier to handle the
@@ -3419,8 +3497,9 @@ test_default_system_servicedirs (void)
   if (!_dbus_string_init (&progs))
     _dbus_assert_not_reached ("OOM allocating progs");
 
-  common_progs = _dbus_getenv ("CommonProgramFiles");
 #ifndef DBUS_UNIX
+  common_progs = _dbus_getenv ("CommonProgramFiles");
+
   if (common_progs) 
     {
       if (!_dbus_string_append (&progs, common_progs)) 

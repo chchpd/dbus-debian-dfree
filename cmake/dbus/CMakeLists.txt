@@ -21,6 +21,7 @@ set (dbusinclude_HEADERS
 	${DBUS_DIR}/dbus-server.h
 	${DBUS_DIR}/dbus-shared.h
 	${DBUS_DIR}/dbus-signature.h
+	${DBUS_DIR}/dbus-syntax.h
 	${DBUS_DIR}/dbus-threads.h
 	${DBUS_DIR}/dbus-types.h
 	dbus-arch-deps.h
@@ -31,7 +32,6 @@ set (dbusinclude_HEADERS
 set (DBUS_LIB_SOURCES
 	${DBUS_DIR}/dbus-address.c
 	${DBUS_DIR}/dbus-auth.c
-	${DBUS_DIR}/dbus-auth-script.c
 	${DBUS_DIR}/dbus-bus.c
 	${DBUS_DIR}/dbus-connection.c
 	${DBUS_DIR}/dbus-credentials.c
@@ -52,6 +52,7 @@ set (DBUS_LIB_SOURCES
 	${DBUS_DIR}/dbus-server-debug-pipe.c
 	${DBUS_DIR}/dbus-sha.c
 	${DBUS_DIR}/dbus-signature.c
+	${DBUS_DIR}/dbus-syntax.c
 	${DBUS_DIR}/dbus-timeout.c
 	${DBUS_DIR}/dbus-threads.c
 	${DBUS_DIR}/dbus-transport.c
@@ -74,7 +75,6 @@ endif(UNIX)
 
 set (DBUS_LIB_HEADERS
 	${DBUS_DIR}/dbus-auth.h
-	${DBUS_DIR}/dbus-auth-script.h
 	${DBUS_DIR}/dbus-connection-internal.h
 	${DBUS_DIR}/dbus-credentials.h
 	${DBUS_DIR}/dbus-keyring.h
@@ -149,6 +149,7 @@ set (DBUS_SHARED_HEADERS
 ### should be underscore-prefixed but don't really need 
 ### to be unless they move to DBUS_SHARED_SOURCES later)
 set (DBUS_UTIL_SOURCES
+	${DBUS_DIR}/dbus-auth-script.c
 	${DBUS_DIR}/dbus-auth-util.c
 	${DBUS_DIR}/dbus-credentials-util.c
 	${DBUS_DIR}/dbus-mainloop.c
@@ -158,6 +159,8 @@ set (DBUS_UTIL_SOURCES
 	${DBUS_DIR}/dbus-message-factory.c
 	${DBUS_DIR}/dbus-message-util.c
 	${DBUS_DIR}/dbus-shell.c
+	${DBUS_DIR}/dbus-socket-set.c
+	${DBUS_DIR}/dbus-socket-set-poll.c
 	${DBUS_DIR}/dbus-string-util.c
 	${DBUS_DIR}/dbus-sysdeps-util.c
 )
@@ -170,9 +173,11 @@ if (DBUS_BUILD_TESTS)
 endif (DBUS_BUILD_TESTS)
 
 set (DBUS_UTIL_HEADERS
+	${DBUS_DIR}/dbus-auth-script.h
 	${DBUS_DIR}/dbus-mainloop.h
 	${DBUS_DIR}/dbus-message-factory.h
 	${DBUS_DIR}/dbus-shell.h
+	${DBUS_DIR}/dbus-socket-set.h
 	${DBUS_DIR}/dbus-spawn.h
 	${DBUS_DIR}/dbus-test.h
 )
@@ -227,15 +232,11 @@ endif (WIN32)
 set(libdbus_SOURCES
 	${DBUS_LIB_SOURCES}
 	${DBUS_SHARED_SOURCES}
-	# for debugging
-	${DBUS_UTIL_SOURCES}
 )
 
 set(libdbus_HEADERS 
 	${DBUS_LIB_HEADERS}
 	${DBUS_SHARED_HEADERS}
-	# for debugging
-	${DBUS_UTIL_HEADERS}
 )
 if (MSVC)
     set (BUILD_FILEVERSION ${DBUS_MAJOR_VERSION},${DBUS_MINOR_VERSION},${DBUS_MICRO_VERSION},${DBUS_PATCH_VERSION})

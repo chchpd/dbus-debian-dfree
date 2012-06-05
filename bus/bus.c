@@ -103,19 +103,6 @@ server_get_context (DBusServer *server)
 }
 
 static dbus_bool_t
-server_watch_callback (DBusWatch     *watch,
-                       unsigned int   condition,
-                       void          *data)
-{
-  /* FIXME this can be done in dbus-mainloop.c
-   * if the code in activation.c for the babysitter
-   * watch handler is fixed.
-   */
-
-  return dbus_watch_handle (watch, condition);
-}
-
-static dbus_bool_t
 add_server_watch (DBusWatch  *watch,
                   void       *data)
 {
@@ -124,9 +111,7 @@ add_server_watch (DBusWatch  *watch,
 
   context = server_get_context (server);
 
-  return _dbus_loop_add_watch (context->loop,
-                               watch, server_watch_callback, server,
-                               NULL);
+  return _dbus_loop_add_watch (context->loop, watch);
 }
 
 static void
@@ -138,17 +123,19 @@ remove_server_watch (DBusWatch  *watch,
 
   context = server_get_context (server);
 
-  _dbus_loop_remove_watch (context->loop,
-                           watch, server_watch_callback, server);
+  _dbus_loop_remove_watch (context->loop, watch);
 }
 
-
 static void
-server_timeout_callback (DBusTimeout   *timeout,
-                         void          *data)
+toggle_server_watch (DBusWatch  *watch,
+                     void       *data)
 {
-  /* can return FALSE on OOM but we just let it fire again later */
-  dbus_timeout_handle (timeout);
+  DBusServer *server = data;
+  BusContext *context;
+
+  context = server_get_context (server);
+
+  _dbus_loop_toggle_watch (context->loop, watch);
 }
 
 static dbus_bool_t
@@ -160,8 +147,7 @@ add_server_timeout (DBusTimeout *timeout,
 
   context = server_get_context (server);
 
-  return _dbus_loop_add_timeout (context->loop,
-                                 timeout, server_timeout_callback, server, NULL);
+  return _dbus_loop_add_timeout (context->loop, timeout);
 }
 
 static void
@@ -173,8 +159,7 @@ remove_server_timeout (DBusTimeout *timeout,
 
   context = server_get_context (server);
 
-  _dbus_loop_remove_timeout (context->loop,
-                             timeout, server_timeout_callback, server);
+  _dbus_loop_remove_timeout (context->loop, timeout);
 }
 
 static void
@@ -255,7 +240,7 @@ setup_server (BusContext *context,
   if (!dbus_server_set_watch_functions (server,
                                         add_server_watch,
                                         remove_server_watch,
-                                        NULL,
+                                        toggle_server_watch,
                                         server,
                                         NULL))
     {
@@ -284,7 +269,7 @@ static dbus_bool_t
 process_config_first_time_only (BusContext       *context,
 				BusConfigParser  *parser,
                                 const DBusString *address,
-                                dbus_bool_t      systemd_activation,
+                                BusContextFlags   flags,
 				DBusError        *error)
 {
   DBusString log_prefix;
@@ -300,17 +285,24 @@ process_config_first_time_only (BusContext       *context,
 
   retval = FALSE;
   auth_mechanisms = NULL;
+  pidfile = NULL;
 
   _dbus_init_system_log ();
 
-  context->systemd_activation = systemd_activation;
+  if (flags & BUS_CONTEXT_FLAG_SYSTEMD_ACTIVATION)
+    context->systemd_activation = TRUE;
+  else
+    context->systemd_activation = FALSE;
 
   /* Check for an existing pid file. Of course this is a race;
    * we'd have to use fcntl() locks on the pid file to
    * avoid that. But we want to check for the pid file
    * before overwriting any existing sockets, etc.
    */
-  pidfile = bus_config_parser_get_pidfile (parser);
+
+  if (flags & BUS_CONTEXT_FLAG_WRITE_PID_FILE)
+    pidfile = bus_config_parser_get_pidfile (parser);
+
   if (pidfile != NULL)
     {
       DBusString u;
@@ -509,7 +501,6 @@ process_config_every_time (BusContext      *context,
   DBusString full_address;
   DBusList *link;
   DBusList **dirs;
-  BusActivation *new_activation;
   char *addr;
   const char *servicehelper;
   char *s;
@@ -709,16 +700,17 @@ process_config_postinit (BusContext      *context,
 
 BusContext*
 bus_context_new (const DBusString *config_file,
-                 ForceForkSetting  force_fork,
+                 BusContextFlags   flags,
                  DBusPipe         *print_addr_pipe,
                  DBusPipe         *print_pid_pipe,
                  const DBusString *address,
-                 dbus_bool_t      systemd_activation,
                  DBusError        *error)
 {
-  DBusString log_prefix;
   BusContext *context;
   BusConfigParser *parser;
+
+  _dbus_assert ((flags & BUS_CONTEXT_FLAG_FORK_NEVER) == 0 ||
+                (flags & BUS_CONTEXT_FLAG_FORK_ALWAYS) == 0);
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
@@ -768,7 +760,7 @@ bus_context_new (const DBusString *config_file,
       goto failed;
     }
 
-  if (!process_config_first_time_only (context, parser, address, systemd_activation, error))
+  if (!process_config_first_time_only (context, parser, address, flags, error))
     {
       _DBUS_ASSERT_ERROR_IS_SET (error);
       goto failed;
@@ -863,7 +855,8 @@ bus_context_new (const DBusString *config_file,
     if (context->pidfile)
       _dbus_string_init_const (&u, context->pidfile);
 
-    if ((force_fork != FORK_NEVER && context->fork) || force_fork == FORK_ALWAYS)
+    if (((flags & BUS_CONTEXT_FLAG_FORK_NEVER) == 0 && context->fork) ||
+        (flags & BUS_CONTEXT_FLAG_FORK_ALWAYS))
       {
         _dbus_verbose ("Forking and becoming daemon\n");
 
@@ -1421,9 +1414,6 @@ bus_context_check_security_policy (BusContext     *context,
   dbus_bool_t log;
   int type;
   dbus_bool_t requested_reply;
-  const char *sender_name;
-  const char *sender_loginfo;
-  const char *proposed_recipient_loginfo;
 
   type = dbus_message_get_type (message);
   dest = dbus_message_get_destination (message);
@@ -1589,9 +1579,6 @@ bus_context_check_security_policy (BusContext     *context,
                                          proposed_recipient,
                                          message, &toggles, &log))
     {
-      const char *msg = "Rejected send message, %d matched rules; "
-                        "type=\"%s\", sender=\"%s\" (%s) interface=\"%s\" member=\"%s\" error name=\"%s\" requested_reply=%d destination=\"%s\" (%s))";
-
       complain_about_message (context, DBUS_ERROR_ACCESS_DENIED,
           "Rejected send message", toggles,
           message, sender, proposed_recipient, requested_reply,

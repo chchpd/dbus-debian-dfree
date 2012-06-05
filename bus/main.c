@@ -32,11 +32,11 @@
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>     /* for write() and STDERR_FILENO */
 #endif
 #include "selinux.h"
 
@@ -48,7 +48,7 @@ static int reload_pipe[2];
 #define RELOAD_READ_END 0
 #define RELOAD_WRITE_END 1
 
-static void close_reload_pipe (void);
+static void close_reload_pipe (DBusWatch **);
 
 typedef enum
  {
@@ -125,7 +125,7 @@ signal_handler (int sig)
 static void
 usage (void)
 {
-  fprintf (stderr, DBUS_DAEMON_NAME " [--version] [--session] [--system] [--config-file=FILE] [--print-address[=DESCRIPTOR]] [--print-pid[=DESCRIPTOR]] [--fork] [--nofork] [--introspect] [--address=ADDRESS] [--systemd-activation]\n");
+  fprintf (stderr, DBUS_DAEMON_NAME " [--version] [--session] [--system] [--config-file=FILE] [--print-address[=DESCRIPTOR]] [--print-pid[=DESCRIPTOR]] [--fork] [--nofork] [--introspect] [--address=ADDRESS] [--systemd-activation] [--nopidfile]\n");
   exit (1);
 }
 
@@ -231,7 +231,7 @@ handle_reload_watch (DBusWatch    *watch,
       _dbus_read_socket (reload_pipe[RELOAD_READ_END], &str, 1) != 1)
     {
       _dbus_warn ("Couldn't read from reload pipe.\n");
-      close_reload_pipe ();
+      close_reload_pipe (&watch);
       return TRUE;
     }
 
@@ -286,14 +286,6 @@ handle_reload_watch (DBusWatch    *watch,
   return TRUE;
 }
 
-static dbus_bool_t
-reload_watch_callback (DBusWatch    *watch,
-		       unsigned int  condition,
-		       void         *data)
-{
-  return dbus_watch_handle (watch, condition);
-}
-
 static void
 setup_reload_pipe (DBusLoop *loop)
 {
@@ -323,8 +315,7 @@ setup_reload_pipe (DBusLoop *loop)
       exit (1);
     }
 
-  if (!_dbus_loop_add_watch (loop, watch, reload_watch_callback,
-			     NULL, NULL))
+  if (!_dbus_loop_add_watch (loop, watch))
     {
       _dbus_warn ("Unable to add reload watch to main loop: %s\n",
 		  error.message);
@@ -335,8 +326,13 @@ setup_reload_pipe (DBusLoop *loop)
 }
 
 static void
-close_reload_pipe (void)
+close_reload_pipe (DBusWatch **watch)
 {
+    _dbus_loop_remove_watch (bus_context_get_loop (context), *watch);
+    _dbus_watch_invalidate (*watch);
+    _dbus_watch_unref (*watch);
+    *watch = NULL;
+
     _dbus_close_socket (reload_pipe[RELOAD_READ_END], NULL);
     reload_pipe[RELOAD_READ_END] = -1;
 
@@ -359,9 +355,7 @@ main (int argc, char **argv)
   int i;
   dbus_bool_t print_address;
   dbus_bool_t print_pid;
-  dbus_bool_t is_session_bus;
-  int force_fork;
-  dbus_bool_t systemd_activation;
+  BusContextFlags flags;
 
   if (!_dbus_string_init (&config_file))
     return 1;
@@ -377,9 +371,8 @@ main (int argc, char **argv)
 
   print_address = FALSE;
   print_pid = FALSE;
-  is_session_bus = FALSE;
-  force_fork = FORK_FOLLOW_CONFIG_FILE;
-  systemd_activation = FALSE;
+
+  flags = BUS_CONTEXT_FLAG_WRITE_PID_FILE;
 
   prev_arg = NULL;
   i = 1;
@@ -390,17 +383,35 @@ main (int argc, char **argv)
       if (strcmp (arg, "--help") == 0 ||
           strcmp (arg, "-h") == 0 ||
           strcmp (arg, "-?") == 0)
-        usage ();
+        {
+          usage ();
+        }
       else if (strcmp (arg, "--version") == 0)
-        version ();
+        {
+          version ();
+        }
       else if (strcmp (arg, "--introspect") == 0)
-        introspect ();
+        {
+          introspect ();
+        }
       else if (strcmp (arg, "--nofork") == 0)
-        force_fork = FORK_NEVER;
+        {
+          flags &= ~BUS_CONTEXT_FLAG_FORK_ALWAYS;
+          flags |= BUS_CONTEXT_FLAG_FORK_NEVER;
+        }
       else if (strcmp (arg, "--fork") == 0)
-        force_fork = FORK_ALWAYS;
+        {
+          flags &= ~BUS_CONTEXT_FLAG_FORK_NEVER;
+          flags |= BUS_CONTEXT_FLAG_FORK_ALWAYS;
+        }
+      else if (strcmp (arg, "--nopidfile") == 0)
+        {
+          flags &= ~BUS_CONTEXT_FLAG_WRITE_PID_FILE;
+        }
       else if (strcmp (arg, "--systemd-activation") == 0)
-        systemd_activation = TRUE;
+        {
+          flags |= BUS_CONTEXT_FLAG_SYSTEMD_ACTIVATION;
+        }
       else if (strcmp (arg, "--system") == 0)
         {
           check_two_config_files (&config_file, "system");
@@ -436,7 +447,9 @@ main (int argc, char **argv)
             exit (1);
         }
       else if (strcmp (arg, "--config-file") == 0)
-        ; /* wait for next arg */
+        {
+          /* wait for next arg */
+        }
       else if (strstr (arg, "--address=") == arg)
         {
           const char *file;
@@ -458,7 +471,9 @@ main (int argc, char **argv)
             exit (1);
         }
       else if (strcmp (arg, "--address") == 0)
-        ; /* wait for next arg */
+        {
+          /* wait for next arg */
+        }
       else if (strstr (arg, "--print-address=") == arg)
         {
           const char *desc;
@@ -484,7 +499,9 @@ main (int argc, char **argv)
           print_address = TRUE;
         }
       else if (strcmp (arg, "--print-address") == 0)
-        print_address = TRUE; /* and we'll get the next arg if appropriate */
+        {
+          print_address = TRUE; /* and we'll get the next arg if appropriate */
+        }
       else if (strstr (arg, "--print-pid=") == arg)
         {
           const char *desc;
@@ -510,9 +527,13 @@ main (int argc, char **argv)
           print_pid = TRUE;
         }
       else if (strcmp (arg, "--print-pid") == 0)
-        print_pid = TRUE; /* and we'll get the next arg if appropriate */
+        {
+          print_pid = TRUE; /* and we'll get the next arg if appropriate */
+        }
       else
-        usage ();
+        {
+          usage ();
+        }
 
       prev_arg = arg;
 
@@ -576,10 +597,9 @@ main (int argc, char **argv)
     }
 
   dbus_error_init (&error);
-  context = bus_context_new (&config_file, force_fork,
+  context = bus_context_new (&config_file, flags,
                              &print_addr_pipe, &print_pid_pipe,
                              _dbus_string_get_length(&address) > 0 ? &address : NULL,
-                             systemd_activation,
                              &error);
   _dbus_string_free (&config_file);
   if (context == NULL)

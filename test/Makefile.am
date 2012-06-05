@@ -4,17 +4,36 @@
 SUBDIRS= . name-test 
 DIST_SUBDIRS=name-test
 
-INCLUDES=-I$(top_srcdir) $(DBUS_TEST_CFLAGS) 
+AM_CPPFLAGS = \
+	-I$(top_srcdir) \
+	$(GLIB_CFLAGS) \
+	$(DBUS_GLIB_CFLAGS) \
+	$(NULL)
 
-libdbus_testutils_la_SOURCES = test-utils.h test-utils.c
+# improve backtraces from test stuff
+AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
+
+static_cppflags = \
+	$(AM_CPPFLAGS) \
+	-DDBUS_STATIC_BUILD \
+	$(NULL)
+
+libdbus_testutils_la_CPPFLAGS = \
+	$(static_cppflags)
+libdbus_testutils_la_SOURCES = \
+	test-utils.c \
+	test-utils.h \
+	$(NULL)
+libdbus_testutils_la_LIBADD = \
+	$(top_builddir)/dbus/libdbus-internal.la \
+	$(NULL)
 
 noinst_LTLIBRARIES = libdbus-testutils.la
 
 if DBUS_BUILD_TESTS
 ## break-loader removed for now
-## most of these binaries are used in tests but are not themselves tests
+## these binaries are used in tests but are not themselves tests
 TEST_BINARIES = \
-	shell-test \
 	spawn-test \
 	test-exit \
 	test-names \
@@ -24,16 +43,10 @@ TEST_BINARIES = \
 	test-sleep-forever \
 	$(NULL)
 
-## these are the things to run in make check (i.e. they are actual tests)
-## (binaries in here must also be in TEST_BINARIES)
-TESTS = \
-	shell-test \
-	$(NULL)
-
 ## These are conceptually part of directories that come earlier in SUBDIRS
 ## order, but we don't want to run them til we arrive in this directory,
 ## since they depend on stuff from this directory
-TESTS += \
+TESTS = \
 	../bus/bus-test$(EXEEXT) \
 	../bus/bus-test-system$(EXEEXT) \
 	../dbus/dbus-test$(EXEEXT) \
@@ -52,58 +65,26 @@ endif !DBUS_BUILD_TESTS
 
 noinst_PROGRAMS= $(TEST_BINARIES)
 
-test_service_SOURCES=				\
-	test-service.c
-
-test_names_SOURCES=				\
-	test-names.c
-
-##break_loader_SOURCES=				\
-##	break-loader.c
-
-test_shell_service_SOURCES =			\
-	test-shell-service.c
-
-shell_test_SOURCES=                             \
-        shell-test.c
-
-spawn_test_SOURCES=				\
-	spawn-test.c
-
-test_exit_SOURCES =				\
-	test-exit.c
-
-test_segfault_SOURCES =				\
-	test-segfault.c
-
-test_sleep_forever_SOURCES =			\
-	test-sleep-forever.c
-
-# This assumes that most tests will be linked to libdbus-internal;
-# tests linked to only the public libdbus have their own CPPFLAGS.
-AM_CPPFLAGS=-DDBUS_STATIC_BUILD
-TEST_LIBS=$(top_builddir)/dbus/libdbus-internal.la $(DBUS_TEST_LIBS)
-
-test_service_LDADD=libdbus-testutils.la $(TEST_LIBS)
-test_service_LDFLAGS=@R_DYNAMIC_LDFLAG@
-test_names_LDADD=libdbus-testutils.la $(TEST_LIBS)
-test_names_LDFLAGS=@R_DYNAMIC_LDFLAG@
-## break_loader_LDADD= $(TEST_LIBS)
-## break_loader_LDFLAGS=@R_DYNAMIC_LDFLAG@
-test_shell_service_LDADD=libdbus-testutils.la $(TEST_LIBS)
-test_shell_service_LDFLAGS=@R_DYNAMIC_LDFLAG@
-shell_test_LDADD=libdbus-testutils.la $(TEST_LIBS)
-shell_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
-spawn_test_LDADD=$(TEST_LIBS)
-spawn_test_LDFLAGS=@R_DYNAMIC_LDFLAG@
+test_service_CPPFLAGS = $(static_cppflags)
+test_service_LDADD = libdbus-testutils.la
+test_names_CPPFLAGS = $(static_cppflags)
+test_names_LDADD = libdbus-testutils.la
+## break_loader_CPPFLAGS = $(static_cppflags)
+## break_loader_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+test_shell_service_CPPFLAGS = $(static_cppflags)
+test_shell_service_LDADD = libdbus-testutils.la
+shell_test_CPPFLAGS = $(static_cppflags)
+shell_test_LDADD = libdbus-testutils.la
+spawn_test_CPPFLAGS = $(static_cppflags)
+spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 
 test_refs_SOURCES = internals/refs.c
-test_refs_CPPFLAGS = -DDBUS_STATIC_BUILD $(GLIB_CFLAGS)
-test_refs_LDADD = libdbus-testutils.la $(GLIB_LIBS) $(TEST_LIBS)
+test_refs_CPPFLAGS = $(static_cppflags)
+test_refs_LDADD = libdbus-testutils.la $(GLIB_LIBS)
 
 test_syslog_SOURCES = internals/syslog.c
-test_syslog_CPPFLAGS = -DDBUS_STATIC_BUILD $(GLIB_CFLAGS)
-test_syslog_LDADD = libdbus-testutils.la $(GLIB_LIBS) $(TEST_LIBS)
+test_syslog_CPPFLAGS = $(static_cppflags)
+test_syslog_LDADD = libdbus-testutils.la $(GLIB_LIBS)
 
 EXTRA_DIST = dbus-test-runner
 
@@ -112,14 +93,22 @@ testexecdir = $(libdir)/dbus-1.0/test
 testexec_PROGRAMS =
 
 installable_tests = \
+	shell-test \
+	$(NULL)
+
+if DBUS_WITH_GLIB
+installable_tests += \
 	test-corrupt \
 	test-dbus-daemon \
+	test-dbus-daemon-eavesdrop \
 	test-loopback \
 	test-marshal \
 	test-refs \
 	test-relay \
+	test-syntax \
 	test-syslog \
 	$(NULL)
+endif DBUS_WITH_GLIB
 
 installcheck_tests =
 installcheck_environment = \
@@ -136,39 +125,40 @@ TESTS_ENVIRONMENT = \
 	$(NULL)
 
 test_corrupt_SOURCES = corrupt.c
-test_corrupt_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_corrupt_LDFLAGS = @R_DYNAMIC_LDFLAG@
 test_corrupt_LDADD = $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
     $(DBUS_GLIB_LIBS)
 
 test_loopback_SOURCES = loopback.c
-test_loopback_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_loopback_LDFLAGS = @R_DYNAMIC_LDFLAG@
 test_loopback_LDADD = $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
     $(DBUS_GLIB_LIBS)
 
 test_relay_SOURCES = relay.c
-test_relay_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_relay_LDFLAGS = @R_DYNAMIC_LDFLAG@
 test_relay_LDADD = $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
     $(DBUS_GLIB_LIBS)
 
 test_dbus_daemon_SOURCES = dbus-daemon.c
-test_dbus_daemon_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_dbus_daemon_LDFLAGS = @R_DYNAMIC_LDFLAG@
 test_dbus_daemon_LDADD = $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
     $(DBUS_GLIB_LIBS)
 
+test_dbus_daemon_eavesdrop_SOURCES = dbus-daemon-eavesdrop.c
+test_dbus_daemon_eavesdrop_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
+test_dbus_daemon_eavesdrop_LDFLAGS = @R_DYNAMIC_LDFLAG@
+test_dbus_daemon_eavesdrop_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+    $(GLIB_LIBS) \
+    $(DBUS_GLIB_LIBS)
+
 test_marshal_SOURCES = marshal.c
-test_marshal_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_marshal_LDFLAGS = @R_DYNAMIC_LDFLAG@
 test_marshal_LDADD = $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
     $(DBUS_GLIB_LIBS)
+
+test_syntax_SOURCES = syntax.c
+test_syntax_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+    $(GLIB_LIBS)
 
 if DBUS_ENABLE_MODULAR_TESTS
 TESTS += $(installable_tests)
@@ -272,6 +262,7 @@ static_data = \
 	data/valid-config-files/basic.conf \
 	data/valid-config-files/basic.d/basic.conf \
 	data/valid-config-files/entities.conf \
+	data/valid-config-files/incoming-limit.conf \
 	data/valid-config-files/many-rules.conf \
 	data/valid-config-files/system.d/test.conf \
 	data/valid-messages/array-of-array-of-uint32.message \
