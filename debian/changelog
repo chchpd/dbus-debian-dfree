@@ -1,4 +1,4 @@
-dbus (1.6.0) UNRELEASED; urgency=low
+dbus (1.6.0-1) UNRELEASED; urgency=low
 
   * Merge from "experimental" (1.5.12 was accidentally uploaded to unstable)
   * New upstream stable release
