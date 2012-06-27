@@ -1,3 +1,12 @@
+dbus (1.6.2-1) UNRELEASED; urgency=low
+
+  * New upstream stable release
+    - dbus-launch --exit-with-session no longer monitors its stdin if
+      run under X11 (Closes: #453755)
+  * Remove the workaround for #453755 from dbus-Xsession
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Jun 2012 17:57:46 +0100
+
 dbus (1.6.0-1) unstable; urgency=low
 
   * Merge from "experimental" (1.5.12 was accidentally uploaded to unstable)
