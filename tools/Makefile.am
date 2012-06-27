@@ -2,6 +2,7 @@ configdir=$(sysconfdir)/dbus-1
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
+	$(DBUS_STATIC_BUILD_CPPFLAGS) \
 	$(DBUS_X_CFLAGS) \
 	-DDBUS_COMPILATION \
 	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
@@ -71,6 +72,9 @@ EXTRA_DIST = run-with-tmp-session-bus.sh strtoll.c strtoull.c
 CLEANFILES = 				\
 	run-with-tmp-session-bus.conf
 
-#create the /var/lib/data directory for dbus-uuidgen
-localstatelibdir = $(localstatedir)/lib/dbus
-localstatelib_DATA =
+# create the /var/lib/dbus directory for dbus-uuidgen
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/lib/dbus
+
+installcheck-local:
+	test -d $(DESTDIR)$(localstatedir)/lib/dbus

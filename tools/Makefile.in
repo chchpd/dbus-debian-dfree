@@ -15,7 +15,6 @@
 
 @SET_MAKE@
 
-
 VPATH = @srcdir@
 am__make_dryrun = \
   { \
@@ -77,8 +76,7 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @DBUS_UNIX_TRUE@am__EXEEXT_1 = dbus-cleanup-sockets$(EXEEXT) \
 @DBUS_UNIX_TRUE@	dbus-uuidgen$(EXEEXT)
-am__installdirs = "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(localstatelibdir)"
+am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_dbus_cleanup_sockets_OBJECTS = dbus-cleanup-sockets.$(OBJEXT)
 dbus_cleanup_sockets_OBJECTS = $(am_dbus_cleanup_sockets_OBJECTS)
@@ -143,34 +141,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
-DATA = $(localstatelib_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -215,6 +185,7 @@ DBUS_PATH_OR_ABSTRACT = @DBUS_PATH_OR_ABSTRACT@
 DBUS_PREFIX = @DBUS_PREFIX@
 DBUS_SESSION_BUS_DEFAULT_ADDRESS = @DBUS_SESSION_BUS_DEFAULT_ADDRESS@
 DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
+DBUS_STATIC_BUILD_CPPFLAGS = @DBUS_STATIC_BUILD_CPPFLAGS@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
 DBUS_SYSTEM_PID_FILE = @DBUS_SYSTEM_PID_FILE@
 DBUS_SYSTEM_SOCKET = @DBUS_SYSTEM_SOCKET@
@@ -384,6 +355,7 @@ top_srcdir = @top_srcdir@
 configdir = $(sysconfdir)/dbus-1
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
+	$(DBUS_STATIC_BUILD_CPPFLAGS) \
 	$(DBUS_X_CFLAGS) \
 	-DDBUS_COMPILATION \
 	-DDBUS_MACHINE_UUID_FILE=\""$(localstatedir)/lib/dbus/machine-id"\" \
@@ -438,10 +410,6 @@ EXTRA_DIST = run-with-tmp-session-bus.sh strtoll.c strtoull.c
 CLEANFILES = \
 	run-with-tmp-session-bus.conf
 
-
-#create the /var/lib/data directory for dbus-uuidgen
-localstatelibdir = $(localstatedir)/lib/dbus
-localstatelib_DATA = 
 all: all-am
 
 .SUFFIXES:
@@ -579,27 +547,6 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-localstatelibDATA: $(localstatelib_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(localstatelib_DATA)'; test -n "$(localstatelibdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(localstatelibdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(localstatelibdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(localstatelibdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(localstatelibdir)" || exit $$?; \
-	done
-
-uninstall-localstatelibDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(localstatelib_DATA)'; test -n "$(localstatelibdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(localstatelibdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -685,9 +632,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(DATA)
+all-am: Makefile $(PROGRAMS)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(localstatelibdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -743,7 +690,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-localstatelibDATA
+install-data-am: install-data-local
 
 install-dvi: install-dvi-am
 
@@ -769,7 +716,7 @@ install-ps: install-ps-am
 
 install-ps-am:
 
-installcheck-am:
+installcheck-am: installcheck-local
 
 maintainer-clean: maintainer-clean-am
 	-rm -rf ./$(DEPDIR)
@@ -789,7 +736,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS uninstall-localstatelibDATA
+uninstall-am: uninstall-binPROGRAMS
 
 .MAKE: install-am install-strip
 
@@ -797,17 +744,24 @@ uninstall-am: uninstall-binPROGRAMS uninstall-localstatelibDATA
 	clean-generic clean-libtool ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
-	install-localstatelibDATA install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-localstatelibDATA
+	install-binPROGRAMS install-data install-data-am \
+	install-data-local install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installcheck-local installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-binPROGRAMS
 
+
+# create the /var/lib/dbus directory for dbus-uuidgen
+install-data-local:
+	$(MKDIR_P) $(DESTDIR)$(localstatedir)/lib/dbus
+
+installcheck-local:
+	test -d $(DESTDIR)$(localstatedir)/lib/dbus
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
