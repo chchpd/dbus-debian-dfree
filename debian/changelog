@@ -1,11 +1,11 @@
-dbus (1.6.2-2) UNRELEASED; urgency=low
+dbus (1.6.2-2) unstable; urgency=low
 
   * Disable "developer mode", which was intended to be off-by-default,
     but was incorrectly on-by-default in 1.6.2, causing an incorrect
     assertion to be hit when starting fcitx before dbus-launch.
     (Closes: #680027)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 03 Jul 2012 16:16:57 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 03 Jul 2012 19:33:42 +0100
 
 dbus (1.6.2-1) unstable; urgency=low
 
