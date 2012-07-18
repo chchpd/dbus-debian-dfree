@@ -1,3 +1,9 @@
+dbus (1.6.2-3) UNRELEASED; urgency=low
+
+  * gbp.conf: switch to experimental branch
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 18 Jul 2012 18:42:52 +0100
+
 dbus (1.6.2-2) unstable; urgency=low
 
   * Disable "developer mode", which was intended to be off-by-default,
