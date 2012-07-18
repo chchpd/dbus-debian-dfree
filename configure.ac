@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [6])
-m4_define([dbus_micro_version], [2])
+m4_define([dbus_micro_version], [4])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -127,8 +127,9 @@ AM_CONDITIONAL(DBUS_CYGWIN, test "$dbus_cygwin" = yes)
 # this must come first: other options use this to set their defaults
 AC_ARG_ENABLE([developer],
   [AS_HELP_STRING([--enable-developer],
-    [set defaults to be appropriate for a D-Bus developer instead of a distribution/end-user]),
-    [], enable_developer=no])
+    [set defaults to be appropriate for a D-Bus developer instead of a distribution/end-user])],
+  [],
+  [enable_developer=no])
 
 DBUS_STATIC_BUILD_CPPFLAGS=
 if test "x$enable_shared" = xno; then
