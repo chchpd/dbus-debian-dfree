@@ -1,6 +1,9 @@
-dbus (1.6.2-3) UNRELEASED; urgency=low
+dbus (1.6.4-1) UNRELEASED; urgency=low
 
   * gbp.conf: switch to experimental branch
+  * New upstream stable release
+    - remove incorrect assertion and have correct default for developer mode
+      (Closes: #680027, differently)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 18 Jul 2012 18:42:52 +0100
 

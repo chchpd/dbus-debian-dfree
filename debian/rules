@@ -26,7 +26,6 @@ override_dh_auto_configure:
 	dh_auto_configure \
 		-- \
 		$(common_configure_flags) \
-		--disable-developer \
 		--enable-xml-docs \
 		--enable-doxygen-docs \
 		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
