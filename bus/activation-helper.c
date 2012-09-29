@@ -140,21 +140,12 @@ out_all:
   return desktop_file;
 }
 
-/* Cleares the environment, except for DBUS_VERBOSE and DBUS_STARTER_x */
+/* Clears the environment, except for DBUS_STARTER_x,
+ * which we hardcode to the system bus.
+ */
 static dbus_bool_t
 clear_environment (DBusError *error)
 {
-  const char *starter_env = NULL;
-#ifdef DBUS_ENABLE_VERBOSE_MODE
-  const char *debug_env = NULL;
-
-  /* are we debugging */
-  debug_env = _dbus_getenv ("DBUS_VERBOSE");
-#endif
-
-  /* we save the starter */
-  starter_env = _dbus_getenv ("DBUS_STARTER_ADDRESS");
-
 #ifndef ACTIVATION_LAUNCHER_TEST
   /* totally clear the environment */
   if (!_dbus_clearenv ())
@@ -165,17 +156,8 @@ clear_environment (DBusError *error)
     }
 #endif
 
-#ifdef DBUS_ENABLE_VERBOSE_MODE
-  /* restore the debugging environment setting if set */
-  if (debug_env)
-    _dbus_setenv ("DBUS_VERBOSE", debug_env);
-#endif
-
-  /* restore the starter */
-  if (starter_env)
-    _dbus_setenv ("DBUS_STARTER_ADDRESS", starter_env);
-
-  /* set the type, which must be system if we got this far */
+  /* Ensure the bus is set to system */
+  _dbus_setenv ("DBUS_STARTER_ADDRESS", DBUS_SYSTEM_BUS_DEFAULT_ADDRESS);
   _dbus_setenv ("DBUS_STARTER_BUS_TYPE", "system");
 
   return TRUE;

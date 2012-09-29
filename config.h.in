@@ -206,6 +206,9 @@
 /* Define to 1 if you have the `getpeerucred' function. */
 #undef HAVE_GETPEERUCRED
 
+/* Define to 1 if you have the `getresuid' function. */
+#undef HAVE_GETRESUID
+
 /* Have GNU-style varargs macros */
 #undef HAVE_GNUC_VARARGS
 
@@ -217,6 +220,9 @@
 
 /* Have ISO C99 varargs macros */
 #undef HAVE_ISO_VARARGS
+
+/* Define to 1 if you have the `issetugid' function. */
+#undef HAVE_ISSETUGID
 
 /* audit daemon SELinux support */
 #undef HAVE_LIBAUDIT
@@ -253,6 +259,9 @@
 
 /* Have POSIX function getpwnam_r */
 #undef HAVE_POSIX_GETPWNAM_R
+
+/* Define to 1 if you have the `secure_getenv' function. */
+#undef HAVE_SECURE_GETENV
 
 /* SELinux support */
 #undef HAVE_SELINUX
@@ -343,6 +352,9 @@
 
 /* Define to 1 if you have the <wspiapi.h> header file. */
 #undef HAVE_WSPIAPI_H
+
+/* Define to 1 if you have the `__secure_getenv' function. */
+#undef HAVE___SECURE_GETENV
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
