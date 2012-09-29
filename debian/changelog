@@ -1,3 +1,9 @@
+dbus (1.6.4-2) UNRELEASED; urgency=low
+
+  * Merge from experimental
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 29 Sep 2012 13:10:43 +0100
+
 dbus (1.6.4-1) experimental; urgency=low
 
   * gbp.conf: switch to experimental branch
