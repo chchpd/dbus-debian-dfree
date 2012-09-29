@@ -260,9 +260,6 @@
 /* Have POSIX function getpwnam_r */
 #undef HAVE_POSIX_GETPWNAM_R
 
-/* Define to 1 if you have the `secure_getenv' function. */
-#undef HAVE_SECURE_GETENV
-
 /* SELinux support */
 #undef HAVE_SELINUX
 
@@ -352,9 +349,6 @@
 
 /* Define to 1 if you have the <wspiapi.h> header file. */
 #undef HAVE_WSPIAPI_H
-
-/* Define to 1 if you have the `__secure_getenv' function. */
-#undef HAVE___SECURE_GETENV
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
