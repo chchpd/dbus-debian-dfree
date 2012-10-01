@@ -1,3 +1,9 @@
+dbus (1.6.8-1+exp1) UNRELEASED; urgency=low
+
+  * Branch for experimental
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 01 Oct 2012 14:49:32 +0100
+
 dbus (1.6.8-1) unstable; urgency=low
 
   * Merge from experimental
