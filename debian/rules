@@ -7,12 +7,18 @@
 include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --builddirectory=build --with autoreconf --parallel
+	dh $@ $(dh_options)
 
 libdbusN := $(shell sed -rn 's/Package:[[:space:]]*(libdbus-[0-9-]+)[[:space:]]*$$/\1/p' debian/control | head -n 1)
 libdbus_soname := $(patsubst libdbus-1-%,libdbus-1.so.%,$(libdbusN))
 
 LDFLAGS += -Wl,--as-needed
+
+dh_options = \
+	--builddirectory=build \
+	--with autoreconf \
+	--parallel \
+	$(NULL)
 
 common_configure_flags := \
 		--disable-silent-rules \
@@ -44,6 +50,7 @@ normal_configure_flags += \
 	$(NULL)
 else
 # documentation disabled
+dh_options += -Ndbus-1-doc
 normal_configure_flags += \
 	--disable-xml-docs \
 	--disable-doxygen-docs \
