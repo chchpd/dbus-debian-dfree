@@ -31,7 +31,6 @@ debug_configure_flags := \
 	--disable-doxygen-docs \
 	--enable-asserts \
 	--enable-checks \
-	--enable-tests \
 	--enable-verbose-mode \
 	--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
 	--libdir='$${prefix}/lib' \
@@ -49,6 +48,13 @@ normal_configure_flags += \
 	--disable-xml-docs \
 	--disable-doxygen-docs \
 	$(NULL)
+endif
+
+ifeq ($(filter stage1,$(DEB_BUILD_PROFILE)),)
+# not a stage1 build - build all the tests
+debug_configure_flags += \
+		--enable-tests \
+		$(NULL)
 endif
 
 # libdbus doesn't have --with-valgrind=auto yet. We want to enable it
