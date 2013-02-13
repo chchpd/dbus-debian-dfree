@@ -36,7 +36,7 @@ debug_configure_flags := \
 	--libdir='$${prefix}/lib' \
 	$(NULL)
 
-ifeq ($(filter nodocs,$(DEB_BUILD_OPTIONS)),)
+ifeq ($(filter nodocs,$(DEB_BUILD_OPTIONS))$(filter stage1,$(DEB_BUILD_PROFILE)),)
 # documentation enabled
 normal_configure_flags += \
 	--enable-xml-docs \
