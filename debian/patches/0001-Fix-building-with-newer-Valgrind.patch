@@ -1,0 +1,96 @@
+From: Arun Raghavan <arun.raghavan@collabora.co.uk>
+Date: Fri, 12 Oct 2012 21:52:03 +0530
+Subject: [PATCH] Fix building with newer Valgrind
+
+Newer valgrind (tried with 3.8.0) defines macros so that a terminating
+semi-colon is required. This fixes usage to follow that convention.
+
+[edited to remove comments that are no longer useful -smcv]
+Bug: https://bugs.freedesktop.org/show_bug.cgi?id=55932
+Reviewed-by: Simon McVittie <simon.mcvittie@collabora.co.uk>
+Applied-upstream: 1.7.0, commit:e516a31f59abbbf7cbfcc3396ef41162188a7f5c
+---
+ dbus/dbus-mempool.c           |   12 ++++++------
+ dbus/dbus-valgrind-internal.h |    8 ++++----
+ 2 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/dbus/dbus-mempool.c b/dbus/dbus-mempool.c
+index 33aabf9..0c3f117 100644
+--- a/dbus/dbus-mempool.c
++++ b/dbus/dbus-mempool.c
+@@ -173,7 +173,7 @@ _dbus_mem_pool_new (int element_size,
+   _dbus_assert ((pool->block_size %
+                  pool->element_size) == 0);
+ 
+-  VALGRIND_CREATE_MEMPOOL (pool, 0, zero_elements)
++  VALGRIND_CREATE_MEMPOOL (pool, 0, zero_elements);
+ 
+   return pool;
+ }
+@@ -188,7 +188,7 @@ _dbus_mem_pool_free (DBusMemPool *pool)
+ {
+   DBusMemBlock *block;
+ 
+-  VALGRIND_DESTROY_MEMPOOL (pool)
++  VALGRIND_DESTROY_MEMPOOL (pool);
+ 
+   block = pool->blocks;
+   while (block != NULL)
+@@ -241,7 +241,7 @@ _dbus_mem_pool_alloc (DBusMemPool *pool)
+           pool->allocated_elements += 1;
+ 
+           VALGRIND_MEMPOOL_ALLOC (pool, (void *) &block->elements[0],
+-              pool->element_size)
++              pool->element_size);
+           return (void*) &block->elements[0];
+         }
+       else
+@@ -261,7 +261,7 @@ _dbus_mem_pool_alloc (DBusMemPool *pool)
+ 
+           pool->free_elements = pool->free_elements->next;
+ 
+-          VALGRIND_MEMPOOL_ALLOC (pool, element, pool->element_size)
++          VALGRIND_MEMPOOL_ALLOC (pool, element, pool->element_size);
+ 
+           if (pool->zero_elements)
+             memset (element, '\0', pool->element_size);
+@@ -329,7 +329,7 @@ _dbus_mem_pool_alloc (DBusMemPool *pool)
+ 
+           pool->allocated_elements += 1;
+ 
+-          VALGRIND_MEMPOOL_ALLOC (pool, element, pool->element_size)
++          VALGRIND_MEMPOOL_ALLOC (pool, element, pool->element_size);
+           return element;
+         }
+     }
+@@ -347,7 +347,7 @@ dbus_bool_t
+ _dbus_mem_pool_dealloc (DBusMemPool *pool,
+                         void        *element)
+ {
+-  VALGRIND_MEMPOOL_FREE (pool, element)
++  VALGRIND_MEMPOOL_FREE (pool, element);
+ 
+ #ifdef DBUS_BUILD_TESTS
+   if (_dbus_disable_mem_pools ())
+diff --git a/dbus/dbus-valgrind-internal.h b/dbus/dbus-valgrind-internal.h
+index 55566ec..6760b40 100644
+--- a/dbus/dbus-valgrind-internal.h
++++ b/dbus/dbus-valgrind-internal.h
+@@ -32,10 +32,10 @@
+ #   include <memcheck.h>
+ #   include <valgrind.h>
+ #else
+-#   define VALGRIND_CREATE_MEMPOOL(_1, _2, _3) /* nothing */
+-#   define VALGRIND_DESTROY_MEMPOOL(_1) /* nothing */
+-#   define VALGRIND_MEMPOOL_ALLOC(_1, _2, _3) /* nothing */
+-#   define VALGRIND_MEMPOOL_FREE(_1, _2) /* nothing */
++#   define VALGRIND_CREATE_MEMPOOL(_1, _2, _3) do { } while (0)
++#   define VALGRIND_DESTROY_MEMPOOL(_1) do { } while (0)
++#   define VALGRIND_MEMPOOL_ALLOC(_1, _2, _3) do { } while (0)
++#   define VALGRIND_MEMPOOL_FREE(_1, _2) do { } while (0)
+ 
+ /* Recent gcc will warn if you have a statement that's just a macro
+  * expanding to (0), but not if you have an inline stub function that
+-- 
+1.7.10.4
+

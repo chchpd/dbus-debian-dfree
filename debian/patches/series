@@ -1,1 +1,2 @@
 01_no-fatal-warnings.patch
+0001-Fix-building-with-newer-Valgrind.patch
