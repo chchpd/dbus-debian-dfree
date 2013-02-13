@@ -11,6 +11,9 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
 # features:
 #   libsystemd-daemon-dev (circular dependency)
 #   libsystemd-login-dev (circular dependency)
+# The following packages can be omitted for bootstrapping, but provide extra
+# debugging support in /usr/lib/*/dbus-1.0/debug-build:
+#   valgrind
 # The following packages can be omitted for bootstrapping, but improve test
 # coverage:
 #   libdbus-glib-1-dev (circular dependency)
@@ -34,6 +37,7 @@ Build-Depends: automake (>= 1:1.10),
                python (>= 2.6),
                python-dbus,
                python-gobject,
+               valgrind [amd64 armel armhf i386 mips powerpc ppc64 s390x],
                xmlto,
                xsltproc
 Standards-Version: 3.9.3
