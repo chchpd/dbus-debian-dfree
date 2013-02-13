@@ -4,6 +4,7 @@ dbus (1.6.8-1+exp1) UNRELEASED; urgency=low
   * On architectures where it's currently supported, do the
     debug build with --with-valgrind for better instrumentation
   * Apply patch from upstream to make it build with newer valgrind
+  * debian/rules: factor out production and debug configure flags
 
  -- Simon McVittie <smcv@debian.org>  Mon, 01 Oct 2012 14:49:32 +0100
 

@@ -22,6 +22,23 @@ common_configure_flags := \
 		--with-systemdsystemunitdir=/lib/systemd/system \
 		$(NULL)
 
+normal_configure_flags := \
+	--enable-xml-docs \
+	--enable-doxygen-docs \
+	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+	$(NULL)
+
+debug_configure_flags := \
+	--disable-xml-docs \
+	--disable-doxygen-docs \
+	--enable-asserts \
+	--enable-checks \
+	--enable-tests \
+	--enable-verbose-mode \
+	--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
+	--libdir='$${prefix}/lib' \
+	$(NULL)
+
 # libdbus doesn't have --with-valgrind=auto yet. We want to enable it
 # on those architectures where it exists, while only having to modify
 # debian/control when it works on more architectures.
@@ -29,30 +46,20 @@ common_configure_flags := \
 # We could use --with-valgrind=auto if someone reviewed the patch on
 # <https://bugs.freedesktop.org/show_bug.cgi?id=56925>.
 ifeq (yes,$(shell if pkg-config --exists valgrind; then echo yes; fi))
-maybe_with_valgrind := --with-valgrind
+debug_configure_flags += --with-valgrind
 endif
 
 override_dh_auto_configure:
 	dh_auto_configure \
 		-- \
 		$(common_configure_flags) \
-		--enable-xml-docs \
-		--enable-doxygen-docs \
-		--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
+		$(normal_configure_flags) \
 		$(NULL)
 	dh_auto_configure \
 		--builddirectory=build-debug \
 		-- \
 		$(common_configure_flags) \
-		--disable-xml-docs \
-		--disable-doxygen-docs \
-		--enable-asserts \
-		--enable-checks \
-		--enable-tests \
-		--enable-verbose-mode \
-		${maybe_with_valgrind} \
-		--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
-		--libdir='$${prefix}/lib' \
+		$(debug_configure_flags) \
 		$(NULL)
 
 override_dh_auto_build:
