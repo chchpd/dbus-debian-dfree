@@ -23,8 +23,6 @@ common_configure_flags := \
 		$(NULL)
 
 normal_configure_flags := \
-	--enable-xml-docs \
-	--enable-doxygen-docs \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
 	$(NULL)
 
@@ -38,6 +36,20 @@ debug_configure_flags := \
 	--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
 	--libdir='$${prefix}/lib' \
 	$(NULL)
+
+ifeq ($(filter nodocs,$(DEB_BUILD_OPTIONS)),)
+# documentation enabled
+normal_configure_flags += \
+	--enable-xml-docs \
+	--enable-doxygen-docs \
+	$(NULL)
+else
+# documentation disabled
+normal_configure_flags += \
+	--disable-xml-docs \
+	--disable-doxygen-docs \
+	$(NULL)
+endif
 
 # libdbus doesn't have --with-valgrind=auto yet. We want to enable it
 # on those architectures where it exists, while only having to modify
