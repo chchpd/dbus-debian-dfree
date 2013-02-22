@@ -23,7 +23,12 @@ if (MEINPROC4_EXECUTABLE OR XMLTO_EXECUTABLE)
   OPTION(DBUS_ENABLE_XML_DOCS "build XML  documentation (requires xmlto or meinproc4)" ON)
 endif (MEINPROC4_EXECUTABLE OR XMLTO_EXECUTABLE)
 
-if (MEINPROC4_EXECUTABLE)
+if (XMLTO_EXECUTABLE)
+	set (DOCBOOK_GENERATOR_NAME "xmlto" PARENT_SCOPE)
+	set(DBUS_XML_DOCS_ENABLED 1)
+	set(MEINPROC4_EXECUTABLE 0)
+	MESSAGE(STATUS "xmlto docbook generator found")
+elseif (MEINPROC4_EXECUTABLE)
 	set(DOCBOOK_GENERATOR_NAME "meinproc4" PARENT_SCOPE)
 	set(DBUS_XML_DOCS_ENABLED 1)
 	if(WIN32)
@@ -33,38 +38,43 @@ if (MEINPROC4_EXECUTABLE)
 		set(_meinproc_install_path ${CMAKE_INSTALL_PREFIX})
 	endif(WIN32)
 	set(STYLESHEET "${_meinproc_install_path}/share/apps/ksgmltools2/docbook/xsl/html/docbook.xsl")
-endif (MEINPROC4_EXECUTABLE)
-  
- 
-if (XMLTO_EXECUTABLE)
-	set (DOCBOOK_GENERATOR_NAME "xmlto" PARENT_SCOPE)
-	set(DBUS_XML_DOCS_ENABLED 1)
-	MESSAGE(STATUS "xmlto docbook generator found")
-endif (XMLTO_EXECUTABLE)
+endif ()
 
 if (DBUS_ENABLE_XML_DOCS)
 
-macro (DOCBOOK _sources _options)
+macro (DOCBOOK _sources _format)
   get_filename_component(_infile ${_sources} ABSOLUTE)
-  get_filename_component(_basename ${_infile} NAME_WE)
-  set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_basename}.html)
+  get_filename_component(_name ${_infile} NAME)
 
+  if (${_format} STREQUAL "man")
+    string(REPLACE ".xml" "" _outname ${_name})
+    set(STYLESHEET "${DOCBOOKXSL_DIR}/manpages/docbook.xsl")
+  else()
+    string(REPLACE ".xml" ".html" _outname ${_name})
+    set(STYLESHEET "${DOCBOOKXSL_DIR}/html/docbook.xsl")
+  endif ()
+
+  set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_outname})
   if (EXISTS ${_sources})
 	  if (MEINPROC4_EXECUTABLE)
-		  ADD_CUSTOM_TARGET(${_basename}.html ALL
-			${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} -o ${_outfile} ${_infile} 
-			DEPENDS ${_infile} 
+		  ADD_CUSTOM_TARGET(${_outname} ALL
+			${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} -o ${_outfile} ${_infile}
+			DEPENDS ${_infile}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 	  endif ()
 	  if (XMLTO_EXECUTABLE)
-		  ADD_CUSTOM_TARGET(${_basename}.html ALL
-			${XMLTO_EXECUTABLE} -vv ${_options} ${_infile} 
-			DEPENDS ${_infile} 
+		  ADD_CUSTOM_TARGET(${_outname} ALL
+			${XMLTO_EXECUTABLE} -vv ${_format} ${_infile}
+			DEPENDS ${_infile}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 	  endif ()
-	  install(FILES ${_outfile} DESTINATION share/doc/dbus)
+	  if (${_format} STREQUAL "man")
+		  install(FILES ${_outfile} DESTINATION share/man/man1)
+	  else ()
+		  install(FILES ${_outfile} DESTINATION share/doc/dbus)
+	  endif ()
   else ()
 	  MESSAGE(STATUS "skipping xml doc generating for ${_infile}, file not found")
   endif ()
@@ -98,11 +108,26 @@ DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-test-plan.xml html-nochunks)
 DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-tutorial.xml html-nochunks)
 DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-specification.xml html-nochunks)
 DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-faq.xml html-nochunks)
-DOCBOOK(${CMAKE_SOURCE_DIR}/bus/dbus-daemon.xml html-nochunks)
-DOCBOOK(${CMAKE_SOURCE_DIR}/tools/dbus-monitor.xml html-nochunks)
-DOCBOOK(${CMAKE_SOURCE_DIR}/tools/dbus-send.xml html-nochunks)
-DOCBOOK(${CMAKE_SOURCE_DIR}/tools/dbus-launch.xml html-nochunks)
-
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-cleanup-sockets.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-cleanup-sockets.1.xml)
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-daemon.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-daemon.1.xml)
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-launch.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-launch.1.xml)
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-monitor.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-monitor.1.xml)
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-send.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-send.1.xml)
+configure_file(${CMAKE_SOURCE_DIR}/../doc/dbus-uuidgen.1.xml.in ${CMAKE_BINARY_DIR}/doc/dbus-uuidgen.1.xml)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-cleanup-sockets.1.xml html-nochunks)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-daemon.1.xml html-nochunks)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-launch.1.xml html-nochunks)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-monitor.1.xml html-nochunks)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-send.1.xml html-nochunks)
+DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-uuidgen.1.xml html-nochunks)
+if (UNIX)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-daemon.1.xml man)
+  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-monitor.1.xml man)
+  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-send.1.xml man)
+  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-launch.1.xml man)
+  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-uuidgen.1.xml man)
+  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-cleanup-sockets.1.xml man)
+endif()
 #
 # handle html index file
 #

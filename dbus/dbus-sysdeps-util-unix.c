@@ -49,7 +49,10 @@
 #include <sys/socket.h>
 #include <dirent.h>
 #include <sys/un.h>
+
+#ifdef HAVE_SYSLOG_H
 #include <syslog.h>
+#endif
 
 #ifdef HAVE_SYS_SYSLIMITS_H
 #include <sys/syslimits.h>
@@ -123,6 +126,7 @@ _dbus_become_daemon (const DBusString *pidfile,
             dup2 (dev_null_fd, 2);
           else
             _dbus_verbose ("keeping stderr open due to DBUS_DEBUG_OUTPUT\n");
+          close (dev_null_fd);
         }
 
       if (!keep_umask)
@@ -424,10 +428,14 @@ _dbus_request_file_descriptor_limit (unsigned int limit)
 void
 _dbus_init_system_log (void)
 {
+#ifdef HAVE_SYSLOG_H
+
 #if HAVE_DECL_LOG_PERROR
   openlog ("dbus", LOG_PID | LOG_PERROR, LOG_DAEMON);
 #else
   openlog ("dbus", LOG_PID, LOG_DAEMON);
+#endif
+
 #endif
 }
 
@@ -464,6 +472,7 @@ _dbus_system_log (DBusSystemLogSeverity severity, const char *msg, ...)
 void
 _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args)
 {
+#ifdef HAVE_SYSLOG_H
   int flags;
   switch (severity)
     {
@@ -480,7 +489,10 @@ _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args
         return;
     }
 
-#ifndef HAVE_DECL_LOG_PERROR
+  vsyslog (flags, msg, args);
+#endif
+
+#if !defined(HAVE_SYSLOG_H) || !HAVE_DECL_LOG_PERROR
     {
       /* vsyslog() won't write to stderr, so we'd better do it */
       va_list tmp;
@@ -492,8 +504,6 @@ _dbus_system_logv (DBusSystemLogSeverity severity, const char *msg, va_list args
       va_end (tmp);
     }
 #endif
-
-  vsyslog (flags, msg, args);
 
   if (severity == DBUS_SYSTEM_LOG_FATAL)
     exit (1);

@@ -2,8 +2,8 @@ dnl -*- mode: m4 -*-
 AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
-m4_define([dbus_minor_version], [6])
-m4_define([dbus_micro_version], [8])
+m4_define([dbus_minor_version], [7])
+m4_define([dbus_micro_version], [0])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -33,16 +33,16 @@ AC_DEFINE_UNQUOTED(DBUS_DAEMON_NAME,"dbus-daemon",[Name of executable])
 #
 
 ## increment if the interface has additions, changes, removals.
-LT_CURRENT=10
+LT_CURRENT=11
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=2
+LT_REVISION=0
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
 ## precedence over adding, so set to 0 if both happened.
-LT_AGE=7
+LT_AGE=8
 
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
@@ -169,7 +169,6 @@ AC_ARG_WITH(console-owner-file, AS_HELP_STRING([--with-console-owner-file=[filen
 AC_ARG_WITH(launchd-agent-dir, AS_HELP_STRING([--with-launchd-agent-dir=[dirname]],[directory to put the launchd agent (default: /Library/LaunchAgents)]))
 AC_ARG_WITH(dbus_user, AS_HELP_STRING([--with-dbus-user=<user>],[User for running the DBUS daemon (messagebus)]))
 AC_ARG_WITH(dbus_daemondir, AS_HELP_STRING([--with-dbus-daemondir=[dirname]],[Directory for installing the DBUS daemon]))
-AC_ARG_WITH(dbus_session_bus_default_address, AS_HELP_STRING([--with-dbus-session-bus-default-address=[nonce-tcp:/autolaunch:/tcp:host:port]],[Transport Type to be used (default: nonce-tcp:)]),with_dbus_session_bus_default_address=$withval,with_dbus_session_bus_default_address=nonce-tcp:)
 
 AC_ARG_ENABLE([embedded-tests],
   AS_HELP_STRING([--enable-embedded-tests],
@@ -211,6 +210,9 @@ fi
 # These use GTest, from GLib, because life's too short. They're enabled by
 # default (unless you don't have GLib), because they don't bloat the library
 # or binaries.
+
+AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_26], [Ignore post-2.26 deprecations])
+AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_26], [Prevent post-2.26 APIs])
 
 with_glib=yes
 
@@ -953,15 +955,53 @@ AC_SUBST([XML_CFLAGS])
 AC_SUBST([XML_LIBS])
 
 # Thread lib detection
-AC_CHECK_FUNC(pthread_cond_timedwait,[AC_CHECK_LIB(pthread,pthread_cond_timedwait,
-                                                    [THREAD_LIBS="-lpthread"])])
+AC_ARG_VAR([THREAD_LIBS])
 save_libs="$LIBS"
 LIBS="$LIBS $THREAD_LIBS"
-AC_CHECK_FUNC(pthread_condattr_setclock,have_pthread_condattr_setclock=true,have_pthread_condattr_setclock=false)
-if test x$have_pthread_condattr_setclock = xtrue; then
-    AC_SEARCH_LIBS([clock_getres],[rt],[THREAD_LIBS="$THREAD_LIBS -lrt"])
-    AC_MSG_CHECKING([for CLOCK_MONOTONIC])
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>
+
+is_missing_pthread_function="is required when compiling D-Bus on Unix platforms, but is not in your libc or libpthread. Please open a bug on https://bugs.freedesktop.org/enter_bug.cgi?product=dbus with details of your platform."
+
+# Don't do these automatic checks if the user set THREAD_LIBS on the
+# configure command-line. If they did, we assume they're right.
+#
+# We also don't do these checks on Windows, because you don't need magical
+# linker flags to have threading support there.
+AS_IF([test "x$dbus_unix" = xyes && test "x$THREAD_LIBS" = x],
+  [
+    # Mandatory pthread functions. In principle, some of these could be made
+    # optional if there are platforms that don't have them.
+    #
+    # Currently, we only look in -lpthread.
+    # In principle we might need to look in -lpthreads, -lthreads, ...
+    # as well - please file a bug if your platform needs this.
+    AC_SEARCH_LIBS([pthread_cond_timedwait],
+        [pthread],
+        [THREAD_LIBS="$LIBS"],
+        [AC_MSG_ERROR([pthread_cond_timedwait $is_missing_pthread_function])],
+        [])
+    AC_SEARCH_LIBS([pthread_mutexattr_init],
+        [pthread],
+        [THREAD_LIBS="$LIBS"],
+        [AC_MSG_ERROR([pthread_mutexattr_init $is_missing_pthread_function])],
+        [])
+    AC_SEARCH_LIBS([pthread_mutexattr_settype],
+        [pthread],
+        [THREAD_LIBS="$LIBS"],
+        [AC_MSG_ERROR([pthread_mutexattr_settype $is_missing_pthread_function])],
+        [])
+
+    # Optional, for monotonic clocks. Because it's optional, this check
+    # is non-fatal if we don't find it.
+    AC_SEARCH_LIBS([pthread_condattr_setclock],
+        [pthread],
+        [THREAD_LIBS="$LIBS"])
+
+    AS_IF([test "x$ac_cv_search_pthread_condattr_setclock" != xno],
+      [
+        AC_SEARCH_LIBS([clock_getres], [rt], [THREAD_LIBS="$LIBS"])
+        AC_MSG_CHECKING([for CLOCK_MONOTONIC])
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+[[#include <time.h>
 #include <pthread.h>
 ]], [[
 struct timespec monotonic_timer;
@@ -970,15 +1010,17 @@ pthread_condattr_init (&attr);
 pthread_condattr_setclock (&attr, CLOCK_MONOTONIC);
 clock_getres (CLOCK_MONOTONIC,&monotonic_timer);
 ]])],
-[have_clock_monotonic=true],
-[have_clock_monotonic=false])
-if test x$have_clock_monotonic = xtrue; then
-    AC_MSG_RESULT([found])
-    AC_DEFINE(HAVE_MONOTONIC_CLOCK, 1, [Define if we have CLOCK_MONOTONIC])
-else
-    AC_MSG_RESULT([not found])
-fi
-fi
+            [have_clock_monotonic=true],
+            [have_clock_monotonic=false])
+        AS_IF([test x$have_clock_monotonic = xtrue],
+	  [
+            AC_MSG_RESULT([found])
+            AC_DEFINE(HAVE_MONOTONIC_CLOCK, 1, [Define if we have CLOCK_MONOTONIC])
+	  ],
+          [AC_MSG_RESULT([not found])])
+      ]) dnl have pthread_condattr_setclock
+  ]) dnl on Unix
+
 LIBS="$save_libs"
 
 AC_SUBST([THREAD_LIBS])
@@ -1449,13 +1491,8 @@ fi
 AM_CONDITIONAL(DBUS_XML_DOCS_ENABLED, test x$enable_xml_docs = xyes)
 AC_MSG_RESULT($enable_xml_docs)
 
-AC_PATH_PROG([MAN2HTML], [man2html])
-AC_ARG_VAR([MAN2HTML], [Path to man2html (optional)])
-AM_CONDITIONAL(DBUS_HAVE_MAN2HTML, test x$MAN2HTML != x)
-
 AM_CONDITIONAL(DBUS_CAN_UPLOAD_DOCS,
-    test x$enable_doxygen_docs = xyes -a x$enable_xml_docs = xyes -a \
-         x$MAN2HTML != x)
+    [test x$enable_doxygen_docs = xyes && test x$enable_xml_docs = xyes])
 
 #### Have to go $localstatedir->$prefix/var->/usr/local/var
 
@@ -1523,8 +1560,17 @@ fi
 AC_SUBST(DBUS_SYSTEM_SOCKET)
 AC_DEFINE_UNQUOTED(DBUS_SYSTEM_SOCKET,"$DBUS_SYSTEM_SOCKET",[The name of the socket the system bus listens on by default])
 
-## system bus only listens on local domain sockets, and never
-## on an abstract socket (so only root can create the socket)
+## System bus only listens on local domain sockets, and never
+## on an abstract socket (so only root can create the socket).
+##
+## This won't work on Windows. It's not meant to - the system bus is
+## meaningless on Windows anyway.
+##
+## This has to be suitable for hard-coding in client libraries as well as
+## in the dbus-daemon's configuration, so it has to be valid to listen on
+## and also to connect to. If this ever changes, it'll need to be split into
+## two variables, one for the listening address and one for the connecting
+## address.
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS="unix:path=$DBUS_SYSTEM_SOCKET"
 AC_SUBST(DBUS_SYSTEM_BUS_DEFAULT_ADDRESS)
 AC_DEFINE_UNQUOTED(DBUS_SYSTEM_BUS_DEFAULT_ADDRESS, "$DBUS_SYSTEM_BUS_DEFAULT_ADDRESS",[The default D-Bus address of the system bus])
@@ -1668,14 +1714,64 @@ fi
 AC_DEFINE_UNQUOTED(DBUS_SESSION_SOCKET_DIR, "$DBUS_SESSION_SOCKET_DIR", [Where per-session bus puts its sockets])
 AC_SUBST(DBUS_SESSION_SOCKET_DIR)
 
-if test x$dbus_win = xyes; then
-        DBUS_SESSION_BUS_DEFAULT_ADDRESS="$with_dbus_session_bus_default_address"
+# This must be a listening address. It doesn't necessarily need to be an
+# address you can connect to - it can be something vague like
+# "nonce-tcp:".
+#
+# The default varies by platform.
+AC_ARG_WITH([dbus_session_bus_listen_address],
+            AS_HELP_STRING([--with-dbus-session-bus-listen-address=[ADDRESS]],
+                           [default address for a session bus to listen on (see configure.ac)]),
+            [with_dbus_session_bus_listen_address=$withval],
+            [with_dbus_session_bus_listen_address=])
+
+if test "x$with_dbus_session_bus_listen_address" != "x"; then
+        # the user specified something, trust them
+        DBUS_SESSION_BUS_LISTEN_ADDRESS="$with_dbus_session_bus_listen_address"
+elif test x$dbus_win = xyes; then
+        # On Windows, you can (and should) listen on autolaunch addresses,
+        # because autolaunching is different.
+        # See https://bugs.freedesktop.org/show_bug.cgi?id=38201
+        DBUS_SESSION_BUS_LISTEN_ADDRESS="autolaunch:"
 elif test x$have_launchd = xyes; then
-        DBUS_SESSION_BUS_DEFAULT_ADDRESS="launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET"
+        # Mac OS X default is to use launchd
+        DBUS_SESSION_BUS_LISTEN_ADDRESS="launchd:env=DBUS_LAUNCHD_SESSION_BUS_SOCKET"
 else
-        DBUS_SESSION_BUS_DEFAULT_ADDRESS="unix:tmpdir=$DBUS_SESSION_SOCKET_DIR"
+        # The default on all other Unix platforms (notably Linux)
+        # is to create a randomly named socket in /tmp or similar
+        DBUS_SESSION_BUS_LISTEN_ADDRESS="unix:tmpdir=$DBUS_SESSION_SOCKET_DIR"
 fi
-AC_SUBST(DBUS_SESSION_BUS_DEFAULT_ADDRESS)
+AC_SUBST([DBUS_SESSION_BUS_LISTEN_ADDRESS])
+
+# This must be an address you can connect to. It doesn't necessarily
+# need to be an address you can listen on - it can be "autolaunch:",
+# even on Unix.
+#
+# The default varies by platform.
+AC_ARG_WITH([dbus_session_bus_connect_address],
+            AS_HELP_STRING([--with-dbus-session-bus-connect-address=[ADDRESS]],
+                           [fallback address for a session bus client to connect to (see configure.ac)]),
+            [with_dbus_session_bus_connect_address=$withval],
+            [with_dbus_session_bus_connect_address=])
+
+if test "x$with_dbus_session_bus_connect_address" != "x"; then
+        # the user specified something, trust them
+        DBUS_SESSION_BUS_CONNECT_ADDRESS="$with_dbus_session_bus_connect_address"
+elif test x$dbus_win = xyes; then
+        # Windows autolaunching is a bit different; leaving it in its own
+        # branch of the conditional because the default might conceivably
+        # change (see #38201)
+        DBUS_SESSION_BUS_CONNECT_ADDRESS="autolaunch:"
+else
+        # The default on all other Unix platforms (notably Linux)
+        # is to use auto-launching - this works a bit differently on Mac OS X
+        # but comes out basically the same in the end
+        DBUS_SESSION_BUS_CONNECT_ADDRESS="autolaunch:"
+fi
+AC_SUBST([DBUS_SESSION_BUS_CONNECT_ADDRESS])
+AC_DEFINE_UNQUOTED([DBUS_SESSION_BUS_CONNECT_ADDRESS],
+  ["$DBUS_SESSION_BUS_CONNECT_ADDRESS"],
+  [Fallback address for session bus clients])
 
 # darwin needs this to initialize the environment
 AC_CHECK_HEADERS(crt_externs.h)
@@ -1717,7 +1813,12 @@ tools/Makefile
 test/Makefile
 test/name-test/Makefile
 doc/Makefile
-doc/dbus-daemon.1
+doc/dbus-cleanup-sockets.1.xml
+doc/dbus-daemon.1.xml
+doc/dbus-launch.1.xml
+doc/dbus-monitor.1.xml
+doc/dbus-send.1.xml
+doc/dbus-uuidgen.1.xml
 dbus-1.pc
 dbus-1-uninstalled.pc
 test/data/valid-config-files/debug-allow-all.conf
@@ -1762,8 +1863,7 @@ echo "
 	32-bit int:		  ${DBUS_INT32_TYPE}
 	16-bit int:		  ${DBUS_INT16_TYPE}
         Doxygen:                  ${DOXYGEN:-not found}
-        xmlto:                    ${XMLTO:-not found}
-        man2html:                 ${MAN2HTML:-not found}"
+        xmlto:                    ${XMLTO:-not found}"
 
 echo "
         Rebuilding generated files: ${USE_MAINTAINER_MODE}
@@ -1791,7 +1891,8 @@ echo "
         System bus socket:        ${DBUS_SYSTEM_SOCKET}
         System bus address:       ${DBUS_SYSTEM_BUS_DEFAULT_ADDRESS}
         System bus PID file:      ${DBUS_SYSTEM_PID_FILE}
-        Session bus address:      ${DBUS_SESSION_BUS_DEFAULT_ADDRESS}
+        Session bus listens on:   ${DBUS_SESSION_BUS_LISTEN_ADDRESS}
+        Session clients connect to: ${DBUS_SESSION_BUS_CONNECT_ADDRESS}
         Console auth dir:         ${DBUS_CONSOLE_AUTH_DIR}
         Console owner file:       ${have_console_owner_file}
         Console owner file path:  ${DBUS_CONSOLE_OWNER_FILE}

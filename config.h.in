@@ -90,6 +90,9 @@
 /* Prefix for installing DBUS */
 #undef DBUS_PREFIX
 
+/* Fallback address for session bus clients */
+#undef DBUS_SESSION_BUS_CONNECT_ADDRESS
+
 /* Where per-session bus puts its sockets */
 #undef DBUS_SESSION_SOCKET_DIR
 
@@ -134,6 +137,12 @@
 
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
+
+/* Prevent post-2.26 APIs */
+#undef GLIB_VERSION_MAX_ALLOWED
+
+/* Ignore post-2.26 deprecations */
+#undef GLIB_VERSION_MIN_REQUIRED
 
 /* Disable GLib public API sanity checking */
 #undef G_DISABLE_CHECKS

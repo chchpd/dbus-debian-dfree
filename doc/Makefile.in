@@ -51,12 +51,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@am__append_1 = dbus.devhelp
-@DBUS_HAVE_MAN2HTML_TRUE@am__append_2 = $(MAN_HTML_FILES)
+@DBUS_XML_DOCS_ENABLED_TRUE@am__append_1 = $(XMLTO_HTML)
+@DBUS_DOXYGEN_DOCS_ENABLED_TRUE@@DBUS_HAVE_XSLTPROC_TRUE@am__append_2 = dbus.devhelp
 subdir = doc
-DIST_COMMON = $(dist_doc_DATA) $(dist_html_DATA) $(dist_man1_MANS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/dbus-daemon.1.in TODO
+DIST_COMMON = $(dist_doc_DATA) $(dist_html_DATA) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/dbus-cleanup-sockets.1.xml.in \
+	$(srcdir)/dbus-daemon.1.xml.in $(srcdir)/dbus-launch.1.xml.in \
+	$(srcdir)/dbus-monitor.1.xml.in $(srcdir)/dbus-send.1.xml.in \
+	$(srcdir)/dbus-uuidgen.1.xml.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/as-ac-expand.m4 \
 	$(top_srcdir)/m4/compiler.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -69,7 +71,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = dbus-daemon.1
+CONFIG_CLEAN_FILES = dbus-cleanup-sockets.1.xml dbus-daemon.1.xml \
+	dbus-launch.1.xml dbus-monitor.1.xml dbus-send.1.xml \
+	dbus-uuidgen.1.xml
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_GEN = $(am__v_GEN_@AM_V@)
 am__v_GEN_ = $(am__v_GEN_@AM_DEFAULT_V@)
@@ -115,7 +119,7 @@ man1dir = $(mandir)/man1
 am__installdirs = "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)" \
 	"$(DESTDIR)$(htmldir)" "$(DESTDIR)$(htmldir)"
 NROFF = nroff
-MANS = $(dist_man1_MANS) $(man1_MANS)
+MANS = $(man1_MANS)
 DATA = $(dist_doc_DATA) $(dist_html_DATA) $(html_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -157,7 +161,8 @@ DBUS_MICRO_VERSION = @DBUS_MICRO_VERSION@
 DBUS_MINOR_VERSION = @DBUS_MINOR_VERSION@
 DBUS_PATH_OR_ABSTRACT = @DBUS_PATH_OR_ABSTRACT@
 DBUS_PREFIX = @DBUS_PREFIX@
-DBUS_SESSION_BUS_DEFAULT_ADDRESS = @DBUS_SESSION_BUS_DEFAULT_ADDRESS@
+DBUS_SESSION_BUS_CONNECT_ADDRESS = @DBUS_SESSION_BUS_CONNECT_ADDRESS@
+DBUS_SESSION_BUS_LISTEN_ADDRESS = @DBUS_SESSION_BUS_LISTEN_ADDRESS@
 DBUS_SESSION_SOCKET_DIR = @DBUS_SESSION_SOCKET_DIR@
 DBUS_STATIC_BUILD_CPPFLAGS = @DBUS_STATIC_BUILD_CPPFLAGS@
 DBUS_SYSTEM_BUS_DEFAULT_ADDRESS = @DBUS_SYSTEM_BUS_DEFAULT_ADDRESS@
@@ -216,7 +221,6 @@ LT_CURRENT = @LT_CURRENT@
 LT_REVISION = @LT_REVISION@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
-MAN2HTML = @MAN2HTML@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 NETWORK_libs = @NETWORK_libs@
@@ -327,23 +331,23 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 apidir = @htmldir@/api
+MAN_XML_FILES = \
+	dbus-cleanup-sockets.1.xml \
+	dbus-daemon.1.xml \
+	dbus-launch.1.xml \
+	dbus-monitor.1.xml \
+	dbus-send.1.xml \
+	dbus-uuidgen.1.xml \
+	$(NULL)
 
-# automake normally assumes that man pages are generated files;
-# these ones aren't, so we need the dist_ prefix to say that they're
-# their own source code
-dist_man1_MANS = \
-	dbus-cleanup-sockets.1 \
-	dbus-launch.1 \
-	dbus-monitor.1 \
-	dbus-send.1 \
-	dbus-uuidgen.1
+@DBUS_XML_DOCS_ENABLED_TRUE@man1_MANS = \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-cleanup-sockets.1 \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-daemon.1 \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-launch.1 \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-monitor.1 \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-send.1 \
+@DBUS_XML_DOCS_ENABLED_TRUE@	dbus-uuidgen.1
 
-
-# on the other hand, this one is generated
-man1_MANS = \
-	dbus-daemon.1
-
-MAN_IN_FILES = dbus-daemon.1.in
 MAN_HTML_FILES = \
 	dbus-cleanup-sockets.1.html \
 	dbus-daemon.1.html \
@@ -371,13 +375,10 @@ STATIC_DOCS = \
 EXTRA_DIST = \
 	file-boilerplate.c \
 	doxygen_to_devhelp.xsl \
-	$(STATIC_DOCS) \
-	$(MAN_IN_FILES)
+	$(STATIC_DOCS)
 
 html_DATA = $(am__append_1) $(am__append_2)
-
-# we distribute these in the tarball so users don't necessarily need xmlto
-dist_html_DATA = $(STATIC_HTML) $(XMLTO_OUTPUT)
+dist_html_DATA = $(STATIC_HTML)
 
 # diagram.png/diagram.svg aren't really HTML, but must go in the same
 # directory as the HTML to avoid broken links
@@ -386,11 +387,13 @@ STATIC_HTML = \
 	diagram.svg \
 	$(NULL)
 
-XMLTO_OUTPUT = \
+XMLTO_HTML = \
 	dbus-faq.html				\
 	dbus-specification.html			\
 	dbus-test-plan.html			\
-	dbus-tutorial.html
+	dbus-tutorial.html			\
+	$(MAN_HTML_FILES)			\
+	$(NULL)
 
 @DBUS_CAN_UPLOAD_DOCS_TRUE@BONUS_FILES = \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(top_srcdir)/README \
@@ -404,6 +407,12 @@ XMLTO_OUTPUT = \
 @DBUS_CAN_UPLOAD_DOCS_TRUE@DOC_WWW_DIR = /srv/dbus.freedesktop.org/www
 @DBUS_CAN_UPLOAD_DOCS_TRUE@SPECIFICATION_SERVER = specifications.freedesktop.org
 @DBUS_CAN_UPLOAD_DOCS_TRUE@SPECIFICATION_PATH = /srv/specifications.freedesktop.org/www/dbus/1.0
+CLEANFILES = \
+	$(man1_MANS) \
+	$(MAN_XML_FILES) \
+	$(XMLTO_HTML) \
+	$(NULL)
+
 all: all-am
 
 .SUFFIXES:
@@ -437,7 +446,17 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-dbus-daemon.1: $(top_builddir)/config.status $(srcdir)/dbus-daemon.1.in
+dbus-cleanup-sockets.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-cleanup-sockets.1.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dbus-daemon.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-daemon.1.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dbus-launch.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-launch.1.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dbus-monitor.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-monitor.1.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dbus-send.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-send.1.xml.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+dbus-uuidgen.1.xml: $(top_builddir)/config.status $(srcdir)/dbus-uuidgen.1.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
@@ -445,9 +464,9 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-man1: $(dist_man1_MANS) $(man1_MANS)
+install-man1: $(man1_MANS)
 	@$(NORMAL_INSTALL)
-	@list1='$(dist_man1_MANS) $(man1_MANS)'; \
+	@list1='$(man1_MANS)'; \
 	list2=''; \
 	test -n "$(man1dir)" \
 	  && test -n "`echo $$list1$$list2`" \
@@ -481,7 +500,7 @@ install-man1: $(dist_man1_MANS) $(man1_MANS)
 
 uninstall-man1:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dist_man1_MANS) $(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
+	@list='$(man1_MANS)'; test -n "$(man1dir)" || exit 0; \
 	files=`{ for i in $$list; do echo "$$i"; done; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
@@ -629,6 +648,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -690,8 +710,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 	-rm -f Makefile
-maintainer-clean-am: distclean-am maintainer-clean-generic \
-	maintainer-clean-local
+maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
@@ -722,24 +741,18 @@ uninstall-man: uninstall-man1
 	install-info-am install-man install-man1 install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic maintainer-clean-local mostlyclean \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-dist_docDATA \
-	uninstall-dist_htmlDATA uninstall-htmlDATA uninstall-local \
-	uninstall-man uninstall-man1
+	maintainer-clean-generic mostlyclean mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-dist_docDATA uninstall-dist_htmlDATA \
+	uninstall-htmlDATA uninstall-local uninstall-man \
+	uninstall-man1
 
 
-@DBUS_XML_DOCS_ENABLED_TRUE@dbus-specification.html: dbus-specification.xml
+@DBUS_XML_DOCS_ENABLED_TRUE@%.html: %.xml
 @DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
 
-@DBUS_XML_DOCS_ENABLED_TRUE@dbus-test-plan.html: dbus-test-plan.xml
-@DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
-
-@DBUS_XML_DOCS_ENABLED_TRUE@dbus-tutorial.html: dbus-tutorial.xml
-@DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
-
-@DBUS_XML_DOCS_ENABLED_TRUE@dbus-faq.html: dbus-faq.xml
-@DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) html-nochunks $<
+@DBUS_XML_DOCS_ENABLED_TRUE@%.1: %.1.xml
+@DBUS_XML_DOCS_ENABLED_TRUE@	$(XMLTO) man $<
 
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@all-local:: doxygen.stamp
 
@@ -768,17 +781,15 @@ uninstall-man: uninstall-man1
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@	rmdir --ignore-fail-on-non-empty $(DESTDIR)$(apidir) || \
 @DBUS_DOXYGEN_DOCS_ENABLED_TRUE@		rmdir $(DESTDIR)$(apidir)
 
-@DBUS_HAVE_MAN2HTML_TRUE@%.1.html: %.1
-@DBUS_HAVE_MAN2HTML_TRUE@	$(AM_V_GEN)( $(MAN2HTML) < $< > $@.tmp && mv $@.tmp $@ )
-
-@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(dist_doc_DATA) $(dist_html_DATA) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@dbus-docs: $(STATIC_DOCS) $(MAN_XML_FILES) $(dist_doc_DATA) $(dist_html_DATA) $(MAN_HTML_FILES) $(BONUS_FILES) doxygen.stamp $(XMLTO_HTML)
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)rm -rf $@ $@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_GEN)$(MKDIR_P) $@.tmp/api
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(STATIC_DOCS) @abs_builddir@/$@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(dist_doc_DATA) @abs_builddir@/$@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cd $(srcdir) && cp $(STATIC_HTML) @abs_builddir@/$@.tmp
-@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(XMLTO_OUTPUT) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(XMLTO_HTML) @abs_builddir@/$@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_HTML_FILES) @abs_builddir@/$@.tmp
+@DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(MAN_XML_FILES) @abs_builddir@/$@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp $(BONUS_FILES) @abs_builddir@/$@.tmp
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)cp -r api/html @abs_builddir@/$@.tmp/api
 @DBUS_CAN_UPLOAD_DOCS_TRUE@	$(AM_V_at)mv $@.tmp $@
@@ -803,9 +814,6 @@ clean-local:
 	rm -rf dbus-docs dbus-docs.tmp
 	rm -f *.1.html
 	rm -f doxygen.stamp
-
-maintainer-clean-local:
-	rm -f $(XMLTO_OUTPUT)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
