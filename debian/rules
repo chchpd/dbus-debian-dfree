@@ -51,6 +51,7 @@ normal_configure_flags += \
 else
 # documentation disabled
 dh_options += -Ndbus-1-doc
+dh_install_options += -X/usr/share/man/
 normal_configure_flags += \
 	--disable-xml-docs \
 	--disable-doxygen-docs \
@@ -113,7 +114,7 @@ override_dh_install:
 	dh_install -p$(libdbusN) \
 		"usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)*" \
 		lib/$(DEB_HOST_MULTIARCH)
-	dh_install --remaining-packages --list-missing
+	dh_install --remaining-packages --list-missing $(dh_install_options)
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
 
 override_dh_installinit:
