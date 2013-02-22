@@ -6,8 +6,8 @@
 <article id="index">
   <articleinfo>
     <title>D-Bus Specification</title>
-    <releaseinfo>Version 0.19</releaseinfo>
-    <date>2012-02-21</date>
+    <releaseinfo>Version 0.20</releaseinfo>
+    <date>2013-02-22</date>
     <authorgroup>
       <author>
 	<firstname>Havoc</firstname>
@@ -72,10 +72,11 @@
     </authorgroup>
    <revhistory>
      <revision>
-       <revnumber>current</revnumber>
-       <date><ulink url='http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml'>commit log</ulink></date>
-       <authorinitials></authorinitials>
-       <revremark></revremark>
+       <revnumber>0.20</revnumber>
+       <date>22 February 2013 (<ulink url='http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml'>commit log</ulink>)</date>
+       <authorinitials>smcv, walters</authorinitials>
+       <revremark>reorganise for clarity, remove false claims about
+         basic types, mention /o/fd/DBus</revremark>
      </revision>
      <revision>
        <revnumber>0.19</revnumber>
@@ -292,17 +293,68 @@
       it back from the wire format is <firstterm>unmarshaling</firstterm>.
     </para>
 
-    <sect2 id="message-protocol-signatures">
-      <title>Type Signatures</title>
+    <para>
+      The D-Bus protocol does not include type tags in the marshaled data; a
+      block of marshaled values must have a known <firstterm>type
+        signature</firstterm>. The type signature is made up of zero or more
+      <firstterm id="term-single-complete-type">single complete
+        types</firstterm>, each made up of one or more
+      <firstterm>type codes</firstterm>.
+    </para>
+
+    <para>
+      A type code is an ASCII character representing the
+      type of a value. Because ASCII characters are used, the type signature
+      will always form a valid ASCII string. A simple string compare
+      determines whether two type signatures are equivalent.
+    </para>
+
+    <para>
+      A single complete type is a sequence of type codes that fully describes
+      one type: either a basic type, or a single fully-described container type.
+      A single complete type is a basic type code, a variant type code,
+      an array with its element type, or a struct with its fields (all of which
+      are defined below). So the following signatures are not single complete
+      types:
+      <programlisting>
+        "aa"
+      </programlisting>
+      <programlisting>
+        "(ii"
+      </programlisting>
+      <programlisting>
+        "ii)"
+      </programlisting>
+      And the following signatures contain multiple complete types:
+      <programlisting>
+        "ii"
+      </programlisting>
+      <programlisting>
+        "aiai"
+      </programlisting>
+      <programlisting>
+        "(ii)(ii)"
+      </programlisting>
+      Note however that a single complete type may <emphasis>contain</emphasis>
+      multiple other single complete types, by containing a struct or dict
+      entry.
+    </para>
+
+    <sect2 id="basic-types">
+      <title>Basic types</title>
 
       <para>
-        The D-Bus protocol does not include type tags in the marshaled data; a
-        block of marshaled values must have a known <firstterm>type
-        signature</firstterm>.  The type signature is made up of <firstterm>type
-        codes</firstterm>. A type code is an ASCII character representing the
-        type of a value. Because ASCII characters are used, the type signature
-        will always form a valid ASCII string. A simple string compare 
-        determines whether two type signatures are equivalent.
+        The simplest type codes are the <firstterm id="term-basic-type">basic
+          types</firstterm>, which are the types whose structure is entirely
+        defined by their 1-character type code. Basic types consist of
+        fixed types and string-like types.
+      </para>
+
+      <para>
+        The <firstterm id="term-fixed-type">fixed types</firstterm>
+        are basic types whose values have a fixed length, namely BYTE,
+        BOOLEAN, DOUBLE, UNIX_FD, and signed or unsigned integers of length
+        16, 32 or 64 bits.
       </para>
 
       <para>
@@ -319,10 +371,260 @@
       </para>
 
       <para>
-        All <firstterm>basic</firstterm> types work like 
-        <literal>INT32</literal> in this example. To marshal and unmarshal 
-        basic types, you simply read one value from the data
-        block corresponding to each type code in the signature.
+        The characteristics of the fixed types are listed in this table.
+
+        <informaltable>
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Conventional name</entry>
+                <entry>ASCII type-code</entry>
+                <entry>Encoding</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry><literal>BYTE</literal></entry>
+                <entry><literal>y</literal> (121)</entry>
+                <entry>Unsigned 8-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>BOOLEAN</literal></entry>
+                <entry><literal>b</literal> (98)</entry>
+                <entry>Boolean value: 0 is false, 1 is true, any other value
+                  allowed by the marshalling format is invalid</entry>
+              </row>
+              <row>
+                <entry><literal>INT16</literal></entry>
+                <entry><literal>n</literal> (110)</entry>
+                <entry>Signed (two's complement) 16-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>UINT16</literal></entry>
+                <entry><literal>q</literal> (113)</entry>
+                <entry>Unsigned 16-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>INT32</literal></entry>
+                <entry><literal>i</literal> (105)</entry>
+                <entry>Signed (two's complement) 32-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>UINT32</literal></entry>
+                <entry><literal>u</literal> (117)</entry>
+                <entry>Unsigned 32-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>INT64</literal></entry>
+                <entry><literal>x</literal> (120)</entry>
+                <entry>Signed (two's complement) 64-bit integer
+                  (mnemonic: x and t are the first characters in "sixty" not
+                  already used for something more common)</entry>
+              </row>
+              <row>
+                <entry><literal>UINT64</literal></entry>
+                <entry><literal>t</literal> (116)</entry>
+                <entry>Unsigned 64-bit integer</entry>
+              </row>
+              <row>
+                <entry><literal>DOUBLE</literal></entry>
+                <entry><literal>d</literal> (100)</entry>
+                <entry>IEEE 754 double-precision floating point</entry>
+              </row>
+              <row>
+                <entry><literal>UNIX_FD</literal></entry>
+                <entry><literal>h</literal> (104)</entry>
+                <entry>Unsigned 32-bit integer representing an index into an
+                  out-of-band array of file descriptors, transferred via some
+                  platform-specific mechanism (mnemonic: h for handle)</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </para>
+
+      <para>
+        The <firstterm id="term-string-like-type">string-like types</firstterm>
+        are basic types with a variable length. The value of any string-like
+        type is conceptually 0 or more Unicode codepoints encoded in UTF-8,
+        none of which may be U+0000. The UTF-8 text must be validated
+        strictly: in particular, it must not contain overlong sequences,
+        noncharacters such as U+FFFE, or codepoints above U+10FFFF.
+      </para>
+
+      <para>
+        The marshalling formats for the string-like types all end with a
+        single zero (NUL) byte, but that byte is not considered to be part of
+        the text.
+      </para>
+
+      <para>
+        The characteristics of the string-like types are listed in this table.
+
+        <informaltable>
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Conventional name</entry>
+                <entry>ASCII type-code</entry>
+                <entry>Validity constraints</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry><literal>STRING</literal></entry>
+                <entry><literal>s</literal> (115)</entry>
+                <entry>No extra constraints</entry>
+              </row>
+              <row>
+                <entry><literal>OBJECT_PATH</literal></entry>
+                <entry><literal>o</literal> (111)</entry>
+                <entry>Must be
+                  <link linkend="message-protocol-marshaling-object-path">a
+                    syntactically valid object path</link></entry>
+              </row>
+              <row>
+                <entry><literal>SIGNATURE</literal></entry>
+                <entry><literal>g</literal> (103)</entry>
+                <entry>Zero or more
+                  <firstterm linkend="term-single-complete-type">single
+                    complete types</firstterm></entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </para>
+
+      <sect3 id="message-protocol-marshaling-object-path">
+        <title>Valid Object Paths</title>
+
+        <para>
+          An object path is a name used to refer to an object instance.
+          Conceptually, each participant in a D-Bus message exchange may have
+          any number of object instances (think of C++ or Java objects) and each
+          such instance will have a path. Like a filesystem, the object
+          instances in an application form a hierarchical tree.
+        </para>
+
+        <para>
+          Object paths are often namespaced by starting with a reversed
+          domain name and containing an interface version number, in the
+          same way as
+          <link linkend="message-protocol-names-interface">interface
+            names</link> and
+          <link linkend="message-protocol-names-bus">well-known
+            bus names</link>.
+          This makes it possible to implement more than one service, or
+          more than one version of a service, in the same process,
+          even if the services share a connection but cannot otherwise
+          co-operate (for instance, if they are implemented by different
+          plugins).
+        </para>
+
+        <para>
+          For instance, if the owner of <literal>example.com</literal> is
+          developing a D-Bus API for a music player, they might use the
+          hierarchy of object paths that start with
+          <literal>/com/example/MusicPlayer1</literal> for its objects.
+        </para>
+
+        <para>
+          The following rules define a valid object path. Implementations must
+          not send or accept messages with invalid object paths.
+          <itemizedlist>
+            <listitem>
+              <para>
+                The path may be of any length.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                The path must begin with an ASCII '/' (integer 47) character,
+                and must consist of elements separated by slash characters.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Each element must only contain the ASCII characters
+                "[A-Z][a-z][0-9]_"
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                No element may be the empty string.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Multiple '/' characters cannot occur in sequence.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                A trailing '/' character is not allowed unless the
+                path is the root path (a single '/' character).
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+
+      </sect3>
+
+      <sect3 id="message-protocol-marshaling-signature">
+        <title>Valid Signatures</title>
+        <para>
+          An implementation must not send or accept invalid signatures.
+          Valid signatures will conform to the following rules:
+          <itemizedlist>
+            <listitem>
+              <para>
+                The signature is a list of single complete types.
+                Arrays must have element types, and structs must
+                have both open and close parentheses.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Only type codes, open and close parentheses, and open and
+                close curly brackets are allowed in the signature. The
+                <literal>STRUCT</literal> type code
+                is not allowed in signatures, because parentheses
+                are used instead. Similarly, the
+                <literal>DICT_ENTRY</literal> type code is not allowed in
+                signatures, because curly brackets are used instead.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                The maximum depth of container type nesting is 32 array type
+                codes and 32 open parentheses. This implies that the maximum
+                total depth of recursion is 64, for an "array of array of array
+                of ... struct of struct of struct of ..."  where there are 32
+                array and 32 struct.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                The maximum length of a signature is 255.
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+
+        <para>
+          When signatures appear in messages, the marshalling format
+          guarantees that they will be followed by a nul byte (which can
+          be interpreted as either C-style string termination or the INVALID
+          type-code), but this is not conceptually part of the signature.
+        </para>
+      </sect3>
+
+    </sect2>
+
+    <sect2 id="container-types">
+      <title>Container types</title>
+
+      <para>
         In addition to basic types, there are four <firstterm>container</firstterm> 
         types: <literal>STRUCT</literal>, <literal>ARRAY</literal>, <literal>VARIANT</literal>, 
         and <literal>DICT_ENTRY</literal>.
@@ -378,38 +680,18 @@
       </para>
 
       <para>
-        The phrase <firstterm>single complete type</firstterm> deserves some 
-        definition. A single complete type is a basic type code, a variant type code, 
-        an array with its element type, or a struct with its fields. 
-        So the following signatures are not single complete types:
-        <programlisting>
-          "aa"
-        </programlisting>
-        <programlisting>
-          "(ii"
-        </programlisting>
-        <programlisting>
-          "ii)"
-        </programlisting>
-        And the following signatures contain multiple complete types:
-        <programlisting>
-          "ii"
-        </programlisting>
-        <programlisting>
-          "aiai"
-        </programlisting>
-        <programlisting>
-          "(ii)(ii)"
-        </programlisting>
-        Note however that a single complete type may <emphasis>contain</emphasis>
-        multiple other single complete types.
-      </para>
-
-      <para>
         <literal>VARIANT</literal> has ASCII character 'v' as its type code. A marshaled value of
         type <literal>VARIANT</literal> will have the signature of a single complete type as part
         of the <emphasis>value</emphasis>.  This signature will be followed by a
         marshaled value of that type.
+      </para>
+
+      <para>
+        Unlike a message signature, the variant signature can
+        contain only a single complete type.  So "i", "ai"
+        or "(ii)" is OK, but "ii" is not.  Use of variants may not
+        cause a total message depth to be larger than 64, including
+        other container types such as structures.
       </para>
 
       <para>
@@ -435,6 +717,10 @@
         In most languages, an array of dict entry would be represented as a 
         map, hash table, or dict object.
       </para>
+    </sect2>
+
+    <sect2>
+      <title>Summary of types</title>
 
       <para>
         The following table summarizes the D-Bus types.
@@ -566,9 +852,21 @@
       </para>
 
     </sect2>
+  </sect1>
 
-    <sect2 id="message-protocol-marshaling">
-      <title>Marshaling (Wire Format)</title>
+  <sect1 id="message-protocol-marshaling">
+    <title>Marshaling (Wire Format)</title>
+
+    <para>
+      D-Bus defines a marshalling format for its type system, which is
+      used in D-Bus messages. This is not the only possible marshalling
+      format for the type system: for instance, GVariant (part of GLib)
+      re-uses the D-Bus type system but implements an alternative marshalling
+      format.
+    </para>
+
+    <sect2>
+      <title>Byte order and alignment</title>
 
       <para>
         Given a type signature, a block of bytes can be converted into typed
@@ -577,11 +875,11 @@
       </para>
 
       <para>
-        A block of bytes has an associated byte order. The byte order 
-        has to be discovered in some way; for D-Bus messages, the 
-        byte order is part of the message header as described in 
-        <xref linkend="message-protocol-messages"/>. For now, assume 
-        that the byte order is known to be either little endian or big 
+        A block of bytes has an associated byte order. The byte order
+        has to be discovered in some way; for D-Bus messages, the
+        byte order is part of the message header as described in
+        <xref linkend="message-protocol-messages"/>. For now, assume
+        that the byte order is known to be either little endian or big
           endian.
       </para>
 
@@ -595,6 +893,95 @@
         not be left uninitialized (it can't contain garbage), and more padding
         than required must not be used.
       </para>
+
+      <para>
+        As an exception to natural alignment, <literal>STRUCT</literal> and
+        <literal>DICT_ENTRY</literal> values are always aligned to an 8-byte
+        boundary, regardless of the alignments of their contents.
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Marshalling basic types</title>
+
+      <para>
+        To marshal and unmarshal fixed types, you simply read one value
+        from the data block corresponding to each type code in the signature.
+        All signed integer values are encoded in two's complement, DOUBLE
+        values are IEEE 754 double-precision floating-point, and BOOLEAN
+        values are encoded in 32 bits (of which only the least significant
+        bit is used).
+      </para>
+
+      <para>
+        The string-like types are all marshalled as a
+        fixed-length unsigned integer <varname>n</varname> giving the
+        length of the variable part, followed by <varname>n</varname>
+        nonzero bytes of UTF-8 text, followed by a single zero (nul) byte
+        which is not considered to be part of the text. The alignment
+        of the string-like type is the same as the alignment of
+        <varname>n</varname>.
+      </para>
+
+      <para>
+        For the STRING and OBJECT_PATH types, <varname>n</varname> is
+        encoded in 4 bytes, leading to 4-byte alignment.
+        For the SIGNATURE type, <varname>n</varname> is encoded as a single
+        byte. As a result, alignment padding is never required before a
+        SIGNATURE.
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Marshalling containers</title>
+
+      <para>
+        Arrays are marshalled as a <literal>UINT32</literal>
+        <varname>n</varname> giving the length of the array data in bytes,
+        followed by alignment padding to the alignment boundary of the array
+        element type, followed by the <varname>n</varname> bytes of the
+        array elements marshalled in sequence. <varname>n</varname> does not
+        include the padding after the length, or any padding after the
+        last element.
+      </para>
+
+      <para>
+        For instance, if the current position in the message is a multiple
+        of 8 bytes and the byte-order is big-endian, an array containing only
+        the 64-bit integer 5 would be marshalled as:
+
+        <screen>
+00 00 00 08               <lineannotation>8 bytes of data</lineannotation>
+00 00 00 00               <lineannotation>padding to 8-byte boundary</lineannotation>
+00 00 00 00  00 00 00 05  <lineannotation>first element = 5</lineannotation>
+        </screen>
+      </para>
+
+      <para>
+        Arrays have a maximum length defined to be 2 to the 26th power or
+        67108864. Implementations must not send or accept arrays exceeding this
+        length.
+      </para>
+
+      <para>
+        Structs and dict entries are marshalled in the same way as their
+        contents, but their alignment is always to an 8-byte boundary,
+        even if their contents would normally be less strictly aligned.
+      </para>
+
+      <para>
+        Variants are marshalled as the <literal>SIGNATURE</literal> of
+        the contents (which must be a single complete type), followed by a
+        marshalled value with the type given by that signature. The
+        variant has the same 1-byte alignment as the signature, which means
+        that alignment padding before a variant is never needed.
+        Use of variants may not cause a total message depth to be larger
+        than 64, including other container types such as structures.
+      </para>
+    </sect2>
+
+    <sect2>
+      <title>Summary of D-Bus marshalling</title>
 
       <para>
         Given all this, the types are marshaled on the wire as follows:
@@ -661,7 +1048,7 @@
               </row><row>
                 <entry><literal>OBJECT_PATH</literal></entry>
                 <entry>Exactly the same as <literal>STRING</literal> except the 
-                  content must be a valid object path (see below).
+                  content must be a valid object path (see above).
                 </entry>
                 <entry>
                   4 (for the length)
@@ -670,7 +1057,7 @@
                 <entry><literal>SIGNATURE</literal></entry>
                 <entry>The same as <literal>STRING</literal> except the length is a single 
                   byte (thus signatures have a maximum length of 255)
-                  and the content must be a valid signature (see below).
+                  and the content must be a valid signature (see above).
                 </entry>
                 <entry>
                   1
@@ -679,14 +1066,8 @@
                 <entry><literal>ARRAY</literal></entry>
                 <entry>
                   A <literal>UINT32</literal> giving the length of the array data in bytes, followed by 
-                  alignment padding to the alignment boundary of the array element type, 
-                  followed by each array element. The array length is from the 
-                  end of the alignment padding to the end of the last element,
-                  i.e. it does not include the padding after the length,
-                  or any padding after the last element.
-                  Arrays have a maximum length defined to be 2 to the 26th power or
-                  67108864. Implementations must not send or accept arrays exceeding this
-                  length.
+                  alignment padding to the alignment boundary of the array element type,
+                  followed by each array element.
                 </entry>
                 <entry>
                   4 (for the length)
@@ -705,14 +1086,9 @@
 	      </row><row>
                 <entry><literal>VARIANT</literal></entry>
                 <entry>
-                  A variant type has a marshaled
-                  <literal>SIGNATURE</literal> followed by a marshaled
-                  value with the type given in the signature.  Unlike
-                  a message signature, the variant signature can
-                  contain only a single complete type.  So "i", "ai"
-                  or "(ii)" is OK, but "ii" is not.  Use of variants may not
-                  cause a total message depth to be larger than 64, including
-		  other container types such as structures.
+                  The marshaled <literal>SIGNATURE</literal> of a single
+                  complete type, followed by a marshaled value with the type
+                  given in the signature.
                 </entry>
                 <entry>
                   1 (alignment of the signature)
@@ -739,130 +1115,7 @@
           </tgroup>
         </informaltable>
       </para>
-      
-      <sect3 id="message-protocol-marshaling-object-path">
-        <title>Valid Object Paths</title>
-        
-        <para>
-          An object path is a name used to refer to an object instance.
-          Conceptually, each participant in a D-Bus message exchange may have
-          any number of object instances (think of C++ or Java objects) and each
-          such instance will have a path. Like a filesystem, the object
-          instances in an application form a hierarchical tree.
-        </para>
-        
-        <para>
-          The following rules define a valid object path. Implementations must 
-          not send or accept messages with invalid object paths.
-          <itemizedlist>
-            <listitem>
-              <para>
-                The path may be of any length.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                The path must begin with an ASCII '/' (integer 47) character, 
-                and must consist of elements separated by slash characters.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                Each element must only contain the ASCII characters 
-                "[A-Z][a-z][0-9]_"
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                No element may be the empty string.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                Multiple '/' characters cannot occur in sequence.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                A trailing '/' character is not allowed unless the 
-                path is the root path (a single '/' character).
-              </para>
-            </listitem>
-          </itemizedlist>
-        </para>
 
-        <para>
-          Object paths are often namespaced by starting with a reversed
-          domain name and containing an interface version number, in the
-          same way as
-          <link linkend="message-protocol-names-interface">interface
-            names</link> and
-          <link linkend="message-protocol-names-bus">well-known
-            bus names</link>.
-          This makes it possible to implement more than one service, or
-          more than one version of a service, in the same process,
-          even if the services share a connection but cannot otherwise
-          co-operate (for instance, if they are implemented by different
-          plugins).
-        </para>
-
-        <para>
-          For instance, if the owner of <literal>example.com</literal> is
-          developing a D-Bus API for a music player, they might use the
-          hierarchy of object paths that start with
-          <literal>/com/example/MusicPlayer1</literal> for its objects.
-        </para>
-      </sect3>
-
-      <sect3 id="message-protocol-marshaling-signature">
-        <title>Valid Signatures</title>
-        <para>
-          An implementation must not send or accept invalid signatures.
-          Valid signatures will conform to the following rules:
-          <itemizedlist>
-            <listitem>
-              <para>
-                The signature ends with a nul byte.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                The signature is a list of single complete types. 
-                Arrays must have element types, and structs must 
-                have both open and close parentheses.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                Only type codes and open and close parentheses are 
-                allowed in the signature. The <literal>STRUCT</literal> type code
-                is not allowed in signatures, because parentheses
-                are used instead.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                The maximum depth of container type nesting is 32 array type
-                codes and 32 open parentheses. This implies that the maximum
-                total depth of recursion is 64, for an "array of array of array
-                of ... struct of struct of struct of ..."  where there are 32
-                array and 32 struct.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                The maximum length of a signature is 255.
-              </para>
-            </listitem>
-            <listitem>
-              <para>
-                Signatures must be nul-terminated.
-              </para>
-            </listitem>
-          </itemizedlist>
-        </para>
-      </sect3>
-      
     </sect2>
 
   </sect1>
@@ -2174,7 +2427,7 @@
               </listitem>
               <listitem>
                 <para>
-                  Receive REJECT [mechs] &rarr; send AUTH [next mech],
+                  Receive REJECTED [mechs] &rarr; send AUTH [next mech],
                   goto <emphasis>WaitingForData</emphasis> or
                   <emphasis>WaitingForOK</emphasis>
                 </para>
@@ -2210,7 +2463,7 @@
             <itemizedlist>
               <listitem>
                 <para>
-                  Receive REJECT [mechs] &rarr; send AUTH [next mech],
+                  Receive REJECTED [mechs] &rarr; send AUTH [next mech],
                   goto <emphasis>WaitingForData</emphasis> or
                   <emphasis>WaitingForOK</emphasis>
                 </para>
@@ -2252,7 +2505,7 @@
 
             <listitem>
               <para>
-                REJECT means that the client failed to authenticate or
+                REJECTED means that the client failed to authenticate or
                 there was an error in RESP.
               </para>
             </listitem>
@@ -2299,7 +2552,7 @@
                     </member>
 
                     <member>
-                      MECH(RESP) returns REJECT &rarr; send REJECTED
+                      MECH(RESP) returns REJECTED &rarr; send REJECTED
                       [mechs], goto
                       <emphasis>WaitingForAuth</emphasis>
                     </member>
@@ -2353,7 +2606,7 @@
                     </member>
 
                     <member>
-                      MECH(RESP) returns REJECT &rarr; send REJECTED
+                      MECH(RESP) returns REJECTED &rarr; send REJECTED
                       [mechs], goto
                       <emphasis>WaitingForAuth</emphasis>
                     </member>
@@ -3553,10 +3806,13 @@
         that connection is said to <firstterm>own</firstterm> the name.
       </para>
       <para>
-        The bus itself owns a special name, <literal>org.freedesktop.DBus</literal>. 
-        This name routes messages to the bus, allowing applications to make 
-        administrative requests. For example, applications can ask the bus 
-        to assign a name to a connection.
+        The bus itself owns a special name,
+        <literal>org.freedesktop.DBus</literal>, with an object
+        located at <literal>/org/freedesktop/DBus</literal> that
+        implements the <literal>org.freedesktop.DBus</literal>
+        interface. This service allows applications to make
+        administrative requests of the bus itself. For example,
+        applications can ask the bus to assign a name to a connection.
       </para>
       <para>
         Each name may have <firstterm>queued owners</firstterm>.  When an

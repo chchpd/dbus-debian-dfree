@@ -1,3 +1,9 @@
+# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+
+# we do not need to have WIN32 defined
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+
 project(dbus)
 
 # we need to be up to date
@@ -6,8 +12,6 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
 
 # detect version
 include(MacrosAutotools)
@@ -95,7 +99,7 @@ option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
 if (DBUS_USE_EXPAT)
-    find_package(LibExpat)
+    find_package(EXPAT)
 else ()
     find_package(LibXml2)
 endif ()
@@ -295,14 +299,14 @@ if("${sysname}" MATCHES ".*SOLARIS.*")
 endif("${sysname}" MATCHES ".*SOLARIS.*")
 
 #AC_ARG_WITH(xml, AS_HELP_STRING([--with-xml=[libxml/expat]],[XML library to use]))
-if(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
+if(NOT LIBXML2_FOUND AND NOT EXPAT_FOUND)
     message(FATAL "Neither expat nor libxml2 found!")
-endif(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
+endif(NOT LIBXML2_FOUND AND NOT EXPAT_FOUND)
 
 if(DBUS_USE_EXPAT)
     SET(XML_LIB "Expat")
-    SET(XML_LIBRARY     ${LIBEXPAT_LIBRARIES})
-    SET(XML_INCLUDE_DIR ${LIBEXPAT_INCLUDE_DIR})
+    SET(XML_LIBRARY     ${EXPAT_LIBRARIES})
+    SET(XML_INCLUDE_DIR ${EXPAT_INCLUDE_DIR})
 else(DBUS_USE_EXPAT)
     SET(XML_LIB "LibXML2")
     SET(XML_LIBRARY     ${LIBXML2_LIBRARIES})
@@ -431,18 +435,27 @@ endif (WIN32)
 
 set (DBUS_USER )
 
+# This won't work on Windows. It's not meant to - the system bus is
+# meaningless on Windows anyway.
+#
+# This has to be suitable for hard-coding in client libraries as well as
+# in the dbus-daemon's configuration, so it has to be valid to listen on
+# and also to connect to. If this ever changes, it'll need to be split into
+# two variables, one for the listening address and one for the connecting
+# address.
+set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "unix:path=${EXPANDED_LOCALSTATEDIR}/run/dbus/system_bus_socket" CACHE STRING "system bus default address")
 
 if (WIN32)
-  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "system bus default address")
-  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "session bus default address")
+  set (DBUS_SESSION_BUS_LISTEN_ADDRESS "autolaunch:" CACHE STRING "session bus default listening address")
+  set (DBUS_SESSION_BUS_CONNECT_ADDRESS "autolaunch:" CACHE STRING "session bus fallback address for clients")
 
   set (DBUS_SYSTEM_CONFIG_FILE "etc/dbus-1/system.conf")
   set (DBUS_SESSION_CONFIG_FILE "etc/dbus-1/session.conf")
   # bus-test expects a non empty string
   set (DBUS_USER "Administrator")
 else (WIN32)
-  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "unix:tmpdir=" CACHE STRING "system bus default address")
-  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "unix:path=${DBUS_SESSION_SOCKET_DIR}" CACHE STRING "session bus default address")
+  set (DBUS_SESSION_BUS_LISTEN_ADDRESS "unix:tmpdir=${DBUS_SESSION_SOCKET_DIR}" CACHE STRING "session bus default listening address")
+  set (DBUS_SESSION_BUS_CONNECT_ADDRESS "autolaunch:" CACHE STRING "session bus fallback address for clients")
   set (sysconfdir "")
   set (configdir ${sysconfdir}/dbus-1 )
   set (DBUS_SYSTEM_CONFIG_FILE  ${configdir}/system.conf)
@@ -562,7 +575,8 @@ message("        Using XML parser:         ${XML_LIB}                          "
 message("        Daemon executable name:   ${DBUS_DAEMON_NAME}")
 if (WIN32)
 message("        System bus address:       ${DBUS_SYSTEM_BUS_DEFAULT_ADDRESS}  ")
-message("        Session bus address:      ${DBUS_SESSION_BUS_DEFAULT_ADDRESS} ")
+message("        Session bus listens on:   ${DBUS_SESSION_BUS_LISTEN_ADDRESS} ")
+message("        Session clients connect to: ${DBUS_SESSION_BUS_CONNECT_ADDRESS} ")
 else (WIN32)
 #message("        Init scripts style:       ${with_init_scripts}                ")
 #message("        Abstract socket names:    ${have_abstract_sockets}            ")
