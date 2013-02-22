@@ -6,10 +6,9 @@ dbus (1.6.8-1+exp1) UNRELEASED; urgency=low
   * Apply patch from upstream to make it build with newer valgrind
   * debian/rules: factor out production and debug configure flags
   * Add support for DEB_BUILD_OPTIONS=nodocs, which omits most documentation
-    (allowing doxygen and xmlto to be avoided)
-  * In the debug build, do not insist on building all tests if
-  * In the normal build, do not build the documentation if
-  * Branch for experimental
+    (allowing doxygen and xmlto to be avoided) and the dbus-1-doc package
+  * Add support for DEB_BUILD_PROFILE=stage1, which does the same as nodocs
+    and additionally makes the debug build not insist on building all tests
 
  -- Simon McVittie <smcv@debian.org>  Mon, 01 Oct 2012 14:49:32 +0100
 
