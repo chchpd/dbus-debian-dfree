@@ -1,9 +1,9 @@
-dbus (1.6.8-1+exp1) UNRELEASED; urgency=low
+dbus (1.7.0-1) UNRELEASED; urgency=low
 
   * Branch for experimental
+  * New upstream development release
   * On architectures where it's currently supported, do the
     debug build with --with-valgrind for better instrumentation
-  * Apply patch from upstream to make it build with newer valgrind
   * debian/rules: factor out production and debug configure flags
   * Add support for DEB_BUILD_OPTIONS=nodocs, which omits most documentation
     (allowing doxygen and xmlto to be avoided) and the dbus-1-doc package
