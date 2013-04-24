@@ -135,6 +135,12 @@
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 
+/* Prevent post-2.32 APIs */
+#undef GLIB_VERSION_MAX_ALLOWED
+
+/* Ignore post-2.26 deprecations */
+#undef GLIB_VERSION_MIN_REQUIRED
+
 /* Disable GLib public API sanity checking */
 #undef G_DISABLE_CHECKS
 
@@ -146,6 +152,9 @@
 
 /* Adt audit API */
 #undef HAVE_ADT
+
+/* Define to 1 if you have the <alloca.h> header file. */
+#undef HAVE_ALLOCA_H
 
 /* Define to 1 if you have the `backtrace' function. */
 #undef HAVE_BACKTRACE
