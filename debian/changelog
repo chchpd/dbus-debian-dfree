@@ -1,21 +1,22 @@
-dbus (1.6.8-2) UNRELEASED; urgency=low
+dbus (1.6.10-1) UNRELEASED; urgency=low
 
-  * Branch for jessie-targeted changes
-  * On architectures where it's currently supported, do the
-    debug build with --with-valgrind for better instrumentation
-  * Apply patch from upstream to make it build with newer valgrind
-  * debian/rules: factor out production and debug configure flags
-  * Add support for DEB_BUILD_OPTIONS=nodocs, which omits most documentation
-    (allowing doxygen and xmlto to be avoided) and the dbus-1-doc package
-  * Add support for DEB_BUILD_PROFILE=stage1, which does the same as nodocs
-    and additionally makes the debug build not insist on building all tests
-  * Make the development and debugging packages Multi-Arch: same,
-    since their arch-dependent files are all arch-segregated
-    (/usr/lib/TUPLE) or named according to a build-ID (/usr/lib/debug)
-    (Closes: #689071). This is not actually useful until pkg-config
-    becomes M-A: foreign (#631275).
+  * New upstream stable release 1.6.10
+  * Merge everything except the upstream development release from experimental:
+    - On architectures where it's currently supported, do the
+      debug build with --with-valgrind for better instrumentation
+    - Apply patch from upstream to make it build with newer valgrind
+    - debian/rules: factor out production and debug configure flags
+    - Add support for DEB_BUILD_OPTIONS=nodocs, which omits most documentation
+      (allowing doxygen and xmlto to be avoided) and the dbus-1-doc package
+    - Add support for DEB_BUILD_PROFILE=stage1, which does the same as nodocs
+      and additionally makes the debug build not insist on building all tests
+    - Make the development and debugging packages Multi-Arch: same,
+      since their arch-dependent files are all arch-segregated
+      (/usr/lib/TUPLE) or named according to a build-ID (/usr/lib/debug)
+      (Closes: #689071). This is not actually useful until pkg-config
+      becomes M-A: foreign (#631275).
 
- -- Simon McVittie <smcv@debian.org>  Mon, 01 Oct 2012 14:49:32 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 24 Apr 2013 13:09:35 +0100
 
 dbus (1.6.8-1) unstable; urgency=low
 
