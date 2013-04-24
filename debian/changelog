@@ -15,6 +15,7 @@ dbus (1.6.10-1) UNRELEASED; urgency=low
       (/usr/lib/TUPLE) or named according to a build-ID (/usr/lib/debug)
       (Closes: #689071). This is not actually useful until pkg-config
       becomes M-A: foreign (#631275).
+  * Do the debug build --with-valgrind on mipsel, too
 
  -- Simon McVittie <smcv@debian.org>  Wed, 24 Apr 2013 13:09:35 +0100
 
