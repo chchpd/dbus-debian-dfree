@@ -1,3 +1,9 @@
+dbus (1.7.0-2) UNRELEASED; urgency=low
+
+  * Do the debug build --with-valgrind on mipsel, too
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 25 Apr 2013 13:46:10 +0100
+
 dbus (1.7.0-1) experimental; urgency=low
 
   * Branch for experimental
