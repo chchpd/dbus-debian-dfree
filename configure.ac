@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [7])
-m4_define([dbus_micro_version], [0])
+m4_define([dbus_micro_version], [2])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -37,7 +37,7 @@ LT_CURRENT=11
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=0
+LT_REVISION=1
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -212,7 +212,7 @@ fi
 # or binaries.
 
 AC_DEFINE([GLIB_VERSION_MIN_REQUIRED], [GLIB_VERSION_2_26], [Ignore post-2.26 deprecations])
-AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_26], [Prevent post-2.26 APIs])
+AC_DEFINE([GLIB_VERSION_MAX_ALLOWED], [GLIB_VERSION_2_32], [Prevent post-2.32 APIs])
 
 with_glib=yes
 
@@ -687,6 +687,8 @@ AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(ws2tcpip.h)
 
 AC_CHECK_HEADERS(wspiapi.h)
+
+AC_CHECK_HEADERS(alloca.h)
 
 # Add -D_POSIX_PTHREAD_SEMANTICS if on Solaris
 #
@@ -1277,7 +1279,7 @@ if test x$dbus_win = xyes ; then
   if test x$dbus_wince = xyes ; then
     NETWORK_libs="-lws2"
   else
-    NETWORK_libs="-lws2_32"
+    NETWORK_libs="-lws2_32 -liphlpapi"
   fi
 fi
 
@@ -1293,6 +1295,17 @@ if test x$with_valgrind != xno; then
   PKG_CHECK_MODULES([VALGRIND], [valgrind >= 3.6])
   AC_DEFINE([WITH_VALGRIND], [1], [Define to add Valgrind instrumentation])
 fi
+
+# Determine maximum number of Unix fds which may be passed
+AS_CASE([$host_os],
+  [*qnx*],
+    [DEFAULT_MESSAGE_UNIX_FDS=256],
+  [*],
+    [DEFAULT_MESSAGE_UNIX_FDS=1024])
+AC_DEFINE_UNQUOTED([DBUS_DEFAULT_MESSAGE_UNIX_FDS],
+  [$DEFAULT_MESSAGE_UNIX_FDS],
+  [Default for dbus_connection_get_max_message_unix_fds()])
+AC_SUBST([DEFAULT_MESSAGE_UNIX_FDS])
 
 #### Set up final flags
 LIBDBUS_LIBS="$THREAD_LIBS $NETWORK_libs"
