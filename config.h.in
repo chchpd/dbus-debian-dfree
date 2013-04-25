@@ -45,6 +45,9 @@
 /* Directory for installing DBUS data files */
 #undef DBUS_DATADIR
 
+/* Default for dbus_connection_get_max_message_unix_fds() */
+#undef DBUS_DEFAULT_MESSAGE_UNIX_FDS
+
 /* Disable assertion checking */
 #undef DBUS_DISABLE_ASSERT
 
@@ -138,7 +141,7 @@
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 
-/* Prevent post-2.26 APIs */
+/* Prevent post-2.32 APIs */
 #undef GLIB_VERSION_MAX_ALLOWED
 
 /* Ignore post-2.26 deprecations */
@@ -155,6 +158,9 @@
 
 /* Adt audit API */
 #undef HAVE_ADT
+
+/* Define to 1 if you have the <alloca.h> header file. */
+#undef HAVE_ALLOCA_H
 
 /* Define to 1 if you have the `backtrace' function. */
 #undef HAVE_BACKTRACE

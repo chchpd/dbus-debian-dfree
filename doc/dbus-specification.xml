@@ -1,13 +1,13 @@
 <?xml version="1.0" standalone="no" ?>
-<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-"http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd"
+<!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd"
 [
 ]>
 <article id="index">
   <articleinfo>
     <title>D-Bus Specification</title>
-    <releaseinfo>Version 0.20</releaseinfo>
-    <date>2013-02-22</date>
+    <releaseinfo>Version 0.21</releaseinfo>
+    <date>2013-04-25</date>
     <authorgroup>
       <author>
 	<firstname>Havoc</firstname>
@@ -72,8 +72,15 @@
     </authorgroup>
    <revhistory>
      <revision>
+       <revnumber>0.21</revnumber>
+       <date>2013-04-25</date>
+       <authorinitials>smcv</authorinitials>
+       <revremark>allow Unicode noncharacters in UTF-8 (Unicode
+         Corrigendum #9)</revremark>
+     </revision>
+     <revision>
        <revnumber>0.20</revnumber>
-       <date>22 February 2013 (<ulink url='http://cgit.freedesktop.org/dbus/dbus/log/doc/dbus-specification.xml'>commit log</ulink>)</date>
+       <date>22 February 2013</date>
        <authorinitials>smcv, walters</authorinitials>
        <revremark>reorganise for clarity, remove false claims about
          basic types, mention /o/fd/DBus</revremark>
@@ -448,8 +455,15 @@
         are basic types with a variable length. The value of any string-like
         type is conceptually 0 or more Unicode codepoints encoded in UTF-8,
         none of which may be U+0000. The UTF-8 text must be validated
-        strictly: in particular, it must not contain overlong sequences,
-        noncharacters such as U+FFFE, or codepoints above U+10FFFF.
+        strictly: in particular, it must not contain overlong sequences
+        or codepoints above U+10FFFF.
+      </para>
+
+      <para>
+        Since D-Bus Specification version 0.21, in accordance with Unicode
+        Corrigendum #9, the "noncharacters" U+FDD0..U+FDEF, U+nFFFE and
+        U+nFFFF are allowed in UTF-8 strings (but note that older versions of
+        D-Bus rejected these noncharacters).
       </para>
 
       <para>

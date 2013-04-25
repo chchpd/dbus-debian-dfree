@@ -72,6 +72,9 @@
 #ifdef HAVE_GETPEERUCRED
 #include <ucred.h>
 #endif
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
 #ifdef HAVE_ADT
 #include <bsm/adt.h>
@@ -1863,7 +1866,7 @@ _dbus_read_credentials_socket  (int              client_fd,
 
   if (pid_read != DBUS_PID_UNSET)
     {
-      if (!_dbus_credentials_add_unix_pid (credentials, pid_read))
+      if (!_dbus_credentials_add_pid (credentials, pid_read))
         {
           _DBUS_SET_OOM (error);
           return FALSE;
@@ -2318,7 +2321,7 @@ _dbus_credentials_add_from_current_process (DBusCredentials *credentials)
   _dbus_assert (sizeof (uid_t) <= sizeof (dbus_uid_t));
   _dbus_assert (sizeof (gid_t) <= sizeof (dbus_gid_t));
 
-  if (!_dbus_credentials_add_unix_pid(credentials, _dbus_getpid()))
+  if (!_dbus_credentials_add_pid(credentials, _dbus_getpid()))
     return FALSE;
   if (!_dbus_credentials_add_unix_uid(credentials, _dbus_geteuid()))
     return FALSE;

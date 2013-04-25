@@ -58,6 +58,8 @@
 #include <sys/syslimits.h>
 #endif
 
+#include "sd-daemon.h"
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -426,16 +428,19 @@ _dbus_request_file_descriptor_limit (unsigned int limit)
 }
 
 void
-_dbus_init_system_log (void)
+_dbus_init_system_log (dbus_bool_t is_daemon)
 {
 #ifdef HAVE_SYSLOG_H
+  int logopts = LOG_PID;
 
 #if HAVE_DECL_LOG_PERROR
-  openlog ("dbus", LOG_PID | LOG_PERROR, LOG_DAEMON);
-#else
-  openlog ("dbus", LOG_PID, LOG_DAEMON);
+#ifdef HAVE_SYSTEMD
+  if (!is_daemon || sd_booted () <= 0)
+#endif
+    logopts |= LOG_PERROR;
 #endif
 
+  openlog ("dbus", logopts, LOG_DAEMON);
 #endif
 }
 
