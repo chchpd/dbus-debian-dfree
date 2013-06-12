@@ -70,6 +70,12 @@ set(DBUS_DAEMONDIR 			 ${EXPANDED_BINDIR})
 #enable building of shared library
 SET(BUILD_SHARED_LIBS ON)
 
+if(WIN32)
+    set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "bin" LIBRARY DESTINATION "lib" ARCHIVE DESTINATION "lib")
+else()
+    set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "${EXPANDED_LIBDIR}" LIBRARY DESTINATION "${EXPANDED_LIBDIR}" ARCHIVE DESTINATION "${EXPANDED_LIBDIR}")
+endif()
+
 if (CYGWIN)
    set (WIN32)
 endif (CYGWIN)
@@ -82,8 +88,6 @@ if (WIN32)
     include(Win32Macros)
     addExplorerWrapper(${CMAKE_PROJECT_NAME})
 endif (WIN32)
-
-option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
 
 if(NOT WIN32)
 	option (DBUS_ENABLE_ABSTRACT_SOCKETS "enable support for abstract sockets" ON)
@@ -98,11 +102,7 @@ option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
-if (DBUS_USE_EXPAT)
-    find_package(EXPAT)
-else ()
-    find_package(LibXml2)
-endif ()
+find_package(EXPAT)
 find_package(X11)
 
 # analogous to AC_USE_SYSTEM_EXTENSIONS in configure.ac
@@ -303,16 +303,9 @@ if(NOT LIBXML2_FOUND AND NOT EXPAT_FOUND)
     message(FATAL "Neither expat nor libxml2 found!")
 endif(NOT LIBXML2_FOUND AND NOT EXPAT_FOUND)
 
-if(DBUS_USE_EXPAT)
-    SET(XML_LIB "Expat")
-    SET(XML_LIBRARY     ${EXPAT_LIBRARIES})
-    SET(XML_INCLUDE_DIR ${EXPAT_INCLUDE_DIR})
-else(DBUS_USE_EXPAT)
-    SET(XML_LIB "LibXML2")
-    SET(XML_LIBRARY     ${LIBXML2_LIBRARIES})
-    SET(XML_INCLUDE_DIR ${LIBXML2_INCLUDE_DIR})
-endif(DBUS_USE_EXPAT)
-
+SET(XML_LIB "Expat")
+SET(XML_LIBRARY     ${EXPAT_LIBRARIES})
+SET(XML_INCLUDE_DIR ${EXPAT_INCLUDE_DIR})
 
 #AC_ARG_WITH(init-scripts, AS_HELP_STRING([--with-init-scripts=[redhat]],[Style of init scripts to install]))
 #AC_ARG_WITH(session-socket-dir, AS_HELP_STRING([--with-session-socket-dir=[dirname]],[Where to put sockets for the per-login-session message bus]))
