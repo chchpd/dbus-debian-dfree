@@ -1,3 +1,50 @@
+D-Bus 1.7.4 (2013-06-13)
+==
+
+Security fixes:
+
+• CVE-2013-2168: Fix misuse of va_list that could be used as a denial
+  of service for system services. Vulnerability reported by Alexandru Cornea.
+  (Simon)
+
+Dependencies:
+
+• The Windows version of libdbus now contains a C++ source file, used
+  to provide global initialization when the library is loaded.
+  gcc (mingw*) users should ensure that g++ is also installed.
+
+• The libxml2-based configuration reader (which hasn't worked for 2.5 years,
+  and was never the recommended option) has been removed. Expat is now a
+  hard dependency.
+
+Enhancements:
+
+• It should now be safe to call dbus_threads_init_default() from any thread,
+  at any time. Authors of loadable modules and plugins that use libdbus
+  should consider doing so during initialization.
+  (fd.o #54972, Simon McVittie)
+
+• Improve dbus-send documentation and command-line parsing (fd.o #65424,
+  Chengwei Yang)
+
+Other fixes:
+
+• In dbus-daemon, don't crash if a .service file starts with key=value
+  (fd.o #60853, Chengwei Yang)
+
+• Unix-specific:
+  · Fix a crash similar to CVE-2013-2168 the first time we try to use syslog
+    on a platform not defining LOG_PERROR, such as Solaris or QNX.
+    This regressed in 1.7.0. (Simon)
+  · Fix an assertion failure if we try to activate systemd services before
+    systemd connects to the bus (fd.o #50199, Chengwei Yang)
+  · Avoid compiler warnings for ignoring the return from write()
+    (Chengwei Yang)
+
+• Windows-specific:
+  · Under cmake, install runtime libraries (DLLs) into bin/ instead of lib/
+    so that Windows finds them (fd.o #59733, Ralf Habacker)
+
 D-Bus 1.7.2 (2013-04-25)
 ==
 

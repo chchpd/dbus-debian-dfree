@@ -283,5 +283,20 @@ _dbus_threads_init_platform_specific (void)
    */
   check_monotonic_clock ();
   (void) _dbus_check_setuid ();
-  return dbus_threads_init (NULL);
+
+  return TRUE;
+}
+
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void
+_dbus_threads_lock_platform_specific (void)
+{
+  pthread_mutex_lock (&init_mutex);
+}
+
+void
+_dbus_threads_unlock_platform_specific (void)
+{
+  pthread_mutex_unlock (&init_mutex);
 }

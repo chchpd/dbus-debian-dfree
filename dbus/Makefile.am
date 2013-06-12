@@ -295,6 +295,17 @@ libdbus_internal_la_CPPFLAGS = \
 	$(NULL)
 libdbus_internal_la_LIBADD=$(LIBDBUS_LIBS) $(SYSTEMD_LIBS)
 
+if DBUS_WIN
+# This must be a separate convenience library, otherwise libtool notices
+# that libdbus-1 might contain C++, links it with g++ and links in libstdc++,
+# even on Unix where in fact it doesn't contain any C++. For Windows, where
+# this code is used, we don't actually need libstdc++.
+noinst_LTLIBRARIES += libdbus-init-win.la
+libdbus_init_win_la_SOURCES = dbus-init-win.cpp
+libdbus_1_la_LIBADD += libdbus-init-win.la
+libdbus_internal_la_LIBADD += libdbus-init-win.la
+endif
+
 noinst_PROGRAMS =
 
 if DBUS_BUILD_TESTS

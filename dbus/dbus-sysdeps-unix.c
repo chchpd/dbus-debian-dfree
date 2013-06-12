@@ -82,6 +82,10 @@
 
 #include "sd-daemon.h"
 
+#if !DBUS_USE_SYNC
+#include <pthread.h>
+#endif
+
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -2428,7 +2432,12 @@ _dbus_parse_uid (const DBusString      *uid_str,
 }
 
 #if !DBUS_USE_SYNC
-_DBUS_DEFINE_GLOBAL_LOCK (atomic);
+/* To be thread-safe by default on platforms that don't necessarily have
+ * atomic operations (notably Debian armel, which is armv4t), we must
+ * use a mutex that can be initialized statically, like this.
+ * GLib >= 2.32 uses a similar system.
+ */
+static pthread_mutex_t atomic_mutex = PTHREAD_MUTEX_INITIALIZER;
 #endif
 
 /**
@@ -2444,10 +2453,12 @@ _dbus_atomic_inc (DBusAtomic *atomic)
   return __sync_add_and_fetch(&atomic->value, 1)-1;
 #else
   dbus_int32_t res;
-  _DBUS_LOCK (atomic);
+
+  pthread_mutex_lock (&atomic_mutex);
   res = atomic->value;
   atomic->value += 1;
-  _DBUS_UNLOCK (atomic);
+  pthread_mutex_unlock (&atomic_mutex);
+
   return res;
 #endif
 }
@@ -2466,10 +2477,11 @@ _dbus_atomic_dec (DBusAtomic *atomic)
 #else
   dbus_int32_t res;
 
-  _DBUS_LOCK (atomic);
+  pthread_mutex_lock (&atomic_mutex);
   res = atomic->value;
   atomic->value -= 1;
-  _DBUS_UNLOCK (atomic);
+  pthread_mutex_unlock (&atomic_mutex);
+
   return res;
 #endif
 }
@@ -2490,9 +2502,10 @@ _dbus_atomic_get (DBusAtomic *atomic)
 #else
   dbus_int32_t res;
 
-  _DBUS_LOCK (atomic);
+  pthread_mutex_lock (&atomic_mutex);
   res = atomic->value;
-  _DBUS_UNLOCK (atomic);
+  pthread_mutex_unlock (&atomic_mutex);
+
   return res;
 #endif
 }
@@ -3122,8 +3135,11 @@ _dbus_printf_string_upper_bound (const char *format,
   char static_buf[1024];
   int bufsize = sizeof (static_buf);
   int len;
+  va_list args_copy;
 
-  len = vsnprintf (static_buf, bufsize, format, args);
+  DBUS_VA_COPY (args_copy, args);
+  len = vsnprintf (static_buf, bufsize, format, args_copy);
+  va_end (args_copy);
 
   /* If vsnprintf() returned non-negative, then either the string fits in
    * static_buf, or this OS has the POSIX and C99 behaviour where vsnprintf
@@ -3139,8 +3155,12 @@ _dbus_printf_string_upper_bound (const char *format,
        * or the real length could be coincidentally the same. Which is it?
        * If vsnprintf returns the truncated length, we'll go to the slow
        * path. */
-      if (vsnprintf (static_buf, 1, format, args) == 1)
+      DBUS_VA_COPY (args_copy, args);
+
+      if (vsnprintf (static_buf, 1, format, args_copy) == 1)
         len = -1;
+
+      va_end (args_copy);
     }
 
   /* If vsnprintf() returned negative, we have to do more work.
@@ -3156,7 +3176,10 @@ _dbus_printf_string_upper_bound (const char *format,
       if (buf == NULL)
         return -1;
 
-      len = vsnprintf (buf, bufsize, format, args);
+      DBUS_VA_COPY (args_copy, args);
+      len = vsnprintf (buf, bufsize, format, args_copy);
+      va_end (args_copy);
+
       dbus_free (buf);
 
       /* If the reported length is exactly the buffer size, round up to the
@@ -3207,6 +3230,7 @@ _dbus_get_tmpdir(void)
   return tmpdir;
 }
 
+#if defined(DBUS_ENABLE_X11_AUTOLAUNCH) || defined(DBUS_ENABLE_LAUNCHD)
 /**
  * Execute a subprocess, returning up to 1024 bytes of output
  * into @p result.
@@ -3408,6 +3432,7 @@ _read_subprocess_line_argv (const char *progpath,
 
   return retval;
 }
+#endif
 
 /**
  * Returns the address of a new session bus.

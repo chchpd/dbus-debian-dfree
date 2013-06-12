@@ -186,6 +186,7 @@ set (DBUS_UTIL_HEADERS
 if (WIN32)
 	set (DBUS_SHARED_SOURCES ${DBUS_SHARED_SOURCES} 
 		${DBUS_DIR}/dbus-file-win.c
+		${DBUS_DIR}/dbus-init-win.cpp
 		${DBUS_DIR}/dbus-sysdeps-win.c
 		${DBUS_DIR}/dbus-pipe-win.c
 		${DBUS_DIR}/dbus-sysdeps-thread-win.c
@@ -270,7 +271,7 @@ else(WIN32)
     target_link_libraries(dbus-1 ${CMAKE_THREAD_LIBS_INIT} rt)
 endif(WIN32)
 
-install_targets(/lib dbus-1 )
+install(TARGETS dbus-1 ${INSTALL_TARGETS_DEFAULT_ARGS})
 install_files(/include/dbus FILES ${dbusinclude_HEADERS})
 
 ### Internal library, used for the daemon, tools and tests, compiled statically.
