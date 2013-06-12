@@ -1,3 +1,11 @@
+dbus (1.7.4-1) experimental; urgency=low
+
+  * New upstream development release
+    - CVE-2013-2168: avoid a user-triggerable crash (denial of services)
+      in system services that use libdbus
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 12 Jun 2013 19:53:00 +0100
+
 dbus (1.7.2-1) experimental; urgency=low
 
   * New upstream development release
