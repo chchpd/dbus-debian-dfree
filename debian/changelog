@@ -1,3 +1,11 @@
+dbus (1.6.12-1) unstable; urgency=high
+
+  * New upstream stable release 1.6.12
+    - CVE-2013-2168: avoid a user-triggerable crash (denial of services)
+      in system services that use libdbus
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 12 Jun 2013 14:38:34 +0100
+
 dbus (1.6.10-1) unstable; urgency=low
 
   * New upstream stable release 1.6.10
