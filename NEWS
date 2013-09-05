@@ -1,5 +1,34 @@
+D-Bus 1.6.14 (2013-09-05)
+==
+
+The “Restore Fatigue” release.
+
+Fixes:
+
+• Avoid an infinite busy-loop if a signal interrupts waitpid()
+  (fd.o #68945, Simon McVittie)
+
+• Escape addresses containing non-ASCII characters correctly
+  (fd.o #53499, Chengwei Yang)
+
+• If malloc() returns NULL in _dbus_string_init() or similar, don't free
+  an invalid pointer if the string is later freed (fd.o #65959, Chengwei Yang)
+
+• If malloc() returns NULL in dbus_set_error(), don't va_end() a va_list
+  that was never va_start()ed (fd.o #66300, Chengwei Yang)
+
+• Fix a regression test on platforms with strict alignment (fd.o #67279,
+  Colin Walters)
+
+• Avoid calling function parameters "interface" since certain Windows headers
+  have a namespace-polluting macro of that name (fd.o #66493, Ivan Romanov)
+
+• Make "make -j check" work (fd.o #68852, Simon McVittie)
+
 D-Bus 1.6.12 (2013-06-13)
 ==
+
+The “does this unit have a soul?” release.
 
 Fixes:
 
