@@ -1,3 +1,11 @@
+dbus (1.6.14-1) unstable; urgency=low
+
+  * New upstream stable release 1.6.14
+    - fixes an infinite busy-loop if waitpid() is interrupted by a signal
+      while spawning a subprocess (Closes: #721932)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 05 Sep 2013 16:42:55 +0100
+
 dbus (1.6.12-1) unstable; urgency=high
 
   * New upstream stable release 1.6.12
