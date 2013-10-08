@@ -4,6 +4,7 @@ dbus (1.6.16-1) UNRELEASED; urgency=low
   * Backport the new dbus-run-session tool from D-Bus 1.7
   * Add udeb packages, so the graphical installer can use AT-SPI
     (Closes: #723952)
+  * Standards-Version: 3.9.4 (no changes needed)
 
  -- Simon McVittie <smcv@debian.org>  Tue, 08 Oct 2013 14:54:24 +0100
 
