@@ -42,6 +42,20 @@ debug_configure_flags := \
 	--libdir='$${prefix}/lib' \
 	$(NULL)
 
+udeb_configure_flags := \
+	$(normal_configure_flags) \
+	--disable-asserts \
+	--disable-checks \
+	--disable-doxygen-docs \
+	--disable-libaudit \
+	--disable-selinux \
+	--disable-systemd \
+	--disable-tests \
+	--disable-verbose-mode \
+	--disable-xml-docs \
+	CFLAGS='$(CFLAGS) -Os' \
+	$(NULL)
+
 ifeq ($(filter nodocs,$(DEB_BUILD_OPTIONS))$(filter stage1,$(DEB_BUILD_PROFILE)),)
 # documentation enabled
 normal_configure_flags += \
@@ -87,10 +101,17 @@ override_dh_auto_configure:
 		$(common_configure_flags) \
 		$(debug_configure_flags) \
 		$(NULL)
+	dh_auto_configure \
+		--builddirectory=build-udeb \
+		-- \
+		$(common_configure_flags) \
+		$(udeb_configure_flags) \
+		$(NULL)
 
 override_dh_auto_build:
 	dh_auto_build
 	dh_auto_build --builddirectory=build-debug
+	dh_auto_build --builddirectory=build-udeb
 
 # tests need more environmental setup at the moment
 override_dh_auto_test:
@@ -99,6 +120,7 @@ override_dh_auto_test:
 override_dh_auto_install:
 	dh_auto_install
 	make -C build-debug install-exec DESTDIR=$(CURDIR)/debian/tmp
+	make -C build-udeb install-exec DESTDIR=$(CURDIR)/debian/tmp-udeb
 
 override_dh_link:
 	dh_link -plibdbus-1-dev lib/$(DEB_HOST_MULTIARCH)/$$(basename $$(readlink debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so)) usr/lib/$(DEB_HOST_MULTIARCH)/libdbus-1.so
@@ -114,6 +136,11 @@ override_dh_install:
 	dh_install -p$(libdbusN) \
 		"usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)*" \
 		lib/$(DEB_HOST_MULTIARCH)
+	dh_install -pdbus-udeb
+	dh_install -p$(libdbusN)-udeb \
+		--sourcedir=debian/tmp-udeb \
+		"usr/lib/$(DEB_HOST_MULTIARCH)/$(libdbus_soname)*" \
+		lib/$(DEB_HOST_MULTIARCH)
 	dh_install --remaining-packages --list-missing $(dh_install_options)
 	install -m 644 -D debian/dbus-Xsession debian/dbus-x11/etc/X11/Xsession.d/75dbus_dbus-launch
 
@@ -123,13 +150,14 @@ override_dh_installinit:
 # we don't want docs for the debug symbols, just symlink to the library docs
 override_dh_installdocs:
 	dh_installdocs -pdbus-1-dbg --link-doc=$(libdbusN)
+	dh_installdocs -pdbus-udeb -p$(libdbusN)-udeb --no-act
 	dh_installdocs --remaining-packages --all AUTHORS NEWS README
 
 override_dh_strip:
 	dh_strip --dbg-package=dbus-1-dbg
 
 override_dh_makeshlibs:
-	dh_makeshlibs -V -Ndbus-1-dbg
+	dh_makeshlibs -V -Ndbus-1-dbg --add-udeb=$(libdbusN)-udeb
 
 override_dh_autoreconf:
 	cp INSTALL INSTALL.orig
@@ -144,6 +172,7 @@ override_dh_autoreconf_clean:
 override_dh_auto_clean:
 	dh_auto_clean
 	dh_auto_clean --builddirectory=build-debug
+	dh_auto_clean --builddirectory=build-udeb
 	rm -f build/test/data/valid-config-files/session.conf
 	rm -f build/test/data/valid-config-files/system.conf
 	rm -f build-debug/test/data/valid-config-files/session.conf
