@@ -29,7 +29,6 @@
 #include <glib.h>
 
 #include <dbus/dbus.h>
-#include <dbus/dbus-glib-lowlevel.h>
 
 #include <string.h>
 
@@ -39,10 +38,15 @@
 #else
 # include <signal.h>
 # include <unistd.h>
+# include <sys/types.h>
 #endif
+
+#include "test-utils.h"
 
 typedef struct {
     gboolean skip;
+
+    TestMainContext *ctx;
 
     DBusError e;
     GError *ge;
@@ -126,7 +130,8 @@ spawn_dbus_daemon (gchar *binary,
 }
 
 static DBusConnection *
-connect_to_bus (const gchar *address)
+connect_to_bus (Fixture *f,
+    const gchar *address)
 {
   DBusConnection *conn;
   DBusError error = DBUS_ERROR_INIT;
@@ -141,7 +146,7 @@ connect_to_bus (const gchar *address)
   g_assert (ok);
   g_assert (dbus_bus_get_unique_name (conn) != NULL);
 
-  dbus_connection_setup_with_g_main (conn, NULL);
+  test_connection_setup (f->ctx, conn);
   return conn;
 }
 
@@ -183,6 +188,7 @@ setup (Fixture *f,
   gchar *arg;
   gchar *address;
 
+  f->ctx = test_main_context_get ();
   f->ge = NULL;
   dbus_error_init (&f->e);
 
@@ -226,8 +232,8 @@ setup (Fixture *f,
   g_free (dbus_daemon);
   g_free (arg);
 
-  f->left_conn = connect_to_bus (address);
-  f->right_conn = connect_to_bus (address);
+  f->left_conn = connect_to_bus (f, address);
+  f->right_conn = connect_to_bus (f, address);
   g_free (address);
 }
 
@@ -301,12 +307,137 @@ test_echo (Fixture *f,
     }
 
   while (received < count)
-    g_main_context_iteration (NULL, TRUE);
+    test_main_context_iterate (f->ctx, TRUE);
 
   elapsed = g_test_timer_elapsed ();
 
   g_test_maximized_result (count / elapsed, "%u messages / %f seconds",
       count, elapsed);
+}
+
+static void
+pending_call_store_reply (DBusPendingCall *pc,
+    void *data)
+{
+  DBusMessage **message_p = data;
+
+  *message_p = dbus_pending_call_steal_reply (pc);
+  g_assert (*message_p != NULL);
+}
+
+static void
+test_creds (Fixture *f,
+    gconstpointer context)
+{
+  const char *unique = dbus_bus_get_unique_name (f->left_conn);
+  DBusMessage *m = dbus_message_new_method_call (DBUS_SERVICE_DBUS,
+      DBUS_PATH_DBUS, DBUS_INTERFACE_DBUS, "GetConnectionCredentials");
+  DBusPendingCall *pc;
+  DBusMessageIter args_iter;
+  DBusMessageIter arr_iter;
+  DBusMessageIter pair_iter;
+  DBusMessageIter var_iter;
+  enum {
+      SEEN_UNIX_USER = 1,
+      SEEN_PID = 2,
+      SEEN_WINDOWS_SID = 4
+  } seen = 0;
+
+  if (m == NULL)
+    g_error ("OOM");
+
+  if (!dbus_message_append_args (m,
+        DBUS_TYPE_STRING, &unique,
+        DBUS_TYPE_INVALID))
+    g_error ("OOM");
+
+  if (!dbus_connection_send_with_reply (f->left_conn, m, &pc,
+                                        DBUS_TIMEOUT_USE_DEFAULT) ||
+      pc == NULL)
+    g_error ("OOM");
+
+  dbus_message_unref (m);
+  m = NULL;
+
+  if (dbus_pending_call_get_completed (pc))
+    pending_call_store_reply (pc, &m);
+  else if (!dbus_pending_call_set_notify (pc, pending_call_store_reply,
+                                          &m, NULL))
+    g_error ("OOM");
+
+  while (m == NULL)
+    test_main_context_iterate (f->ctx, TRUE);
+
+  g_assert_cmpstr (dbus_message_get_signature (m), ==, "a{sv}");
+
+  dbus_message_iter_init (m, &args_iter);
+  g_assert_cmpuint (dbus_message_iter_get_arg_type (&args_iter), ==,
+      DBUS_TYPE_ARRAY);
+  g_assert_cmpuint (dbus_message_iter_get_element_type (&args_iter), ==,
+      DBUS_TYPE_DICT_ENTRY);
+  dbus_message_iter_recurse (&args_iter, &arr_iter);
+
+  while (dbus_message_iter_get_arg_type (&arr_iter) != DBUS_TYPE_INVALID)
+    {
+      const char *name;
+
+      dbus_message_iter_recurse (&arr_iter, &pair_iter);
+      g_assert_cmpuint (dbus_message_iter_get_arg_type (&pair_iter), ==,
+          DBUS_TYPE_STRING);
+      dbus_message_iter_get_basic (&pair_iter, &name);
+      dbus_message_iter_next (&pair_iter);
+      g_assert_cmpuint (dbus_message_iter_get_arg_type (&pair_iter), ==,
+          DBUS_TYPE_VARIANT);
+      dbus_message_iter_recurse (&pair_iter, &var_iter);
+
+      if (g_strcmp0 (name, "UnixUserID") == 0)
+        {
+#ifdef G_OS_UNIX
+          guint32 u32;
+
+          g_assert (!(seen & SEEN_UNIX_USER));
+          g_assert_cmpuint (dbus_message_iter_get_arg_type (&var_iter), ==,
+              DBUS_TYPE_UINT32);
+          dbus_message_iter_get_basic (&var_iter, &u32);
+          g_message ("%s of this process is %u", name, u32);
+          g_assert_cmpuint (u32, ==, geteuid ());
+          seen |= SEEN_UNIX_USER;
+#else
+          g_assert_not_reached ();
+#endif
+        }
+      else if (g_strcmp0 (name, "ProcessID") == 0)
+        {
+          guint32 u32;
+
+          g_assert (!(seen & SEEN_PID));
+          g_assert_cmpuint (dbus_message_iter_get_arg_type (&var_iter), ==,
+              DBUS_TYPE_UINT32);
+          dbus_message_iter_get_basic (&var_iter, &u32);
+          g_message ("%s of this process is %u", name, u32);
+#ifdef G_OS_UNIX
+          g_assert_cmpuint (u32, ==, getpid ());
+#elif defined(G_OS_WIN32)
+          g_assert_cmpuint (u32, ==, GetCurrentProcessId ());
+#else
+          g_assert_not_reached ();
+#endif
+          seen |= SEEN_PID;
+        }
+
+      dbus_message_iter_next (&arr_iter);
+    }
+
+#ifdef G_OS_UNIX
+  g_assert (seen & SEEN_UNIX_USER);
+  g_assert (seen & SEEN_PID);
+#endif
+
+#ifdef G_OS_WIN32
+  /* FIXME: when implemented:
+  g_assert (seen & SEEN_WINDOWS_SID);
+   */
+#endif
 }
 
 static void
@@ -347,6 +478,8 @@ teardown (Fixture *f,
       g_spawn_close_pid (f->daemon_pid);
       f->daemon_pid = 0;
     }
+
+  test_main_context_unref (f->ctx);
 }
 
 static Config limited_config = {
@@ -363,6 +496,7 @@ main (int argc,
   g_test_add ("/echo/session", Fixture, NULL, setup, test_echo, teardown);
   g_test_add ("/echo/limited", Fixture, &limited_config,
       setup, test_echo, teardown);
+  g_test_add ("/creds", Fixture, NULL, setup, test_creds, teardown);
 
   return g_test_run ();
 }

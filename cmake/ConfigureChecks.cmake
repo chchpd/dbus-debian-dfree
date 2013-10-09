@@ -11,7 +11,6 @@ check_include_file(sys/time.h   HAVE_SYS_TIME_H)# dbus-sysdeps-win.c
 check_include_file(sys/wait.h   HAVE_SYS_WAIT_H)# dbus-sysdeps-win.c
 check_include_file(time.h       HAVE_TIME_H)    # dbus-sysdeps-win.c
 check_include_file(ws2tcpip.h   HAVE_WS2TCPIP_H)# dbus-sysdeps-win.c
-check_include_file(wspiapi.h    HAVE_WSPIAPI_H) # dbus-sysdeps-win.c
 check_include_file(unistd.h     HAVE_UNISTD_H)  # dbus-sysdeps-util-win.c
 check_include_file(stdio.h      HAVE_STDIO_H)   # dbus-sysdeps.h
 check_include_file(sys/syslimits.h    HAVE_SYS_SYSLIMITS_H)   # dbus-sysdeps-unix.c
@@ -52,25 +51,23 @@ check_type_size("__int64"   SIZEOF___INT64)
 
 # DBUS_INT64_TYPE
 if(SIZEOF_INT EQUAL 8)
-    set (DBUS_HAVE_INT64 1)
     set (DBUS_INT64_TYPE "int")
     set (DBUS_INT64_CONSTANT  "(val)")
     set (DBUS_UINT64_CONSTANT "(val##U)")
 elseif(SIZEOF_LONG EQUAL 8)
-    set (DBUS_HAVE_INT64 1)
     set (DBUS_INT64_TYPE "long")
     set (DBUS_INT64_CONSTANT  "(val##L)")
     set (DBUS_UINT64_CONSTANT "(val##UL)")
 elseif(SIZEOF_LONG_LONG EQUAL 8)
-    set (DBUS_HAVE_INT64 1)
     set (DBUS_INT64_TYPE "long long")
     set (DBUS_INT64_CONSTANT  "(val##LL)")
     set (DBUS_UINT64_CONSTANT "(val##ULL)")
 elseif(SIZEOF___INT64 EQUAL 8)
-    set (DBUS_HAVE_INT64 1)
     set (DBUS_INT64_TYPE "__int64")
     set (DBUS_INT64_CONSTANT  "(val##i64)")
     set (DBUS_UINT64_CONSTANT "(val##ui64)")
+else(SIZEOF_INT EQUAL 8)
+    message (FATAL_ERROR "Could not find a 64-bit integer type")
 endif(SIZEOF_INT EQUAL 8)
 
 # DBUS_INT32_TYPE

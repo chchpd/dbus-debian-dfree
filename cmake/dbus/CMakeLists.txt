@@ -149,6 +149,7 @@ set (DBUS_SHARED_HEADERS
 ### should be underscore-prefixed but don't really need 
 ### to be unless they move to DBUS_SHARED_SOURCES later)
 set (DBUS_UTIL_SOURCES
+	${DBUS_DIR}/dbus-asv-util.c
 	${DBUS_DIR}/dbus-auth-script.c
 	${DBUS_DIR}/dbus-auth-util.c
 	${DBUS_DIR}/dbus-credentials-util.c
@@ -165,14 +166,15 @@ set (DBUS_UTIL_SOURCES
 	${DBUS_DIR}/dbus-sysdeps-util.c
 )
 
-if (DBUS_BUILD_TESTS)
+if (DBUS_ENABLE_EMBEDDED_TESTS)
 	set (DBUS_UTIL_SOURCES 
 		${DBUS_UTIL_SOURCES}
 		${DBUS_DIR}/dbus-test.c
 	)
-endif (DBUS_BUILD_TESTS)
+endif (DBUS_ENABLE_EMBEDDED_TESTS)
 
 set (DBUS_UTIL_HEADERS
+	${DBUS_DIR}/dbus-asv-util.h
 	${DBUS_DIR}/dbus-auth-script.h
 	${DBUS_DIR}/dbus-mainloop.h
 	${DBUS_DIR}/dbus-message-factory.h
@@ -296,13 +298,13 @@ else(WIN32)
     target_link_libraries(dbus-internal ${CMAKE_THREAD_LIBS_INIT} rt)
 endif(WIN32)
 
-if (DBUS_BUILD_TESTS)
+if (DBUS_ENABLE_EMBEDDED_TESTS)
 	set (TESTS_ENVIRONMENT "DBUS_TEST_DATA=${CMAKE_SOURCE_DIR}/test/data DBUS_TEST_HOMEDIR=${CMAKE_BUILD_DIR}/dbus")
 	ADD_EXECUTABLE(dbus-test ${CMAKE_SOURCE_DIR}/../dbus/dbus-test-main.c)
 	target_link_libraries(dbus-test ${DBUS_INTERNAL_LIBRARIES})
 	add_test(dbus-test ${EXECUTABLE_OUTPUT_PATH}/dbus-test ${CMAKE_SOURCE_DIR}/../test/data)
 	set_target_properties(dbus-test PROPERTIES COMPILE_FLAGS ${DBUS_INTERNAL_CLIENT_DEFINITIONS})
-ENDIF (DBUS_BUILD_TESTS)
+ENDIF (DBUS_ENABLE_EMBEDDED_TESTS)
 
 if (UNIX)
 # set version info

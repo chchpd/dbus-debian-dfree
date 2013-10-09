@@ -6,8 +6,8 @@
 <article id="index">
   <articleinfo>
     <title>D-Bus Specification</title>
-    <releaseinfo>Version 0.21</releaseinfo>
-    <date>2013-04-25</date>
+    <releaseinfo>Version 0.22</releaseinfo>
+    <date>2013-10-09</date>
     <authorgroup>
       <author>
 	<firstname>Havoc</firstname>
@@ -71,6 +71,15 @@
       </author>
     </authorgroup>
    <revhistory>
+     <revision>
+       <revnumber>0.22</revnumber>
+       <date>2013-10-09</date>
+       <authorinitials></authorinitials>
+       <revremark>add GetConnectionCredentials, document
+        GetAtdAuditSessionData, document GetConnectionSELinuxSecurityContext,
+        document and correct .service file syntax and naming
+      </revremark>
+     </revision>
      <revision>
        <revnumber>0.21</revnumber>
        <date>2013-04-25</date>
@@ -169,23 +178,18 @@
   <sect1 id="introduction">
     <title>Introduction</title>
     <para>
-      D-Bus is a system for low-latency, low-overhead, easy to use
+      D-Bus is a system for low-overhead, easy to use
       interprocess communication (IPC). In more detail:
       <itemizedlist>
-        <listitem>
-          <para>
-            D-Bus is <emphasis>low-latency</emphasis> because it is designed 
-            to avoid round trips and allow asynchronous operation, much like 
-            the X protocol.
-          </para>
-        </listitem>
         <listitem>
           <para>
             D-Bus is <emphasis>low-overhead</emphasis> because it uses a
             binary protocol, and does not have to convert to and from a text
             format such as XML. Because D-Bus is intended for potentially
             high-resolution same-machine IPC, not primarily for Internet IPC,
-            this is an interesting optimization.
+            this is an interesting optimization. D-Bus is also designed to
+            avoid round trips and allow asynchronous operation, much like
+            the X protocol.
           </para>
         </listitem>
         <listitem>
@@ -3655,8 +3659,8 @@
       <programlisting>
         &lt;!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
          "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd"&gt;
-        &lt;node name="/org/freedesktop/sample_object"&gt;
-          &lt;interface name="org.freedesktop.SampleInterface"&gt;
+        &lt;node name="/com/example/sample_object"&gt;
+          &lt;interface name="com.example.SampleInterface"&gt;
             &lt;method name="Frobate"&gt;
               &lt;arg name="foo" type="i" direction="in"/&gt;
               &lt;arg name="bar" type="s" direction="out"/&gt;
@@ -3816,7 +3820,7 @@
         unique-for-the-lifetime-of-the-bus name automatically assigned.
         Applications may request additional names for a connection. Additional
         names are usually "well-known names" such as
-        "org.freedesktop.TextEditor". When a name is bound to a connection,
+        "com.example.TextEditor". When a name is bound to a connection,
         that connection is said to <firstterm>own</firstterm> the name.
       </para>
       <para>
@@ -3838,7 +3842,7 @@
 
       <para>
         This feature causes the right thing to happen if you start two text
-        editors for example; the first one may request "org.freedesktop.TextEditor", 
+        editors for example; the first one may request "com.example.TextEditor",
         and the second will be queued as a possible owner of that name. When 
         the first exits, the second will take over.
       </para>
@@ -4410,8 +4414,7 @@
         </para>
         <para>
           The following table describes the keys that can be used to create 
-          a match rule:
-          The following table summarizes the D-Bus types.
+          a match rule.
           <informaltable>
             <tgroup cols="3">
               <thead>
@@ -4613,9 +4616,9 @@
       <para>
         With D-Bus, starting a service is normally done by name. That is,
         applications ask the message bus to start some program that will own a
-        well-known name, such as <literal>org.freedesktop.TextEditor</literal>.
-        This implies a contract documented along with the name 
-        <literal>org.freedesktop.TextEditor</literal> for which objects 
+        well-known name, such as <literal>com.example.TextEditor</literal>.
+        This implies a contract documented along with the name
+        <literal>com.example.TextEditor</literal> for which object
         the owner of that name will provide, and what interfaces those 
         objects will have.
       </para>
@@ -4639,6 +4642,19 @@
       </para>
 
       <para>
+        On the well-known system bus, the name of a service description file
+        must be its well-known name plus <literal>.service</literal>,
+        for instance
+        <literal>com.example.ConfigurationDatabase.service</literal>.
+      </para>
+
+      <para>
+        On the well-known session bus, services should follow the same
+        service description file naming convention as on the system bus,
+        but for backwards compatibility they are not required to do so.
+      </para>
+
+      <para>
         [FIXME the file format should be much better specified than "similar to
         .desktop entries" esp. since desktop entries are already
         badly-specified. ;-)]
@@ -4649,23 +4665,55 @@
           <listitem><para>Comment format</para></listitem>
         </itemizedlist>
 
+        Service description files must contain a
+        <literal>D-BUS Service</literal> group with at least the keys
+        <literal>Name</literal> (the well-known name of the service)
+        and <literal>Exec</literal> (the command to be executed).
+
         <figure>
 	  <title>Example service description file</title>
 	  <programlisting>
             # Sample service description file
             [D-BUS Service]
-            Names=org.freedesktop.ConfigurationDatabase;org.gnome.GConf;
-            Exec=/usr/libexec/gconfd-2
+            Name=com.example.ConfigurationDatabase
+            Exec=/usr/bin/sample-configd
           </programlisting>
 	</figure>
       </para>
+
+      <para>
+        Additionally, service description files for the well-known system
+        bus on Unix must contain a <literal>User</literal> key, whose value
+        is the name of a user account (e.g. <literal>root</literal>).
+        The system service will be run as that user.
+      </para>
+
       <para>
         When an application asks to start a service by name, the bus daemon tries to
         find a service that will own that name. It then tries to spawn the
         executable associated with it. If this fails, it will report an
-        error. [FIXME what happens if two .service files offer the same service;
-        what kind of error is reported, should we have a way for the client to
-        choose one?]
+        error.
+      </para>
+
+      <para>
+        On the well-known system bus, it is not possible for two .service files
+        in the same directory to offer the same service, because they are
+        constrained to have names that match the service name.
+      </para>
+
+      <para>
+        On the well-known session bus, if two .service files in the same
+        directory offer the same service name, the result is undefined.
+        Distributors should avoid this situation, for instance by naming
+        session services' .service files according to their service name.
+      </para>
+
+      <para>
+        If two .service files in different directories offer the same
+        service name, the one in the higher-priority directory is used:
+        for instance, on the system bus, .service files in
+        /usr/local/share/dbus-1/system-services take precedence over those
+        in /usr/share/dbus-1/system-services.
       </para>
       <para>
         The executable launched will have the environment variable
@@ -5574,6 +5622,225 @@
        </para>
       </sect3>
 
+      <sect3 id="bus-messages-get-connection-credentials">
+        <title><literal>org.freedesktop.DBus.GetConnectionCredentials</literal></title>
+        <para>
+          As a method:
+          <programlisting>
+            DICT&lt;STRING,VARIANT&gt; GetConnectionCredentials (in STRING bus_name)
+          </programlisting>
+          Message arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>STRING</entry>
+                  <entry>Unique or well-known bus name of the connection to
+                    query, such as <literal>:12.34</literal> or
+                    <literal>com.example.tea</literal></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        Reply arguments:
+        <informaltable>
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Argument</entry>
+                <entry>Type</entry>
+                <entry>Description</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>0</entry>
+                <entry>DICT&lt;STRING,VARIANT&gt;</entry>
+                <entry>Credentials</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+      </para>
+
+      <para>
+        Returns as many credentials as possible for the process connected to
+        the server. If unable to determine certain credentials (for instance,
+        because the process is not on the same machine as the bus daemon,
+        or because this version of the bus daemon does not support a
+        particular security framework), or if the values of those credentials
+        cannot be represented as documented here, then those credentials
+        are omitted.
+      </para>
+
+      <para>
+        Keys in the returned dictionary not containing "." are defined
+        by this specification. Bus daemon implementors supporting
+        credentials frameworks not mentioned in this document should either
+        contribute patches to this specification, or use keys containing
+        "." and starting with a reversed domain name.
+        <informaltable>
+          <tgroup cols="3">
+            <thead>
+              <row>
+                <entry>Key</entry>
+                <entry>Value type</entry>
+                <entry>Value</entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>UnixUserID</entry>
+                <entry>UINT32</entry>
+                <entry>The numeric Unix user ID, as defined by POSIX</entry>
+              </row>
+              <row>
+                <entry>ProcessID</entry>
+                <entry>UINT32</entry>
+                <entry>The numeric process ID, on platforms that have
+                  this concept. On Unix, this is the process ID defined by
+                  POSIX.</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+       </para>
+
+        <para>
+          This method was added in D-Bus 1.7 to reduce the round-trips
+          required to list a process's credentials. In older versions, calling
+          this method will fail: applications should recover by using the
+          separate methods such as
+          <xref linkend="bus-messages-get-connection-unix-user"/>
+          instead.
+        </para>
+      </sect3>
+
+      <sect3 id="bus-messages-get-adt-audit-session-data">
+        <title><literal>org.freedesktop.DBus.GetAdtAuditSessionData</literal></title>
+        <para>
+          As a method:
+          <programlisting>
+            ARRAY of BYTE GetAdtAuditSessionData (in STRING bus_name)
+          </programlisting>
+          Message arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>STRING</entry>
+                  <entry>Unique or well-known bus name of the connection to
+                    query, such as <literal>:12.34</literal> or
+                    <literal>com.example.tea</literal></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          Reply arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>ARRAY of BYTE</entry>
+                  <entry>auditing data as returned by
+                    adt_export_session_data()</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          Returns auditing data used by Solaris ADT, in an unspecified
+          binary format. If you know what this means, please contribute
+          documentation via the D-Bus bug tracking system.
+          This method is on the core DBus interface for historical reasons;
+          the same information should be made available via
+          <xref linkend="bus-messages-get-connection-credentials"/>
+          in future.
+        </para>
+      </sect3>
+
+      <sect3 id="bus-messages-get-connection-selinux-security-context">
+        <title><literal>org.freedesktop.DBus.GetConnectionSELinuxSecurityContext</literal></title>
+        <para>
+          As a method:
+          <programlisting>
+            ARRAY of BYTE GetConnectionSELinuxSecurityContext (in STRING bus_name)
+          </programlisting>
+          Message arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>STRING</entry>
+                  <entry>Unique or well-known bus name of the connection to
+                    query, such as <literal>:12.34</literal> or
+                    <literal>com.example.tea</literal></entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          Reply arguments:
+          <informaltable>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>Argument</entry>
+                  <entry>Type</entry>
+                  <entry>Description</entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>0</entry>
+                  <entry>ARRAY of BYTE</entry>
+                  <entry>some sort of string of bytes, not necessarily UTF-8,
+                    not including '\0'</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          Returns the security context used by SELinux, in an unspecified
+          format. If you know what this means, please contribute
+          documentation via the D-Bus bug tracking system.
+          This method is on the core DBus interface for historical reasons;
+          the same information should be made available via
+          <xref linkend="bus-messages-get-connection-credentials"/>
+          in future.
+        </para>
+      </sect3>
+
+
       <sect3 id="bus-messages-add-match">
         <title><literal>org.freedesktop.DBus.AddMatch</literal></title>
         <para>
@@ -5816,9 +6083,9 @@
           A service is an executable that can be launched by the bus daemon.
           Services normally guarantee some particular features, for example they
           may guarantee that they will request a specific name such as
-          "org.freedesktop.Screensaver", have a singleton object
-          "/org/freedesktop/Application", and that object will implement the
-          interface "org.freedesktop.ScreensaverControl".
+          "com.example.Screensaver", have a singleton object
+	  "/com/example/Application", and that object will implement the
+          interface "com.example.Screensaver.Control".
         </para>
       </glossdef>
     </glossentry>

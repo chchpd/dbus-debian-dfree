@@ -79,26 +79,19 @@ struct DBusPendingCall
   unsigned int timeout_added : 1;                 /**< Have added the timeout */
 };
 
-#ifdef DBUS_ENABLE_VERBOSE_MODE
 static void
 _dbus_pending_call_trace_ref (DBusPendingCall *pending_call,
     int old_refcount,
     int new_refcount,
     const char *why)
 {
+#ifdef DBUS_ENABLE_VERBOSE_MODE
   static int enabled = -1;
 
   _dbus_trace_ref ("DBusPendingCall", pending_call, old_refcount,
       new_refcount, why, "DBUS_PENDING_CALL_TRACE", &enabled);
-}
-#else
-#define _dbus_pending_call_trace_ref(p, o, n, w) \
-  do \
-  {\
-    (void) (o); \
-    (void) (n); \
-  } while (0)
 #endif
+}
 
 static dbus_int32_t notify_user_data_slot = -1;
 
@@ -489,8 +482,8 @@ _dbus_pending_call_get_completed_unlocked (DBusPendingCall    *pending)
   return pending->completed;
 }
 
-static DBusDataSlotAllocator slot_allocator;
-_DBUS_DEFINE_GLOBAL_LOCK (pending_call_slots);
+static DBusDataSlotAllocator slot_allocator =
+  _DBUS_DATA_SLOT_ALLOCATOR_INIT (_DBUS_LOCK_NAME (pending_call_slots));
 
 /**
  * Stores a pointer on a #DBusPendingCall, along
@@ -768,7 +761,6 @@ dbus_pending_call_allocate_data_slot (dbus_int32_t *slot_p)
   _dbus_return_val_if_fail (slot_p != NULL, FALSE);
 
   return _dbus_data_slot_allocator_alloc (&slot_allocator,
-                                          &_DBUS_LOCK_NAME (pending_call_slots),
                                           slot_p);
 }
 

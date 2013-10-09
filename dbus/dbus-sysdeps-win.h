@@ -42,9 +42,9 @@ extern void *_dbus_win_get_dll_hmodule (void);
 void _dbus_win_set_errno (int err);
 const char* _dbus_win_error_from_last_error (void);
 
-void _dbus_win_startup_winsock (void);
+dbus_bool_t _dbus_win_startup_winsock (void);
 void _dbus_win_warn_win_error  (const char *message,
-                                int         code);
+                                unsigned long code);
                                 
 char * _dbus_win_error_string (int error_number);
 void _dbus_win_free_error_string (char *string);

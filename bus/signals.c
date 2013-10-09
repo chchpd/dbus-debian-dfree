@@ -64,7 +64,7 @@ bus_match_rule_new (DBusConnection *matches_go_to)
   rule->refcount = 1;
   rule->matches_go_to = matches_go_to;
 
-#ifndef DBUS_BUILD_TESTS
+#ifndef DBUS_ENABLE_EMBEDDED_TESTS
   _dbus_assert (rule->matches_go_to != NULL);
 #endif
   
@@ -1980,12 +1980,10 @@ get_recipients_from_list (DBusList       **rules,
               if (!_dbus_list_append (recipients_p, rule->matches_go_to))
                 return FALSE;
             }
-#ifdef DBUS_ENABLE_VERBOSE_MODE
           else
             {
               _dbus_verbose ("Connection already receiving this message, so not adding again\n");
             }
-#endif /* DBUS_ENABLE_VERBOSE_MODE */
         }
 
       link = _dbus_list_get_next_link (rules, link);
@@ -2056,7 +2054,7 @@ bus_matchmaker_get_recipients (BusMatchmaker   *matchmaker,
   return TRUE;
 }
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 #include "test.h"
 #include <stdlib.h>
 
@@ -2811,5 +2809,5 @@ bus_signals_test (const DBusString *test_data_dir)
   return TRUE;
 }
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 

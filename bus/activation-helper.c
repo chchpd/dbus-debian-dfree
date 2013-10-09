@@ -40,6 +40,7 @@
 #include <pwd.h>
 #include <grp.h>
 
+#include <dbus/dbus-misc.h>
 #include <dbus/dbus-shell.h>
 #include <dbus/dbus-marshal-validate.h>
 
@@ -156,8 +157,8 @@ clear_environment (DBusError *error)
     }
 
   /* Ensure the bus is set to system */
-  _dbus_setenv ("DBUS_STARTER_ADDRESS", DBUS_SYSTEM_BUS_DEFAULT_ADDRESS);
-  _dbus_setenv ("DBUS_STARTER_BUS_TYPE", "system");
+  dbus_setenv ("DBUS_STARTER_ADDRESS", DBUS_SYSTEM_BUS_DEFAULT_ADDRESS);
+  dbus_setenv ("DBUS_STARTER_BUS_TYPE", "system");
 #endif
 
   return TRUE;
@@ -371,7 +372,7 @@ check_bus_name (const char *bus_name,
   _dbus_string_init_const (&str, bus_name);
   if (!_dbus_validate_bus_name (&str, 0, _dbus_string_get_length (&str)))
     {
-      dbus_set_error (error, DBUS_ERROR_SPAWN_SERVICE_NOT_FOUND,
+      dbus_set_error (error, DBUS_ERROR_SPAWN_SERVICE_INVALID,
                       "bus name '%s' is not a valid bus name\n",
                       bus_name);
       return FALSE;
