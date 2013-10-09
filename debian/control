@@ -40,7 +40,7 @@ Build-Depends: automake (>= 1:1.10),
                valgrind [amd64 armel armhf i386 mips mipsel powerpc ppc64 s390x],
                xmlto,
                xsltproc
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Vcs-Git: git://anonscm.debian.org/pkg-utopia/dbus.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-utopia/dbus.git
 Homepage: http://dbus.freedesktop.org/
