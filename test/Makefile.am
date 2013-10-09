@@ -19,21 +19,45 @@ AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 static_cppflags = \
 	$(AM_CPPFLAGS) \
 	-DDBUS_STATIC_BUILD \
+	-DDBUS_COMPILATION \
+	-DDBUS_TEST_USE_INTERNAL \
 	$(NULL)
 
-libdbus_testutils_la_CPPFLAGS = \
-	$(static_cppflags)
+noinst_LTLIBRARIES = libdbus-testutils-internal.la
+
+# You can link either libdbus-testutils, dbus-glib and libdbus-1,
+# or libdbus-testutils-internal and libdbus-internal - never both in the
+# same binary.
+if DBUS_WITH_DBUS_GLIB
+noinst_LTLIBRARIES += libdbus-testutils.la
 libdbus_testutils_la_SOURCES = \
 	test-utils.c \
 	test-utils.h \
 	$(NULL)
 libdbus_testutils_la_LIBADD = \
+	$(top_builddir)/dbus/libdbus-1.la \
+	$(GLIB_LIBS) \
+	$(DBUS_GLIB_LIBS) \
+	$(NULL)
+testutils_shared_if_possible_cppflags = $(AM_CPPFLAGS)
+testutils_shared_if_possible_libs = libdbus-testutils.la
+else
+testutils_shared_if_possible_cppflags = $(static_cppflags)
+testutils_shared_if_possible_libs = libdbus-testutils-internal.la
+endif
+
+libdbus_testutils_internal_la_CPPFLAGS = \
+	$(static_cppflags) \
+	$(NULL)
+libdbus_testutils_internal_la_SOURCES = \
+	test-utils.c \
+	test-utils.h \
+	$(NULL)
+libdbus_testutils_internal_la_LIBADD = \
 	$(top_builddir)/dbus/libdbus-internal.la \
 	$(NULL)
 
-noinst_LTLIBRARIES = libdbus-testutils.la
-
-if DBUS_BUILD_TESTS
+if DBUS_ENABLE_EMBEDDED_TESTS
 ## break-loader removed for now
 ## these binaries are used in tests but are not themselves tests
 TEST_BINARIES = \
@@ -59,25 +83,25 @@ if DBUS_UNIX
 TESTS += ../bus/bus-test-launch-helper$(EXEEXT)
 endif
 
-else !DBUS_BUILD_TESTS
+else !DBUS_ENABLE_EMBEDDED_TESTS
 
 TEST_BINARIES=
 TESTS=
 
-endif !DBUS_BUILD_TESTS
+endif !DBUS_ENABLE_EMBEDDED_TESTS
 
 noinst_PROGRAMS= $(TEST_BINARIES)
 
 test_service_CPPFLAGS = $(static_cppflags)
-test_service_LDADD = libdbus-testutils.la
+test_service_LDADD = libdbus-testutils-internal.la
 test_names_CPPFLAGS = $(static_cppflags)
-test_names_LDADD = libdbus-testutils.la
+test_names_LDADD = libdbus-testutils-internal.la
 ## break_loader_CPPFLAGS = $(static_cppflags)
 ## break_loader_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 test_shell_service_CPPFLAGS = $(static_cppflags)
-test_shell_service_LDADD = libdbus-testutils.la
+test_shell_service_LDADD = libdbus-testutils-internal.la
 shell_test_CPPFLAGS = $(static_cppflags)
-shell_test_LDADD = libdbus-testutils.la
+shell_test_LDADD = libdbus-testutils-internal.la
 spawn_test_CPPFLAGS = $(static_cppflags)
 spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 
@@ -87,11 +111,11 @@ test_printf_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 
 test_refs_SOURCES = internals/refs.c
 test_refs_CPPFLAGS = $(static_cppflags)
-test_refs_LDADD = libdbus-testutils.la $(GLIB_LIBS)
+test_refs_LDADD = libdbus-testutils-internal.la $(GLIB_LIBS)
 
 test_syslog_SOURCES = internals/syslog.c
 test_syslog_CPPFLAGS = $(static_cppflags)
-test_syslog_LDADD = libdbus-testutils.la $(GLIB_LIBS)
+test_syslog_LDADD = libdbus-testutils-internal.la $(GLIB_LIBS)
 
 EXTRA_DIST = dbus-test-runner
 
@@ -102,6 +126,8 @@ testexec_PROGRAMS =
 installable_tests = \
 	shell-test \
 	test-printf \
+	$(NULL)
+installable_manual_tests = \
 	$(NULL)
 
 if DBUS_WITH_GLIB
@@ -115,6 +141,9 @@ installable_tests += \
 	test-relay \
 	test-syntax \
 	test-syslog \
+	$(NULL)
+installable_manual_tests += \
+	manual-authz \
 	$(NULL)
 endif DBUS_WITH_GLIB
 
@@ -132,50 +161,68 @@ TESTS_ENVIRONMENT = \
 	DBUS_TEST_HOMEDIR=@abs_top_builddir@/dbus \
 	$(NULL)
 
-test_corrupt_SOURCES = corrupt.c
-test_corrupt_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+manual_authz_SOURCES = manual-authz.c
+manual_authz_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+manual_authz_LDADD = \
+    $(testutils_shared_if_possible_libs) \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
+
+test_corrupt_SOURCES = corrupt.c
+test_corrupt_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+test_corrupt_LDADD = \
+    $(testutils_shared_if_possible_libs) \
+    $(GLIB_LIBS) \
+    $(NULL)
 
 test_loopback_SOURCES = loopback.c
-test_loopback_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+test_loopback_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+test_loopback_LDADD = \
+    $(testutils_shared_if_possible_libs) \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
 
 test_relay_SOURCES = relay.c
-test_relay_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+test_relay_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+test_relay_LDADD = \
+    $(testutils_shared_if_possible_libs) \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
 
 test_dbus_daemon_SOURCES = dbus-daemon.c
-test_dbus_daemon_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+test_dbus_daemon_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+test_dbus_daemon_LDADD = \
+    $(testutils_shared_if_possible_libs) \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
 
 test_dbus_daemon_eavesdrop_SOURCES = dbus-daemon-eavesdrop.c
-test_dbus_daemon_eavesdrop_CPPFLAGS = $(GLIB_CFLAGS) $(DBUS_GLIB_CFLAGS)
-test_dbus_daemon_eavesdrop_LDFLAGS = @R_DYNAMIC_LDFLAG@
-test_dbus_daemon_eavesdrop_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+test_dbus_daemon_eavesdrop_CPPFLAGS = $(testutils_shared_if_possible_cppflags)
+test_dbus_daemon_eavesdrop_LDADD = \
+    $(testutils_shared_if_possible_libs) \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
 
 test_marshal_SOURCES = marshal.c
-test_marshal_LDADD = $(top_builddir)/dbus/libdbus-1.la \
+test_marshal_LDADD = \
+    $(top_builddir)/dbus/libdbus-1.la \
     $(GLIB_LIBS) \
-    $(DBUS_GLIB_LIBS)
+    $(NULL)
 
 test_syntax_SOURCES = syntax.c
-test_syntax_LDADD = $(top_builddir)/dbus/libdbus-1.la \
-    $(GLIB_LIBS)
+test_syntax_LDADD = \
+    $(top_builddir)/dbus/libdbus-1.la \
+    $(GLIB_LIBS) \
+    $(NULL)
 
 if DBUS_ENABLE_MODULAR_TESTS
 TESTS += $(installable_tests)
 installcheck_tests += $(installable_tests)
 
 if DBUS_ENABLE_INSTALLED_TESTS
-  testexec_PROGRAMS += $(installable_tests)
+  testexec_PROGRAMS += $(installable_tests) $(installable_manual_tests)
 else !DBUS_ENABLE_INSTALLED_TESTS
-  noinst_PROGRAMS += $(installable_tests)
+  noinst_PROGRAMS += $(installable_tests) $(installable_manual_tests)
 endif !DBUS_ENABLE_INSTALLED_TESTS
 
 endif DBUS_ENABLE_MODULAR_TESTS
@@ -323,10 +370,6 @@ imported_data = \
 noinst_DATA = $(imported_data)
 CLEANFILES = $(noinst_DATA)
 
-data/valid-config-files/session.conf: $(top_builddir)/bus/session.conf
-	$(AM_V_at)$(MKDIR_P) data/valid-config-files
-	$(AM_V_GEN)cp $< $@
-
-data/valid-config-files/system.conf: $(top_builddir)/bus/system.conf
+$(imported_data): data/valid-config-files/%.conf: $(top_builddir)/bus/%.conf
 	$(AM_V_at)$(MKDIR_P) data/valid-config-files
 	$(AM_V_GEN)cp $< $@

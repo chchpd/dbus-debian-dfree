@@ -34,27 +34,6 @@
 
 #define MAINLOOP_SPEW 0
 
-#if MAINLOOP_SPEW
-#ifdef DBUS_ENABLE_VERBOSE_MODE
-static const char*
-watch_flags_to_string (int flags)
-{
-  const char *watch_type;
-
-  if ((flags & DBUS_WATCH_READABLE) &&
-      (flags & DBUS_WATCH_WRITABLE))
-    watch_type = "readwrite";
-  else if (flags & DBUS_WATCH_READABLE)
-    watch_type = "read";
-  else if (flags & DBUS_WATCH_WRITABLE)
-    watch_type = "write";
-  else
-    watch_type = "not read or write";
-  return watch_type;
-}
-#endif /* DBUS_ENABLE_VERBOSE_MODE */
-#endif /* MAINLOOP_SPEW */
-
 struct DBusLoop
 {
   int refcount;
@@ -675,7 +654,7 @@ _dbus_loop_iterate (DBusLoop     *loop,
     timeout = MIN (timeout, _dbus_get_oom_wait ());
 
 #if MAINLOOP_SPEW
-  _dbus_verbose ("  polling on %d descriptors timeout %ld\n", n_fds, timeout);
+  _dbus_verbose ("  polling on %d descriptors timeout %ld\n", _DBUS_N_ELEMENTS (ready_fds), timeout);
 #endif
 
   n_ready = _dbus_socket_set_poll (loop->socket_set, ready_fds,
@@ -922,7 +901,7 @@ _dbus_loop_quit (DBusLoop *loop)
 int
 _dbus_get_oom_wait (void)
 {
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
   /* make tests go fast */
   return 0;
 #else

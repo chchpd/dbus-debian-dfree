@@ -104,7 +104,11 @@ _dbus_is_console_user (dbus_uid_t uid,
 
 #endif /* HAVE_CONSOLE_OWNER_FILE */
 
-  _dbus_user_database_lock_system ();
+  if (!_dbus_user_database_lock_system ())
+    {
+      _DBUS_SET_OOM (error);
+      return FALSE;
+    }
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -158,7 +162,10 @@ _dbus_get_group_id (const DBusString  *groupname,
 {
   DBusUserDatabase *db;
   const DBusGroupInfo *info;
-  _dbus_user_database_lock_system ();
+
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -195,7 +202,10 @@ _dbus_get_user_id_and_primary_group (const DBusString  *username,
 {
   DBusUserDatabase *db;
   const DBusUserInfo *info;
-  _dbus_user_database_lock_system ();
+
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -251,7 +261,6 @@ _dbus_user_database_lookup_group (DBusUserDatabase *db,
         gid = n;
     }
 
-#ifdef DBUS_ENABLE_USERDB_CACHE
   if (gid != DBUS_GID_UNSET)
     info = _dbus_hash_table_lookup_uintptr (db->groups, gid);
   else
@@ -264,9 +273,6 @@ _dbus_user_database_lookup_group (DBusUserDatabase *db,
       return info;
     }
   else
-#else
-  if (1)
-#endif
     {
       if (gid != DBUS_GID_UNSET)
 	_dbus_verbose ("No cache for GID "DBUS_GID_FORMAT"\n",
@@ -388,7 +394,9 @@ _dbus_groups_from_uid (dbus_uid_t         uid,
   *group_ids = NULL;
   *n_group_ids = 0;
 
-  _dbus_user_database_lock_system ();
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -425,7 +433,7 @@ _dbus_groups_from_uid (dbus_uid_t         uid,
 }
 /** @} */
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 #include <stdio.h>
 
 /**
@@ -478,4 +486,4 @@ _dbus_userdb_test (const char *test_data_dir)
 
   return TRUE;
 }
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */

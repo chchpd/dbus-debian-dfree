@@ -230,10 +230,8 @@ char**      _dbus_dup_string_array      (const char **array);
 #define _DBUS_INT_MIN	 _DBUS_INT32_MIN
 #define _DBUS_INT_MAX	 _DBUS_INT32_MAX
 #define _DBUS_UINT_MAX	 _DBUS_UINT32_MAX
-#ifdef DBUS_HAVE_INT64
 #define _DBUS_INT64_MAX	 DBUS_INT64_CONSTANT  (0x7fffffffffffffff)
 #define _DBUS_UINT64_MAX DBUS_UINT64_CONSTANT (0xffffffffffffffff)
-#endif
 #define _DBUS_ONE_KILOBYTE 1024
 #define _DBUS_ONE_MEGABYTE 1024 * _DBUS_ONE_KILOBYTE
 #define _DBUS_ONE_HOUR_IN_MILLISECONDS (1000 * 60 * 60)
@@ -266,7 +264,7 @@ void _dbus_verbose_bytes_of_string (const DBusString    *str,
 extern const char *_dbus_no_memory_message;
 #define _DBUS_SET_OOM(error) dbus_set_error_const ((error), DBUS_ERROR_NO_MEMORY, _dbus_no_memory_message)
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 /* Memory debugging */
 void        _dbus_set_fail_alloc_counter        (int  until_next_fail);
 int         _dbus_get_fail_alloc_counter        (void);
@@ -290,38 +288,46 @@ dbus_bool_t _dbus_test_oom_handling (const char             *description,
 #define _dbus_decrement_fail_alloc_counter() (FALSE)
 #define _dbus_disable_mem_pools()            (FALSE)
 #define _dbus_get_malloc_blocks_outstanding  (0)
-#endif /* !DBUS_BUILD_TESTS */
+#endif /* !DBUS_ENABLE_EMBEDDED_TESTS */
 
 typedef void (* DBusShutdownFunction) (void *data);
-dbus_bool_t _dbus_register_shutdown_func (DBusShutdownFunction  function,
-                                          void                 *data);
+dbus_bool_t _dbus_register_shutdown_func          (DBusShutdownFunction  function,
+                                                   void                 *data);
+dbus_bool_t _dbus_register_shutdown_func_unlocked (DBusShutdownFunction  function,
+                                                   void                 *data);
 
 extern int _dbus_current_generation;
 
-/* Thread initializers */
-#define _DBUS_LOCK_NAME(name)           _dbus_lock_##name
-#define _DBUS_DECLARE_GLOBAL_LOCK(name) extern DBusRMutex *_dbus_lock_##name
-#define _DBUS_DEFINE_GLOBAL_LOCK(name)  DBusRMutex        *_dbus_lock_##name
-#define _DBUS_LOCK(name)                _dbus_rmutex_lock   (_dbus_lock_##name)
-#define _DBUS_UNLOCK(name)              _dbus_rmutex_unlock (_dbus_lock_##name)
+/* The weird case convention is to avoid having to change all the callers,
+ * which would be quite a mega-patch. */
+typedef enum
+{
+  /* index 0-4 */
+  _DBUS_LOCK_list,
+  _DBUS_LOCK_connection_slots,
+  _DBUS_LOCK_pending_call_slots,
+  _DBUS_LOCK_server_slots,
+  _DBUS_LOCK_message_slots,
+  /* index 5-9 */
+  _DBUS_LOCK_bus,
+  _DBUS_LOCK_bus_datas,
+  _DBUS_LOCK_shutdown_funcs,
+  _DBUS_LOCK_system_users,
+  _DBUS_LOCK_message_cache,
+  /* index 10-12 */
+  _DBUS_LOCK_shared_connections,
+  _DBUS_LOCK_machine_uuid,
+  _DBUS_LOCK_sysdeps,
 
-/* index 0-4 */
-_DBUS_DECLARE_GLOBAL_LOCK (list);
-_DBUS_DECLARE_GLOBAL_LOCK (connection_slots);
-_DBUS_DECLARE_GLOBAL_LOCK (pending_call_slots);
-_DBUS_DECLARE_GLOBAL_LOCK (server_slots);
-_DBUS_DECLARE_GLOBAL_LOCK (message_slots);
-/* index 5-9 */
-_DBUS_DECLARE_GLOBAL_LOCK (bus);
-_DBUS_DECLARE_GLOBAL_LOCK (bus_datas);
-_DBUS_DECLARE_GLOBAL_LOCK (shutdown_funcs);
-_DBUS_DECLARE_GLOBAL_LOCK (system_users);
-_DBUS_DECLARE_GLOBAL_LOCK (message_cache);
-/* index 10-11 */
-_DBUS_DECLARE_GLOBAL_LOCK (shared_connections);
-_DBUS_DECLARE_GLOBAL_LOCK (machine_uuid);
+  _DBUS_N_GLOBAL_LOCKS
+} DBusGlobalLock;
 
-#define _DBUS_N_GLOBAL_LOCKS (12)
+dbus_bool_t _dbus_lock   (DBusGlobalLock lock) _DBUS_GNUC_WARN_UNUSED_RESULT;
+void        _dbus_unlock (DBusGlobalLock lock);
+
+#define _DBUS_LOCK_NAME(name)           _DBUS_LOCK_##name
+#define _DBUS_LOCK(name)                _dbus_lock   (_DBUS_LOCK_##name)
+#define _DBUS_UNLOCK(name)              _dbus_unlock (_DBUS_LOCK_##name)
 
 dbus_bool_t _dbus_threads_init_debug (void);
 

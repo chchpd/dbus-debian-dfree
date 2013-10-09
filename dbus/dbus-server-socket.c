@@ -101,7 +101,7 @@ handle_new_client_fd_and_unlock (DBusServer *server,
       return TRUE;
     }
 
-  transport = _dbus_transport_new_for_socket (client_fd, &server->guid_hex, FALSE);
+  transport = _dbus_transport_new_for_socket (client_fd, &server->guid_hex, NULL);
   if (transport == NULL)
     {
       _dbus_close_socket (client_fd, NULL);
@@ -478,7 +478,10 @@ _dbus_server_new_for_tcp_socket (const char     *host,
   if (server == NULL)
     {
       dbus_set_error (error, DBUS_ERROR_NO_MEMORY, NULL);
-      goto failed_4;
+      if (noncefile != NULL)
+        goto failed_4;
+      else
+        goto failed_2;
     }
 
   _dbus_string_free (&port_str);

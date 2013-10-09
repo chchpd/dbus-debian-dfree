@@ -1,5 +1,177 @@
+D-Bus 1.7.6 (2013-10-09)
+==
+
+The “CSI Shrewsbury” release.
+
+Build-time configuration changes:
+
+• Directory change notification via dnotify on Linux is no longer
+  supported; it hadn't compiled successfully since 2010 in any case.
+  If you don't have inotify (Linux) or kqueue (*BSD), you will need
+  to send SIGHUP to the dbus-daemon when its configuration changes.
+  (fd.o #33001, Chengwei Yang)
+
+• Compiling with --disable-userdb-cache is no longer supported;
+  it didn't work since at least 2008, and would lead to an extremely
+  slow dbus-daemon even it worked. (fd.o #15589, #17133, #66947;
+  Chengwei Yang)
+
+• The DBUS_DISABLE_ASSERTS CMake option didn't actually disable most
+  assertions. It has been renamed to DBUS_DISABLE_ASSERT to be consistent
+  with the Autotools build system. (fd.o #66142, Chengwei Yang)
+
+• --with-valgrind=auto enables Valgrind instrumentation if and only if
+  valgrind headers are available. The default is still --with-valgrind=no.
+  (fd.o #56925, Simon McVittie)
+
+Dependencies:
+
+• Platforms with no 64-bit integer type are no longer supported.
+  (fd.o #65429, Simon McVittie)
+
+• GNU make is now (documented to be) required. (fd.o #48277, Simon McVittie)
+
+• Full test coverage no longer requires dbus-glib, although the tests do not
+  exercise the shared library (only a static copy) if dbus-glib is missing.
+  (fd.o #68852, Simon McVittie)
+
+Enhancements:
+
+• D-Bus Specification 0.22
+  · Document GetAdtAuditSessionData() and
+    GetConnectionSELinuxSecurityContext() (fd.o #54445, Simon)
+  · Fix example .service file (fd.o #66481, Chengwei Yang)
+  · Don't claim D-Bus is "low-latency" (lower than what?), just
+    give factual statements about it supporting async use
+    (fd.o #65141, Justin Lee)
+  · Document the contents of .service files, and the fact that
+    system services' filenames are constrained
+    (fd.o #66608; Simon McVittie, Chengwei Yang)
+
+• Be thread-safe by default on all platforms, even if
+  dbus_threads_init_default() has not been called. For compatibility with
+  older libdbus, library users should continue to call
+  dbus_threads_init_default(): it is harmless to do so.
+  (fd.o #54972, Simon McVittie)
+
+• Add GetConnectionCredentials() method (fd.o #54445, Simon)
+
+• New API: dbus_setenv(), a simple wrapper around setenv().
+  Note that this is not thread-safe. (fd.o #39196, Simon)
+
+• Add dbus-send --peer=ADDRESS (connect to a given peer-to-peer connection,
+  like --address=ADDRESS in previous versions) and dbus-send --bus=ADDRESS
+  (connect to a given bus, like dbus-monitor --address=ADDRESS).
+  dbus-send --address still exists for backwards compatibility,
+  but is no longer documented. (fd.o #48816, Andrey Mazo)
+
+• Windows-specific:
+  · "dbus-daemon --nofork" is allowed on Windows again. (fd.o #68852,
+    Simon McVittie)
+
+Fixes:
+
+• Avoid an infinite busy-loop if a signal interrupts waitpid()
+  (fd.o #68945, Simon McVittie)
+
+• Clean up memory for parent nodes when objects are unexported
+  (fd.o #60176, Thomas Fitzsimmons)
+
+• Make dbus_connection_set_route_peer_messages(x, FALSE) behave as
+  documented. Previously, it assumed its second parameter was TRUE.
+  (fd.o #69165, Chengwei Yang)
+
+• Escape addresses containing non-ASCII characters correctly
+  (fd.o #53499, Chengwei Yang)
+
+• Document <servicedir> search order correctly (fd.o #66994, Chengwei Yang)
+
+• Don't crash on "dbus-send --session / x.y.z" which regressed in 1.7.4.
+  (fd.o #65923, Chengwei Yang)
+
+• If malloc() returns NULL in _dbus_string_init() or similar, don't free
+  an invalid pointer if the string is later freed (fd.o #65959, Chengwei Yang)
+
+• If malloc() returns NULL in dbus_set_error(), don't va_end() a va_list
+  that was never va_start()ed (fd.o #66300, Chengwei Yang)
+
+• fix build failure with --enable-stats (fd.o #66004, Chengwei Yang)
+
+• fix a regression test on platforms with strict alignment (fd.o #67279,
+  Colin Walters)
+
+• Avoid calling function parameters "interface" since certain Windows headers
+  have a namespace-polluting macro of that name (fd.o #66493, Ivan Romanov)
+
+• Assorted Doxygen fixes (fd.o #65755, Chengwei Yang)
+
+• Various thread-safety improvements to static variables (fd.o #68610,
+  Simon McVittie)
+
+• Make "make -j check" work (fd.o #68852, Simon McVittie)
+
+• Fix a NULL pointer dereference on an unlikely error path
+  (fd.o #69327, Sviatoslav Chagaev)
+
+• Improve valgrind memory pool tracking (fd.o #69326,
+  Sviatoslav Chagaev)
+
+• Don't over-allocate memory in dbus-monitor (fd.o #69329,
+  Sviatoslav Chagaev)
+
+• dbus-monitor can monitor dbus-daemon < 1.5.6 again
+  (fd.o #66107, Chengwei Yang)
+
+• Unix-specific:
+  · If accept4() fails with EINVAL, as it can on older Linux kernels
+    with newer glibc, try accept() instead of going into a busy-loop.
+    (fd.o #69026, Chengwei Yang)
+  · If socket() or socketpair() fails with EINVAL or EPROTOTYPE,
+    for instance on Hurd or older Linux with a new glibc, try without
+    SOCK_CLOEXEC. (fd.o #69073; Pino Toscano, Chengwei Yang)
+  · Fix a file descriptor leak on an error code path.
+    (fd.o #69182, Sviatoslav Chagaev)
+  · dbus-run-session: clear some unwanted environment variables
+    (fd.o #39196, Simon)
+  · dbus-run-session: compile on FreeBSD (fd.o #66197, Chengwei Yang)
+  · Don't fail the autolaunch test if there is no DISPLAY (fd.o #40352, Simon)
+  · Use dbus-launch from the builddir for testing, not the installed copy
+    (fd.o #37849, Chengwei Yang)
+  · Fix compilation if writev() is unavailable (fd.o #69409,
+    Vasiliy Balyasnyy)
+  · Remove broken support for LOCAL_CREDS credentials passing, and
+    document where each credential-passing scheme is used (fd.o #60340,
+    Simon McVittie)
+  · Make autogen.sh work on *BSD by not assuming GNU coreutils functionality
+    (fd.o #35881, #69787; Chengwei Yang)
+  · dbus-monitor: be portable to NetBSD (fd.o #69842, Chengwei Yang)
+  · dbus-launch: stop using non-portable asprintf (fd.o #37849, Simon)
+  · Improve error reporting from the setuid activation helper (fd.o #66728,
+    Chengwei Yang)
+
+• Windows-specific:
+  · Remove unavailable command-line options from 'dbus-daemon --help'
+    (fd.o #42441, Ralf Habacker)
+  · Add support for looking up local TCPv4 clients' credentials on
+    Windows XP via the undocumented AllocateAndGetTcpExTableFromStack
+    function (fd.o #66060, Ralf Habacker)
+  · Fix insufficient dependency-tracking (fd.o #68505, Simon McVittie)
+  · Don't include wspiapi.h, fixing a compiler warning (fd.o #68852,
+    Simon McVittie)
+
+• Internal changes:
+  · add DBUS_ENABLE_ASSERT, DBUS_ENABLE_CHECKS for less confusing
+    conditionals (fd.o #66142, Chengwei Yang)
+  · improve verbose-mode output (fd.o #63047, Colin Walters)
+  · consolidate Autotools and CMake build (fd.o #64875, Ralf Habacker)
+  · fix various unused variables, unusual build configurations
+    etc. (fd.o #65712, #65990, #66005, #66257, #69165, #69410, #70218;
+    Chengwei Yang, Vasiliy Balyasnyy)
+
 D-Bus 1.7.4 (2013-06-13)
 ==
+
+The “but is your thread-safety thread-safe?” release.
 
 Security fixes:
 
@@ -26,6 +198,12 @@ Enhancements:
 
 • Improve dbus-send documentation and command-line parsing (fd.o #65424,
   Chengwei Yang)
+
+Unix-specific:
+  · dbus-run-session: experimental new tool to start a temporary D-Bus
+    session, e.g. for regression tests or a text console, replacing
+    certain uses of dbus-launch which weren't really correct
+    (fd.o #39196, Simon)
 
 Other fixes:
 

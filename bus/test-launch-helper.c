@@ -28,8 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dbus/dbus-internals.h>
+#include <dbus/dbus-misc.h>
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 static void
 die (const char *failure)
 {
@@ -56,7 +57,7 @@ test_post_hook (const char *name)
 {
   check_memleaks (name);
 }
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 
 
 #ifdef ACTIVATION_LAUNCHER_DO_OOM
@@ -97,7 +98,7 @@ bus_activation_helper_oom_test (void *data)
 int
 main (int argc, char **argv)
 {
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
   const char *dir;
   DBusString config_file;
 
@@ -122,8 +123,8 @@ main (int argc, char **argv)
     return 1;
 
   /* use a config file that will actually work... */
-  _dbus_setenv ("TEST_LAUNCH_HELPER_CONFIG",
-                _dbus_string_get_const_data (&config_file));
+  dbus_setenv ("TEST_LAUNCH_HELPER_CONFIG",
+               _dbus_string_get_const_data (&config_file));
 
   _dbus_string_free (&config_file);
 
@@ -137,7 +138,7 @@ main (int argc, char **argv)
   printf ("%s: Success\n", argv[0]);
 
   return 0;
-#else /* DBUS_BUILD_TESTS */
+#else /* DBUS_ENABLE_EMBEDDED_TESTS */
 
   printf ("Not compiled with test support\n");
   

@@ -77,16 +77,6 @@ extern BOOL WINAPI ConvertSidToStringSidA (PSID Sid, LPSTR *StringSid);
 #include <ws2tcpip.h>
 #endif
 
-#ifdef HAVE_WSPIAPI_H
-// needed for w2k compatibility (getaddrinfo/freeaddrinfo/getnameinfo)
-#ifdef __GNUC__
-#define _inline
-#include "wspiapi.h"
-#else
-#include <wspiapi.h>
-#endif
-#endif // HAVE_WSPIAPI_H
-
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -104,6 +94,142 @@ _dbus_win_set_errno (int err)
 #endif
 }
 
+static BOOL is_winxp_sp3_or_lower();
+
+/*
+ * _MIB_TCPROW_EX and friends are not available in system headers
+ *  and are mapped to attribute identical ...OWNER_PID typedefs.
+ */
+typedef MIB_TCPROW_OWNER_PID _MIB_TCPROW_EX;
+typedef MIB_TCPTABLE_OWNER_PID MIB_TCPTABLE_EX;
+typedef PMIB_TCPTABLE_OWNER_PID PMIB_TCPTABLE_EX;
+typedef DWORD (WINAPI *ProcAllocateAndGetTcpExtTableFromStack)(PMIB_TCPTABLE_EX*,BOOL,HANDLE,DWORD,DWORD);
+static ProcAllocateAndGetTcpExtTableFromStack lpfnAllocateAndGetTcpExTableFromStack = NULL;
+
+/**
+ * AllocateAndGetTcpExTableFromStack() is undocumented and not exported,
+ * but is the only way to do this in older XP versions.
+ * @return true if the procedures could be loaded
+ */
+static BOOL
+load_ex_ip_helper_procedures(void)
+{
+  HMODULE hModule = LoadLibrary ("iphlpapi.dll");
+  if (hModule == NULL)
+    {
+      _dbus_verbose ("could not load iphlpapi.dll\n");
+      return FALSE;
+    }
+
+  lpfnAllocateAndGetTcpExTableFromStack = (ProcAllocateAndGetTcpExtTableFromStack)GetProcAddress (hModule, "AllocateAndGetTcpExTableFromStack");
+  if (lpfnAllocateAndGetTcpExTableFromStack == NULL)
+    {
+      _dbus_verbose ("could not find function AllocateAndGetTcpExTableFromStack in iphlpapi.dll\n");
+      return FALSE;
+    }
+  return TRUE;
+}
+
+/**
+ * get pid from localhost tcp connection using peer_port
+ * This function is available on WinXP >= SP3
+ * @param peer_port peers tcp port
+ * @return process id or 0 if connection has not been found
+ */
+static dbus_pid_t
+get_pid_from_extended_tcp_table(int peer_port)
+{
+  dbus_pid_t result;
+  DWORD errorCode, size, i;
+  MIB_TCPTABLE_OWNER_PID *tcp_table;
+
+  if ((errorCode =
+       GetExtendedTcpTable (NULL, &size, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) == ERROR_INSUFFICIENT_BUFFER)
+    {
+      tcp_table = (MIB_TCPTABLE_OWNER_PID *) dbus_malloc (size);
+      if (tcp_table == NULL)
+        {
+          _dbus_verbose ("Error allocating memory\n");
+          return 0;
+        }
+    }
+  else
+    {
+      _dbus_win_warn_win_error ("unexpected error returned from GetExtendedTcpTable", errorCode);
+      return 0;
+    }
+
+  if ((errorCode = GetExtendedTcpTable (tcp_table, &size, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) != NO_ERROR)
+    {
+      _dbus_verbose ("Error fetching tcp table %d\n", (int)errorCode);
+      dbus_free (tcp_table);
+      return 0;
+    }
+
+  result = 0;
+  for (i = 0; i < tcp_table->dwNumEntries; i++)
+    {
+      MIB_TCPROW_OWNER_PID *p = &tcp_table->table[i];
+      int local_address = ntohl (p->dwLocalAddr);
+      int local_port = ntohs (p->dwLocalPort);
+      if (p->dwState == MIB_TCP_STATE_ESTAB
+          && local_address == INADDR_LOOPBACK && local_port == peer_port)
+         result = p->dwOwningPid;
+    }
+
+  dbus_free (tcp_table);
+  _dbus_verbose ("got pid %lu\n", result);
+  return result;
+}
+
+/**
+ * get pid from localhost tcp connection using peer_port
+ * This function is available on all WinXP versions, but
+ * not in wine (at least version <= 1.6.0)
+ * @param peer_port peers tcp port
+ * @return process id or 0 if connection has not been found
+ */
+static dbus_pid_t
+get_pid_from_tcp_ex_table(int peer_port)
+{
+  dbus_pid_t result;
+  DWORD errorCode, i;
+  PMIB_TCPTABLE_EX tcp_table = NULL;
+
+  if (!load_ex_ip_helper_procedures ())
+    {
+      _dbus_verbose
+        ("Error not been able to load iphelper procedures\n");
+      return 0;
+    }
+
+  errorCode = lpfnAllocateAndGetTcpExTableFromStack (&tcp_table, TRUE, GetProcessHeap(), 0, 2);
+
+  if (errorCode != NO_ERROR)
+    {
+      _dbus_verbose
+        ("Error not been able to call AllocateAndGetTcpExTableFromStack()\n");
+      return 0;
+    }
+
+  result = 0;
+  for (i = 0; i < tcp_table->dwNumEntries; i++)
+    {
+      _MIB_TCPROW_EX *p = &tcp_table->table[i];
+      int local_port = ntohs (p->dwLocalPort);
+      int local_address = ntohl (p->dwLocalAddr);
+      if (local_address == INADDR_LOOPBACK && local_port == peer_port)
+        {
+          result = p->dwOwningPid;
+          break;
+        }
+    }
+
+  HeapFree (GetProcessHeap(), 0, tcp_table);
+  _dbus_verbose ("got pid %lu\n", result);
+  return result;
+}
+
 /**
  * @brief return peer process id from tcp handle for localhost connections
  * @param handle tcp socket descriptor
@@ -117,9 +243,6 @@ _dbus_get_peer_pid_from_tcp_handle (int handle)
   int peer_port;
 
   dbus_pid_t result;
-  DWORD size;
-  MIB_TCPTABLE_OWNER_PID *tcp_table;
-  DWORD i;
   dbus_bool_t is_localhost = FALSE;
 
   getpeername (handle, (struct sockaddr *) &addr, &len);
@@ -128,7 +251,7 @@ _dbus_get_peer_pid_from_tcp_handle (int handle)
     {
       struct sockaddr_in *s = (struct sockaddr_in *) &addr;
       peer_port = ntohs (s->sin_port);
-      is_localhost = (htonl (s->sin_addr.s_addr) == INADDR_LOOPBACK);
+      is_localhost = (ntohl (s->sin_addr.s_addr) == INADDR_LOOPBACK);
     }
   else if (addr.ss_family == AF_INET6)
     {
@@ -160,35 +283,12 @@ _dbus_get_peer_pid_from_tcp_handle (int handle)
       return 0;
     }
 
-  if ((result =
-       GetExtendedTcpTable (NULL, &size, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) == ERROR_INSUFFICIENT_BUFFER)
-    {
-      tcp_table = (MIB_TCPTABLE_OWNER_PID *) dbus_malloc (size);
-      if (tcp_table == NULL)
-        {
-          _dbus_verbose ("Error allocating memory\n");
-          return 0;
-        }
-    }
+  _dbus_verbose ("trying to get peers pid");
 
-  if ((result = GetExtendedTcpTable (tcp_table, &size, TRUE, AF_INET, TCP_TABLE_OWNER_PID_ALL, 0)) != NO_ERROR)
-    {
-      _dbus_verbose ("Error fetching tcp table %d\n", result);
-      dbus_free (tcp_table);
-      return 0;
-    }
-
-  result = 0;
-  for (i = 0; i < tcp_table->dwNumEntries; i++)
-    {
-      MIB_TCPROW_OWNER_PID *p = &tcp_table->table[i];
-      int local_port = ntohs (p->dwLocalPort);
-      if (p->dwState == MIB_TCP_STATE_ESTAB && local_port == peer_port)
-        result = p->dwOwningPid;
-    }
-
-  _dbus_verbose ("got pid %d\n", result);
-  dbus_free (tcp_table);
+  result = get_pid_from_extended_tcp_table (peer_port);
+  if (result > 0)
+      return result;
+  result = get_pid_from_tcp_ex_table (peer_port);
   return result;
 }
 
@@ -412,7 +512,7 @@ _dbus_close_socket (int        fd,
  * on exec. Should be called for all file
  * descriptors in D-Bus code.
  *
- * @param fd the file descriptor
+ * @param handle the Windows HANDLE
  */
 void
 _dbus_fd_set_close_on_exec (intptr_t handle)
@@ -428,7 +528,7 @@ _dbus_fd_set_close_on_exec (intptr_t handle)
 /**
  * Sets a file descriptor to be nonblocking.
  *
- * @param fd the file descriptor.
+ * @param handle the file descriptor.
  * @param error address of error location.
  * @returns #TRUE on success.
  */
@@ -562,21 +662,26 @@ _dbus_connect_named_pipe (const char     *path,
 
 #endif
 
-
-
-void
+/**
+ * @returns #FALSE if no memory
+ */
+dbus_bool_t
 _dbus_win_startup_winsock (void)
 {
   /* Straight from MSDN, deuglified */
 
+  /* Protected by _DBUS_LOCK_sysdeps */
   static dbus_bool_t beenhere = FALSE;
 
   WORD wVersionRequested;
   WSADATA wsaData;
   int err;
 
+  if (!_DBUS_LOCK (sysdeps))
+    return FALSE;
+
   if (beenhere)
-    return;
+    goto out;
 
   wVersionRequested = MAKEWORD (2, 0);
 
@@ -600,6 +705,10 @@ _dbus_win_startup_winsock (void)
     }
 
   beenhere = TRUE;
+
+out:
+  _DBUS_UNLOCK (sysdeps);
+  return TRUE;
 }
 
 
@@ -832,6 +941,38 @@ _dbus_pid_for_log (void)
 }
 
 #ifndef DBUS_WINCE
+
+static BOOL is_winxp_sp3_or_lower()
+{
+   OSVERSIONINFOEX osvi;
+   DWORDLONG dwlConditionMask = 0;
+   int op=VER_LESS_EQUAL;
+
+   // Initialize the OSVERSIONINFOEX structure.
+
+   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+   osvi.dwMajorVersion = 5;
+   osvi.dwMinorVersion = 1;
+   osvi.wServicePackMajor = 3;
+   osvi.wServicePackMinor = 0;
+
+   // Initialize the condition mask.
+
+   VER_SET_CONDITION( dwlConditionMask, VER_MAJORVERSION, op );
+   VER_SET_CONDITION( dwlConditionMask, VER_MINORVERSION, op );
+   VER_SET_CONDITION( dwlConditionMask, VER_SERVICEPACKMAJOR, op );
+   VER_SET_CONDITION( dwlConditionMask, VER_SERVICEPACKMINOR, op );
+
+   // Perform the test.
+
+   return VerifyVersionInfo(
+      &osvi,
+      VER_MAJORVERSION | VER_MINORVERSION |
+      VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR,
+      dwlConditionMask);
+}
+
 /** Gets our SID
  * @param sid points to sid buffer, need to be freed with LocalFree()
  * @param process_id the process id for which the sid should be returned
@@ -845,7 +986,8 @@ _dbus_getsid(char **sid, dbus_pid_t process_id)
   DWORD n;
   PSID psid;
   int retval = FALSE;
-  HANDLE process_handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id);
+
+  HANDLE process_handle = OpenProcess(is_winxp_sp3_or_lower() ? PROCESS_QUERY_INFORMATION : PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id);
 
   if (!OpenProcessToken (process_handle, TOKEN_QUERY, &process_token))
     {
@@ -879,7 +1021,7 @@ failed:
   if (process_token != INVALID_HANDLE_VALUE)
     CloseHandle (process_token);
 
-  _dbus_verbose("_dbus_getsid() returns %d\n",retval);
+  _dbus_verbose("_dbus_getsid() got '%s' and returns %d\n", *sid, retval);
   return retval;
 }
 #endif
@@ -911,7 +1053,11 @@ _dbus_full_duplex_pipe (int        *fd1,
   int len;
   u_long arg;
 
-  _dbus_win_startup_winsock ();
+  if (!_dbus_win_startup_winsock ())
+    {
+      _DBUS_SET_OOM (error);
+      return FALSE;
+    }
 
   temp = socket (AF_INET, SOCK_STREAM, 0);
   if (temp == INVALID_SOCKET)
@@ -1355,7 +1501,11 @@ _dbus_connect_tcp_socket_with_nonce (const char     *host,
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
-  _dbus_win_startup_winsock ();
+  if (!_dbus_win_startup_winsock ())
+    {
+      _DBUS_SET_OOM (error);
+      return -1;
+    }
 
   _DBUS_ZERO (hints);
 
@@ -1500,7 +1650,11 @@ _dbus_listen_tcp_socket (const char     *host,
   *fds_p = NULL;
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
-  _dbus_win_startup_winsock ();
+  if (!_dbus_win_startup_winsock ())
+    {
+      _DBUS_SET_OOM (error);
+      return -1;
+    }
 
   _DBUS_ZERO (hints);
 
@@ -1766,7 +1920,7 @@ again:
  * The point of the byte is that on some systems we have to
  * use sendmsg()/recvmsg() to transmit credentials.
  *
- * @param client_fd the client file descriptor
+ * @param handle the client file descriptor
  * @param credentials struct to fill with credentials of client
  * @param error location to store error code
  * @returns #TRUE on success
@@ -2113,13 +2267,17 @@ _dbus_generate_random_bytes (DBusString *str,
  * Gets the temporary files directory by inspecting the environment variables 
  * TMPDIR, TMP, and TEMP in that order. If none of those are set "/tmp" is returned
  *
- * @returns location of temp directory
+ * @returns location of temp directory, or #NULL if no memory for locking
  */
 const char*
 _dbus_get_tmpdir(void)
 {
+  /* Protected by _DBUS_LOCK_sysdeps */
   static const char* tmpdir = NULL;
   static char buf[1000];
+
+  if (!_DBUS_LOCK (sysdeps))
+    return NULL;
 
   if (tmpdir == NULL)
     {
@@ -2141,6 +2299,8 @@ _dbus_get_tmpdir(void)
 
       tmpdir = buf;
     }
+
+  _DBUS_UNLOCK (sysdeps);
 
   _dbus_assert(tmpdir != NULL);
 
@@ -2177,51 +2337,7 @@ _dbus_delete_file (const DBusString *filename,
     return TRUE;
 }
 
-/*
- * replaces the term DBUS_PREFIX in configure_time_path by the
- * current dbus installation directory. On unix this function is a noop
- *
- * @param configure_time_path
- * @return real path
- */
-const char *
-_dbus_replace_install_prefix (const char *configure_time_path)
-{
-#ifndef DBUS_PREFIX
-  return configure_time_path;
-#else
-  static char retval[1000];
-  static char runtime_prefix[1000];
-  int len = 1000;
-  int i;
-
-  if (!configure_time_path)
-    return NULL;
-
-  if ((!_dbus_get_install_root(runtime_prefix, len) ||
-       strncmp (configure_time_path, DBUS_PREFIX "/",
-                strlen (DBUS_PREFIX) + 1))) {
-     strcat (retval, configure_time_path);
-     return retval;
-  }
-
-  strcpy (retval, runtime_prefix);
-  strcat (retval, configure_time_path + strlen (DBUS_PREFIX) + 1);
-
-  /* Somehow, in some situations, backslashes get collapsed in the string.
-   * Since windows C library accepts both forward and backslashes as
-   * path separators, convert all backslashes to forward slashes.
-   */
-
-  for(i = 0; retval[i] != '\0'; i++) {
-    if(retval[i] == '\\')
-      retval[i] = '/';
-  }
-  return retval;
-#endif
-}
-
-#if !defined (DBUS_DISABLE_ASSERTS) || defined(DBUS_BUILD_TESTS)
+#if !defined (DBUS_DISABLE_ASSERT) || defined(DBUS_ENABLE_EMBEDDED_TESTS)
 
 #if defined(_MSC_VER) || defined(DBUS_WINCE)
 # ifdef BACKTRACES
@@ -3060,140 +3176,6 @@ _dbus_make_file_world_readable(const DBusString *filename,
 }
 
 /**
- * return the relocated DATADIR
- *
- * @returns relocated DATADIR static string
- */
-
-static const char *
-_dbus_windows_get_datadir (void)
-{
-	return _dbus_replace_install_prefix(DBUS_DATADIR);
-}
-
-#undef DBUS_DATADIR
-#define DBUS_DATADIR _dbus_windows_get_datadir ()
-
-
-#define DBUS_STANDARD_SESSION_SERVICEDIR "/dbus-1/services"
-#define DBUS_STANDARD_SYSTEM_SERVICEDIR "/dbus-1/system-services"
-
-/**
- * Returns the standard directories for a session bus to look for service 
- * activation files 
- *
- * On Windows this should be data directories:
- *
- * %CommonProgramFiles%/dbus
- *
- * and
- *
- * relocated DBUS_DATADIR
- *
- * @param dirs the directory list we are returning
- * @returns #FALSE on OOM 
- */
-
-dbus_bool_t 
-_dbus_get_standard_session_servicedirs (DBusList **dirs)
-{
-  const char *common_progs;
-  DBusString servicedir_path;
-
-  if (!_dbus_string_init (&servicedir_path))
-    return FALSE;
-
-#ifdef DBUS_WINCE
-  {
-    /* On Windows CE, we adjust datadir dynamically to installation location.  */
-    const char *data_dir = _dbus_getenv ("DBUS_DATADIR");
-
-    if (data_dir != NULL)
-      {
-        if (!_dbus_string_append (&servicedir_path, data_dir))
-          goto oom;
-        
-        if (!_dbus_string_append (&servicedir_path, _DBUS_PATH_SEPARATOR))
-          goto oom;
-      }
-  }
-#else
-/*
- the code for accessing services requires absolute base pathes
- in case DBUS_DATADIR is relative make it absolute
-*/
-#ifdef DBUS_WIN
-  {
-    DBusString p;
-
-    _dbus_string_init_const (&p, DBUS_DATADIR);
-
-    if (!_dbus_path_is_absolute (&p))
-      {
-        char install_root[1000];
-        if (_dbus_get_install_root (install_root, sizeof(install_root)))
-          if (!_dbus_string_append (&servicedir_path, install_root))
-            goto oom;
-      }
-  }
-#endif
-  if (!_dbus_string_append (&servicedir_path, DBUS_DATADIR))
-    goto oom;
-
-  if (!_dbus_string_append (&servicedir_path, _DBUS_PATH_SEPARATOR))
-    goto oom;
-#endif
-
-  common_progs = _dbus_getenv ("CommonProgramFiles");
-
-  if (common_progs != NULL)
-    {
-      if (!_dbus_string_append (&servicedir_path, common_progs))
-        goto oom;
-
-      if (!_dbus_string_append (&servicedir_path, _DBUS_PATH_SEPARATOR))
-        goto oom;
-    }
-
-  if (!_dbus_split_paths_and_append (&servicedir_path, 
-                               DBUS_STANDARD_SESSION_SERVICEDIR, 
-                               dirs))
-    goto oom;
-
-  _dbus_string_free (&servicedir_path);  
-  return TRUE;
-
- oom:
-  _dbus_string_free (&servicedir_path);
-  return FALSE;
-}
-
-/**
- * Returns the standard directories for a system bus to look for service
- * activation files
- *
- * On UNIX this should be the standard xdg freedesktop.org data directories:
- *
- * XDG_DATA_DIRS=${XDG_DATA_DIRS-/usr/local/share:/usr/share}
- *
- * and
- *
- * DBUS_DATADIR
- *
- * On Windows there is no system bus and this function can return nothing.
- *
- * @param dirs the directory list we are returning
- * @returns #FALSE on OOM
- */
-
-dbus_bool_t
-_dbus_get_standard_system_servicedirs (DBusList **dirs)
-{
-  *dirs = NULL;
-  return TRUE;
-}
-
-/**
  * Atomically increments an integer
  *
  * @param atomic pointer to the integer to increment
@@ -3275,7 +3257,7 @@ _dbus_get_is_errno_eagain_or_ewouldblock (void)
 /**
  * return the absolute path of the dbus installation 
  *
- * @param s buffer for installation path
+ * @param prefix buffer for installation path
  * @param len length of buffer
  * @returns #FALSE on failure
  */
@@ -3380,32 +3362,6 @@ _dbus_get_config_file_name(DBusString *config_file, char *s)
   return TRUE;
 }    
 
-/**
- * Append the absolute path of the system.conf file
- * (there is no system bus on Windows so this can just
- * return FALSE and print a warning or something)
- * 
- * @param str the string to append to
- * @returns #FALSE if no memory
- */
-dbus_bool_t
-_dbus_append_system_config_file (DBusString *str)
-{
-  return _dbus_get_config_file_name(str, "system.conf");
-}
-
-/**
- * Append the absolute path of the session.conf file.
- * 
- * @param str the string to append to
- * @returns #FALSE if no memory
- */
-dbus_bool_t
-_dbus_append_session_config_file (DBusString *str)
-{
-  return _dbus_get_config_file_name(str, "session.conf");
-}
-
 /* See comment in dbus-sysdeps-unix.c */
 dbus_bool_t
 _dbus_lookup_session_address (dbus_bool_t *supported,
@@ -3457,7 +3413,7 @@ _dbus_append_keyring_directory_for_credentials (DBusString      *directory,
       _dbus_string_append(&homedir,homepath);
     }
   
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
   {
     const char *override;
     
@@ -3473,6 +3429,8 @@ _dbus_append_keyring_directory_for_credentials (DBusString      *directory,
       }
     else
       {
+        /* Not strictly thread-safe, but if we fail at thread-safety here,
+         * the worst that will happen is some extra warnings. */
         static dbus_bool_t already_warned = FALSE;
         if (!already_warned)
           {
@@ -3697,7 +3655,7 @@ _dbus_win_set_error_from_win_error (DBusError *error,
 
 void
 _dbus_win_warn_win_error (const char *message,
-                          int         code)
+                          unsigned long code)
 {
   DBusError error;
 

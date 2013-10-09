@@ -6,9 +6,10 @@ endif(DOXYGEN_EXECUTABLE)
 
 if (DBUS_ENABLE_DOXYGEN_DOCS)
     set (top_srcdir ${CMAKE_SOURCE_DIR}/..)
-    configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.cmake ${CMAKE_BINARY_DIR}/Doxyfile )
+    configure_file(${CMAKE_SOURCE_DIR}/../Doxyfile.in ${CMAKE_BINARY_DIR}/Doxyfile )
     add_custom_target(doc 
         COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 endif (DBUS_ENABLE_DOXYGEN_DOCS)
 
@@ -21,6 +22,7 @@ find_program(XMLTO_EXECUTABLE xmlto)
 
 if (MEINPROC4_EXECUTABLE OR XMLTO_EXECUTABLE)
   OPTION(DBUS_ENABLE_XML_DOCS "build XML  documentation (requires xmlto or meinproc4)" ON)
+  ADD_CUSTOM_TARGET(xmldoc ALL)
 endif (MEINPROC4_EXECUTABLE OR XMLTO_EXECUTABLE)
 
 if (XMLTO_EXECUTABLE)
@@ -48,6 +50,7 @@ if (DBUS_ENABLE_XML_DOCS)
 macro (DOCBOOK _sources _format)
   get_filename_component(_infile ${_sources} ABSOLUTE)
   get_filename_component(_name ${_infile} NAME)
+  set(_deps ${CMAKE_SOURCE_DIR}/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt)
 
   if (${_format} STREQUAL "man")
     string(REPLACE ".xml" "" _outname ${_name})
@@ -60,16 +63,18 @@ macro (DOCBOOK _sources _format)
   set(_outfile ${CMAKE_CURRENT_BINARY_DIR}/${_outname})
   if (EXISTS ${_sources})
 	  if (MEINPROC4_EXECUTABLE)
-		  ADD_CUSTOM_TARGET(${_outname} ALL
-			${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} -o ${_outfile} ${_infile}
-			DEPENDS ${_infile}
+		    ADD_CUSTOM_COMMAND(
+			OUTPUT ${_outfile}
+			COMMAND ${MEINPROC4_EXECUTABLE} --stylesheet ${STYLESHEET} -o ${_outfile} ${_infile}
+			DEPENDS ${_infile} ${STYLESHEET} ${_deps}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 	  endif ()
 	  if (XMLTO_EXECUTABLE)
-		  ADD_CUSTOM_TARGET(${_outname} ALL
-			${XMLTO_EXECUTABLE} -vv ${_format} ${_infile}
-			DEPENDS ${_infile}
+		    ADD_CUSTOM_COMMAND(
+			OUTPUT ${_outfile}
+			COMMAND ${XMLTO_EXECUTABLE} -vv ${_format} ${_infile}
+			DEPENDS ${_infile} ${_deps}
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 	  endif ()
@@ -81,7 +86,8 @@ macro (DOCBOOK _sources _format)
   else ()
 	  MESSAGE(STATUS "skipping xml doc generating for ${_infile}, file not found")
   endif ()
-	  
+  ADD_CUSTOM_TARGET(${_outname} DEPENDS ${_outfile})
+  ADD_DEPENDENCIES(xmldoc ${_outname})
 endmacro (DOCBOOK)
 
 ### copy tests to builddir so that generated tests and static tests 
@@ -125,11 +131,11 @@ DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-send.1.xml html-nochunks)
 DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-uuidgen.1.xml html-nochunks)
 if (UNIX)
   DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-daemon.1.xml man)
-  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-monitor.1.xml man)
-  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-send.1.xml man)
-  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-launch.1.xml man)
-  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-uuidgen.1.xml man)
-  DOCBOOK(${CMAKE_SOURCE_DIR}/../doc/dbus-cleanup-sockets.1.xml man)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-monitor.1.xml man)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-send.1.xml man)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-launch.1.xml man)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-uuidgen.1.xml man)
+  DOCBOOK(${CMAKE_BINARY_DIR}/doc/dbus-cleanup-sockets.1.xml man)
 endif()
 #
 # handle html index file

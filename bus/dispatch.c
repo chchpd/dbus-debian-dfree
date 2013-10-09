@@ -34,6 +34,7 @@
 #include "signals.h"
 #include "test.h"
 #include <dbus/dbus-internals.h>
+#include <dbus/dbus-misc.h>
 #include <string.h>
 
 #ifdef HAVE_UNIX_FD_PASSING
@@ -428,7 +429,7 @@ bus_dispatch_remove_connection (DBusConnection *connection)
                                  NULL);
 }
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 
 #include <stdio.h>
 
@@ -1306,9 +1307,15 @@ check_get_connection_unix_process_id (BusContext     *context,
 #endif
       else
         {
+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
+          defined(__linux__) || \
+          defined(__OpenBSD__)
           warn_unexpected (connection, message, "not this error");
 
           goto out;
+#else
+          _dbus_verbose ("does not support GetConnectionUnixProcessID but perhaps that's OK?\n");
+#endif
         }
     }
   else
@@ -4466,7 +4473,7 @@ setenv_TEST_LAUNCH_HELPER_CONFIG(const DBusString *test_data_dir,
   _dbus_verbose ("Setting TEST_LAUNCH_HELPER_CONFIG to '%s'\n",
                  _dbus_string_get_const_data (&full));
 
-  _dbus_setenv ("TEST_LAUNCH_HELPER_CONFIG", _dbus_string_get_const_data (&full));
+  dbus_setenv ("TEST_LAUNCH_HELPER_CONFIG", _dbus_string_get_const_data (&full));
 
   _dbus_string_free (&full);
 
@@ -4907,4 +4914,4 @@ bus_unix_fds_passing_test(const DBusString *test_data_dir)
 }
 #endif
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
