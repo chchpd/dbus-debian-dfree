@@ -2,8 +2,9 @@ dbus (1.7.6-1) experimental; urgency=low
 
   * Standards-Version: 3.9.4 (no changes needed)
   * New upstream development release
+    - update symbols
 
- -- Simon McVittie <smcv@debian.org>  Wed, 09 Oct 2013 11:59:44 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 09 Oct 2013 16:44:43 +0100
 
 dbus (1.7.4-1) experimental; urgency=low
 
