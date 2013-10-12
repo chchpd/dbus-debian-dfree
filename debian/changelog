@@ -2,6 +2,8 @@ dbus (1.7.6-2) UNRELEASED; urgency=low
 
   * debian/rules: FTBFS if new symbols or libraries are added
     without updating the symbols file
+  * debian/copyright: list copyright holders and minor licenses
+    (Closes: #726000)
 
  -- Simon McVittie <smcv@debian.org>  Wed, 09 Oct 2013 18:34:10 +0100
 
