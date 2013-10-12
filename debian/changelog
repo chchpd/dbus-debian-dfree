@@ -4,6 +4,8 @@ dbus (1.6.16-2) UNRELEASED; urgency=low
     `update-rc.d dbus start ...` (Closes: #725923)
   * debian/rules: FTBFS if new symbols or libraries are added
     without updating the symbols file
+  * debian/copyright: list copyright holders and minor licenses
+    (Closes: #726000)
 
  -- Simon McVittie <smcv@debian.org>  Thu, 10 Oct 2013 11:46:26 +0100
 
