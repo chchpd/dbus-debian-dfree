@@ -42,6 +42,20 @@ debug_configure_flags := \
 	--libdir='$${prefix}/lib' \
 	$(NULL)
 
+udeb_configure_flags := \
+       $(normal_configure_flags) \
+       --disable-asserts \
+       --disable-checks \
+       --disable-doxygen-docs \
+       --disable-libaudit \
+       --disable-selinux \
+       --disable-systemd \
+       --disable-tests \
+       --disable-verbose-mode \
+       --disable-xml-docs \
+       CFLAGS='$(CFLAGS) -Os' \
+       $(NULL)
+
 ifeq ($(filter nodocs,$(DEB_BUILD_OPTIONS))$(filter stage1,$(DEB_BUILD_PROFILE)),)
 # documentation enabled
 normal_configure_flags += \
