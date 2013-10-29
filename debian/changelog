@@ -1,3 +1,11 @@
+dbus (1.7.6-3) UNRELEASED; urgency=low
+
+  [ Laurent Bigonville ]
+  * debian/rules: Re-add udeb_configure_flags that were lost during merge
+    (Closes: #727774)
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 29 Oct 2013 13:07:02 +0000
+
 dbus (1.7.6-2) experimental; urgency=low
 
   * debian/rules: FTBFS if new symbols or libraries are added
