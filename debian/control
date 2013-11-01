@@ -12,6 +12,7 @@ Uploaders: Sjoerd Simons <sjoerd@debian.org>,
 #   libaudit-dev
 #   libcap-ng-dev
 #   libsystemd-daemon-dev (circular dependency)
+#   libsystemd-journal-dev (circular dependency)
 #   libsystemd-login-dev (circular dependency)
 # The following packages can be omitted for bootstrapping, but provide extra
 # debugging support in /usr/lib/*/dbus-1.0/debug-build:
@@ -36,6 +37,7 @@ Build-Depends: automake (>= 1:1.10),
                libglib2.0-dev,
                libselinux1-dev [linux-any],
                libsystemd-daemon-dev (>= 32) [linux-any],
+               libsystemd-journal-dev (>= 32) [linux-any],
                libsystemd-login-dev (>= 32) [linux-any],
                libx11-dev,
                python (>= 2.6),

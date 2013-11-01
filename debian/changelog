@@ -1,4 +1,4 @@
-dbus (1.7.6-3) UNRELEASED; urgency=low
+dbus (1.7.8-1) experimental; urgency=low
 
   [ Laurent Bigonville ]
   * debian/rules: Re-add udeb_configure_flags that were lost during merge
@@ -8,6 +8,8 @@ dbus (1.7.6-3) UNRELEASED; urgency=low
   * Standards-Version: 3.9.5 (no changes needed)
   * Enable libaudit support so messages that violate SELinux policy go to the
     audit log (Closes: #727771)
+  * New upstream release
+    - add new dependency on libsystemd-journal-dev for linux-any
 
  -- Simon McVittie <smcv@debian.org>  Tue, 29 Oct 2013 13:07:02 +0000
 
