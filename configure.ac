@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [7])
-m4_define([dbus_micro_version], [6])
+m4_define([dbus_micro_version], [8])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -37,7 +37,7 @@ LT_CURRENT=11
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=2
+LT_REVISION=3
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -1143,7 +1143,7 @@ if test x$enable_systemd = xno ; then
     have_systemd=no;
 else
     PKG_CHECK_MODULES(SYSTEMD,
-        [libsystemd-login >= 32, libsystemd-daemon >= 32],
+        [libsystemd-login >= 32, libsystemd-daemon >= 32, libsystemd-journal >= 32],
         have_systemd=yes,
         have_systemd=no)
 fi
@@ -1774,6 +1774,7 @@ dbus-1.pc
 dbus-1-uninstalled.pc
 test/data/valid-config-files/debug-allow-all.conf
 test/data/valid-config-files/debug-allow-all-sha1.conf
+test/data/valid-config-files/incoming-limit.conf
 test/data/valid-config-files-system/debug-allow-all-pass.conf
 test/data/valid-config-files-system/debug-allow-all-fail.conf
 test/data/valid-service-files/org.freedesktop.DBus.TestSuite.PrivServer.service
