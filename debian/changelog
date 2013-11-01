@@ -6,6 +6,8 @@ dbus (1.7.6-3) UNRELEASED; urgency=low
 
   [ Simon McVittie ]
   * Standards-Version: 3.9.5 (no changes needed)
+  * Enable libaudit support so messages that violate SELinux policy go to the
+    audit log (Closes: #727771)
 
  -- Simon McVittie <smcv@debian.org>  Tue, 29 Oct 2013 13:07:02 +0000
 

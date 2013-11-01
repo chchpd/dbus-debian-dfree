@@ -22,7 +22,7 @@ dh_options = \
 
 common_configure_flags := \
 		--disable-silent-rules \
-		--disable-libaudit \
+		--enable-libaudit \
 		--enable-installed-tests \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
 		--with-systemdsystemunitdir=/lib/systemd/system \
