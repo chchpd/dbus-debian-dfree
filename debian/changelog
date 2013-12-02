@@ -1,3 +1,10 @@
+dbus (1.6.18-2) unstable; urgency=medium
+
+  * Disable valgrind integration in the debug build on armel,
+    since valgrind no longer supports armel (Closes: #729136)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 02 Dec 2013 10:22:39 +0000
+
 dbus (1.6.18-1) unstable; urgency=low
 
   * Run `update-rc.d dbus defaults` instead of deprecated
