@@ -526,6 +526,18 @@ process_config_every_time (BusContext      *context,
   context->policy = bus_config_parser_steal_policy (parser);
   _dbus_assert (context->policy != NULL);
 
+  /* context->connections is NULL when creating new BusContext */
+  if (context->connections)
+    {
+      _dbus_verbose ("Reload policy rules for completed connections\n");
+      retval = bus_connections_reload_policy (context->connections, error);
+      if (!retval)
+        {
+          _DBUS_ASSERT_ERROR_IS_SET (error);
+          goto failed;
+        }
+    }
+
   /* We have to build the address backward, so that
    * <listen> later in the config file have priority
    */
@@ -894,7 +906,7 @@ bus_context_new (const DBusString *config_file,
 
   if (!bus_selinux_full_init ())
     {
-      bus_context_log (context, DBUS_SYSTEM_LOG_FATAL, "SELinux enabled but AVC initialization failed; check system log\n");
+      bus_context_log (context, DBUS_SYSTEM_LOG_FATAL, "SELinux enabled but D-Bus initialization failed; check system log\n");
     }
 
   if (!process_config_postinit (context, parser, error))
