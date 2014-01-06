@@ -1,4 +1,1 @@
 01_no-fatal-warnings.patch
-0001-Add-dbus-run-session.patch
-0002-FreeBSD-explicit-include-signal.h-to-fix-build-failu.patch
-0003-dbus-run-session-remove-various-extra-variables-from.patch
