@@ -144,7 +144,6 @@ _dbus_user_database_lookup (DBusUserDatabase *db,
         uid = n;
     }
 
-#ifdef DBUS_ENABLE_USERDB_CACHE  
   if (uid != DBUS_UID_UNSET)
     info = _dbus_hash_table_lookup_uintptr (db->users, uid);
   else
@@ -157,9 +156,6 @@ _dbus_user_database_lookup (DBusUserDatabase *db,
       return info;
     }
   else
-#else 
-  if (1)
-#endif
     {
       if (uid != DBUS_UID_UNSET)
 	_dbus_verbose ("No cache for UID "DBUS_UID_FORMAT"\n",
@@ -306,11 +302,18 @@ init_system_db (void)
 /**
  * Locks global system user database.
  */
-void
+dbus_bool_t
 _dbus_user_database_lock_system (void)
 {
-  _DBUS_LOCK (system_users);
-  database_locked = TRUE;
+  if (_DBUS_LOCK (system_users))
+    {
+      database_locked = TRUE;
+      return TRUE;
+    }
+  else
+    {
+      return FALSE;
+    }
 }
 
 /**
@@ -345,8 +348,12 @@ _dbus_user_database_get_system (void)
 void
 _dbus_user_database_flush_system (void)
 {
-  _dbus_user_database_lock_system ();
-   
+  if (!_dbus_user_database_lock_system ())
+    {
+      /* nothing to flush */
+      return;
+    }
+
    if (system_db != NULL)
     _dbus_user_database_flush (system_db);
 
@@ -363,7 +370,9 @@ _dbus_user_database_flush_system (void)
 dbus_bool_t
 _dbus_username_from_current_process (const DBusString **username)
 {
-  _dbus_user_database_lock_system ();
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
+
   if (!init_system_db ())
     {
       _dbus_user_database_unlock_system ();
@@ -385,7 +394,9 @@ _dbus_username_from_current_process (const DBusString **username)
 dbus_bool_t
 _dbus_homedir_from_current_process (const DBusString  **homedir)
 {
-  _dbus_user_database_lock_system ();
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
+
   if (!init_system_db ())
     {
       _dbus_user_database_unlock_system ();
@@ -410,7 +421,10 @@ _dbus_homedir_from_username (const DBusString *username,
 {
   DBusUserDatabase *db;
   const DBusUserInfo *info;
-  _dbus_user_database_lock_system ();
+
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -449,7 +463,10 @@ _dbus_homedir_from_uid (dbus_uid_t         uid,
 {
   DBusUserDatabase *db;
   const DBusUserInfo *info;
-  _dbus_user_database_lock_system ();
+
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -496,7 +513,9 @@ _dbus_credentials_add_from_user (DBusCredentials  *credentials,
   DBusUserDatabase *db;
   const DBusUserInfo *info;
 
-  _dbus_user_database_lock_system ();
+  /* FIXME: this can't distinguish ENOMEM from other errors */
+  if (!_dbus_user_database_lock_system ())
+    return FALSE;
 
   db = _dbus_user_database_get_system ();
   if (db == NULL)
@@ -579,7 +598,7 @@ _dbus_user_database_flush (DBusUserDatabase *db)
   _dbus_hash_table_remove_all(db->groups);
 }
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 /**
  * Increments refcount of user database.
  * @param db the database
@@ -594,7 +613,7 @@ _dbus_user_database_ref (DBusUserDatabase  *db)
 
   return db;
 }
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 
 /**
  * Decrements refcount of user database.

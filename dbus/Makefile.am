@@ -12,6 +12,10 @@ AM_CPPFLAGS = \
 	-DDBUS_SESSION_CONFIG_FILE=\""$(configdir)/session.conf"\" \
 	$(NULL)
 
+# On Linux with glibc 2.17, sd-daemon.c support for POSIX message queues
+# results in an otherwise unnecessary dependency on librt. Disable it.
+AM_CPPFLAGS += -DSD_DAEMON_DISABLE_MQ
+
 # if assertions are enabled, improve backtraces
 AM_LDFLAGS = @R_DYNAMIC_LDFLAG@
 
@@ -35,7 +39,7 @@ dbus_res_ldflag = -Wl,$(dbus_res)
 no_undefined = -no-undefined
 export_symbols =
 
-libdbus_1_la_DEPENDENCIES = $(dbus_res)
+EXTRA_libdbus_1_la_DEPENDENCIES = $(dbus_res)
 intllibs =
 
 else
@@ -233,6 +237,8 @@ DBUS_SHARED_SOURCES=				\
 ### should be underscore-prefixed but don't really need
 ### to be unless they move to DBUS_SHARED_SOURCES later)
 DBUS_UTIL_SOURCES=				\
+	dbus-asv-util.c				\
+	dbus-asv-util.h				\
 	dbus-auth-script.c			\
 	dbus-auth-script.h			\
 	dbus-auth-util.c			\
@@ -291,9 +297,20 @@ libdbus_internal_la_CPPFLAGS = \
 	$(NULL)
 libdbus_internal_la_LIBADD=$(LIBDBUS_LIBS) $(SYSTEMD_LIBS)
 
+if DBUS_WIN
+# This must be a separate convenience library, otherwise libtool notices
+# that libdbus-1 might contain C++, links it with g++ and links in libstdc++,
+# even on Unix where in fact it doesn't contain any C++. For Windows, where
+# this code is used, we don't actually need libstdc++.
+noinst_LTLIBRARIES += libdbus-init-win.la
+libdbus_init_win_la_SOURCES = dbus-init-win.cpp
+libdbus_1_la_LIBADD += libdbus-init-win.la
+libdbus_internal_la_LIBADD += libdbus-init-win.la
+endif
+
 noinst_PROGRAMS =
 
-if DBUS_BUILD_TESTS
+if DBUS_ENABLE_EMBEDDED_TESTS
 # We can't actually run this til we've reached test/
 noinst_PROGRAMS += dbus-test
 endif
@@ -308,5 +325,5 @@ clean-local:
 	/bin/rm *.bb *.bbg *.da *.gcov .libs/*.da .libs/*.bbg || true
 
 update-systemd:
-	curl http://cgit.freedesktop.org/systemd/plain/src/sd-daemon.c > sd-daemon.c
-	curl http://cgit.freedesktop.org/systemd/plain/src/sd-daemon.h > sd-daemon.h
+	curl http://cgit.freedesktop.org/systemd/systemd/plain/src/libsystemd-daemon/sd-daemon.c > $(srcdir)/sd-daemon.c
+	curl http://cgit.freedesktop.org/systemd/systemd/plain/src/systemd/sd-daemon.h > $(srcdir)/sd-daemon.h

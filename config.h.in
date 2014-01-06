@@ -9,17 +9,11 @@
 /* Directory for installing the binaries */
 #undef DBUS_BINDIR
 
-/* Define to build test code into the library and binaries */
-#undef DBUS_BUILD_TESTS
-
 /* Define to build X11 functionality */
 #undef DBUS_BUILD_X11
 
 /* whether -export-dynamic was passed to libtool */
 #undef DBUS_BUILT_R_DYNAMIC
-
-/* Use dnotify on Linux */
-#undef DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX
 
 /* Use inotify */
 #undef DBUS_BUS_ENABLE_INOTIFY
@@ -45,6 +39,9 @@
 /* Directory for installing DBUS data files */
 #undef DBUS_DATADIR
 
+/* Default for dbus_connection_get_max_message_unix_fds() */
+#undef DBUS_DEFAULT_MESSAGE_UNIX_FDS
+
 /* Disable assertion checking */
 #undef DBUS_DISABLE_ASSERT
 
@@ -62,9 +59,6 @@
 
 /* Define to enable bus daemon usage statistics */
 #undef DBUS_ENABLE_STATS
-
-/* Build with caching of user data */
-#undef DBUS_ENABLE_USERDB_CACHE
 
 /* Support a verbose mode */
 #undef DBUS_ENABLE_VERBOSE_MODE
@@ -89,6 +83,9 @@
 
 /* Prefix for installing DBUS */
 #undef DBUS_PREFIX
+
+/* Fallback address for session bus clients */
+#undef DBUS_SESSION_BUS_CONNECT_ADDRESS
 
 /* Where per-session bus puts its sockets */
 #undef DBUS_SESSION_SOCKET_DIR
@@ -356,12 +353,12 @@
 /* Define to 1 if you have the <ws2tcpip.h> header file. */
 #undef HAVE_WS2TCPIP_H
 
-/* Define to 1 if you have the <wspiapi.h> header file. */
-#undef HAVE_WSPIAPI_H
-
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
 
 /* Name of package */
 #undef PACKAGE
@@ -408,8 +405,8 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Full path to the daemon in the builddir */
-#undef TEST_BUS_BINARY
+/* Full path to the dbus-launch in the builddir */
+#undef TEST_BUS_LAUNCH_BINARY
 
 /* Listening address for regression tests */
 #undef TEST_LISTEN
@@ -489,4 +486,13 @@
    calls it, or to nothing if 'inline' is not supported under any name.  */
 #ifndef __cplusplus
 #undef inline
+#endif
+
+
+/* explicitly define these macros to get less confusing conditions */
+#ifndef DBUS_DISABLE_ASSERT
+#  define DBUS_ENABLE_ASSERT 1
+#endif
+#ifndef DBUS_DISABLE_CHECKS
+#  define DBUS_ENABLE_CHECKS 1
 #endif

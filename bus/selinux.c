@@ -936,8 +936,7 @@ bus_selinux_get_policy_root (void)
 void
 bus_selinux_id_table_print (DBusHashTable *service_table)
 {
-#ifdef DBUS_ENABLE_VERBOSE_MODE
-#ifdef HAVE_SELINUX
+#if defined (DBUS_ENABLE_VERBOSE_MODE) && defined (HAVE_SELINUX)
   DBusHashIter iter;
 
   if (!selinux_enabled)
@@ -953,19 +952,18 @@ bus_selinux_id_table_print (DBusHashTable *service_table)
       _dbus_verbose ("The context is %s\n", sid->ctx);
       _dbus_verbose ("The refcount is %d\n", sid->refcnt);
     }
-#endif /* HAVE_SELINUX */
-#endif /* DBUS_ENABLE_VERBOSE_MODE */
+#endif /* DBUS_ENABLE_VERBOSE_MODE && HAVE_SELINUX */
 }
 
 
-#ifdef DBUS_ENABLE_VERBOSE_MODE
-#ifdef HAVE_SELINUX
 /**
  * Print out some AVC statistics.
  */
+#ifdef HAVE_SELINUX
 static void
 bus_avc_print_stats (void)
 {
+#ifdef DBUS_ENABLE_VERBOSE_MODE
   struct avc_cache_stats cstats;
 
   if (!selinux_enabled)
@@ -983,10 +981,9 @@ bus_avc_print_stats (void)
   _dbus_verbose ("CAV hits: %d\n", cstats.cav_hits);
   _dbus_verbose ("CAV probes: %d\n", cstats.cav_probes);
   _dbus_verbose ("CAV misses: %d\n", cstats.cav_misses);
+#endif /* DBUS_ENABLE_VERBOSE_MODE */
 }
 #endif /* HAVE_SELINUX */
-#endif /* DBUS_ENABLE_VERBOSE_MODE */
-
 
 /**
  * Destroy the AVC before we terminate.
@@ -1005,12 +1002,7 @@ bus_selinux_shutdown (void)
       sidput (bus_sid);
       bus_sid = SECSID_WILD;
 
-#ifdef DBUS_ENABLE_VERBOSE_MODE
- 
-      if (_dbus_is_verbose()) 
-        bus_avc_print_stats ();
- 
-#endif /* DBUS_ENABLE_VERBOSE_MODE */
+      bus_avc_print_stats ();
 
       avc_destroy ();
 #ifdef HAVE_LIBAUDIT
@@ -1051,10 +1043,17 @@ _dbus_change_to_daemon_user  (const char    *user,
   if (_dbus_geteuid () == 0)
     {
       int rc;
+      int have_audit_write;
 
+      have_audit_write = capng_have_capability (CAPNG_PERMITTED, CAP_AUDIT_WRITE);
       capng_clear (CAPNG_SELECT_BOTH);
-      capng_update (CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED,
-                    CAP_AUDIT_WRITE);
+      /* Only attempt to retain CAP_AUDIT_WRITE if we had it when
+       * starting.  See:
+       * https://bugs.freedesktop.org/show_bug.cgi?id=49062#c9
+       */
+      if (have_audit_write)
+        capng_update (CAPNG_ADD, CAPNG_EFFECTIVE | CAPNG_PERMITTED,
+                      CAP_AUDIT_WRITE);
       rc = capng_change_id (uid, gid, CAPNG_DROP_SUPP_GRP);
       if (rc)
         {

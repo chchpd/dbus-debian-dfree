@@ -51,15 +51,11 @@ Core library
  Requisite:
 
   - Gettext
-  - expat or libxml-2
-
- NB, expat is the recommended XML parser because it has more robust
- handling of OOM conditions.
+  - expat
 
  Optional:
 
   - libselinux           (for SELinux integration)
-  - dnotify              (for automatic service file reload)
   - doxygen              (for API documentation)
   - xmlto or meinproc4   (for Spec & other XML documentation)
 

@@ -28,6 +28,7 @@
 #include "dbus-internals.h"
 #include "dbus-message.h"
 #include "dbus-marshal-validate.h"
+#include "dbus-misc.h"
 #include "dbus-threads-internal.h"
 #include "dbus-connection-internal.h"
 #include "dbus-string.h"
@@ -94,19 +95,6 @@ static char *bus_connection_addresses[N_BUS_TYPES] = { NULL, NULL, NULL };
 static DBusBusType activation_bus_type = DBUS_BUS_STARTER;
 
 static dbus_bool_t initialized = FALSE;
-
-/**
- * Lock for globals in this file
- */
-_DBUS_DEFINE_GLOBAL_LOCK (bus);
-
-/**
- * Global lock covering all BusData on any connection. The bet is
- * that some lock contention is better than more memory
- * for a per-connection lock, but it's tough to imagine it mattering
- * either way.
- */
-_DBUS_DEFINE_GLOBAL_LOCK (bus_datas);
 
 static void
 addresses_shutdown_func (void *data)
@@ -192,12 +180,12 @@ init_session_address (void)
   if (!retval)
     return FALSE;
 
-  /* The DBUS_SESSION_BUS_DEFAULT_ADDRESS should have really been named
-   * DBUS_SESSION_BUS_FALLBACK_ADDRESS. 
-   */
+  /* We have a hard-coded (but compile-time-configurable) fallback address for
+   * the session bus. */
   if (bus_connection_addresses[DBUS_BUS_SESSION] == NULL)
     bus_connection_addresses[DBUS_BUS_SESSION] =
-      _dbus_strdup (DBUS_SESSION_BUS_DEFAULT_ADDRESS);
+      _dbus_strdup (DBUS_SESSION_BUS_CONNECT_ADDRESS);
+
   if (bus_connection_addresses[DBUS_BUS_SESSION] == NULL)
     return FALSE;
 
@@ -306,12 +294,6 @@ init_connections_unlocked (void)
        * the above code will work right
        */
       
-      if (!_dbus_setenv ("DBUS_ACTIVATION_ADDRESS", NULL))
-        return FALSE;
-
-      if (!_dbus_setenv ("DBUS_ACTIVATION_BUS_TYPE", NULL))
-        return FALSE;
-      
       if (!_dbus_register_shutdown_func (addresses_shutdown_func,
                                          NULL))
         return FALSE;
@@ -330,7 +312,11 @@ bus_data_free (void *data)
   if (bd->is_well_known)
     {
       int i;
-      _DBUS_LOCK (bus);
+
+      if (!_DBUS_LOCK (bus))
+        _dbus_assert_not_reached ("global locks should have been initialized "
+            "when we attached bus data");
+
       /* We may be stored in more than one slot */
       /* This should now be impossible - these slots are supposed to
        * be cleared on disconnect, so should not need to be cleared on
@@ -401,8 +387,13 @@ void
 _dbus_bus_notify_shared_connection_disconnected_unlocked (DBusConnection *connection)
 {
   int i;
-  
-  _DBUS_LOCK (bus);
+
+  if (!_DBUS_LOCK (bus))
+    {
+      /* If it was in bus_connections, we would have initialized global locks
+       * when we added it. So, it can't be. */
+      return;
+    }
 
   /* We are expecting to have the connection saved in only one of these
    * slots, but someone could in a pathological case set system and session
@@ -436,7 +427,12 @@ internal_bus_get (DBusBusType  type,
 
   connection = NULL;
 
-  _DBUS_LOCK (bus);
+  if (!_DBUS_LOCK (bus))
+    {
+      _DBUS_SET_OOM (error);
+      /* do not "goto out", that would try to unlock */
+      return NULL;
+    }
 
   if (!init_connections_unlocked ())
     {
@@ -506,8 +502,10 @@ internal_bus_get (DBusBusType  type,
    */
   dbus_connection_set_exit_on_disconnect (connection,
                                           TRUE);
- 
-  _DBUS_LOCK (bus_datas);
+
+  if (!_DBUS_LOCK (bus_datas))
+    _dbus_assert_not_reached ("global locks were initialized already");
+
   bd = ensure_bus_data (connection);
   _dbus_assert (bd != NULL); /* it should have been created on
                                 register, so OOM not possible */
@@ -554,7 +552,7 @@ out:
  * 
  * @param type bus type
  * @param error address where an error can be returned.
- * @returns a #DBusConnection with new ref
+ * @returns a #DBusConnection with new ref or #NULL on error
  */
 DBusConnection *
 dbus_bus_get (DBusBusType  type,
@@ -660,7 +658,12 @@ dbus_bus_register (DBusConnection *connection,
   message = NULL;
   reply = NULL;
 
-  _DBUS_LOCK (bus_datas);
+  if (!_DBUS_LOCK (bus_datas))
+    {
+      _DBUS_SET_OOM (error);
+      /* do not "goto out", that would try to unlock */
+      return FALSE;
+    }
 
   bd = ensure_bus_data (connection);
   if (bd == NULL)
@@ -769,8 +772,12 @@ dbus_bus_set_unique_name (DBusConnection *connection,
   _dbus_return_val_if_fail (connection != NULL, FALSE);
   _dbus_return_val_if_fail (unique_name != NULL, FALSE);
 
-  _DBUS_LOCK (bus_datas);
-  
+  if (!_DBUS_LOCK (bus_datas))
+    {
+      /* do not "goto out", that would try to unlock */
+      return FALSE;
+    }
+
   bd = ensure_bus_data (connection);
   if (bd == NULL)
     goto out;
@@ -812,8 +819,13 @@ dbus_bus_get_unique_name (DBusConnection *connection)
 
   _dbus_return_val_if_fail (connection != NULL, NULL);
 
-  _DBUS_LOCK (bus_datas);
-  
+  if (!_DBUS_LOCK (bus_datas))
+    {
+      /* We'd have initialized locks when we gave it its unique name, if it
+       * had one. Don't "goto out", that would try to unlock. */
+      return NULL;
+    }
+
   bd = ensure_bus_data (connection);
   if (bd == NULL)
     goto out;

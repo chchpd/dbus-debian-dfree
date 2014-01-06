@@ -51,7 +51,7 @@ static const char *appname;
 static void
 usage (int ecode)
 {
-  fprintf (stderr, "Usage: %s [--help] [--system | --session | --address=ADDRESS] [--dest=NAME] [--type=TYPE] [--print-reply[=literal]] [--reply-timeout=MSEC] <destination object path> <message name> [contents ...]\n", appname);
+  fprintf (stderr, "Usage: %s [--help] [--system | --session | --bus=ADDRESS | --peer=ADDRESS] [--dest=NAME] [--type=TYPE] [--print-reply[=literal]] [--reply-timeout=MSEC] <destination object path> <message name> [contents ...]\n", appname);
   exit (ecode);
 }
 
@@ -241,6 +241,7 @@ main (int argc, char *argv[])
   int message_type = DBUS_MESSAGE_TYPE_SIGNAL;
   const char *type_str = NULL;
   const char *address = NULL;
+  int is_bus = FALSE;
   int session_or_system = FALSE;
 
   appname = argv[0];
@@ -266,34 +267,66 @@ main (int argc, char *argv[])
 	  type = DBUS_BUS_SESSION;
           session_or_system = TRUE;
         }
-      else if (strstr (arg, "--address") == arg)
+      else if ((strstr (arg, "--bus=") == arg) || (strstr (arg, "--peer=") == arg) || (strstr (arg, "--address=") == arg))
         {
-          address = strchr (arg, '=');
-
-          if (address == NULL) 
+          if (arg[2] == 'b') /* bus */
             {
-              fprintf (stderr, "\"--address=\" requires an ADDRESS\n");
-              usage (1);
+              is_bus = TRUE;
             }
-          else
+          else if (arg[2] == 'p') /* peer */
             {
-              address = address + 1;
+              is_bus = FALSE;
+            }
+          else /* address; keeping backwards compatibility */
+            {
+              is_bus = FALSE;
+            }
+
+          address = strchr (arg, '=') + 1;
+
+          if (address[0] == '\0')
+            {
+              fprintf (stderr, "\"--peer=\" and \"--bus=\" require an ADDRESS\n");
+              usage (1);
             }
         }
       else if (strncmp (arg, "--print-reply", 13) == 0)
 	{
 	  print_reply = TRUE;
 	  message_type = DBUS_MESSAGE_TYPE_METHOD_CALL;
-	  if (*(arg + 13) != '\0')
+	  if (strcmp (arg + 13, "=literal") == 0)
 	    print_reply_literal = TRUE;
+	  else if (*(arg + 13) != '\0')
+	    {
+	      fprintf (stderr, "invalid value (%s) of \"--print-reply\"\n", arg + 13);
+	      usage (1);
+	    }
 	}
       else if (strstr (arg, "--reply-timeout=") == arg)
 	{
+	  if (*(strchr (arg, '=') + 1) == '\0')
+	    {
+	      fprintf (stderr, "\"--reply-timeout=\" requires an MSEC\n");
+	      usage (1);
+	    }
 	  reply_timeout = strtol (strchr (arg, '=') + 1,
 				  NULL, 10);
+	  if (reply_timeout <= 0)
+	    {
+	      fprintf (stderr, "invalid value (%s) of \"--reply-timeout\"\n",
+	               strchr (arg, '=') + 1);
+	      usage (1);
+	    }
 	}
       else if (strstr (arg, "--dest=") == arg)
-	dest = strchr (arg, '=') + 1;
+	{
+	  if (*(strchr (arg, '=') + 1) == '\0')
+	    {
+	      fprintf (stderr, "\"--dest=\" requires an NAME\n");
+	      usage (1);
+	    }
+	  dest = strchr (arg, '=') + 1;
+	}
       else if (strstr (arg, "--type=") == arg)
 	type_str = strchr (arg, '=') + 1;
       else if (!strcmp(arg, "--help"))
@@ -312,7 +345,7 @@ main (int argc, char *argv[])
   if (session_or_system &&
       (address != NULL))
     {
-      fprintf (stderr, "\"--address\" may not be used with \"--system\" or \"--session\"\n");
+      fprintf (stderr, "\"--peer\" and \"--bus\" may not be used with \"--system\" or \"--session\"\n");
       usage (1);
     }
 
@@ -329,6 +362,12 @@ main (int argc, char *argv[])
     }
   
   dbus_error_init (&error);
+
+  if (dest && !dbus_validate_bus_name (dest, &error))
+    {
+      fprintf (stderr, "invalid value (%s) of \"--dest\"\n", dest);
+      usage (1);
+    }
 
   if (address != NULL)
     {
@@ -347,6 +386,16 @@ main (int argc, char *argv[])
                error.message);
       dbus_error_free (&error);
       exit (1);
+    }
+  else if ((address != NULL) && is_bus)
+    {
+      if (!dbus_bus_register (connection, &error))
+        {
+          fprintf (stderr, "Failed to register on connection to \"%s\" message bus: %s\n",
+                   address, error.message);
+          dbus_error_free (&error);
+          exit (1);
+        }
     }
 
   if (message_type == DBUS_MESSAGE_TYPE_METHOD_CALL)

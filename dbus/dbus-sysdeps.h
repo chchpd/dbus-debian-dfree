@@ -89,8 +89,6 @@ void _dbus_abort (void) _DBUS_GNUC_NORETURN;
 
 dbus_bool_t _dbus_check_setuid (void);
 const char* _dbus_getenv (const char *varname);
-dbus_bool_t _dbus_setenv (const char *varname,
-			  const char *value);
 dbus_bool_t _dbus_clearenv (void);
 char **     _dbus_get_environment (void);
 
@@ -278,6 +276,19 @@ dbus_int32_t _dbus_atomic_get (DBusAtomic *atomic);
 #define _DBUS_POLLHUP     0x0080
 /** Invalid request: fd not open */
 #define _DBUS_POLLNVAL    0x1000
+#elif defined(__QNX__)
+/** Writing now will not block */
+#define _DBUS_POLLOUT     0x0002
+/** There is data to read */
+#define _DBUS_POLLIN      0x0005
+/** There is urgent data to read */
+#define _DBUS_POLLPRI     0x0008
+/** Error condition */
+#define _DBUS_POLLERR     0x0020
+/** Hung up */
+#define _DBUS_POLLHUP     0x0040
+/** Invalid request: fd not open */
+#define _DBUS_POLLNVAL    0x1000
 #else
 /** There is data to read */
 #define _DBUS_POLLIN      0x0001
@@ -437,7 +448,7 @@ void _dbus_set_signal_handler (int               sig,
 dbus_bool_t _dbus_user_at_console (const char *username,
                                    DBusError  *error);
 
-void _dbus_init_system_log (void);
+void _dbus_init_system_log (dbus_bool_t is_daemon);
 
 typedef enum {
   DBUS_SYSTEM_LOG_INFO,
@@ -506,6 +517,16 @@ dbus_bool_t _dbus_read_local_machine_uuid   (DBusGUID         *machine_id,
  * @returns #FALSE if no memory
  */
 dbus_bool_t _dbus_threads_init_platform_specific (void);
+
+/**
+ * Lock a static mutex used to protect _dbus_threads_init_platform_specific().
+ */
+void _dbus_threads_lock_platform_specific (void);
+
+/**
+ * Undo _dbus_threads_lock_platform_specific().
+ */
+void _dbus_threads_unlock_platform_specific (void);
 
 dbus_bool_t _dbus_split_paths_and_append (DBusString *dirs, 
                                           const char *suffix, 

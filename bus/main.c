@@ -61,11 +61,6 @@ signal_handler (int sig)
 {
   switch (sig)
     {
-#ifdef DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX
-    case SIGIO:
-      /* explicit fall-through */
-#endif /* DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX  */
-#ifdef SIGHUP
     case SIGHUP:
       {
         DBusString str;
@@ -98,7 +93,6 @@ signal_handler (int sig)
           }
       }
       break;
-#endif
 
     case SIGTERM:
       {
@@ -131,7 +125,23 @@ signal_handler (int sig)
 static void
 usage (void)
 {
-  fprintf (stderr, DBUS_DAEMON_NAME " [--version] [--session] [--system] [--config-file=FILE] [--print-address[=DESCRIPTOR]] [--print-pid[=DESCRIPTOR]] [--fork] [--nofork] [--introspect] [--address=ADDRESS] [--systemd-activation] [--nopidfile]\n");
+  fprintf (stderr,
+      DBUS_DAEMON_NAME
+      " [--version]"
+      " [--session]"
+      " [--system]"
+      " [--config-file=FILE]"
+      " [--print-address[=DESCRIPTOR]]"
+      " [--print-pid[=DESCRIPTOR]]"
+      " [--introspect]"
+      " [--address=ADDRESS]"
+      " [--nopidfile]"
+      " [--nofork]"
+#ifdef DBUS_UNIX
+      " [--fork]"
+      " [--systemd-activation]"
+#endif
+      "\n");
   exit (1);
 }
 
@@ -405,18 +415,20 @@ main (int argc, char **argv)
           flags &= ~BUS_CONTEXT_FLAG_FORK_ALWAYS;
           flags |= BUS_CONTEXT_FLAG_FORK_NEVER;
         }
+#ifdef DBUS_UNIX
       else if (strcmp (arg, "--fork") == 0)
         {
           flags &= ~BUS_CONTEXT_FLAG_FORK_NEVER;
           flags |= BUS_CONTEXT_FLAG_FORK_ALWAYS;
         }
-      else if (strcmp (arg, "--nopidfile") == 0)
-        {
-          flags &= ~BUS_CONTEXT_FLAG_WRITE_PID_FILE;
-        }
       else if (strcmp (arg, "--systemd-activation") == 0)
         {
           flags |= BUS_CONTEXT_FLAG_SYSTEMD_ACTIVATION;
+        }
+#endif
+      else if (strcmp (arg, "--nopidfile") == 0)
+        {
+          flags &= ~BUS_CONTEXT_FLAG_WRITE_PID_FILE;
         }
       else if (strcmp (arg, "--system") == 0)
         {
@@ -628,12 +640,7 @@ main (int argc, char **argv)
    * no point in trying to make the handler portable to non-Unix. */
 
   _dbus_set_signal_handler (SIGTERM, signal_handler);
-#ifdef SIGHUP
   _dbus_set_signal_handler (SIGHUP, signal_handler);
-#endif
-#ifdef DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX
-  _dbus_set_signal_handler (SIGIO, signal_handler);
-#endif /* DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX */
 #endif /* DBUS_UNIX */
 
   _dbus_verbose ("We are on D-Bus...\n");

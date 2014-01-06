@@ -26,7 +26,7 @@
 #include "dbus-server-unix.h"
 #include "dbus-server-socket.h"
 #include "dbus-string.h"
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 #include "dbus-server-debug-pipe.h"
 #endif
 #include "dbus-address.h"
@@ -529,7 +529,7 @@ static const struct {
 } listen_funcs[] = {
   { _dbus_server_listen_socket }
   , { _dbus_server_listen_platform_specific }
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
   , { _dbus_server_listen_debug_pipe }
 #endif
 };
@@ -699,13 +699,11 @@ dbus_server_ref (DBusServer *server)
 
   _dbus_return_val_if_fail (server != NULL, NULL);
 
-  /* can't get the refcount without a side-effect */
   old_refcount = _dbus_atomic_inc (&server->refcount);
 
 #ifndef DBUS_DISABLE_CHECKS
   if (_DBUS_UNLIKELY (old_refcount <= 0))
     {
-      /* undo side-effect first */
       _dbus_atomic_dec (&server->refcount);
       _dbus_warn_check_failed (_dbus_return_if_fail_warning_format,
                                _DBUS_FUNCTION_NAME, "old_refcount > 0",
@@ -736,13 +734,18 @@ dbus_server_unref (DBusServer *server)
 
   _dbus_return_if_fail (server != NULL);
 
-  /* can't get the refcount without a side-effect */
   old_refcount = _dbus_atomic_dec (&server->refcount);
 
 #ifndef DBUS_DISABLE_CHECKS
   if (_DBUS_UNLIKELY (old_refcount <= 0))
     {
-      /* undo side-effect first */
+      /* undo side-effect first
+       * please do not try to simplify the code here by using
+       * _dbus_atomic_get(), why we don't use it is
+       * because it issues another atomic operation even though
+       * DBUS_DISABLE_CHECKS defined.
+       * Bug: https://bugs.freedesktop.org/show_bug.cgi?id=68303
+       */
       _dbus_atomic_inc (&server->refcount);
       _dbus_warn_check_failed (_dbus_return_if_fail_warning_format,
                                _DBUS_FUNCTION_NAME, "old_refcount > 0",
@@ -777,16 +780,7 @@ dbus_server_disconnect (DBusServer *server)
 {
   _dbus_return_if_fail (server != NULL);
 
-#ifdef DBUS_DISABLE_CHECKS
-  _dbus_atomic_inc (&server->refcount);
-#else
-    {
-      dbus_int32_t old_refcount = _dbus_atomic_inc (&server->refcount);
-
-      _dbus_return_if_fail (old_refcount > 0);
-    }
-#endif
-
+  dbus_server_ref (server);
   SERVER_LOCK (server);
 
   _dbus_assert (server->vtable->disconnect != NULL);
@@ -1071,9 +1065,8 @@ dbus_server_set_auth_mechanisms (DBusServer  *server,
   return TRUE;
 }
 
-
-static DBusDataSlotAllocator slot_allocator;
-_DBUS_DEFINE_GLOBAL_LOCK (server_slots);
+static DBusDataSlotAllocator slot_allocator =
+  _DBUS_DATA_SLOT_ALLOCATOR_INIT (_DBUS_LOCK_NAME (server_slots));
 
 /**
  * Allocates an integer ID to be used for storing application-specific
@@ -1093,7 +1086,6 @@ dbus_bool_t
 dbus_server_allocate_data_slot (dbus_int32_t *slot_p)
 {
   return _dbus_data_slot_allocator_alloc (&slot_allocator,
-                                          (DBusRMutex **)&_DBUS_LOCK_NAME (server_slots),
                                           slot_p);
 }
 
@@ -1190,7 +1182,7 @@ dbus_server_get_data (DBusServer   *server,
 
 /** @} */
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 #include "dbus-test.h"
 #include <string.h>
 
@@ -1246,4 +1238,4 @@ _dbus_server_test (void)
   return TRUE;
 }
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */

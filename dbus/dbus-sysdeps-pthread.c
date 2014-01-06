@@ -36,12 +36,14 @@
 
 #include <config.h>
 
+#ifdef HAVE_MONOTONIC_CLOCK
 /* Whether we have a "monotonic" clock; i.e. a clock not affected by
  * changes in system time.
  * This is initialized once in check_monotonic_clock below.
  * https://bugs.freedesktop.org/show_bug.cgi?id=18121
  */
 static dbus_bool_t have_monotonic_clock = 0;
+#endif
 
 struct DBusRMutex {
   pthread_mutex_t lock; /**< the lock */
@@ -281,5 +283,20 @@ _dbus_threads_init_platform_specific (void)
    */
   check_monotonic_clock ();
   (void) _dbus_check_setuid ();
-  return dbus_threads_init (NULL);
+
+  return TRUE;
+}
+
+static pthread_mutex_t init_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void
+_dbus_threads_lock_platform_specific (void)
+{
+  pthread_mutex_lock (&init_mutex);
+}
+
+void
+_dbus_threads_unlock_platform_specific (void)
+{
+  pthread_mutex_unlock (&init_mutex);
 }

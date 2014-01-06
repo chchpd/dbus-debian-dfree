@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 static void
 die (const char *failure)
 {
@@ -84,7 +84,7 @@ run_data_test (const char             *test_name,
     }
 }
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 
 /**
  * An exported symbol to be run in order to execute
@@ -94,11 +94,12 @@ run_data_test (const char             *test_name,
  * (with --enable-tests=no)
  *
  * @param test_data_dir the directory with test data (test/data normally)
+ * @param specific_test run specific test or #NULL to run all tests
  */
 void
 dbus_internal_do_not_use_run_tests (const char *test_data_dir, const char *specific_test)
 {
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
   if (!_dbus_threads_init_debug ())
     die ("debug threads init");
   

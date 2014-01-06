@@ -1,3 +1,9 @@
+# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
+
+# we do not need to have WIN32 defined
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+
 project(dbus)
 
 # we need to be up to date
@@ -6,14 +12,20 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
-# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/modules")
 
 # detect version
 include(MacrosAutotools)
 autoversion(../configure.ac dbus)
 # used by file version info
 set (DBUS_PATCH_VERSION "0")
+
+# set PACKAGE_... variables
+autopackage(
+    dbus
+    ${DBUS_VERSION_STRING}
+    "http://dbus.freedesktop.org"
+    "https://bugs.freedesktop.org/enter_bug.cgi?product=dbus"
+)
 
 include(Macros)
 TIMESTAMP(DBUS_BUILD_TIMESTAMP)
@@ -60,11 +72,17 @@ set(EXPANDED_SYSCONFDIR      ${DBUS_INSTALL_DIR}/etc)
 set(EXPANDED_DATADIR         ${DBUS_INSTALL_DIR}/${DBUS_DATADIR})
 set(DBUS_MACHINE_UUID_FILE   ${DBUS_INSTALL_DIR}/lib/dbus/machine-id)
 set(DBUS_BINDIR              ${EXPANDED_BINDIR})
-set(DBUS_DAEMONDIR 			 ${EXPANDED_BINDIR})
+set(DBUS_DAEMONDIR           ${EXPANDED_BINDIR})
 
 
 #enable building of shared library
 SET(BUILD_SHARED_LIBS ON)
+
+if(WIN32)
+    set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "bin" LIBRARY DESTINATION "lib" ARCHIVE DESTINATION "lib")
+else()
+    set(INSTALL_TARGETS_DEFAULT_ARGS  RUNTIME DESTINATION "${EXPANDED_LIBDIR}" LIBRARY DESTINATION "${EXPANDED_LIBDIR}" ARCHIVE DESTINATION "${EXPANDED_LIBDIR}")
+endif()
 
 if (CYGWIN)
    set (WIN32)
@@ -79,30 +97,21 @@ if (WIN32)
     addExplorerWrapper(${CMAKE_PROJECT_NAME})
 endif (WIN32)
 
-option (DBUS_USE_EXPAT "Use expat (== ON) or libxml2 (==OFF)" ON)
-
 if(NOT WIN32)
 	option (DBUS_ENABLE_ABSTRACT_SOCKETS "enable support for abstract sockets" ON)
 	set (CMAKE_THREAD_PREFER_PTHREAD ON)
 	include (FindThreads)
 endif(NOT WIN32)
 
-#AC_ARG_ENABLE(asserts, AS_HELP_STRING([--enable-asserts],[include assertion checks]),enable_asserts=$enableval,enable_asserts=$USE_MAINTAINER_MODE)
-option (DBUS_DISABLE_ASSERTS "Disable assertion checking" OFF)
+option (DBUS_DISABLE_ASSERT "Disable assertion checking" OFF)
 
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
-option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
-
-if (DBUS_USE_EXPAT)
-    find_package(LibExpat)
-else ()
-    find_package(LibXml2)
-endif ()
+find_package(EXPAT)
 find_package(X11)
 
 # analogous to AC_USE_SYSTEM_EXTENSIONS in configure.ac
-add_definitions(-D_POSIX_C_SOURCE=199309L -D_GNU_SOURCE)
+add_definitions(-D_GNU_SOURCE)
 
 # do config checks
 INCLUDE(ConfigureChecks.cmake)
@@ -157,12 +166,12 @@ if(WIN32)
 	endif(MSVC)
 endif(WIN32)
 
-if (UNIX AND NOT DBUS_DISABLE_ASSERTS)
+if (UNIX AND NOT DBUS_DISABLE_ASSERT)
 	# required for backtrace
 	SET(CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}   -Wl,--export-dynamic")
 	SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Wl,--export-dynamic")
 	add_definitions(-DDBUS_BUILT_R_DYNAMIC)
-endif (UNIX AND NOT DBUS_DISABLE_ASSERTS)
+endif (UNIX AND NOT DBUS_DISABLE_ASSERT)
 
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -D_DEBUG")
 
@@ -227,11 +236,12 @@ ENABLE_TESTING()
 ########### command line options ###############
 # TODO: take check from configure.in
 
-#AC_ARG_ENABLE(tests, AS_HELP_STRING([--enable-tests],[enable unit test code]),enable_tests=$enableval,enable_tests=$USE_MAINTAINER_MODE)
 option (DBUS_BUILD_TESTS "enable unit test code" ON)
  
 if(DBUS_BUILD_TESTS)
-    add_definitions(-DDBUS_BUILD_TESTS -DDBUS_ENABLE_EMBEDDED_TESTS)
+    set (DBUS_ENABLE_EMBEDDED_TESTS ON)
+    set (DBUS_ENABLE_MODULAR_TESTS ON)
+    add_definitions(-DDBUS_ENABLE_EMBEDDED_TESTS -DDBUS_ENABLE_MODULAR_TESTS)
 endif(DBUS_BUILD_TESTS)
 
 option (DBUS_USE_OUTPUT_DEBUG_STRING "enable win32 debug port for message output" OFF)
@@ -244,7 +254,6 @@ if(WIN32)
 	option (DBUS_SERVICE "enable dbus service installer" OFF)
 endif(WIN32)
 
-#AC_ARG_ENABLE(ansi, AS_HELP_STRING([--enable-ansi],[enable -ansi -pedantic gcc flags]),enable_ansi=$enableval,enable_ansi=no)
 option (DBUS_ENABLE_ANSI "enable -ansi -pedantic gcc flags" OFF)
 if(DBUS_ENABLE_ANSI)
    if(NOT MSVC)
@@ -254,14 +263,11 @@ if(DBUS_ENABLE_ANSI)
    endif(NOT MSVC)
 endif(DBUS_ENABLE_ANSI)
 
-#AC_ARG_ENABLE(verbose-mode, AS_HELP_STRING([--enable-verbose-mode],[support verbose debug mode]),enable_verbose_mode=$enableval,enable_verbose_mode=$USE_MAINTAINER_MODE)
 option (DBUS_ENABLE_VERBOSE_MODE "support verbose debug mode" ON)
 
-#AC_ARG_ENABLE(checks, AS_HELP_STRING([--enable-checks],[include sanity checks on public API]),enable_checks=$enableval,enable_checks=yes)
 option (DBUS_DISABLE_CHECKS "Disable public API sanity checking" OFF)
 
 if(NOT MSVC)
-    #AC_ARG_ENABLE(gcov, AS_HELP_STRING([--enable-gcov],[compile with coverage profiling instrumentation (gcc only)]),enable_gcov=$enableval,enable_gcov=no)
     option (DBUS_GCOV_ENABLED "compile with coverage profiling instrumentation (gcc only)" OFF)
     if(DBUS_GCOV_ENABLED)
             add_definitions(-fprofile-arcs -ftest-coverage)
@@ -271,21 +277,27 @@ if(NOT MSVC)
     endif(DBUS_GCOV_ENABLED)
 endif(NOT MSVC)
 
-#AC_ARG_ENABLE(abstract-sockets, AS_HELP_STRING([--enable-abstract-sockets],[use abstract socket namespace (linux only)]),enable_abstract_sockets=$enableval,enable_abstract_sockets=auto)
-# -> moved before include(ConfigureChecks.cmake)
-
-#AC_ARG_ENABLE(selinux, AS_HELP_STRING([--enable-selinux],[build with SELinux support]),enable_selinux=$enableval,enable_selinux=auto)
-#selinux missing
-
-#AC_ARG_ENABLE(dnotify, AS_HELP_STRING([--enable-dnotify],[build with dnotify support (linux only)]),enable_dnotify=$enableval,enable_dnotify=auto)
 if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    option (DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX "build with dnotify support (linux only)" ON) # add a check !
+    option (DBUS_BUS_ENABLE_INOTIFY "build with inotify support (linux only)" ON)
+    if(DBUS_BUS_ENABLE_INOTIFY)
+        check_include_file(sys/inotify.h HAVE_SYS_INOTIFY_H)
+        if(NOT HAVE_SYS_INOTIFY_H)
+            message(FATAL_ERROR "sys/inotify.h not found!")
+        endif(NOT HAVE_SYS_INOTIFY_H)
+    endif(DBUS_BUS_ENABLE_INOTIFY)
+elseif("${CMAKE_SYSTEM_NAME}" MATCHES ".*BSD")
+    option (DBUS_BUS_ENABLE_KQUEUE "build with kqueue support (FreeBSD only)" ON)
+    if(DBUS_BUS_ENABLE_KQUEUE)
+        # cmake check a header by compiling a test program with
+        # the header, sys/event.h needs stdint.h and sys/types.h
+        # to work.
+        check_include_files("stdint.h;sys/types.h;sys/event.h" HAVE_SYS_EVENT_H)
+        if(NOT HAVE_SYS_EVENT_H)
+            message(FATAL_ERROR "sys/event.h not found!")
+        endif(NOT HAVE_SYS_EVENT_H)
+    endif(DBUS_BUS_ENABLE_KQUEUE)
 endif("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
 
-#AC_ARG_ENABLE(kqueue, AS_HELP_STRING([--enable-kqueue],[build with kqueue support (FreeBSD only)]),enable_kqueue=$enableval,enable_kqueue=auto)
-#missing
-
-#AC_ARG_ENABLE(console-owner-file, AS_HELP_STRING([--enable-console-owner-file],[enable console owner file]),enable_console_owner_file=$enableval,enable_console_owner_file=auto)
 STRING(TOUPPER ${CMAKE_SYSTEM_NAME} sysname)
 if("${sysname}" MATCHES ".*SOLARIS.*")
     option (HAVE_CONSOLE_OWNER_FILE "enable console owner file (solaris only)" ON)
@@ -294,31 +306,14 @@ if("${sysname}" MATCHES ".*SOLARIS.*")
     endif(HAVE_CONSOLE_OWNER_FILE)
 endif("${sysname}" MATCHES ".*SOLARIS.*")
 
-#AC_ARG_WITH(xml, AS_HELP_STRING([--with-xml=[libxml/expat]],[XML library to use]))
-if(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
-    message(FATAL "Neither expat nor libxml2 found!")
-endif(NOT LIBXML2_FOUND AND NOT LIBEXPAT_FOUND)
+if(NOT EXPAT_FOUND)
+    message(FATAL_ERROR "expat not found!")
+endif(NOT EXPAT_FOUND)
 
-if(DBUS_USE_EXPAT)
-    SET(XML_LIB "Expat")
-    SET(XML_LIBRARY     ${LIBEXPAT_LIBRARIES})
-    SET(XML_INCLUDE_DIR ${LIBEXPAT_INCLUDE_DIR})
-else(DBUS_USE_EXPAT)
-    SET(XML_LIB "LibXML2")
-    SET(XML_LIBRARY     ${LIBXML2_LIBRARIES})
-    SET(XML_INCLUDE_DIR ${LIBXML2_INCLUDE_DIR})
-endif(DBUS_USE_EXPAT)
+SET(XML_LIB "Expat")
+SET(XML_LIBRARY     ${EXPAT_LIBRARIES})
+SET(XML_INCLUDE_DIR ${EXPAT_INCLUDE_DIR})
 
-
-#AC_ARG_WITH(init-scripts, AS_HELP_STRING([--with-init-scripts=[redhat]],[Style of init scripts to install]))
-#AC_ARG_WITH(session-socket-dir, AS_HELP_STRING([--with-session-socket-dir=[dirname]],[Where to put sockets for the per-login-session message bus]))
-#AC_ARG_WITH(test-socket-dir, AS_HELP_STRING([--with-test-socket-dir=[dirname]],[Where to put sockets for make check]))
-#AC_ARG_WITH(system-pid-file, AS_HELP_STRING([--with-system-pid-file=[pidfile]],[PID file for systemwide daemon]))
-#AC_ARG_WITH(system-socket, AS_HELP_STRING([--with-system-socket=[filename]],[UNIX domain socket for systemwide daemon]))
-#AC_ARG_WITH(console-auth-dir, AS_HELP_STRING([--with-console-auth-dir=[dirname]],[directory to check for console ownerhip]))
-#AC_ARG_WITH(console-owner-file, AS_HELP_STRING([--with-console-owner-file=[filename]],[file whose owner determines current console owner]))
-#AC_ARG_WITH(dbus_user, AS_HELP_STRING([--with-dbus-user=<user>],[User for running the DBUS daemon (messagebus)]))
-#AC_ARG_WITH(dbus_daemondir, AS_HELP_STRING([--with-dbus-daemondir=[dirname]],[Directory for installing the DBUS daemon]))
 # all missing or hardcoded for now
 
 # 'hidden' ones
@@ -390,7 +385,7 @@ endif (MSVC_IDE)
          else (NOT $ENV{TMP} STREQUAL "")
          if (WIN32)
              #Should never happen, both TMP and TEMP seem always set on Windows
-             message(FATAL "Could not determine a usable temporary directory")
+             message(FATAL_ERROR "Could not determine a usable temporary directory")
          else(WIN32)
             set (DBUS_SESSION_SOCKET_DIR /tmp)
          endif(WIN32)
@@ -398,17 +393,6 @@ endif (MSVC_IDE)
      endif (NOT $ENV{TEMP} STREQUAL "")
  endif (NOT $ENV{TMPDIR} STREQUAL "")
 
-#AC_ARG_WITH(test-socket-dir, AS_HELP_STRING([--with-test-socket-dir=[dirname]],[Where to put sockets for make check]))
-
-#AC_ARG_WITH(system-pid-file, AS_HELP_STRING([--with-system-pid-file=[pidfile]],[PID file for systemwide daemon]))
-
-#if ! test -z "$with_system_pid_file"; then
-#   DBUS_SYSTEM_PID_FILE=$with_system_pid_file
-#elif test x$operating_system = xredhat ; then
-#   DBUS_SYSTEM_PID_FILE=${EXPANDED_LOCALSTATEDIR}/run/messagebus.pid
-#else
-#   DBUS_SYSTEM_PID_FILE=${EXPANDED_LOCALSTATEDIR}/run/dbus/pid
-#fi
 # TODO: fix redhet
 if (WIN32)
   # bus-test expects a non empty string
@@ -417,32 +401,39 @@ else (WIN32)
 	set (DBUS_SYSTEM_PID_FILE ${EXPANDED_LOCALSTATEDIR}/run/dbus/pid)
 endif (WIN32)
 
-#AC_ARG_WITH(system-socket, AS_HELP_STRING([--with-system-socket=[filename]],[UNIX domain socket for systemwide daemon]))
-
-#AC_ARG_WITH(console-auth-dir, AS_HELP_STRING([--with-console-auth-dir=[dirname]],[directory to check for console ownerhip]))
-
 if (WIN32)
 	set (DBUS_CONSOLE_AUTH_DIR "")
 else (WIN32)
 	set (DBUS_CONSOLE_AUTH_DIR "/var/run/console/")
 endif (WIN32)
 
-#AC_ARG_WITH(dbus_user, AS_HELP_STRING([--with-dbus-user=<user>],[User for running the DBUS daemon (messagebus)]))
-
 set (DBUS_USER )
 
+# In Autotools this has a different default on QNX, but there seems little
+# point in replicating that here; if you're on an unusual Unix, use Autotools.
+set (DEFAULT_MESSAGE_UNIX_FDS 1024)
+
+# This won't work on Windows. It's not meant to - the system bus is
+# meaningless on Windows anyway.
+#
+# This has to be suitable for hard-coding in client libraries as well as
+# in the dbus-daemon's configuration, so it has to be valid to listen on
+# and also to connect to. If this ever changes, it'll need to be split into
+# two variables, one for the listening address and one for the connecting
+# address.
+set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "unix:path=${EXPANDED_LOCALSTATEDIR}/run/dbus/system_bus_socket" CACHE STRING "system bus default address")
 
 if (WIN32)
-  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "system bus default address")
-  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "nonce-tcp:" CACHE STRING "session bus default address")
+  set (DBUS_SESSION_BUS_LISTEN_ADDRESS "autolaunch:" CACHE STRING "session bus default listening address")
+  set (DBUS_SESSION_BUS_CONNECT_ADDRESS "autolaunch:" CACHE STRING "session bus fallback address for clients")
 
   set (DBUS_SYSTEM_CONFIG_FILE "etc/dbus-1/system.conf")
   set (DBUS_SESSION_CONFIG_FILE "etc/dbus-1/session.conf")
   # bus-test expects a non empty string
   set (DBUS_USER "Administrator")
 else (WIN32)
-  set (DBUS_SYSTEM_BUS_DEFAULT_ADDRESS "unix:tmpdir=" CACHE STRING "system bus default address")
-  set (DBUS_SESSION_BUS_DEFAULT_ADDRESS "unix:path=${DBUS_SESSION_SOCKET_DIR}" CACHE STRING "session bus default address")
+  set (DBUS_SESSION_BUS_LISTEN_ADDRESS "unix:tmpdir=${DBUS_SESSION_SOCKET_DIR}" CACHE STRING "session bus default listening address")
+  set (DBUS_SESSION_BUS_CONNECT_ADDRESS "autolaunch:" CACHE STRING "session bus fallback address for clients")
   set (sysconfdir "")
   set (configdir ${sysconfdir}/dbus-1 )
   set (DBUS_SYSTEM_CONFIG_FILE  ${configdir}/system.conf)
@@ -487,7 +478,9 @@ set(DBUS_INTERNAL_LIBRARIES dbus-internal)
 # important note: DBUS_INTERNAL_xxxxx_DEFINITIONS must *not* be set when building dbus-1 library
 set (DBUS_INTERNAL_ADD_LIBRARY_OPTIONS STATIC)
 set (DBUS_INTERNAL_LIBRARY_DEFINITIONS "-DDBUS_STATIC_BUILD")
-set (DBUS_INTERNAL_CLIENT_DEFINITIONS "-DDBUS_STATIC_BUILD")
+# For now, the CMake build system doesn't support replacing the internal
+# main loop with dbus-glib
+set (DBUS_INTERNAL_CLIENT_DEFINITIONS "-DDBUS_STATIC_BUILD -DDBUS_COMPILATION -DDBUS_TEST_USE_INTERNAL")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 
@@ -526,7 +519,6 @@ message("        install exec_prefix:      ${exec_prefix}                      "
 message("        install libdir:           ${EXPANDED_LIBDIR}                  ")
 message("        install bindir:           ${EXPANDED_BINDIR}                  ")
 message("        install sysconfdir:       ${EXPANDED_SYSCONFDIR}              ")
-#message("        install localstatedir:    ${EXPANDED_LOCALSTATEDIR}           ")
 message("        install datadir:          ${EXPANDED_DATADIR}                 ")
 message("        source code location:     ${DBUS_SOURCE_DIR}                  ")
 message("        build dir:                ${CMAKE_BINARY_DIR}                 ")
@@ -545,27 +537,23 @@ message("        Doxygen:                  ${DOXYGEN}                          "
 message("        Docbook Generator:        ${DOCBOOK_GENERATOR_NAME}           ")
 
 
-#message("        Maintainer mode:          ${USE_MAINTAINER_MODE}              ")
 message("        gcc coverage profiling:   ${DBUS_GCOV_ENABLED}                ")
 message("        Building unit tests:      ${DBUS_BUILD_TESTS}                 ")
 message("        Building verbose mode:    ${DBUS_ENABLE_VERBOSE_MODE}         ")
-message("        Building w/o assertions:  ${DBUS_DISABLE_ASSERTS}             ")
+message("        Building w/o assertions:  ${DBUS_DISABLE_ASSERT}             ")
 message("        Building w/o checks:      ${DBUS_DISABLE_CHECKS}              ")
 message("        Building bus stats API:   ${DBUS_ENABLE_STATS}                ")
 message("        installing system libs:   ${DBUS_INSTALL_SYSTEM_LIBS}         ")
-#message("        Building SELinux support: ${have_selinux}                     ")
-#message("        Building dnotify support: ${have_dnotify}                     ")
+message("        Building inotify support: ${DBUS_BUS_ENABLE_INOTIFY}          ")
+message("        Building kqueue support: ${DBUS_BUS_ENABLE_KQUEUE}            ")
 message("        Building Doxygen docs:    ${DBUS_ENABLE_DOXYGEN_DOCS}         ")
 message("        Building XML docs:        ${DBUS_ENABLE_XML_DOCS}             ")
-#message("        Gettext libs (empty OK):  ${INTLLIBS}                         ")
-message("        Using XML parser:         ${XML_LIB}                          ")
 message("        Daemon executable name:   ${DBUS_DAEMON_NAME}")
 if (WIN32)
 message("        System bus address:       ${DBUS_SYSTEM_BUS_DEFAULT_ADDRESS}  ")
-message("        Session bus address:      ${DBUS_SESSION_BUS_DEFAULT_ADDRESS} ")
+message("        Session bus listens on:   ${DBUS_SESSION_BUS_LISTEN_ADDRESS} ")
+message("        Session clients connect to: ${DBUS_SESSION_BUS_CONNECT_ADDRESS} ")
 else (WIN32)
-#message("        Init scripts style:       ${with_init_scripts}                ")
-#message("        Abstract socket names:    ${have_abstract_sockets}            ")
 message("        System bus socket:        ${DBUS_SYSTEM_SOCKET}               ")
 message("        System bus address:       ${DBUS_SYSTEM_BUS_DEFAULT_ADDRESS}  ")
 message("        System bus PID file:      ${DBUS_SYSTEM_PID_FILE}             ")
@@ -584,9 +572,9 @@ if (DBUS_BUILD_TESTS)
     message("NOTE: building with unit tests increases the size of the installed library and renders it insecure.")
 endif(DBUS_BUILD_TESTS)
 
-if (DBUS_BUILD_TESTS AND DBUS_DISABLE_ASSERTS)
+if (DBUS_BUILD_TESTS AND DBUS_DISABLE_ASSERT)
     message("NOTE: building with unit tests but without assertions means tests may not properly report failures (this configuration is only useful when doing something like profiling the tests)")
-endif(DBUS_BUILD_TESTS AND DBUS_DISABLE_ASSERTS)
+endif(DBUS_BUILD_TESTS AND DBUS_DISABLE_ASSERT)
 
 if (DBUS_GCOV_ENABLED)
     message("NOTE: building with coverage profiling is definitely for developers only.")
@@ -596,9 +584,9 @@ if (DBUS_ENABLE_VERBOSE_MODE)
     message("NOTE: building with verbose mode increases library size, may slightly increase security risk, and decreases performance.")
 endif(DBUS_ENABLE_VERBOSE_MODE)
 
-if(NOT DBUS_DISABLE_ASSERTS)
+if(NOT DBUS_DISABLE_ASSERT)
     message("NOTE: building with assertions increases library size and decreases performance.")
-endif(NOT DBUS_DISABLE_ASSERTS)
+endif(NOT DBUS_DISABLE_ASSERT)
 
 if (DBUS_DISABLE_CHECKS)
     message("NOTE: building without checks for arguments passed to public API makes it harder to debug apps using D-BUS, but will slightly decrease D-BUS library size and _very_ slightly improve performance.")

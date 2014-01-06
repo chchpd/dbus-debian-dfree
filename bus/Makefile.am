@@ -42,12 +42,7 @@ agentdir=$(LAUNCHD_AGENT_DIR)
 agent_DATA=org.freedesktop.dbus-session.plist
 endif
 
-if DBUS_USE_LIBXML
-XML_SOURCES=config-loader-libxml.c
-endif
-if DBUS_USE_EXPAT
 XML_SOURCES=config-loader-expat.c
-endif
 
 if DBUS_BUS_ENABLE_KQUEUE
 DIR_WATCH_SOURCE=dir-watch-kqueue.c
@@ -55,11 +50,7 @@ else
 if DBUS_BUS_ENABLE_INOTIFY
 DIR_WATCH_SOURCE=dir-watch-inotify.c
 else
-if DBUS_BUS_ENABLE_DNOTIFY_ON_LINUX
-DIR_WATCH_SOURCE=dir-watch-dnotify.c
-else
 DIR_WATCH_SOURCE=dir-watch-default.c
-endif
 endif
 endif
 
@@ -173,7 +164,7 @@ endif DBUS_UNIX
 ## compiled, so we don't put them in TESTS here; we run them in test/
 ## instead.
 
-if DBUS_BUILD_TESTS
+if DBUS_ENABLE_EMBEDDED_TESTS
 ## we use noinst_PROGRAMS not check_PROGRAMS so that we build
 ## even when not doing "make check"
 
@@ -187,7 +178,7 @@ noinst_PROGRAMS += bus-test-launch-helper
 noinst_PROGRAMS += dbus-daemon-launch-helper-test
 endif DBUS_UNIX
 
-endif DBUS_BUILD_TESTS
+endif DBUS_ENABLE_EMBEDDED_TESTS
 
 bus_test_system_SOURCES=			\
 	$(XML_SOURCES)				\

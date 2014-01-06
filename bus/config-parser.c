@@ -30,6 +30,7 @@
 #include "selinux.h"
 #include <dbus/dbus-list.h>
 #include <dbus/dbus-internals.h>
+#include <dbus/dbus-misc.h>
 #include <dbus/dbus-sysdeps.h>
 #include <string.h>
 
@@ -323,7 +324,14 @@ merge_included (BusConfigParser *parser,
       parser->pidfile = included->pidfile;
       included->pidfile = NULL;
     }
-  
+
+  if (included->servicehelper != NULL)
+    {
+      dbus_free (parser->servicehelper);
+      parser->servicehelper = included->servicehelper;
+      included->servicehelper = NULL;
+    }
+
   while ((link = _dbus_list_pop_first_link (&included->listen_on)))
     _dbus_list_append_link (&parser->listen_on, link);
 
@@ -413,9 +421,9 @@ bus_config_parser_new (const DBusString      *basedir,
       maximum number of file descriptors we can receive. Picking a
       high value here thus translates directly to more memory
       allocation. */
-      parser->limits.max_incoming_unix_fds = 1024*4;
-      parser->limits.max_outgoing_unix_fds = 1024*4;
-      parser->limits.max_message_unix_fds = 1024;
+      parser->limits.max_incoming_unix_fds = DBUS_DEFAULT_MESSAGE_UNIX_FDS*4;
+      parser->limits.max_outgoing_unix_fds = DBUS_DEFAULT_MESSAGE_UNIX_FDS*4;
+      parser->limits.max_message_unix_fds = DBUS_DEFAULT_MESSAGE_UNIX_FDS;
       
       /* Making this long means the user has to wait longer for an error
        * message if something screws up, but making it too short means
@@ -2735,7 +2743,7 @@ bus_config_parser_steal_service_context_table (BusConfigParser *parser)
   return table;
 }
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 #include <stdio.h>
 
 typedef enum
@@ -3410,10 +3418,10 @@ test_default_session_servicedirs (void)
     }
 
 #ifdef DBUS_UNIX
-  if (!_dbus_setenv ("XDG_DATA_HOME", "/testhome/foo/.testlocal/testshare"))
+  if (!dbus_setenv ("XDG_DATA_HOME", "/testhome/foo/.testlocal/testshare"))
     _dbus_assert_not_reached ("couldn't setenv XDG_DATA_HOME");
 
-  if (!_dbus_setenv ("XDG_DATA_DIRS", ":/testusr/testlocal/testshare: :/testusr/testshare:"))
+  if (!dbus_setenv ("XDG_DATA_DIRS", ":/testusr/testlocal/testshare: :/testusr/testshare:"))
     _dbus_assert_not_reached ("couldn't setenv XDG_DATA_DIRS");
 #endif
   if (!_dbus_get_standard_session_servicedirs (&dirs))
@@ -3543,10 +3551,10 @@ test_default_system_servicedirs (void)
     }
 
 #ifdef DBUS_UNIX
-  if (!_dbus_setenv ("XDG_DATA_HOME", "/testhome/foo/.testlocal/testshare"))
+  if (!dbus_setenv ("XDG_DATA_HOME", "/testhome/foo/.testlocal/testshare"))
     _dbus_assert_not_reached ("couldn't setenv XDG_DATA_HOME");
 
-  if (!_dbus_setenv ("XDG_DATA_DIRS", ":/testusr/testlocal/testshare: :/testusr/testshare:"))
+  if (!dbus_setenv ("XDG_DATA_DIRS", ":/testusr/testlocal/testshare: :/testusr/testshare:"))
     _dbus_assert_not_reached ("couldn't setenv XDG_DATA_DIRS");
 #endif
   if (!_dbus_get_standard_system_servicedirs (&dirs))
@@ -3629,5 +3637,5 @@ bus_config_parser_test (const DBusString *test_data_dir)
   return TRUE;
 }
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 

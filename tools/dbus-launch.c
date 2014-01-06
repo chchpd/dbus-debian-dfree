@@ -105,6 +105,7 @@ save_machine_uuid (const char *uuid_arg)
   machine_uuid = xstrdup (uuid_arg);
 }
 
+#ifdef DBUS_BUILD_X11
 #define UUID_MAXLEN 40
 /* Read the machine uuid from file if needed. Returns TRUE if machine_uuid is
  * set after this function */
@@ -131,7 +132,7 @@ read_machine_uuid_if_needed (void)
     goto out;
 
   /* rstrip the read uuid */
-  while (len > 31 && isspace(uuid[len - 1]))
+  while (len > 31 && isspace((int) uuid[len - 1]))
     len--;
 
   if (len != 32)
@@ -146,12 +147,13 @@ out:
   fclose(f);
   return ret;
 }
-
+#endif /* DBUS_BUILD_X11 */
 
 void
 verbose (const char *format,
          ...)
 {
+#ifdef DBUS_ENABLE_VERBOSE_MODE
   va_list args;
   static int verbose = TRUE;
   static int verbose_initted = FALSE;
@@ -176,12 +178,16 @@ verbose (const char *format,
   va_start (args, format);
   vfprintf (stderr, format, args);
   va_end (args);
+#endif /* DBUS_ENABLE_VERBOSE_MODE */
 }
 
 static void
 usage (int ecode)
 {
-  fprintf (stderr, "dbus-launch [--version] [--help] [--sh-syntax] [--csh-syntax] [--auto-syntax] [--exit-with-session]\n");
+  fprintf (stderr, "dbus-launch [--version] [--help] [--sh-syntax]"
+           " [--csh-syntax] [--auto-syntax] [--binary-syntax] [--close-stderr]"
+           " [--exit-with-session] [--autolaunch=MACHINEID]"
+           " [--config-file=FILENAME] [PROGRAM] [ARGS...]\n");
   exit (ecode);
 }
 
@@ -214,6 +220,26 @@ xstrdup (const char *str)
   memcpy (copy, str, len + 1);
   
   return copy;
+}
+
+static char *
+concat2 (const char *a,
+    const char *b)
+{
+  size_t la, lb;
+  char *ret;
+
+  la = strlen (a);
+  lb = strlen (b);
+
+  ret = malloc (la + lb + 1);
+
+  if (ret == NULL)
+    return NULL;
+
+  memcpy (ret, a, la);
+  memcpy (ret + la, b, lb + 1);
+  return ret;
 }
 
 typedef enum
@@ -445,9 +471,7 @@ signal_handler (int sig)
 {
   switch (sig)
     {
-#ifdef SIGHUP
     case SIGHUP:
-#endif
     case SIGINT:
     case SIGTERM:
       got_sighup = TRUE;
@@ -755,31 +779,35 @@ pass_info (const char *runprog, const char *bus_address, pid_t bus_pid,
       if (envvar == NULL || args == NULL)
         goto oom;
 
-     args[0] = xstrdup (runprog);
+      args[0] = xstrdup (runprog);
       if (!args[0])
         goto oom;
-     for (i = 1; i <= (argc-remaining_args); i++)
-      {
-        size_t len = strlen (argv[remaining_args+i-1])+1;
-        args[i] = malloc (len);
-        if (!args[i])
-          goto oom;
-        strncpy (args[i], argv[remaining_args+i-1], len);
-       }
-     args[i] = NULL;
+      for (i = 1; i <= (argc-remaining_args); i++)
+        {
+          size_t len = strlen (argv[remaining_args+i-1])+1;
+          args[i] = malloc (len);
+          if (!args[i])
+	    {
+              while (i > 1)
+                free (args[--i]);
+              goto oom;
+	    }
+          strncpy (args[i], argv[remaining_args+i-1], len);
+        }
+      args[i] = NULL;
 
-     strcpy (envvar, "DBUS_SESSION_BUS_ADDRESS=");
-     strcat (envvar, bus_address);
-     putenv (envvar);
+      strcpy (envvar, "DBUS_SESSION_BUS_ADDRESS=");
+      strcat (envvar, bus_address);
+      putenv (envvar);
 
-     execvp (runprog, args);
-     fprintf (stderr, "Couldn't exec %s: %s\n", runprog, strerror (errno));
-     exit (1);
+      execvp (runprog, args);
+      fprintf (stderr, "Couldn't exec %s: %s\n", runprog, strerror (errno));
+      exit (1);
     }
    else
     {
       print_variables (bus_address, bus_pid, bus_wid, c_shell_syntax,
-         bourne_shell_syntax, binary_syntax);
+          bourne_shell_syntax, binary_syntax);
     }
   verbose ("dbus-launch exiting\n");
 
@@ -1100,24 +1128,41 @@ main (int argc, char **argv)
 
       verbose ("Calling exec()\n");
  
-#ifdef DBUS_BUILD_TESTS 
-      /* exec from testdir */
-      if (getenv("DBUS_USE_TEST_BINARY") != NULL)
-        {
-          execl (TEST_BUS_BINARY,
-                 TEST_BUS_BINARY,
-                 "--fork",
-                 "--print-pid", write_pid_fd_as_string,
-                 "--print-address", write_address_fd_as_string,
-                 config_file ? "--config-file" : "--session",
-                 config_file, /* has to be last in this varargs list */
-                 NULL); 
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
+      {
+        const char *test_daemon;
+        /* exec from testdir */
+        if (getenv ("DBUS_USE_TEST_BINARY") != NULL &&
+            (test_daemon = getenv ("DBUS_TEST_DAEMON")) != NULL)
+          {
+            if (config_file == NULL && getenv ("DBUS_TEST_DATA") != NULL)
+              {
+                config_file = concat2 (getenv ("DBUS_TEST_DATA"),
+                    "/valid-config-files/session.conf");
 
-          fprintf (stderr,
-                   "Failed to execute test message bus daemon %s: %s. Will try again with the system path.\n",
-                   TEST_BUS_BINARY, strerror (errno));
-        }
- #endif /* DBUS_BUILD_TESTS */
+                if (config_file == NULL)
+                  {
+                    fprintf (stderr, "Out of memory\n");
+                    exit (1);
+                  }
+              }
+
+            execl (test_daemon,
+                   test_daemon,
+                   "--fork",
+                   "--print-pid", write_pid_fd_as_string,
+                   "--print-address", write_address_fd_as_string,
+                   config_file ? "--config-file" : "--session",
+                   config_file, /* has to be last in this varargs list */
+                   NULL);
+
+            fprintf (stderr,
+                     "Failed to execute test message bus daemon %s: %s.\n",
+                     test_daemon, strerror (errno));
+            exit (1);
+          }
+      }
+ #endif /* DBUS_ENABLE_EMBEDDED_TESTS */
 
       execl (DBUS_DAEMONDIR"/dbus-daemon",
              DBUS_DAEMONDIR"/dbus-daemon",
@@ -1162,7 +1207,6 @@ main (int argc, char **argv)
       char *end;
       long wid = 0;
       long val;
-      int ret2;
 
       verbose ("=== Parent dbus-launch continues\n");
       
@@ -1236,6 +1280,8 @@ main (int argc, char **argv)
 #ifdef DBUS_ENABLE_X11_AUTOLAUNCH
       if (xdisplay != NULL)
         {
+          int ret2;
+
           verbose("Saving x11 address\n");
           ret2 = x11_save_address (bus_address, bus_pid, &wid);
           /* Only get an existing dbus session when autolaunching */

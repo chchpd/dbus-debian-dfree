@@ -1289,6 +1289,10 @@ handle_servicehelper_exit_error (int        exit_code,
 {
   switch (exit_code)
     {
+    case BUS_SPAWN_EXIT_CODE_CONFIG_INVALID:
+      dbus_set_error (error, DBUS_ERROR_SPAWN_CONFIG_INVALID,
+		      "Invalid configuration (missing or empty <user>?)");
+      break;
     case BUS_SPAWN_EXIT_CODE_NO_MEMORY:
       dbus_set_error (error, DBUS_ERROR_NO_MEMORY,
                       "Launcher could not run (out of memory)");
@@ -1325,6 +1329,7 @@ handle_servicehelper_exit_error (int        exit_code,
       dbus_set_error (error, DBUS_ERROR_SPAWN_CHILD_SIGNALED,
                       "Launched child was signaled, it probably crashed");
       break;
+    case BUS_SPAWN_EXIT_CODE_GENERIC_FAILURE:
     default:
       dbus_set_error (error, DBUS_ERROR_SPAWN_CHILD_EXITED,
                       "Launch helper exited with unknown return code %i", exit_code);
@@ -2099,7 +2104,9 @@ bus_activation_activate_service (BusActivation  *activation,
 
   dbus_error_init (&tmp_error);
 
-  if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter, argv,
+  if (!_dbus_spawn_async_with_babysitter (&pending_activation->babysitter,
+                                          service_name,
+                                          argv,
                                           envp,
                                           NULL, activation,
                                           &tmp_error))
@@ -2232,7 +2239,7 @@ dbus_activation_systemd_failure (BusActivation *activation,
   return TRUE;
 }
 
-#ifdef DBUS_BUILD_TESTS
+#ifdef DBUS_ENABLE_EMBEDDED_TESTS
 
 #include <stdio.h>
 
@@ -2539,11 +2546,17 @@ dbus_bool_t
 bus_activation_service_reload_test (const DBusString *test_data_dir)
 {
   DBusString directory;
+  const char *tmp;
 
   if (!_dbus_string_init (&directory))
     return FALSE;
 
-  if (!_dbus_string_append (&directory, _dbus_get_tmpdir()))
+  tmp = _dbus_get_tmpdir ();
+
+  if (tmp == NULL)
+    return FALSE;
+
+  if (!_dbus_string_append (&directory, tmp))
     return FALSE;
 
   if (!_dbus_string_append (&directory, "/dbus-reload-test-") ||
@@ -2579,4 +2592,4 @@ bus_activation_service_reload_test (const DBusString *test_data_dir)
   return TRUE;
 }
 
-#endif /* DBUS_BUILD_TESTS */
+#endif /* DBUS_ENABLE_EMBEDDED_TESTS */

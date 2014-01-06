@@ -29,15 +29,15 @@ FOREACH(FILE ${FILES})
 	configure_file(${FILE} ${TARGET} )
 ENDFOREACH(FILE)
 
-if(DBUS_USE_EXPAT)
-    SET (XML_SOURCES ${BUS_DIR}/config-loader-expat.c)
-else(DBUS_USE_EXPAT)
-    SET (XML_SOURCES ${BUS_DIR}/config-loader-libxml.c)
-endif (DBUS_USE_EXPAT)
+SET (XML_SOURCES ${BUS_DIR}/config-loader-expat.c)
 
-# after next cvs update
-#set (DIR_WATCH_SOURCE ${BUS_DIR}/dir-watch-default.c)
-set (DIR_WATCH_SOURCE )
+if (DBUS_BUS_ENABLE_INOTIFY)
+    set (DIR_WATCH_SOURCE ${BUS_DIR}/dir-watch-inotify.c)
+elseif (DBUS_BUS_ENABLE_KQUEUE)
+    set (DIR_WATCH_SOURCE ${BUS_DIR}/dir-watch-kqueue.c)
+else (DBUS_BUS_ENABLE_INOTIFY)
+    set (DIR_WATCH_SOURCE ${BUS_DIR}/dir-watch-default.c)
+endif (DBUS_BUS_ENABLE_INOTIFY)
 
 set (BUS_SOURCES 
 	${BUS_DIR}/activation.c				
@@ -46,14 +46,13 @@ set (BUS_SOURCES
 	${BUS_DIR}/bus.h					
 	${BUS_DIR}/config-parser.c				
 	${BUS_DIR}/config-parser.h
-    ${BUS_DIR}/config-parser-common.c
-    ${BUS_DIR}/config-parser-common.h
+	${BUS_DIR}/config-parser-common.c
+	${BUS_DIR}/config-parser-common.h
 #    ${BUS_DIR}/config-parser-trivial.c
 	${BUS_DIR}/connection.c
 	${BUS_DIR}/connection.h				
 	${BUS_DIR}/desktop-file.c				
 	${BUS_DIR}/desktop-file.h				
-	${BUS_DIR}/dir-watch-default.c				
 	${BUS_DIR}/dir-watch.h				
 	${BUS_DIR}/dispatch.c				
 	${BUS_DIR}/dispatch.h				
@@ -81,7 +80,7 @@ if(DBUS_ENABLE_STATS)
 		${BUS_DIR}/stats.c
 		${BUS_DIR}/stats.h
 	)
-endif()
+endif(DBUS_ENABLE_STATS)
 
 include_directories(${XML_INCLUDE_DIR})
 
@@ -108,12 +107,12 @@ if (DBUS_SERVICE)
 	install_targets(/bin dbus-service )
 endif (DBUS_SERVICE)
 
-if (DBUS_BUILD_TESTS)	
+if (DBUS_ENABLE_EMBEDDED_TESTS)
 	add_executable(bus-test ${BUS_SOURCES} ${BUS_DIR}/test-main.c)
 	target_link_libraries(bus-test ${DBUS_INTERNAL_LIBRARIES} ${XML_LIBRARY})
 	set_target_properties(bus-test PROPERTIES COMPILE_FLAGS ${DBUS_INTERNAL_CLIENT_DEFINITIONS})
 	add_test(bus-test ${EXECUTABLE_OUTPUT_PATH}/bus-test ${CMAKE_BINARY_DIR}/test/data)
-endif (DBUS_BUILD_TESTS)
+endif (DBUS_ENABLE_EMBEDDED_TESTS)
 
 if(MSVC)
 	project_source_group(${GROUP_CODE} bus_test_SOURCES dummy)
