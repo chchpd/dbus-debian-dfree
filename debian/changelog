@@ -1,6 +1,7 @@
-dbus (1.7.8-2) UNRELEASED; urgency=medium
+dbus (1.7.10-1) UNRELEASED; urgency=low
 
   * Merge from experimental into unstable
+  * New upstream release 1.7.10 (1.8 rc1)
 
  -- Simon McVittie <smcv@debian.org>  Mon, 06 Jan 2014 19:08:53 +0000
 
