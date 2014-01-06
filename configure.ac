@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [7])
-m4_define([dbus_micro_version], [8])
+m4_define([dbus_micro_version], [10])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -894,8 +894,6 @@ fi
 # unix:path=/foo or unix:abstract=/foo
 AC_SUBST(DBUS_PATH_OR_ABSTRACT)
 
-PKG_PROG_PKG_CONFIG
-
 #### Sort out XML library
 
 AC_CHECK_LIB(expat, XML_ParserCreate_MM,
@@ -1499,7 +1497,7 @@ AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service
 if test "x$with_systemdsystemunitdir" != xno; then
    AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
 fi
-AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
+AM_CONDITIONAL(HAVE_SYSTEMD, [test "x$have_systemd" != "xno" -a -n "$with_systemdsystemunitdir" -a "x$with_systemdsystemunitdir" != xno ])
 
 ##### Set up location for system bus socket
 if ! test -z "$with_system_socket"; then

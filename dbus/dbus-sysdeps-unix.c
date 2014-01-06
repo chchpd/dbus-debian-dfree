@@ -999,7 +999,6 @@ _dbus_listen_unix_socket (const char     *path,
   int listen_fd;
   struct sockaddr_un addr;
   size_t path_len;
-  unsigned int reuseaddr;
 
   _DBUS_ASSERT_ERROR_IS_CLEAR (error);
 
@@ -1072,13 +1071,6 @@ _dbus_listen_unix_socket (const char     *path,
 	}
 
       strncpy (addr.sun_path, path, path_len);
-    }
-
-  reuseaddr = 1;
-  if (setsockopt  (listen_fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(reuseaddr))==-1)
-    {
-      _dbus_warn ("Failed to set socket option\"%s\": %s",
-                  path, _dbus_strerror (errno));
     }
 
   if (bind (listen_fd, (struct sockaddr*) &addr, _DBUS_STRUCT_OFFSET (struct sockaddr_un, sun_path) + path_len) < 0)
@@ -1572,13 +1564,19 @@ write_credentials_byte (int             server_fd,
                            |MSG_NOSIGNAL
 #endif
                            );
-#else
-  bytes_written = send (server_fd, buf, 1, 0
+
+  /* If we HAVE_CMSGCRED, the OS still might not let us sendmsg()
+   * with a SOL_SOCKET/SCM_CREDS message - for instance, FreeBSD
+   * only allows that on AF_UNIX. Try just doing a send() instead. */
+  if (bytes_written < 0 && errno == EINVAL)
+#endif
+    {
+      bytes_written = send (server_fd, buf, 1, 0
 #if HAVE_DECL_MSG_NOSIGNAL
-                        |MSG_NOSIGNAL
+                            |MSG_NOSIGNAL
 #endif
-                        );
-#endif
+                            );
+    }
 
   if (bytes_written < 0 && errno == EINTR)
     goto again;
@@ -1706,16 +1704,6 @@ _dbus_read_credentials_socket  (int              client_fd,
       return FALSE;
     }
 
-#if defined(HAVE_CMSGCRED)
-  if (cmsg.hdr.cmsg_len < CMSG_LEN (sizeof (struct cmsgcred))
-		  || cmsg.hdr.cmsg_type != SCM_CREDS)
-    {
-      dbus_set_error (error, DBUS_ERROR_FAILED,
-                      "Message from recvmsg() was not SCM_CREDS");
-      return FALSE;
-    }
-#endif
-
   _dbus_verbose ("read credentials byte\n");
 
   {
@@ -1756,10 +1744,22 @@ _dbus_read_credentials_socket  (int              client_fd,
      * which makes it better than getpeereid().
      */
     struct cmsgcred *cred;
+    struct cmsghdr *cmsgp;
 
-    cred = (struct cmsgcred *) CMSG_DATA (&cmsg.hdr);
-    pid_read = cred->cmcred_pid;
-    uid_read = cred->cmcred_euid;
+    for (cmsgp = CMSG_FIRSTHDR (&msg);
+         cmsgp != NULL;
+         cmsgp = CMSG_NXTHDR (&msg, cmsgp))
+      {
+        if (cmsgp->cmsg_type == SCM_CREDS &&
+            cmsgp->cmsg_level == SOL_SOCKET &&
+            cmsgp->cmsg_len >= CMSG_LEN (sizeof (struct cmsgcred)))
+          {
+            cred = (struct cmsgcred *) CMSG_DATA (cmsgp);
+            pid_read = cred->cmcred_pid;
+            uid_read = cred->cmcred_euid;
+            break;
+          }
+      }
 
 #elif defined(HAVE_GETPEERUCRED)
     /* Supported in at least Solaris >= 10. It should probably be higher
@@ -1996,6 +1996,16 @@ _dbus_check_dir_is_private_to_user (DBusString *dir, DBusError *error)
       dbus_set_error (error, _dbus_error_from_errno (errno),
                       "%s", _dbus_strerror (errno));
 
+      return FALSE;
+    }
+
+  if (sb.st_uid != geteuid ())
+    {
+      dbus_set_error (error, DBUS_ERROR_FAILED,
+                     "%s directory is owned by user %lu, not %lu",
+                     directory,
+                     (unsigned long) sb.st_uid,
+                     (unsigned long) geteuid ());
       return FALSE;
     }
 
@@ -4050,6 +4060,7 @@ _dbus_append_address_from_socket (int         fd,
   } socket;
   char hostip[INET6_ADDRSTRLEN];
   int size = sizeof (socket);
+  DBusString path_str;
 
   if (getsockname (fd, &socket.sa, &size))
     goto err;
@@ -4059,26 +4070,32 @@ _dbus_append_address_from_socket (int         fd,
     case AF_UNIX:
       if (socket.un.sun_path[0]=='\0')
         {
-          if (_dbus_string_append_printf (address, "unix:abstract=%s", &(socket.un.sun_path[1])))
+          _dbus_string_init_const (&path_str, &(socket.un.sun_path[1]));
+          if (_dbus_string_append (address, "unix:abstract=") &&
+              _dbus_address_append_escaped (address, &path_str))
             return TRUE;
         }
       else
         {
-          if (_dbus_string_append_printf (address, "unix:path=%s", socket.un.sun_path))
+          _dbus_string_init_const (&path_str, socket.un.sun_path);
+          if (_dbus_string_append (address, "unix:path=") &&
+              _dbus_address_append_escaped (address, &path_str))
             return TRUE;
         }
       break;
     case AF_INET:
       if (inet_ntop (AF_INET, &socket.ipv4.sin_addr, hostip, sizeof (hostip)))
         if (_dbus_string_append_printf (address, "tcp:family=ipv4,host=%s,port=%u",
-                   hostip, ntohs (socket.ipv4.sin_port)))
+                                        hostip, ntohs (socket.ipv4.sin_port)))
           return TRUE;
       break;
 #ifdef AF_INET6
     case AF_INET6:
+      _dbus_string_init_const (&path_str, hostip);
       if (inet_ntop (AF_INET6, &socket.ipv6.sin6_addr, hostip, sizeof (hostip)))
-        if (_dbus_string_append_printf (address, "tcp:family=ipv6,host=%s,port=%u",
-                   hostip, ntohs (socket.ipv6.sin6_port)))
+        if (_dbus_string_append_printf (address, "tcp:family=ipv6,port=%u,host=",
+                                        ntohs (socket.ipv6.sin6_port)) &&
+            _dbus_address_append_escaped (address, &path_str))
           return TRUE;
       break;
 #endif
