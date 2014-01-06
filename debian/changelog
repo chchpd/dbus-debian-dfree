@@ -1,11 +1,11 @@
-dbus (1.7.10-1) UNRELEASED; urgency=low
+dbus (1.7.10-1) unstable; urgency=low
 
   * Merge from experimental into unstable
   * New upstream release 1.7.10 (1.8 rc1)
   * Generate debian/dbus.install from a generic part and a Linux-specific
     part, since systemd metadata doesn't get installed on non-Linux any more
 
- -- Simon McVittie <smcv@debian.org>  Mon, 06 Jan 2014 19:08:53 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 06 Jan 2014 19:43:36 +0000
 
 dbus (1.7.8-1) experimental; urgency=low
 
