@@ -90,6 +90,11 @@ debug_configure_flags += --with-valgrind
 endif
 
 override_dh_auto_configure:
+	cp debian/dbus.install-generic debian/dbus.install
+	if test -e debian/dbus.install-$(DEB_HOST_ARCH_OS); then \
+		cat debian/dbus.install-$(DEB_HOST_ARCH_OS) >> \
+			debian/dbus.install; \
+	fi
 	dh_auto_configure \
 		-- \
 		$(common_configure_flags) \

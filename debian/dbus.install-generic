@@ -14,8 +14,3 @@ debian/tmp/usr/share/man/man1/dbus-run-session.1
 debian/tmp/usr/share/man/man1/dbus-send.1
 debian/tmp/usr/share/man/man1/dbus-uuidgen.1
 debian/tmp/usr/share/man/man1/dbus-monitor.1
-debian/tmp/lib/systemd/system/dbus.service
-debian/tmp/lib/systemd/system/dbus.socket
-debian/tmp/lib/systemd/system/dbus.target.wants/dbus.socket
-debian/tmp/lib/systemd/system/multi-user.target.wants/dbus.service
-debian/tmp/lib/systemd/system/sockets.target.wants/dbus.socket
