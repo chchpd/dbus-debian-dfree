@@ -22,11 +22,21 @@ dh_options = \
 
 common_configure_flags := \
 		--disable-silent-rules \
-		--enable-libaudit \
 		--enable-installed-tests \
 		--libexecdir=\$${prefix}/lib/dbus-1.0 \
+		$(NULL)
+
+ifeq ($(filter stage1,$(DEB_BUILD_PROFILE)),)
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+# Non-bootstrap build on Linux: add Linux-specifics
+common_configure_flags += \
+		--enable-libaudit \
+		--enable-selinux \
+		--enable-systemd \
 		--with-systemdsystemunitdir=/lib/systemd/system \
 		$(NULL)
+endif
+endif
 
 normal_configure_flags := \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \

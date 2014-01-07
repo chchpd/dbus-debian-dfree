@@ -1,3 +1,11 @@
+dbus (1.7.10-2) unstable; urgency=low
+
+  * Conditionalize libaudit and libcap-ng build-dependencies to [linux-any]
+  * Explicitly enable libaudit, SELinux and systemd on Linux;
+    do not enable them elsewhere
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 07 Jan 2014 12:12:15 +0000
+
 dbus (1.7.10-1) unstable; urgency=low
 
   * Merge from experimental into unstable
