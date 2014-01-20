@@ -109,6 +109,11 @@ option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
 find_package(EXPAT)
 find_package(X11)
+find_package(GLib2)
+find_package(GObject)
+if(GLIB2_FOUND AND GOBJECT_FOUND)
+    option (DBUS_WITH_GLIB "build with glib" ON)
+endif()
 
 # analogous to AC_USE_SYSTEM_EXTENSIONS in configure.ac
 add_definitions(-D_GNU_SOURCE)
@@ -348,9 +353,8 @@ endif(X11_FOUND)
 
 # test binary names
 if (WIN32)
-	# Automake calls this EXEEXT, and CMake doesn't have a standard name
-	# for it; follow Automake's naming convention so we can share .in files
-	set (EXEEXT ".exe")
+    # follow Automake's naming convention so we can share .in files
+    set (EXEEXT ${CMAKE_EXECUTABLE_SUFFIX})
 endif(WIN32)
 
 if (MSVC_IDE)
@@ -463,6 +467,7 @@ if (DBUS_BUILD_TESTS)
     set(DBUS_TEST_DATA ${CMAKE_BINARY_DIR}/test/data)
     set(TEST_SOCKET_DIR ${DBUS_SESSION_SOCKET_DIR} )
     set(TEST_LAUNCH_HELPER_BINARY ${EXECUTABLE_OUTPUT_PATH}/dbus-daemon-launch-helper-test)
+    set(TEST_BUS_LAUNCH_BINARY ${EXECUTABLE_OUTPUT_PATH}/dbus-launch${EXEEXT})
     if (UNIX)
         set (TEST_LISTEN "unix:tmpdir=${TEST_SOCKET_DIR}")
     endif (UNIX)
@@ -539,6 +544,7 @@ message("        Docbook Generator:        ${DOCBOOK_GENERATOR_NAME}           "
 
 message("        gcc coverage profiling:   ${DBUS_GCOV_ENABLED}                ")
 message("        Building unit tests:      ${DBUS_BUILD_TESTS}                 ")
+message("        Building with GLib:       ${DBUS_WITH_GLIB}                   ")
 message("        Building verbose mode:    ${DBUS_ENABLE_VERBOSE_MODE}         ")
 message("        Building w/o assertions:  ${DBUS_DISABLE_ASSERT}              ")
 message("        Building w/o checks:      ${DBUS_DISABLE_CHECKS}              ")

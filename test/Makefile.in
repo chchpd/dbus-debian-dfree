@@ -86,12 +86,12 @@ host_triplet = @host@
 # same binary.
 @DBUS_WITH_DBUS_GLIB_TRUE@am__append_1 = libdbus-testutils.la
 @DBUS_ENABLE_EMBEDDED_TESTS_FALSE@TESTS = $(am__EXEEXT_8)
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@TESTS = ../bus/bus-test$(EXEEXT) \
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	../bus/bus-test-system$(EXEEXT) \
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	../dbus/dbus-test$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@TESTS = ../bus/test-bus$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	../bus/test-bus-system$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	../dbus/test-dbus$(EXEEXT) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	$(am__append_2) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	$(am__EXEEXT_8)
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_2 = ../bus/bus-test-launch-helper$(EXEEXT)
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_2 = ../bus/test-bus-launch-helper$(EXEEXT)
 noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_6)
 testexec_PROGRAMS = $(am__EXEEXT_7)
 @DBUS_WITH_GLIB_TRUE@am__append_3 = \
@@ -152,7 +152,7 @@ am__libdbus_testutils_la_SOURCES_DIST = test-utils.c test-utils.h
 @DBUS_WITH_DBUS_GLIB_TRUE@	test-utils.lo
 libdbus_testutils_la_OBJECTS = $(am_libdbus_testutils_la_OBJECTS)
 @DBUS_WITH_DBUS_GLIB_TRUE@am_libdbus_testutils_la_rpath =
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = spawn-test$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = test-spawn$(EXEEXT) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-exit$(EXEEXT) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-names$(EXEEXT) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-segfault$(EXEEXT) \
@@ -166,7 +166,7 @@ libdbus_testutils_la_OBJECTS = $(am_libdbus_testutils_la_OBJECTS)
 @DBUS_WITH_GLIB_TRUE@	test-marshal$(EXEEXT) test-refs$(EXEEXT) \
 @DBUS_WITH_GLIB_TRUE@	test-relay$(EXEEXT) test-syntax$(EXEEXT) \
 @DBUS_WITH_GLIB_TRUE@	test-syslog$(EXEEXT)
-am__EXEEXT_3 = shell-test$(EXEEXT) test-printf$(EXEEXT) \
+am__EXEEXT_3 = test-shell$(EXEEXT) test-printf$(EXEEXT) \
 	$(am__EXEEXT_2)
 @DBUS_WITH_GLIB_TRUE@am__EXEEXT_4 = manual-authz$(EXEEXT)
 am__EXEEXT_5 = $(am__EXEEXT_4)
@@ -180,12 +180,6 @@ am_manual_authz_OBJECTS = manual_authz-manual-authz.$(OBJEXT)
 manual_authz_OBJECTS = $(am_manual_authz_OBJECTS)
 manual_authz_DEPENDENCIES = $(testutils_shared_if_possible_libs) \
 	$(am__DEPENDENCIES_1)
-shell_test_SOURCES = shell-test.c
-shell_test_OBJECTS = shell_test-shell-test.$(OBJEXT)
-shell_test_DEPENDENCIES = libdbus-testutils-internal.la
-spawn_test_SOURCES = spawn-test.c
-spawn_test_OBJECTS = spawn_test-spawn-test.$(OBJEXT)
-spawn_test_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
 am_test_corrupt_OBJECTS = test_corrupt-corrupt.$(OBJEXT)
 test_corrupt_OBJECTS = $(am_test_corrupt_OBJECTS)
 test_corrupt_DEPENDENCIES = $(testutils_shared_if_possible_libs) \
@@ -231,6 +225,9 @@ test_segfault_LDADD = $(LDADD)
 test_service_SOURCES = test-service.c
 test_service_OBJECTS = test_service-test-service.$(OBJEXT)
 test_service_DEPENDENCIES = libdbus-testutils-internal.la
+am_test_shell_OBJECTS = test_shell-shell-test.$(OBJEXT)
+test_shell_OBJECTS = $(am_test_shell_OBJECTS)
+test_shell_DEPENDENCIES = libdbus-testutils-internal.la
 test_shell_service_SOURCES = test-shell-service.c
 test_shell_service_OBJECTS =  \
 	test_shell_service-test-shell-service.$(OBJEXT)
@@ -238,6 +235,9 @@ test_shell_service_DEPENDENCIES = libdbus-testutils-internal.la
 test_sleep_forever_SOURCES = test-sleep-forever.c
 test_sleep_forever_OBJECTS = test-sleep-forever.$(OBJEXT)
 test_sleep_forever_LDADD = $(LDADD)
+am_test_spawn_OBJECTS = test_spawn-spawn-test.$(OBJEXT)
+test_spawn_OBJECTS = $(am_test_spawn_OBJECTS)
+test_spawn_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la
 am_test_syntax_OBJECTS = syntax.$(OBJEXT)
 test_syntax_OBJECTS = $(am_test_syntax_OBJECTS)
 test_syntax_DEPENDENCIES = $(top_builddir)/dbus/libdbus-1.la \
@@ -282,23 +282,24 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libdbus_testutils_internal_la_SOURCES) \
 	$(libdbus_testutils_la_SOURCES) $(manual_authz_SOURCES) \
-	shell-test.c spawn-test.c $(test_corrupt_SOURCES) \
-	$(test_dbus_daemon_SOURCES) \
-	$(test_dbus_daemon_eavesdrop_SOURCES) test-exit.c \
-	$(test_loopback_SOURCES) $(test_marshal_SOURCES) test-names.c \
-	$(test_printf_SOURCES) $(test_refs_SOURCES) \
-	$(test_relay_SOURCES) test-segfault.c test-service.c \
-	test-shell-service.c test-sleep-forever.c \
-	$(test_syntax_SOURCES) $(test_syslog_SOURCES)
-DIST_SOURCES = $(libdbus_testutils_internal_la_SOURCES) \
-	$(am__libdbus_testutils_la_SOURCES_DIST) \
-	$(manual_authz_SOURCES) shell-test.c spawn-test.c \
 	$(test_corrupt_SOURCES) $(test_dbus_daemon_SOURCES) \
 	$(test_dbus_daemon_eavesdrop_SOURCES) test-exit.c \
 	$(test_loopback_SOURCES) $(test_marshal_SOURCES) test-names.c \
 	$(test_printf_SOURCES) $(test_refs_SOURCES) \
 	$(test_relay_SOURCES) test-segfault.c test-service.c \
-	test-shell-service.c test-sleep-forever.c \
+	$(test_shell_SOURCES) test-shell-service.c \
+	test-sleep-forever.c $(test_spawn_SOURCES) \
+	$(test_syntax_SOURCES) $(test_syslog_SOURCES)
+DIST_SOURCES = $(libdbus_testutils_internal_la_SOURCES) \
+	$(am__libdbus_testutils_la_SOURCES_DIST) \
+	$(manual_authz_SOURCES) $(test_corrupt_SOURCES) \
+	$(test_dbus_daemon_SOURCES) \
+	$(test_dbus_daemon_eavesdrop_SOURCES) test-exit.c \
+	$(test_loopback_SOURCES) $(test_marshal_SOURCES) test-names.c \
+	$(test_printf_SOURCES) $(test_refs_SOURCES) \
+	$(test_relay_SOURCES) test-segfault.c test-service.c \
+	$(test_shell_SOURCES) test-shell-service.c \
+	test-sleep-forever.c $(test_spawn_SOURCES) \
 	$(test_syntax_SOURCES) $(test_syslog_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
@@ -830,7 +831,7 @@ libdbus_testutils_internal_la_LIBADD = \
 
 @DBUS_ENABLE_EMBEDDED_TESTS_FALSE@TEST_BINARIES = 
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@TEST_BINARIES = \
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	spawn-test \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-spawn \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-exit \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-names \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-segfault \
@@ -845,10 +846,12 @@ test_names_CPPFLAGS = $(static_cppflags)
 test_names_LDADD = libdbus-testutils-internal.la
 test_shell_service_CPPFLAGS = $(static_cppflags)
 test_shell_service_LDADD = libdbus-testutils-internal.la
-shell_test_CPPFLAGS = $(static_cppflags)
-shell_test_LDADD = libdbus-testutils-internal.la
-spawn_test_CPPFLAGS = $(static_cppflags)
-spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+test_shell_SOURCES = shell-test.c
+test_shell_CPPFLAGS = $(static_cppflags)
+test_shell_LDADD = libdbus-testutils-internal.la
+test_spawn_SOURCES = spawn-test.c
+test_spawn_CPPFLAGS = $(static_cppflags)
+test_spawn_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 test_printf_SOURCES = internals/printf.c
 test_printf_CPPFLAGS = $(static_cppflags)
 test_printf_LDADD = $(top_builddir)/dbus/libdbus-internal.la
@@ -860,7 +863,7 @@ test_syslog_CPPFLAGS = $(static_cppflags)
 test_syslog_LDADD = libdbus-testutils-internal.la $(GLIB_LIBS)
 EXTRA_DIST = dbus-test-runner $(in_data) $(static_data)
 testexecdir = $(libdir)/dbus-1.0/test
-installable_tests = shell-test test-printf $(NULL) $(am__append_3)
+installable_tests = test-shell test-printf $(NULL) $(am__append_3)
 installable_manual_tests = $(NULL) $(am__append_4)
 installcheck_tests = $(am__append_6)
 installcheck_environment = \
@@ -871,7 +874,6 @@ installcheck_environment = \
 
 TESTS_ENVIRONMENT = \
 	XDG_RUNTIME_DIR=@abs_top_builddir@/test/XDG_RUNTIME_DIR \
-	DBUS_BLOCK_ON_ABORT=1 \
 	DBUS_FATAL_WARNINGS=1 \
 	DBUS_TEST_DAEMON=@abs_top_builddir@/bus/dbus-daemon$(EXEEXT) \
 	DBUS_TEST_DATA=@abs_top_builddir@/test/data \
@@ -1147,14 +1149,6 @@ manual-authz$(EXEEXT): $(manual_authz_OBJECTS) $(manual_authz_DEPENDENCIES) $(EX
 	@rm -f manual-authz$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(manual_authz_OBJECTS) $(manual_authz_LDADD) $(LIBS)
 
-shell-test$(EXEEXT): $(shell_test_OBJECTS) $(shell_test_DEPENDENCIES) $(EXTRA_shell_test_DEPENDENCIES) 
-	@rm -f shell-test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(shell_test_OBJECTS) $(shell_test_LDADD) $(LIBS)
-
-spawn-test$(EXEEXT): $(spawn_test_OBJECTS) $(spawn_test_DEPENDENCIES) $(EXTRA_spawn_test_DEPENDENCIES) 
-	@rm -f spawn-test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(spawn_test_OBJECTS) $(spawn_test_LDADD) $(LIBS)
-
 test-corrupt$(EXEEXT): $(test_corrupt_OBJECTS) $(test_corrupt_DEPENDENCIES) $(EXTRA_test_corrupt_DEPENDENCIES) 
 	@rm -f test-corrupt$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_corrupt_OBJECTS) $(test_corrupt_LDADD) $(LIBS)
@@ -1203,6 +1197,10 @@ test-service$(EXEEXT): $(test_service_OBJECTS) $(test_service_DEPENDENCIES) $(EX
 	@rm -f test-service$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_service_OBJECTS) $(test_service_LDADD) $(LIBS)
 
+test-shell$(EXEEXT): $(test_shell_OBJECTS) $(test_shell_DEPENDENCIES) $(EXTRA_test_shell_DEPENDENCIES) 
+	@rm -f test-shell$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_shell_OBJECTS) $(test_shell_LDADD) $(LIBS)
+
 test-shell-service$(EXEEXT): $(test_shell_service_OBJECTS) $(test_shell_service_DEPENDENCIES) $(EXTRA_test_shell_service_DEPENDENCIES) 
 	@rm -f test-shell-service$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_shell_service_OBJECTS) $(test_shell_service_LDADD) $(LIBS)
@@ -1210,6 +1208,10 @@ test-shell-service$(EXEEXT): $(test_shell_service_OBJECTS) $(test_shell_service_
 test-sleep-forever$(EXEEXT): $(test_sleep_forever_OBJECTS) $(test_sleep_forever_DEPENDENCIES) $(EXTRA_test_sleep_forever_DEPENDENCIES) 
 	@rm -f test-sleep-forever$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_sleep_forever_OBJECTS) $(test_sleep_forever_LDADD) $(LIBS)
+
+test-spawn$(EXEEXT): $(test_spawn_OBJECTS) $(test_spawn_DEPENDENCIES) $(EXTRA_test_spawn_DEPENDENCIES) 
+	@rm -f test-spawn$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_spawn_OBJECTS) $(test_spawn_LDADD) $(LIBS)
 
 test-syntax$(EXEEXT): $(test_syntax_OBJECTS) $(test_syntax_DEPENDENCIES) $(EXTRA_test_syntax_DEPENDENCIES) 
 	@rm -f test-syntax$(EXEEXT)
@@ -1228,8 +1230,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdbus_testutils_internal_la-test-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/manual_authz-manual-authz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/marshal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shell_test-shell-test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spawn_test-spawn-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syntax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-exit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-segfault.Po@am__quote@
@@ -1244,7 +1244,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_refs-refs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_relay-relay.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_service-test-service.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_shell-shell-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_shell_service-test-shell-service.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_spawn-spawn-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_syslog-syslog.Po@am__quote@
 
 .c.o:
@@ -1288,34 +1290,6 @@ manual_authz-manual-authz.obj: manual-authz.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='manual-authz.c' object='manual_authz-manual-authz.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(manual_authz_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o manual_authz-manual-authz.obj `if test -f 'manual-authz.c'; then $(CYGPATH_W) 'manual-authz.c'; else $(CYGPATH_W) '$(srcdir)/manual-authz.c'; fi`
-
-shell_test-shell-test.o: shell-test.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(shell_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT shell_test-shell-test.o -MD -MP -MF $(DEPDIR)/shell_test-shell-test.Tpo -c -o shell_test-shell-test.o `test -f 'shell-test.c' || echo '$(srcdir)/'`shell-test.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/shell_test-shell-test.Tpo $(DEPDIR)/shell_test-shell-test.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shell-test.c' object='shell_test-shell-test.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(shell_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o shell_test-shell-test.o `test -f 'shell-test.c' || echo '$(srcdir)/'`shell-test.c
-
-shell_test-shell-test.obj: shell-test.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(shell_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT shell_test-shell-test.obj -MD -MP -MF $(DEPDIR)/shell_test-shell-test.Tpo -c -o shell_test-shell-test.obj `if test -f 'shell-test.c'; then $(CYGPATH_W) 'shell-test.c'; else $(CYGPATH_W) '$(srcdir)/shell-test.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/shell_test-shell-test.Tpo $(DEPDIR)/shell_test-shell-test.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shell-test.c' object='shell_test-shell-test.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(shell_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o shell_test-shell-test.obj `if test -f 'shell-test.c'; then $(CYGPATH_W) 'shell-test.c'; else $(CYGPATH_W) '$(srcdir)/shell-test.c'; fi`
-
-spawn_test-spawn-test.o: spawn-test.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(spawn_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT spawn_test-spawn-test.o -MD -MP -MF $(DEPDIR)/spawn_test-spawn-test.Tpo -c -o spawn_test-spawn-test.o `test -f 'spawn-test.c' || echo '$(srcdir)/'`spawn-test.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/spawn_test-spawn-test.Tpo $(DEPDIR)/spawn_test-spawn-test.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='spawn-test.c' object='spawn_test-spawn-test.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(spawn_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o spawn_test-spawn-test.o `test -f 'spawn-test.c' || echo '$(srcdir)/'`spawn-test.c
-
-spawn_test-spawn-test.obj: spawn-test.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(spawn_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT spawn_test-spawn-test.obj -MD -MP -MF $(DEPDIR)/spawn_test-spawn-test.Tpo -c -o spawn_test-spawn-test.obj `if test -f 'spawn-test.c'; then $(CYGPATH_W) 'spawn-test.c'; else $(CYGPATH_W) '$(srcdir)/spawn-test.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/spawn_test-spawn-test.Tpo $(DEPDIR)/spawn_test-spawn-test.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='spawn-test.c' object='spawn_test-spawn-test.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(spawn_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o spawn_test-spawn-test.obj `if test -f 'spawn-test.c'; then $(CYGPATH_W) 'spawn-test.c'; else $(CYGPATH_W) '$(srcdir)/spawn-test.c'; fi`
 
 test_corrupt-corrupt.o: corrupt.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_corrupt_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_corrupt-corrupt.o -MD -MP -MF $(DEPDIR)/test_corrupt-corrupt.Tpo -c -o test_corrupt-corrupt.o `test -f 'corrupt.c' || echo '$(srcdir)/'`corrupt.c
@@ -1443,6 +1417,20 @@ test_service-test-service.obj: test-service.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_service_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_service-test-service.obj `if test -f 'test-service.c'; then $(CYGPATH_W) 'test-service.c'; else $(CYGPATH_W) '$(srcdir)/test-service.c'; fi`
 
+test_shell-shell-test.o: shell-test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_shell-shell-test.o -MD -MP -MF $(DEPDIR)/test_shell-shell-test.Tpo -c -o test_shell-shell-test.o `test -f 'shell-test.c' || echo '$(srcdir)/'`shell-test.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_shell-shell-test.Tpo $(DEPDIR)/test_shell-shell-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shell-test.c' object='test_shell-shell-test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_shell-shell-test.o `test -f 'shell-test.c' || echo '$(srcdir)/'`shell-test.c
+
+test_shell-shell-test.obj: shell-test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_shell-shell-test.obj -MD -MP -MF $(DEPDIR)/test_shell-shell-test.Tpo -c -o test_shell-shell-test.obj `if test -f 'shell-test.c'; then $(CYGPATH_W) 'shell-test.c'; else $(CYGPATH_W) '$(srcdir)/shell-test.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_shell-shell-test.Tpo $(DEPDIR)/test_shell-shell-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='shell-test.c' object='test_shell-shell-test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_shell-shell-test.obj `if test -f 'shell-test.c'; then $(CYGPATH_W) 'shell-test.c'; else $(CYGPATH_W) '$(srcdir)/shell-test.c'; fi`
+
 test_shell_service-test-shell-service.o: test-shell-service.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_service_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_shell_service-test-shell-service.o -MD -MP -MF $(DEPDIR)/test_shell_service-test-shell-service.Tpo -c -o test_shell_service-test-shell-service.o `test -f 'test-shell-service.c' || echo '$(srcdir)/'`test-shell-service.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_shell_service-test-shell-service.Tpo $(DEPDIR)/test_shell_service-test-shell-service.Po
@@ -1456,6 +1444,20 @@ test_shell_service-test-shell-service.obj: test-shell-service.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-shell-service.c' object='test_shell_service-test-shell-service.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_shell_service_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_shell_service-test-shell-service.obj `if test -f 'test-shell-service.c'; then $(CYGPATH_W) 'test-shell-service.c'; else $(CYGPATH_W) '$(srcdir)/test-shell-service.c'; fi`
+
+test_spawn-spawn-test.o: spawn-test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_spawn_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_spawn-spawn-test.o -MD -MP -MF $(DEPDIR)/test_spawn-spawn-test.Tpo -c -o test_spawn-spawn-test.o `test -f 'spawn-test.c' || echo '$(srcdir)/'`spawn-test.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_spawn-spawn-test.Tpo $(DEPDIR)/test_spawn-spawn-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='spawn-test.c' object='test_spawn-spawn-test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_spawn_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_spawn-spawn-test.o `test -f 'spawn-test.c' || echo '$(srcdir)/'`spawn-test.c
+
+test_spawn-spawn-test.obj: spawn-test.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_spawn_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_spawn-spawn-test.obj -MD -MP -MF $(DEPDIR)/test_spawn-spawn-test.Tpo -c -o test_spawn-spawn-test.obj `if test -f 'spawn-test.c'; then $(CYGPATH_W) 'spawn-test.c'; else $(CYGPATH_W) '$(srcdir)/spawn-test.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_spawn-spawn-test.Tpo $(DEPDIR)/test_spawn-spawn-test.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='spawn-test.c' object='test_spawn-spawn-test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_spawn_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_spawn-spawn-test.obj `if test -f 'spawn-test.c'; then $(CYGPATH_W) 'spawn-test.c'; else $(CYGPATH_W) '$(srcdir)/spawn-test.c'; fi`
 
 test_syslog-syslog.o: internals/syslog.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_syslog_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_syslog-syslog.o -MD -MP -MF $(DEPDIR)/test_syslog-syslog.Tpo -c -o test_syslog-syslog.o `test -f 'internals/syslog.c' || echo '$(srcdir)/'`internals/syslog.c
@@ -1717,9 +1719,9 @@ recheck: all
 	        am__force_recheck=am--force-recheck \
 	        TEST_LOGS="$$log_list"; \
 	exit $$?
-shell-test.log: shell-test$(EXEEXT)
-	@p='shell-test$(EXEEXT)'; \
-	b='shell-test'; \
+test-shell.log: test-shell$(EXEEXT)
+	@p='test-shell$(EXEEXT)'; \
+	b='test-shell'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -1794,30 +1796,30 @@ test-syslog.log: test-syslog$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-../bus/bus-test.log: ../bus/bus-test$(EXEEXT)
-	@p='../bus/bus-test$(EXEEXT)'; \
-	b='../bus/bus-test'; \
+../bus/test-bus.log: ../bus/test-bus$(EXEEXT)
+	@p='../bus/test-bus$(EXEEXT)'; \
+	b='../bus/test-bus'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-../bus/bus-test-system.log: ../bus/bus-test-system$(EXEEXT)
-	@p='../bus/bus-test-system$(EXEEXT)'; \
-	b='../bus/bus-test-system'; \
+../bus/test-bus-system.log: ../bus/test-bus-system$(EXEEXT)
+	@p='../bus/test-bus-system$(EXEEXT)'; \
+	b='../bus/test-bus-system'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-../dbus/dbus-test.log: ../dbus/dbus-test$(EXEEXT)
-	@p='../dbus/dbus-test$(EXEEXT)'; \
-	b='../dbus/dbus-test'; \
+../dbus/test-dbus.log: ../dbus/test-dbus$(EXEEXT)
+	@p='../dbus/test-dbus$(EXEEXT)'; \
+	b='../dbus/test-dbus'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-../bus/bus-test-launch-helper.log: ../bus/bus-test-launch-helper$(EXEEXT)
-	@p='../bus/bus-test-launch-helper$(EXEEXT)'; \
-	b='../bus/bus-test-launch-helper'; \
+../bus/test-bus-launch-helper.log: ../bus/test-bus-launch-helper$(EXEEXT)
+	@p='../bus/test-bus-launch-helper$(EXEEXT)'; \
+	b='../bus/test-bus-launch-helper'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
