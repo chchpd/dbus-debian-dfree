@@ -92,7 +92,7 @@ host_triplet = @host@
 noinst_PROGRAMS = $(am__EXEEXT_1)
 
 # We can't actually run this til we've reached test/
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__append_5 = dbus-test
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__append_5 = test-dbus
 subdir = dbus
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/versioninfo.rc.in $(srcdir)/dbus-arch-deps.h.in \
@@ -374,11 +374,11 @@ am__objects_15 = libdbus_internal_la-dbus-asv-util.lo \
 am_libdbus_internal_la_OBJECTS = $(am__objects_8) $(am__objects_12) \
 	$(am__objects_15)
 libdbus_internal_la_OBJECTS = $(am_libdbus_internal_la_OBJECTS)
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = dbus-test$(EXEEXT)
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = test-dbus$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
-am_dbus_test_OBJECTS = dbus-test-main.$(OBJEXT)
-dbus_test_OBJECTS = $(am_dbus_test_OBJECTS)
-dbus_test_DEPENDENCIES = libdbus-internal.la
+am_test_dbus_OBJECTS = dbus-test-main.$(OBJEXT)
+test_dbus_OBJECTS = $(am_test_dbus_OBJECTS)
+test_dbus_DEPENDENCIES = libdbus-internal.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -432,10 +432,10 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(libdbus_1_la_SOURCES) $(libdbus_init_win_la_SOURCES) \
-	$(libdbus_internal_la_SOURCES) $(dbus_test_SOURCES)
+	$(libdbus_internal_la_SOURCES) $(test_dbus_SOURCES)
 DIST_SOURCES = $(am__libdbus_1_la_SOURCES_DIST) \
 	$(am__libdbus_init_win_la_SOURCES_DIST) \
-	$(am__libdbus_internal_la_SOURCES_DIST) $(dbus_test_SOURCES)
+	$(am__libdbus_internal_la_SOURCES_DIST) $(test_dbus_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -924,10 +924,10 @@ libdbus_internal_la_CPPFLAGS = \
 libdbus_internal_la_LIBADD = $(LIBDBUS_LIBS) $(SYSTEMD_LIBS) \
 	$(am__append_4)
 @DBUS_WIN_TRUE@libdbus_init_win_la_SOURCES = dbus-init-win.cpp
-dbus_test_SOURCES = \
+test_dbus_SOURCES = \
 	dbus-test-main.c
 
-dbus_test_LDADD = libdbus-internal.la
+test_dbus_LDADD = libdbus-internal.la
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1032,9 +1032,9 @@ clean-noinstPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-dbus-test$(EXEEXT): $(dbus_test_OBJECTS) $(dbus_test_DEPENDENCIES) $(EXTRA_dbus_test_DEPENDENCIES) 
-	@rm -f dbus-test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(dbus_test_OBJECTS) $(dbus_test_LDADD) $(LIBS)
+test-dbus$(EXEEXT): $(test_dbus_OBJECTS) $(test_dbus_DEPENDENCIES) $(EXTRA_test_dbus_DEPENDENCIES) 
+	@rm -f test-dbus$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_dbus_OBJECTS) $(test_dbus_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

@@ -61,7 +61,7 @@ if DBUS_ENABLE_EMBEDDED_TESTS
 ## break-loader removed for now
 ## these binaries are used in tests but are not themselves tests
 TEST_BINARIES = \
-	spawn-test \
+	test-spawn \
 	test-exit \
 	test-names \
 	test-segfault \
@@ -74,13 +74,13 @@ TEST_BINARIES = \
 ## order, but we don't want to run them til we arrive in this directory,
 ## since they depend on stuff from this directory
 TESTS = \
-	../bus/bus-test$(EXEEXT) \
-	../bus/bus-test-system$(EXEEXT) \
-	../dbus/dbus-test$(EXEEXT) \
+	../bus/test-bus$(EXEEXT) \
+	../bus/test-bus-system$(EXEEXT) \
+	../dbus/test-dbus$(EXEEXT) \
 	$(NULL)
 
 if DBUS_UNIX
-TESTS += ../bus/bus-test-launch-helper$(EXEEXT)
+TESTS += ../bus/test-bus-launch-helper$(EXEEXT)
 endif
 
 else !DBUS_ENABLE_EMBEDDED_TESTS
@@ -100,10 +100,12 @@ test_names_LDADD = libdbus-testutils-internal.la
 ## break_loader_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 test_shell_service_CPPFLAGS = $(static_cppflags)
 test_shell_service_LDADD = libdbus-testutils-internal.la
-shell_test_CPPFLAGS = $(static_cppflags)
-shell_test_LDADD = libdbus-testutils-internal.la
-spawn_test_CPPFLAGS = $(static_cppflags)
-spawn_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la
+test_shell_SOURCES = shell-test.c
+test_shell_CPPFLAGS = $(static_cppflags)
+test_shell_LDADD = libdbus-testutils-internal.la
+test_spawn_SOURCES = spawn-test.c
+test_spawn_CPPFLAGS = $(static_cppflags)
+test_spawn_LDADD = $(top_builddir)/dbus/libdbus-internal.la
 
 test_printf_SOURCES = internals/printf.c
 test_printf_CPPFLAGS = $(static_cppflags)
@@ -124,7 +126,7 @@ testexecdir = $(libdir)/dbus-1.0/test
 testexec_PROGRAMS =
 
 installable_tests = \
-	shell-test \
+	test-shell \
 	test-printf \
 	$(NULL)
 installable_manual_tests = \
@@ -156,7 +158,6 @@ installcheck_environment = \
 
 TESTS_ENVIRONMENT = \
 	XDG_RUNTIME_DIR=@abs_top_builddir@/test/XDG_RUNTIME_DIR \
-	DBUS_BLOCK_ON_ABORT=1 \
 	DBUS_FATAL_WARNINGS=1 \
 	DBUS_TEST_DAEMON=@abs_top_builddir@/bus/dbus-daemon$(EXEEXT) \
 	DBUS_TEST_DATA=@abs_top_builddir@/test/data \

@@ -85,11 +85,11 @@ dbus_daemon_exec_PROGRAMS = dbus-daemon$(EXEEXT)
 @DBUS_UNIX_TRUE@libexec_PROGRAMS = dbus-daemon-launch-helper$(EXEEXT)
 
 # run as a test by test/Makefile.am
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__append_1 = bus-test bus-test-system
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__append_1 = test-bus test-bus-system
 
 # run as a test by test/Makefile.am
 # this is used by the tests but is not,itself, a test
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_2 = bus-test-launch-helper \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__append_2 = test-bus-launch-helper \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@	dbus-daemon-launch-helper-test
 @HAVE_SYSTEMD_TRUE@am__append_3 = \
 @HAVE_SYSTEMD_TRUE@	dbus.service.in \
@@ -122,13 +122,13 @@ am__installdirs = "$(DESTDIR)$(dbus_daemon_execdir)" \
 	"$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(initddir)" "$(DESTDIR)$(agentdir)" \
 	"$(DESTDIR)$(configdir)" "$(DESTDIR)$(systemdsystemunitdir)"
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = bus-test$(EXEEXT) \
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	bus-test-system$(EXEEXT)
-@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__EXEEXT_2 = bus-test-launch-helper$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@am__EXEEXT_1 = test-bus$(EXEEXT) \
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@	test-bus-system$(EXEEXT)
+@DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@am__EXEEXT_2 = test-bus-launch-helper$(EXEEXT) \
 @DBUS_ENABLE_EMBEDDED_TESTS_TRUE@@DBUS_UNIX_TRUE@	dbus-daemon-launch-helper-test$(EXEEXT)
 PROGRAMS = $(dbus_daemon_exec_PROGRAMS) $(libexec_PROGRAMS) \
 	$(noinst_PROGRAMS)
-am__bus_test_SOURCES_DIST = activation.c activation.h \
+am__dbus_daemon_SOURCES_DIST = activation.c activation.h \
 	activation-exit-codes.h bus.c bus.h config-parser.c \
 	config-parser.h config-parser-common.c config-parser-common.h \
 	connection.c connection.h desktop-file.c desktop-file.h \
@@ -137,7 +137,7 @@ am__bus_test_SOURCES_DIST = activation.c activation.h \
 	expirelist.c expirelist.h policy.c policy.h selinux.h \
 	selinux.c services.c services.h signals.c signals.h stats.c \
 	stats.h test.c test.h utils.c utils.h config-loader-expat.c \
-	test-main.c
+	main.c
 @DBUS_BUS_ENABLE_INOTIFY_FALSE@@DBUS_BUS_ENABLE_KQUEUE_FALSE@am__objects_1 = dir-watch-default.$(OBJEXT)
 @DBUS_BUS_ENABLE_INOTIFY_TRUE@@DBUS_BUS_ENABLE_KQUEUE_FALSE@am__objects_1 = dir-watch-inotify.$(OBJEXT)
 @DBUS_BUS_ENABLE_KQUEUE_TRUE@am__objects_1 =  \
@@ -150,40 +150,44 @@ am__objects_3 = activation.$(OBJEXT) bus.$(OBJEXT) \
 	policy.$(OBJEXT) selinux.$(OBJEXT) services.$(OBJEXT) \
 	signals.$(OBJEXT) stats.$(OBJEXT) test.$(OBJEXT) \
 	utils.$(OBJEXT) $(am__objects_2)
-am_bus_test_OBJECTS = $(am__objects_3) test-main.$(OBJEXT)
-bus_test_OBJECTS = $(am_bus_test_OBJECTS)
+am_dbus_daemon_OBJECTS = $(am__objects_3) main.$(OBJEXT)
+dbus_daemon_OBJECTS = $(am_dbus_daemon_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-bus_test_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-	$(am__DEPENDENCIES_2)
+dbus_daemon_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-am__objects_4 = bus_test_launch_helper-config-loader-expat.$(OBJEXT)
-am__objects_5 = $(am__objects_4) \
-	bus_test_launch_helper-config-parser-common.$(OBJEXT) \
-	bus_test_launch_helper-config-parser-trivial.$(OBJEXT) \
-	bus_test_launch_helper-desktop-file.$(OBJEXT) \
-	bus_test_launch_helper-utils.$(OBJEXT) \
-	bus_test_launch_helper-activation-helper.$(OBJEXT)
-am_bus_test_launch_helper_OBJECTS =  \
-	bus_test_launch_helper-test-launch-helper.$(OBJEXT) \
-	$(am__objects_5)
-bus_test_launch_helper_OBJECTS = $(am_bus_test_launch_helper_OBJECTS)
+am__objects_4 = $(am__objects_2) config-parser-common.$(OBJEXT) \
+	config-parser-trivial.$(OBJEXT) desktop-file.$(OBJEXT) \
+	utils.$(OBJEXT) activation-helper.$(OBJEXT)
+am_dbus_daemon_launch_helper_OBJECTS =  \
+	activation-helper-bin.$(OBJEXT) $(am__objects_4)
+dbus_daemon_launch_helper_OBJECTS =  \
+	$(am_dbus_daemon_launch_helper_OBJECTS)
 am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-bus_test_launch_helper_DEPENDENCIES =  \
+dbus_daemon_launch_helper_DEPENDENCIES =  \
 	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_3)
-am_bus_test_system_OBJECTS = $(am__objects_2) \
-	config-parser-common.$(OBJEXT) config-parser-trivial.$(OBJEXT) \
-	utils.$(OBJEXT) test-system.$(OBJEXT)
-bus_test_system_OBJECTS = $(am_bus_test_system_OBJECTS)
-bus_test_system_DEPENDENCIES =  \
-	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_2)
-am__dbus_daemon_SOURCES_DIST = activation.c activation.h \
+am__objects_5 =  \
+	dbus_daemon_launch_helper_test-config-loader-expat.$(OBJEXT)
+am__objects_6 = $(am__objects_5) \
+	dbus_daemon_launch_helper_test-config-parser-common.$(OBJEXT) \
+	dbus_daemon_launch_helper_test-config-parser-trivial.$(OBJEXT) \
+	dbus_daemon_launch_helper_test-desktop-file.$(OBJEXT) \
+	dbus_daemon_launch_helper_test-utils.$(OBJEXT) \
+	dbus_daemon_launch_helper_test-activation-helper.$(OBJEXT)
+am_dbus_daemon_launch_helper_test_OBJECTS = dbus_daemon_launch_helper_test-activation-helper-bin.$(OBJEXT) \
+	$(am__objects_6)
+dbus_daemon_launch_helper_test_OBJECTS =  \
+	$(am_dbus_daemon_launch_helper_test_OBJECTS)
+dbus_daemon_launch_helper_test_DEPENDENCIES =  \
+	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_3)
+am__test_bus_SOURCES_DIST = activation.c activation.h \
 	activation-exit-codes.h bus.c bus.h config-parser.c \
 	config-parser.h config-parser-common.c config-parser-common.h \
 	connection.c connection.h desktop-file.c desktop-file.h \
@@ -192,34 +196,30 @@ am__dbus_daemon_SOURCES_DIST = activation.c activation.h \
 	expirelist.c expirelist.h policy.c policy.h selinux.h \
 	selinux.c services.c services.h signals.c signals.h stats.c \
 	stats.h test.c test.h utils.c utils.h config-loader-expat.c \
-	main.c
-am_dbus_daemon_OBJECTS = $(am__objects_3) main.$(OBJEXT)
-dbus_daemon_OBJECTS = $(am_dbus_daemon_OBJECTS)
-dbus_daemon_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
-am__objects_6 = $(am__objects_2) config-parser-common.$(OBJEXT) \
-	config-parser-trivial.$(OBJEXT) desktop-file.$(OBJEXT) \
-	utils.$(OBJEXT) activation-helper.$(OBJEXT)
-am_dbus_daemon_launch_helper_OBJECTS =  \
-	activation-helper-bin.$(OBJEXT) $(am__objects_6)
-dbus_daemon_launch_helper_OBJECTS =  \
-	$(am_dbus_daemon_launch_helper_OBJECTS)
-dbus_daemon_launch_helper_DEPENDENCIES =  \
-	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_3)
-am__objects_7 =  \
-	dbus_daemon_launch_helper_test-config-loader-expat.$(OBJEXT)
+	test-main.c
+am_test_bus_OBJECTS = $(am__objects_3) test-main.$(OBJEXT)
+test_bus_OBJECTS = $(am_test_bus_OBJECTS)
+test_bus_DEPENDENCIES = $(top_builddir)/dbus/libdbus-internal.la \
+	$(am__DEPENDENCIES_2)
+am__objects_7 = test_bus_launch_helper-config-loader-expat.$(OBJEXT)
 am__objects_8 = $(am__objects_7) \
-	dbus_daemon_launch_helper_test-config-parser-common.$(OBJEXT) \
-	dbus_daemon_launch_helper_test-config-parser-trivial.$(OBJEXT) \
-	dbus_daemon_launch_helper_test-desktop-file.$(OBJEXT) \
-	dbus_daemon_launch_helper_test-utils.$(OBJEXT) \
-	dbus_daemon_launch_helper_test-activation-helper.$(OBJEXT)
-am_dbus_daemon_launch_helper_test_OBJECTS = dbus_daemon_launch_helper_test-activation-helper-bin.$(OBJEXT) \
+	test_bus_launch_helper-config-parser-common.$(OBJEXT) \
+	test_bus_launch_helper-config-parser-trivial.$(OBJEXT) \
+	test_bus_launch_helper-desktop-file.$(OBJEXT) \
+	test_bus_launch_helper-utils.$(OBJEXT) \
+	test_bus_launch_helper-activation-helper.$(OBJEXT)
+am_test_bus_launch_helper_OBJECTS =  \
+	test_bus_launch_helper-test-launch-helper.$(OBJEXT) \
 	$(am__objects_8)
-dbus_daemon_launch_helper_test_OBJECTS =  \
-	$(am_dbus_daemon_launch_helper_test_OBJECTS)
-dbus_daemon_launch_helper_test_DEPENDENCIES =  \
+test_bus_launch_helper_OBJECTS = $(am_test_bus_launch_helper_OBJECTS)
+test_bus_launch_helper_DEPENDENCIES =  \
 	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_3)
+am_test_bus_system_OBJECTS = $(am__objects_2) \
+	config-parser-common.$(OBJEXT) config-parser-trivial.$(OBJEXT) \
+	utils.$(OBJEXT) test-system.$(OBJEXT)
+test_bus_system_OBJECTS = $(am_test_bus_system_OBJECTS)
+test_bus_system_DEPENDENCIES =  \
+	$(top_builddir)/dbus/libdbus-internal.la $(am__DEPENDENCIES_2)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -282,15 +282,14 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(bus_test_SOURCES) $(bus_test_launch_helper_SOURCES) \
-	$(bus_test_system_SOURCES) $(dbus_daemon_SOURCES) \
+SOURCES = $(dbus_daemon_SOURCES) $(dbus_daemon_launch_helper_SOURCES) \
+	$(dbus_daemon_launch_helper_test_SOURCES) $(test_bus_SOURCES) \
+	$(test_bus_launch_helper_SOURCES) $(test_bus_system_SOURCES)
+DIST_SOURCES = $(am__dbus_daemon_SOURCES_DIST) \
 	$(dbus_daemon_launch_helper_SOURCES) \
-	$(dbus_daemon_launch_helper_test_SOURCES)
-DIST_SOURCES = $(am__bus_test_SOURCES_DIST) \
-	$(bus_test_launch_helper_SOURCES) $(bus_test_system_SOURCES) \
-	$(am__dbus_daemon_SOURCES_DIST) \
-	$(dbus_daemon_launch_helper_SOURCES) \
-	$(dbus_daemon_launch_helper_test_SOURCES)
+	$(dbus_daemon_launch_helper_test_SOURCES) \
+	$(am__test_bus_SOURCES_DIST) $(test_bus_launch_helper_SOURCES) \
+	$(test_bus_system_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -646,20 +645,20 @@ dbus_daemon_launch_helper_test_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DACTIVATION_LAUNCHER_TEST
 
-bus_test_launch_helper_SOURCES = \
+test_bus_launch_helper_SOURCES = \
 	test-launch-helper.c   		\
 	$(LAUNCH_HELPER_SOURCES)
 
-bus_test_launch_helper_LDADD = \
+test_bus_launch_helper_LDADD = \
 	$(top_builddir)/dbus/libdbus-internal.la \
 	$(DBUS_LAUNCHER_LIBS)
 
-bus_test_launch_helper_CPPFLAGS = \
+test_bus_launch_helper_CPPFLAGS = \
 	$(AM_CPPFLAGS) \
 	-DACTIVATION_LAUNCHER_TEST	\
 	-DACTIVATION_LAUNCHER_DO_OOM
 
-bus_test_system_SOURCES = \
+test_bus_system_SOURCES = \
 	$(XML_SOURCES)				\
 	config-parser-common.c			\
 	config-parser-common.h			\
@@ -669,12 +668,12 @@ bus_test_system_SOURCES = \
 	utils.h					\
 	test-system.c
 
-bus_test_system_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_BUS_LIBS)
-bus_test_SOURCES = \
+test_bus_system_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_BUS_LIBS)
+test_bus_SOURCES = \
 	$(BUS_SOURCES)				\
 	test-main.c
 
-bus_test_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_BUS_LIBS)
+test_bus_LDADD = $(top_builddir)/dbus/libdbus-internal.la $(DBUS_BUS_LIBS)
 
 #### Init scripts fun
 SCRIPT_IN_FILES = messagebus.in messagebus-config.in rc.messagebus.in \
@@ -855,18 +854,6 @@ clean-noinstPROGRAMS:
 	echo " rm -f" $$list; \
 	rm -f $$list
 
-bus-test$(EXEEXT): $(bus_test_OBJECTS) $(bus_test_DEPENDENCIES) $(EXTRA_bus_test_DEPENDENCIES) 
-	@rm -f bus-test$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(bus_test_OBJECTS) $(bus_test_LDADD) $(LIBS)
-
-bus-test-launch-helper$(EXEEXT): $(bus_test_launch_helper_OBJECTS) $(bus_test_launch_helper_DEPENDENCIES) $(EXTRA_bus_test_launch_helper_DEPENDENCIES) 
-	@rm -f bus-test-launch-helper$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(bus_test_launch_helper_OBJECTS) $(bus_test_launch_helper_LDADD) $(LIBS)
-
-bus-test-system$(EXEEXT): $(bus_test_system_OBJECTS) $(bus_test_system_DEPENDENCIES) $(EXTRA_bus_test_system_DEPENDENCIES) 
-	@rm -f bus-test-system$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(bus_test_system_OBJECTS) $(bus_test_system_LDADD) $(LIBS)
-
 dbus-daemon$(EXEEXT): $(dbus_daemon_OBJECTS) $(dbus_daemon_DEPENDENCIES) $(EXTRA_dbus_daemon_DEPENDENCIES) 
 	@rm -f dbus-daemon$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(dbus_daemon_OBJECTS) $(dbus_daemon_LDADD) $(LIBS)
@@ -878,6 +865,18 @@ dbus-daemon-launch-helper$(EXEEXT): $(dbus_daemon_launch_helper_OBJECTS) $(dbus_
 dbus-daemon-launch-helper-test$(EXEEXT): $(dbus_daemon_launch_helper_test_OBJECTS) $(dbus_daemon_launch_helper_test_DEPENDENCIES) $(EXTRA_dbus_daemon_launch_helper_test_DEPENDENCIES) 
 	@rm -f dbus-daemon-launch-helper-test$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(dbus_daemon_launch_helper_test_OBJECTS) $(dbus_daemon_launch_helper_test_LDADD) $(LIBS)
+
+test-bus$(EXEEXT): $(test_bus_OBJECTS) $(test_bus_DEPENDENCIES) $(EXTRA_test_bus_DEPENDENCIES) 
+	@rm -f test-bus$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_bus_OBJECTS) $(test_bus_LDADD) $(LIBS)
+
+test-bus-launch-helper$(EXEEXT): $(test_bus_launch_helper_OBJECTS) $(test_bus_launch_helper_DEPENDENCIES) $(EXTRA_test_bus_launch_helper_DEPENDENCIES) 
+	@rm -f test-bus-launch-helper$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_bus_launch_helper_OBJECTS) $(test_bus_launch_helper_LDADD) $(LIBS)
+
+test-bus-system$(EXEEXT): $(test_bus_system_OBJECTS) $(test_bus_system_DEPENDENCIES) $(EXTRA_test_bus_system_DEPENDENCIES) 
+	@rm -f test-bus-system$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_bus_system_OBJECTS) $(test_bus_system_LDADD) $(LIBS)
 install-binSCRIPTS: $(bin_SCRIPTS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_SCRIPTS)'; test -n "$(bindir)" || list=; \
@@ -959,13 +958,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/activation-helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/activation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-activation-helper.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-config-loader-expat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-config-parser-common.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-desktop-file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-test-launch-helper.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bus_test_launch_helper-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config-loader-expat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config-parser-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config-parser-trivial.Po@am__quote@
@@ -994,6 +986,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test-system.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-activation-helper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-config-loader-expat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-config-parser-common.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-desktop-file.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-test-launch-helper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_bus_launch_helper-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@
 
 .c.o:
@@ -1016,104 +1015,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-bus_test_launch_helper-test-launch-helper.o: test-launch-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-test-launch-helper.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Tpo -c -o bus_test_launch_helper-test-launch-helper.o `test -f 'test-launch-helper.c' || echo '$(srcdir)/'`test-launch-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Tpo $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-launch-helper.c' object='bus_test_launch_helper-test-launch-helper.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-test-launch-helper.o `test -f 'test-launch-helper.c' || echo '$(srcdir)/'`test-launch-helper.c
-
-bus_test_launch_helper-test-launch-helper.obj: test-launch-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-test-launch-helper.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Tpo -c -o bus_test_launch_helper-test-launch-helper.obj `if test -f 'test-launch-helper.c'; then $(CYGPATH_W) 'test-launch-helper.c'; else $(CYGPATH_W) '$(srcdir)/test-launch-helper.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Tpo $(DEPDIR)/bus_test_launch_helper-test-launch-helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-launch-helper.c' object='bus_test_launch_helper-test-launch-helper.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-test-launch-helper.obj `if test -f 'test-launch-helper.c'; then $(CYGPATH_W) 'test-launch-helper.c'; else $(CYGPATH_W) '$(srcdir)/test-launch-helper.c'; fi`
-
-bus_test_launch_helper-config-loader-expat.o: config-loader-expat.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-loader-expat.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Tpo -c -o bus_test_launch_helper-config-loader-expat.o `test -f 'config-loader-expat.c' || echo '$(srcdir)/'`config-loader-expat.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Tpo $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-loader-expat.c' object='bus_test_launch_helper-config-loader-expat.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-loader-expat.o `test -f 'config-loader-expat.c' || echo '$(srcdir)/'`config-loader-expat.c
-
-bus_test_launch_helper-config-loader-expat.obj: config-loader-expat.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-loader-expat.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Tpo -c -o bus_test_launch_helper-config-loader-expat.obj `if test -f 'config-loader-expat.c'; then $(CYGPATH_W) 'config-loader-expat.c'; else $(CYGPATH_W) '$(srcdir)/config-loader-expat.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Tpo $(DEPDIR)/bus_test_launch_helper-config-loader-expat.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-loader-expat.c' object='bus_test_launch_helper-config-loader-expat.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-loader-expat.obj `if test -f 'config-loader-expat.c'; then $(CYGPATH_W) 'config-loader-expat.c'; else $(CYGPATH_W) '$(srcdir)/config-loader-expat.c'; fi`
-
-bus_test_launch_helper-config-parser-common.o: config-parser-common.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-parser-common.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-parser-common.Tpo -c -o bus_test_launch_helper-config-parser-common.o `test -f 'config-parser-common.c' || echo '$(srcdir)/'`config-parser-common.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-parser-common.Tpo $(DEPDIR)/bus_test_launch_helper-config-parser-common.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-common.c' object='bus_test_launch_helper-config-parser-common.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-parser-common.o `test -f 'config-parser-common.c' || echo '$(srcdir)/'`config-parser-common.c
-
-bus_test_launch_helper-config-parser-common.obj: config-parser-common.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-parser-common.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-parser-common.Tpo -c -o bus_test_launch_helper-config-parser-common.obj `if test -f 'config-parser-common.c'; then $(CYGPATH_W) 'config-parser-common.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-common.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-parser-common.Tpo $(DEPDIR)/bus_test_launch_helper-config-parser-common.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-common.c' object='bus_test_launch_helper-config-parser-common.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-parser-common.obj `if test -f 'config-parser-common.c'; then $(CYGPATH_W) 'config-parser-common.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-common.c'; fi`
-
-bus_test_launch_helper-config-parser-trivial.o: config-parser-trivial.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-parser-trivial.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Tpo -c -o bus_test_launch_helper-config-parser-trivial.o `test -f 'config-parser-trivial.c' || echo '$(srcdir)/'`config-parser-trivial.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Tpo $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-trivial.c' object='bus_test_launch_helper-config-parser-trivial.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-parser-trivial.o `test -f 'config-parser-trivial.c' || echo '$(srcdir)/'`config-parser-trivial.c
-
-bus_test_launch_helper-config-parser-trivial.obj: config-parser-trivial.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-config-parser-trivial.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Tpo -c -o bus_test_launch_helper-config-parser-trivial.obj `if test -f 'config-parser-trivial.c'; then $(CYGPATH_W) 'config-parser-trivial.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-trivial.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Tpo $(DEPDIR)/bus_test_launch_helper-config-parser-trivial.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-trivial.c' object='bus_test_launch_helper-config-parser-trivial.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-config-parser-trivial.obj `if test -f 'config-parser-trivial.c'; then $(CYGPATH_W) 'config-parser-trivial.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-trivial.c'; fi`
-
-bus_test_launch_helper-desktop-file.o: desktop-file.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-desktop-file.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-desktop-file.Tpo -c -o bus_test_launch_helper-desktop-file.o `test -f 'desktop-file.c' || echo '$(srcdir)/'`desktop-file.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-desktop-file.Tpo $(DEPDIR)/bus_test_launch_helper-desktop-file.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-file.c' object='bus_test_launch_helper-desktop-file.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-desktop-file.o `test -f 'desktop-file.c' || echo '$(srcdir)/'`desktop-file.c
-
-bus_test_launch_helper-desktop-file.obj: desktop-file.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-desktop-file.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-desktop-file.Tpo -c -o bus_test_launch_helper-desktop-file.obj `if test -f 'desktop-file.c'; then $(CYGPATH_W) 'desktop-file.c'; else $(CYGPATH_W) '$(srcdir)/desktop-file.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-desktop-file.Tpo $(DEPDIR)/bus_test_launch_helper-desktop-file.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-file.c' object='bus_test_launch_helper-desktop-file.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-desktop-file.obj `if test -f 'desktop-file.c'; then $(CYGPATH_W) 'desktop-file.c'; else $(CYGPATH_W) '$(srcdir)/desktop-file.c'; fi`
-
-bus_test_launch_helper-utils.o: utils.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-utils.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-utils.Tpo -c -o bus_test_launch_helper-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-utils.Tpo $(DEPDIR)/bus_test_launch_helper-utils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='utils.c' object='bus_test_launch_helper-utils.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
-
-bus_test_launch_helper-utils.obj: utils.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-utils.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-utils.Tpo -c -o bus_test_launch_helper-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-utils.Tpo $(DEPDIR)/bus_test_launch_helper-utils.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='utils.c' object='bus_test_launch_helper-utils.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
-
-bus_test_launch_helper-activation-helper.o: activation-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-activation-helper.o -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-activation-helper.Tpo -c -o bus_test_launch_helper-activation-helper.o `test -f 'activation-helper.c' || echo '$(srcdir)/'`activation-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-activation-helper.Tpo $(DEPDIR)/bus_test_launch_helper-activation-helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='activation-helper.c' object='bus_test_launch_helper-activation-helper.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-activation-helper.o `test -f 'activation-helper.c' || echo '$(srcdir)/'`activation-helper.c
-
-bus_test_launch_helper-activation-helper.obj: activation-helper.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT bus_test_launch_helper-activation-helper.obj -MD -MP -MF $(DEPDIR)/bus_test_launch_helper-activation-helper.Tpo -c -o bus_test_launch_helper-activation-helper.obj `if test -f 'activation-helper.c'; then $(CYGPATH_W) 'activation-helper.c'; else $(CYGPATH_W) '$(srcdir)/activation-helper.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/bus_test_launch_helper-activation-helper.Tpo $(DEPDIR)/bus_test_launch_helper-activation-helper.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='activation-helper.c' object='bus_test_launch_helper-activation-helper.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(bus_test_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o bus_test_launch_helper-activation-helper.obj `if test -f 'activation-helper.c'; then $(CYGPATH_W) 'activation-helper.c'; else $(CYGPATH_W) '$(srcdir)/activation-helper.c'; fi`
 
 dbus_daemon_launch_helper_test-activation-helper-bin.o: activation-helper-bin.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dbus_daemon_launch_helper_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dbus_daemon_launch_helper_test-activation-helper-bin.o -MD -MP -MF $(DEPDIR)/dbus_daemon_launch_helper_test-activation-helper-bin.Tpo -c -o dbus_daemon_launch_helper_test-activation-helper-bin.o `test -f 'activation-helper-bin.c' || echo '$(srcdir)/'`activation-helper-bin.c
@@ -1212,6 +1113,104 @@ dbus_daemon_launch_helper_test-activation-helper.obj: activation-helper.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='activation-helper.c' object='dbus_daemon_launch_helper_test-activation-helper.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(dbus_daemon_launch_helper_test_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dbus_daemon_launch_helper_test-activation-helper.obj `if test -f 'activation-helper.c'; then $(CYGPATH_W) 'activation-helper.c'; else $(CYGPATH_W) '$(srcdir)/activation-helper.c'; fi`
+
+test_bus_launch_helper-test-launch-helper.o: test-launch-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-test-launch-helper.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Tpo -c -o test_bus_launch_helper-test-launch-helper.o `test -f 'test-launch-helper.c' || echo '$(srcdir)/'`test-launch-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Tpo $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-launch-helper.c' object='test_bus_launch_helper-test-launch-helper.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-test-launch-helper.o `test -f 'test-launch-helper.c' || echo '$(srcdir)/'`test-launch-helper.c
+
+test_bus_launch_helper-test-launch-helper.obj: test-launch-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-test-launch-helper.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Tpo -c -o test_bus_launch_helper-test-launch-helper.obj `if test -f 'test-launch-helper.c'; then $(CYGPATH_W) 'test-launch-helper.c'; else $(CYGPATH_W) '$(srcdir)/test-launch-helper.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Tpo $(DEPDIR)/test_bus_launch_helper-test-launch-helper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='test-launch-helper.c' object='test_bus_launch_helper-test-launch-helper.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-test-launch-helper.obj `if test -f 'test-launch-helper.c'; then $(CYGPATH_W) 'test-launch-helper.c'; else $(CYGPATH_W) '$(srcdir)/test-launch-helper.c'; fi`
+
+test_bus_launch_helper-config-loader-expat.o: config-loader-expat.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-loader-expat.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Tpo -c -o test_bus_launch_helper-config-loader-expat.o `test -f 'config-loader-expat.c' || echo '$(srcdir)/'`config-loader-expat.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Tpo $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-loader-expat.c' object='test_bus_launch_helper-config-loader-expat.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-loader-expat.o `test -f 'config-loader-expat.c' || echo '$(srcdir)/'`config-loader-expat.c
+
+test_bus_launch_helper-config-loader-expat.obj: config-loader-expat.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-loader-expat.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Tpo -c -o test_bus_launch_helper-config-loader-expat.obj `if test -f 'config-loader-expat.c'; then $(CYGPATH_W) 'config-loader-expat.c'; else $(CYGPATH_W) '$(srcdir)/config-loader-expat.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Tpo $(DEPDIR)/test_bus_launch_helper-config-loader-expat.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-loader-expat.c' object='test_bus_launch_helper-config-loader-expat.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-loader-expat.obj `if test -f 'config-loader-expat.c'; then $(CYGPATH_W) 'config-loader-expat.c'; else $(CYGPATH_W) '$(srcdir)/config-loader-expat.c'; fi`
+
+test_bus_launch_helper-config-parser-common.o: config-parser-common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-parser-common.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-parser-common.Tpo -c -o test_bus_launch_helper-config-parser-common.o `test -f 'config-parser-common.c' || echo '$(srcdir)/'`config-parser-common.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-parser-common.Tpo $(DEPDIR)/test_bus_launch_helper-config-parser-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-common.c' object='test_bus_launch_helper-config-parser-common.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-parser-common.o `test -f 'config-parser-common.c' || echo '$(srcdir)/'`config-parser-common.c
+
+test_bus_launch_helper-config-parser-common.obj: config-parser-common.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-parser-common.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-parser-common.Tpo -c -o test_bus_launch_helper-config-parser-common.obj `if test -f 'config-parser-common.c'; then $(CYGPATH_W) 'config-parser-common.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-common.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-parser-common.Tpo $(DEPDIR)/test_bus_launch_helper-config-parser-common.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-common.c' object='test_bus_launch_helper-config-parser-common.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-parser-common.obj `if test -f 'config-parser-common.c'; then $(CYGPATH_W) 'config-parser-common.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-common.c'; fi`
+
+test_bus_launch_helper-config-parser-trivial.o: config-parser-trivial.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-parser-trivial.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Tpo -c -o test_bus_launch_helper-config-parser-trivial.o `test -f 'config-parser-trivial.c' || echo '$(srcdir)/'`config-parser-trivial.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Tpo $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-trivial.c' object='test_bus_launch_helper-config-parser-trivial.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-parser-trivial.o `test -f 'config-parser-trivial.c' || echo '$(srcdir)/'`config-parser-trivial.c
+
+test_bus_launch_helper-config-parser-trivial.obj: config-parser-trivial.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-config-parser-trivial.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Tpo -c -o test_bus_launch_helper-config-parser-trivial.obj `if test -f 'config-parser-trivial.c'; then $(CYGPATH_W) 'config-parser-trivial.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-trivial.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Tpo $(DEPDIR)/test_bus_launch_helper-config-parser-trivial.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='config-parser-trivial.c' object='test_bus_launch_helper-config-parser-trivial.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-config-parser-trivial.obj `if test -f 'config-parser-trivial.c'; then $(CYGPATH_W) 'config-parser-trivial.c'; else $(CYGPATH_W) '$(srcdir)/config-parser-trivial.c'; fi`
+
+test_bus_launch_helper-desktop-file.o: desktop-file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-desktop-file.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-desktop-file.Tpo -c -o test_bus_launch_helper-desktop-file.o `test -f 'desktop-file.c' || echo '$(srcdir)/'`desktop-file.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-desktop-file.Tpo $(DEPDIR)/test_bus_launch_helper-desktop-file.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-file.c' object='test_bus_launch_helper-desktop-file.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-desktop-file.o `test -f 'desktop-file.c' || echo '$(srcdir)/'`desktop-file.c
+
+test_bus_launch_helper-desktop-file.obj: desktop-file.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-desktop-file.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-desktop-file.Tpo -c -o test_bus_launch_helper-desktop-file.obj `if test -f 'desktop-file.c'; then $(CYGPATH_W) 'desktop-file.c'; else $(CYGPATH_W) '$(srcdir)/desktop-file.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-desktop-file.Tpo $(DEPDIR)/test_bus_launch_helper-desktop-file.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='desktop-file.c' object='test_bus_launch_helper-desktop-file.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-desktop-file.obj `if test -f 'desktop-file.c'; then $(CYGPATH_W) 'desktop-file.c'; else $(CYGPATH_W) '$(srcdir)/desktop-file.c'; fi`
+
+test_bus_launch_helper-utils.o: utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-utils.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-utils.Tpo -c -o test_bus_launch_helper-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-utils.Tpo $(DEPDIR)/test_bus_launch_helper-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='utils.c' object='test_bus_launch_helper-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-utils.o `test -f 'utils.c' || echo '$(srcdir)/'`utils.c
+
+test_bus_launch_helper-utils.obj: utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-utils.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-utils.Tpo -c -o test_bus_launch_helper-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-utils.Tpo $(DEPDIR)/test_bus_launch_helper-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='utils.c' object='test_bus_launch_helper-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-utils.obj `if test -f 'utils.c'; then $(CYGPATH_W) 'utils.c'; else $(CYGPATH_W) '$(srcdir)/utils.c'; fi`
+
+test_bus_launch_helper-activation-helper.o: activation-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-activation-helper.o -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-activation-helper.Tpo -c -o test_bus_launch_helper-activation-helper.o `test -f 'activation-helper.c' || echo '$(srcdir)/'`activation-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-activation-helper.Tpo $(DEPDIR)/test_bus_launch_helper-activation-helper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='activation-helper.c' object='test_bus_launch_helper-activation-helper.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-activation-helper.o `test -f 'activation-helper.c' || echo '$(srcdir)/'`activation-helper.c
+
+test_bus_launch_helper-activation-helper.obj: activation-helper.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_bus_launch_helper-activation-helper.obj -MD -MP -MF $(DEPDIR)/test_bus_launch_helper-activation-helper.Tpo -c -o test_bus_launch_helper-activation-helper.obj `if test -f 'activation-helper.c'; then $(CYGPATH_W) 'activation-helper.c'; else $(CYGPATH_W) '$(srcdir)/activation-helper.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/test_bus_launch_helper-activation-helper.Tpo $(DEPDIR)/test_bus_launch_helper-activation-helper.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='activation-helper.c' object='test_bus_launch_helper-activation-helper.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_bus_launch_helper_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_bus_launch_helper-activation-helper.obj `if test -f 'activation-helper.c'; then $(CYGPATH_W) 'activation-helper.c'; else $(CYGPATH_W) '$(srcdir)/activation-helper.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
