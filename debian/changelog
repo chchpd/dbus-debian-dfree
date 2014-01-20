@@ -1,3 +1,10 @@
+dbus (1.8.0-1) unstable; urgency=low
+
+  * New upstream stable release
+    - add debian/copyright stanzas for some new BSD-licensed cmake macros
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 20 Jan 2014 15:05:53 +0000
+
 dbus (1.7.10-2) unstable; urgency=low
 
   * Conditionalize libaudit and libcap-ng build-dependencies to [linux-any]
