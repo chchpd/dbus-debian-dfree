@@ -29,6 +29,7 @@ common_configure_flags := \
 ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 # Non-bootstrap build on Linux: add Linux-specifics
+with_systemd = yes
 common_configure_flags += \
 		--enable-libaudit \
 		--enable-selinux \
@@ -101,8 +102,8 @@ endif
 
 override_dh_auto_configure:
 	cp debian/dbus.install-generic debian/dbus.install
-	if test -e debian/dbus.install-$(DEB_HOST_ARCH_OS); then \
-		cat debian/dbus.install-$(DEB_HOST_ARCH_OS) >> \
+	if [ -n "$(with_systemd)" ]; then \
+		cat debian/dbus.install-systemd >> \
 			debian/dbus.install; \
 	fi
 	dh_auto_configure \

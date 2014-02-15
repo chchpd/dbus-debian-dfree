@@ -2,6 +2,8 @@ dbus (1.8.0-2) UNRELEASED; urgency=medium
 
   * debian/rules: look for DEB_BUILD_PROFILES, the new name for
     DEB_BUILD_PROFILE
+  * Don't try to install systemd units in a stage1 build (they are
+    no longer installed unless libsystemd*-dev are found)
 
  -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2014 13:43:08 +0000
 
