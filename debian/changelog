@@ -4,6 +4,7 @@ dbus (1.8.0-2) UNRELEASED; urgency=medium
     DEB_BUILD_PROFILE
   * Don't try to install systemd units in a stage1 build (they are
     no longer installed unless libsystemd*-dev are found)
+  * Mark dbus-1-doc with Build-Profiles: !stage1
 
  -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2014 13:43:08 +0000
 
