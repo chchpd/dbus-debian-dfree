@@ -8,6 +8,7 @@ dbus (1.8.0-2) UNRELEASED; urgency=medium
   * Register a dpkg trigger on /usr/share/dbus-1/system-services and
     /etc/dbus-1/system.d that calls ReloadConfig on the system dbus-daemon,
     in case our inotify monitoring isn't completely reliable (see #740139)
+  * Clean debian/tmp-udeb in `debian/rules clean`
 
  -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2014 13:43:08 +0000
 

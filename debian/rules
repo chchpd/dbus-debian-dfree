@@ -194,3 +194,7 @@ override_dh_auto_clean:
 	rm -f build-debug/test/data/valid-config-files/session.conf
 	rm -f build-debug/test/data/valid-config-files/system.conf
 	rm -f dbus.devhelp
+
+clean:
+	rm -rf debian/tmp-udeb
+	dh $@ $(dh_options)
