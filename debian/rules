@@ -129,7 +129,10 @@ override_dh_auto_build:
 	dh_auto_build --builddirectory=build-debug
 	dh_auto_build --builddirectory=build-udeb
 
-# tests need more environmental setup at the moment
+# The tests need more environmental setup at the moment: they need our
+# home directory, and we can't just set HOME because the nonce-tcp
+# transport uses our "official" HOME according to getpwent(), since its
+# purpose is to prevent one user from impersonating another. (#630152)
 override_dh_auto_test:
 	:
 
