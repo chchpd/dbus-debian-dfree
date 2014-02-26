@@ -43,14 +43,17 @@ if [ "$1" = configure ] && [ -n "$2" ]; then
         [ -x /usr/share/update-notifier/notify-reboot-required ] && \
             /usr/share/update-notifier/notify-reboot-required || true
     fi
-
-    # This is what the init script would do, but it's simpler (and less
-    # dependent on sysvinit vs. Upstart) if we do it directly.
-    # If it's not running (perhaps we're in a chroot) this will just fail
-    # harmlessly, so there's no need to condition on status.
-    dbus-send --print-reply --system --type=method_call \
-            --dest=org.freedesktop.DBus \
-            / org.freedesktop.DBus.ReloadConfig > /dev/null || true
 fi
+
+# This is what the init script would do, but it's simpler (and less
+# dependent on sysvinit vs. Upstart vs. etc.) if we do it directly. It is not
+# conditional on "$1" because it's also the right thing to do for the
+# /etc/dbus-1/system.d and /usr/share/dbus-1/system-services triggers.
+#
+# If it's not running (perhaps we're in a chroot) this will just fail
+# harmlessly, so there's no need to condition on status.
+dbus-send --print-reply --system --type=method_call \
+    --dest=org.freedesktop.DBus \
+    / org.freedesktop.DBus.ReloadConfig > /dev/null || true
 
 #DEBHELPER#
