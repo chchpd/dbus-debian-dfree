@@ -1,3 +1,13 @@
+dbus (1.8.0-3) unstable; urgency=medium
+
+  * Improve autopkgtest support
+    - use a shell wildcard instead of dpkg-architecture, to avoid stderr spam
+      failing the test if gcc is missing
+    - wrap each test-case in an arbitrary (5 minute) timeout so that one
+      test-case failing won't halt the whole build
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 26 Mar 2014 09:17:20 +0000
+
 dbus (1.8.0-2) unstable; urgency=low
 
   * debian/rules: look for DEB_BUILD_PROFILES, the new name for

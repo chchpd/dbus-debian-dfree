@@ -3,17 +3,16 @@
 
 set -e
 
-multiarch="`dpkg-architecture -qDEB_HOST_MULTIARCH`"
-
+timeout="timeout 300s"
 ret=0
 i=0
 
-for dir in "/usr/lib/$multiarch/dbus-1.0/test" "/usr/lib/$multiarch/dbus-1.0/debug-build/lib/dbus-1.0/test"; do
+for dir in /usr/lib/*/dbus-1.0/test /usr/lib/*/dbus-1.0/debug-build/lib/dbus-1.0/test; do
     for t in "$dir"/test-*; do
         i=$(( $i + 1 ))
         echo "# $i - $t ..."
         echo "x" > "$ADTTMP/result"
-        ( set +e; $t; echo "$?" > "$ADTTMP/result" ) 2>&1 | sed 's/^/# /'
+        ( set +e; $timeout $t; echo "$?" > "$ADTTMP/result" ) 2>&1 | sed 's/^/# /'
         e="$(cat "$ADTTMP/result")"
         case "$e" in
             (0)
@@ -30,4 +29,5 @@ for dir in "/usr/lib/$multiarch/dbus-1.0/test" "/usr/lib/$multiarch/dbus-1.0/deb
     done
 done
 
+echo "1..$i"
 exit $ret
