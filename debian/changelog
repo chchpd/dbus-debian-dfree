@@ -1,3 +1,9 @@
+dbus (1.8.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 30 Apr 2014 20:17:46 +0100
+
 dbus (1.8.0-3) unstable; urgency=medium
 
   * Improve autopkgtest support
