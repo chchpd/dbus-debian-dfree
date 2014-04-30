@@ -129,6 +129,9 @@
 /* Define if GLib, GObject, GIO are available */
 #undef DBUS_WITH_GLIB
 
+/* The maximum number of connections that can be handled at once */
+#undef FD_SETSIZE
+
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 

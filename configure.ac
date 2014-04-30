@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [8])
-m4_define([dbus_micro_version], [0])
+m4_define([dbus_micro_version], [2])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -37,7 +37,7 @@ LT_CURRENT=11
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=3
+LT_REVISION=4
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -99,6 +99,9 @@ esac
 # Special defines for certain platforms
 if test "$dbus_win" = yes; then
     AC_DEFINE(DBUS_WIN,1,[Defined if we run on a W32 API based system])
+    # Yes, on Windows it really does work like this.
+    # http://support.microsoft.com/kb/111855
+    AC_DEFINE(FD_SETSIZE,8192,[The maximum number of connections that can be handled at once])
     BUILD_TIMESTAMP=`date --iso-8601=minutes`
     AC_SUBST(BUILD_TIMESTAMP)
     # Assume DBUS_VERSION is always three numbers

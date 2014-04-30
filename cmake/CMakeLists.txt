@@ -107,6 +107,10 @@ option (DBUS_DISABLE_ASSERT "Disable assertion checking" OFF)
 
 option (DBUS_ENABLE_STATS "enable bus daemon usage statistics" OFF)
 
+if(WIN32)
+    set(FD_SETSIZE "8192" CACHE STRING "The maximum number of connections that can be handled at once")
+endif()
+
 find_package(EXPAT)
 find_package(X11)
 find_package(GLib2)
@@ -597,6 +601,11 @@ endif(NOT DBUS_DISABLE_ASSERT)
 if (DBUS_DISABLE_CHECKS)
     message("NOTE: building without checks for arguments passed to public API makes it harder to debug apps using D-BUS, but will slightly decrease D-BUS library size and _very_ slightly improve performance.")
 endif(DBUS_DISABLE_CHECKS)
+
+foreach(_note ${FOOTNOTES})
+    message(${_note})
+endforeach()
+
 MESSAGE(" ")
 
 INCLUDE(modules/CPackInstallConfig.cmake)
