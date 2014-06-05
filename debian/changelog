@@ -1,3 +1,9 @@
+dbus (1.8.4-1) unstable; urgency=high
+
+  * New upstream release, fixing a DoS vulnerability (CVE-2014-3477)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 05 Jun 2014 15:12:02 +0100
+
 dbus (1.8.2-1) unstable; urgency=medium
 
   * New upstream release
