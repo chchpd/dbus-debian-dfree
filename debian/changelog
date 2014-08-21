@@ -1,3 +1,9 @@
+dbus (1.8.6-3) UNRELEASED; urgency=medium
+
+  * Don't attempt config reload if dbus system bus is not running.
+
+ -- Michael Biebl <biebl@debian.org>  Thu, 21 Aug 2014 05:56:30 +0200
+
 dbus (1.8.6-2) unstable; urgency=medium
 
   * debian/dbus.posinst: When triggered only poke the dbus-daemon, don't run
