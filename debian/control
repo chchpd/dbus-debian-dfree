@@ -54,6 +54,7 @@ XS-Testsuite: autopkgtest
 
 Package: dbus
 Architecture: any
+Priority: standard
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          adduser,

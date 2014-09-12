@@ -1,6 +1,12 @@
 dbus (1.8.6-3) UNRELEASED; urgency=medium
 
+  [ Michael Biebl ]
   * Don't attempt config reload if dbus system bus is not running.
+
+  [ Simon McVittie ]
+  * Bump dbus up to Priority: standard because without it, systemd-logind
+    does not run a getty on tty2..tty6 (matching ftp-master action in
+    #759293)
 
  -- Michael Biebl <biebl@debian.org>  Thu, 21 Aug 2014 05:56:30 +0200
 
