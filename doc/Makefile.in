@@ -210,7 +210,6 @@ DBUS_USER = @DBUS_USER@
 DBUS_VERSION = @DBUS_VERSION@
 DBUS_X_CFLAGS = @DBUS_X_CFLAGS@
 DBUS_X_LIBS = @DBUS_X_LIBS@
-DEFAULT_MESSAGE_UNIX_FDS = @DEFAULT_MESSAGE_UNIX_FDS@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
@@ -667,8 +666,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@uninstall-local:
 @DBUS_DOXYGEN_DOCS_ENABLED_FALSE@install-data-local:
+@DBUS_DOXYGEN_DOCS_ENABLED_FALSE@uninstall-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
