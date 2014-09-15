@@ -33,7 +33,7 @@ Files:
  tools/dbus-cleanup-sockets.c
  tools/dbus-monitor.c
  tools/dbus-send.c
- tools/dbus-print-message.[ch]
+ tools/dbus-print-message.?
  tools/dbus-uuidgen.c
 Copyright:
  © 2002 Michael Meeks
@@ -42,8 +42,8 @@ Copyright:
 License: GPL-2+
 
 Files:
- dbus/dbus-server-launchd.[ch]
- dbus/sd-daemon.[ch]
+ dbus/dbus-server-launchd.?
+ dbus/sd-daemon.?
  test/corrupt.c
  test/dbus-daemon-eavesdrop.c
  test/dbus-daemon.c

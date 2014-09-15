@@ -23,6 +23,7 @@ dbus (1.8.8-1) unstable; urgency=medium
       do not accept() new connections when all unauthenticated connection
       slots are in use, so that malicious processes cannot prevent new
       connections to the system bus
+  * debian/copyright: fix glob syntax, .[ch] is not supported
 
  -- Simon McVittie <smcv@debian.org>  Mon, 15 Sep 2014 12:58:25 +0100
 
