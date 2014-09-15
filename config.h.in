@@ -39,9 +39,6 @@
 /* Directory for installing DBUS data files */
 #undef DBUS_DATADIR
 
-/* Default for dbus_connection_get_max_message_unix_fds() */
-#undef DBUS_DEFAULT_MESSAGE_UNIX_FDS
-
 /* Disable assertion checking */
 #undef DBUS_DISABLE_ASSERT
 
@@ -269,6 +266,12 @@
 /* Have POSIX function getpwnam_r */
 #undef HAVE_POSIX_GETPWNAM_R
 
+/* Define to 1 if you have the `prctl' function. */
+#undef HAVE_PRCTL
+
+/* Define to 1 if you have the `raise' function. */
+#undef HAVE_RAISE
+
 /* SELinux support */
 #undef HAVE_SELINUX
 
@@ -316,6 +319,9 @@
 
 /* Define to 1 if you have the <sys/inotify.h> header file. */
 #undef HAVE_SYS_INOTIFY_H
+
+/* Define to 1 if you have the <sys/prctl.h> header file. */
+#undef HAVE_SYS_PRCTL_H
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H

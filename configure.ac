@@ -3,7 +3,7 @@ AC_PREREQ([2.63])
 
 m4_define([dbus_major_version], [1])
 m4_define([dbus_minor_version], [8])
-m4_define([dbus_micro_version], [6])
+m4_define([dbus_micro_version], [8])
 m4_define([dbus_version],
           [dbus_major_version.dbus_minor_version.dbus_micro_version])
 AC_INIT([dbus],[dbus_version],[https://bugs.freedesktop.org/enter_bug.cgi?product=dbus],[dbus])
@@ -37,7 +37,7 @@ LT_CURRENT=11
 
 ## increment any time the source changes; set to
 ##  0 if you increment CURRENT
-LT_REVISION=6
+LT_REVISION=7
 
 ## increment if any interfaces have been added; set to 0
 ## if any interfaces have been changed or removed. removal has
@@ -598,6 +598,10 @@ if test "x$ac_cv_header_syslog_h" = "xyes"; then
   AC_CHECK_DECLS([LOG_PERROR], [], [], [[#include <syslog.h>]])
 fi
 
+# For test-segfault.c
+AC_CHECK_HEADERS_ONCE([sys/prctl.h])
+AC_CHECK_FUNCS_ONCE([prctl raise])
+
 #### Check for broken poll; taken from Glib's configure
 
 AC_MSG_CHECKING([for broken poll])
@@ -1143,10 +1147,13 @@ dnl systemd detection
 if test x$enable_systemd = xno ; then
     have_systemd=no;
 else
-    PKG_CHECK_MODULES(SYSTEMD,
-        [libsystemd-login >= 32, libsystemd-daemon >= 32, libsystemd-journal >= 32],
-        have_systemd=yes,
-        have_systemd=no)
+    PKG_CHECK_MODULES([SYSTEMD],
+        [libsystemd >= 209],
+        [have_systemd=yes],
+        [PKG_CHECK_MODULES([SYSTEMD],
+            [libsystemd-login >= 32, libsystemd-daemon >= 32, libsystemd-journal >= 32],
+            [have_systemd=yes],
+            [have_systemd=no])])
 fi
 
 if test x$have_systemd = xyes; then
@@ -1234,17 +1241,6 @@ if test x$with_valgrind != xno; then
   PKG_CHECK_MODULES([VALGRIND], [valgrind >= 3.6])
   AC_DEFINE([WITH_VALGRIND], [1], [Define to add Valgrind instrumentation])
 fi
-
-# Determine maximum number of Unix fds which may be passed
-AS_CASE([$host_os],
-  [*qnx*],
-    [DEFAULT_MESSAGE_UNIX_FDS=256],
-  [*],
-    [DEFAULT_MESSAGE_UNIX_FDS=1024])
-AC_DEFINE_UNQUOTED([DBUS_DEFAULT_MESSAGE_UNIX_FDS],
-  [$DEFAULT_MESSAGE_UNIX_FDS],
-  [Default for dbus_connection_get_max_message_unix_fds()])
-AC_SUBST([DEFAULT_MESSAGE_UNIX_FDS])
 
 #### Set up final flags
 LIBDBUS_LIBS="$THREAD_LIBS $NETWORK_libs"
