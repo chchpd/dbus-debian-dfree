@@ -1,3 +1,12 @@
+dbus (1.8.8-2) UNRELEASED; urgency=medium
+
+  * debian/dbus.bug-control: when people report bugs against dbus,
+    also report the status of systemd and systemd-sysv (because
+    those alter how system service activation works), and dbus-x11
+    (because that's responsible for normal session bus setup)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 22 Sep 2014 11:52:10 +0100
+
 dbus (1.8.8-1) unstable; urgency=medium
 
   [ Michael Biebl ]
