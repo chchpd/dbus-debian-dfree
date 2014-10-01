@@ -49,6 +49,7 @@ debug_configure_flags := \
 	--enable-asserts \
 	--enable-checks \
 	--enable-verbose-mode \
+	--with-valgrind=auto \
 	--prefix=/usr/lib/$(DEB_HOST_MULTIARCH)/dbus-1.0/debug-build \
 	--libdir='$${prefix}/lib' \
 	$(NULL)
@@ -88,16 +89,6 @@ ifeq ($(filter stage1,$(DEB_BUILD_PROFILES)),)
 debug_configure_flags += \
 		--enable-tests \
 		$(NULL)
-endif
-
-# libdbus doesn't have --with-valgrind=auto yet. We want to enable it
-# on those architectures where it exists, while only having to modify
-# debian/control when it works on more architectures.
-#
-# We could use --with-valgrind=auto if someone reviewed the patch on
-# <https://bugs.freedesktop.org/show_bug.cgi?id=56925>.
-ifeq (yes,$(shell if pkg-config --exists valgrind; then echo yes; fi))
-debug_configure_flags += --with-valgrind
 endif
 
 override_dh_auto_configure:

@@ -11,6 +11,7 @@ dbus (1.8.8-2) UNRELEASED; urgency=medium
     (because that's responsible for normal session bus setup)
   * Make Build-Profiles field comply with updated spec (patch from
     Johannes Schauer, Closes: #764222)
+  * Use --with-valgrind=auto (supported since 1.7.6) for the debug build
 
  -- Simon McVittie <smcv@debian.org>  Mon, 22 Sep 2014 11:52:10 +0100
 
