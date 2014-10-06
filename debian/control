@@ -146,7 +146,7 @@ Description: simple interprocess messaging system (minimal library)
  for use in the Debian installer.
 
 Package: dbus-1-doc
-Build-Profiles: !stage1
+Build-Profiles: <!stage1>
 Section: doc
 Architecture: all
 Depends: ${misc:Depends}

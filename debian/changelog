@@ -1,14 +1,16 @@
 dbus (1.8.8-2) UNRELEASED; urgency=medium
 
+  [ Michael Biebl ]
+  * Build against libsystemd-dev. In systemd v209 the various libraries were
+    merged into a single libsystemd library.
+
   [ Simon McVittie ]
   * debian/dbus.bug-control: when people report bugs against dbus,
     also report the status of systemd and systemd-sysv (because
     those alter how system service activation works), and dbus-x11
     (because that's responsible for normal session bus setup)
-
-  [ Michael Biebl ]
-  * Build against libsystemd-dev. In systemd v209 the various libraries were
-    merged into a single libsystemd library.
+  * Make Build-Profiles field comply with updated spec (patch from
+    Johannes Schauer, Closes: #764222)
 
  -- Simon McVittie <smcv@debian.org>  Mon, 22 Sep 2014 11:52:10 +0100
 
