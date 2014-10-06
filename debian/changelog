@@ -9,8 +9,8 @@ dbus (1.8.8-2) UNRELEASED; urgency=medium
     also report the status of systemd and systemd-sysv (because
     those alter how system service activation works), and dbus-x11
     (because that's responsible for normal session bus setup)
-  * Make Build-Profiles field comply with updated spec (patch from
-    Johannes Schauer, Closes: #764222)
+  * Remove Build-Profiles control field until the syntax settles down
+    (Closes: #764222)
   * Use --with-valgrind=auto (supported since 1.7.6) for the debug build
 
  -- Simon McVittie <smcv@debian.org>  Mon, 22 Sep 2014 11:52:10 +0100
