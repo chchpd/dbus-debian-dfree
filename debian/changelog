@@ -1,4 +1,4 @@
-dbus (1.8.10-1) UNRELEASED; urgency=medium
+dbus (1.8.10-1) unstable; urgency=medium
 
   * New upstream release 1.8.10
     - raise dbus-daemon's file descriptor limit to 65536 to avoid an
@@ -8,7 +8,7 @@ dbus (1.8.10-1) UNRELEASED; urgency=medium
     starts as root under systemd), so it can increase its file
     descriptor limit
 
- -- Simon McVittie <smcv@debian.org>  Thu, 06 Nov 2014 15:57:06 +0000
+ -- Simon McVittie <smcv@debian.org>  Thu, 06 Nov 2014 16:28:22 +0000
 
 dbus (1.8.8-2) unstable; urgency=medium
 
