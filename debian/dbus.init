@@ -69,7 +69,7 @@ start_it_up()
 
   log_daemon_msg "Starting $DESC" "$NAME"
   start-stop-daemon --start --quiet --pidfile $PIDFILE \
-    --user $DAEMONUSER --exec $DAEMON -- --system $PARAMS
+    --exec $DAEMON -- --system $PARAMS
   log_end_msg $?
 }
 

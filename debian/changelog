@@ -4,6 +4,9 @@ dbus (1.8.10-1) UNRELEASED; urgency=medium
     - raise dbus-daemon's file descriptor limit to 65536 to avoid an
       opportunity for denial of service
       (CVE-2014-7824, an incomplete fix for CVE-2014-3636)
+  * Start 'dbus-daemon --system' as root under sysvinit (it already
+    starts as root under systemd), so it can increase its file
+    descriptor limit
 
  -- Simon McVittie <smcv@debian.org>  Thu, 06 Nov 2014 15:57:06 +0000
 
