@@ -33,8 +33,7 @@ with_systemd = yes
 common_configure_flags += \
 		--enable-libaudit \
 		--enable-selinux \
-		--enable-systemd \
-		--with-systemdsystemunitdir=/lib/systemd/system \
+		--disable-systemd \
 		$(NULL)
 endif
 endif
